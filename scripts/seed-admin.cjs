@@ -1,47 +1,44 @@
-const admin = require('firebase-admin');
+const { initializeApp, cert } = require('firebase-admin/app');
+const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 const path = require('path');
 const fs = require('fs');
 
-// Path to your service account key
 const keyPath = path.join(__dirname, '..', 'firebase-key.json');
 
 if (!fs.existsSync(keyPath)) {
   console.error("Error: firebase-key.json not found in the project root.");
-  console.error("Please download it from Firebase Console -> Project Settings -> Service Accounts.");
   process.exit(1);
 }
 
 const serviceAccount = require(keyPath);
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
+initializeApp({
+  credential: cert(serviceAccount)
 });
 
-const db = admin.firestore();
+const db = getFirestore();
 
-async function seedAdmin(email) {
+async function seedAdmin(uid) {
   try {
-    console.log(`Searching for user with email: ${email}...`);
+    console.log(`Searching for user with UID: ${uid}...`);
     
-    // Find the user by email in the 'users' collection
-    const usersRef = db.collection('users');
-    const snapshot = await usersRef.where('email', '==', email).limit(1).get();
+    const userRef = db.collection('users').doc(uid);
+    const doc = await userRef.get();
 
-    if (snapshot.empty) {
-      console.log(`No user found with email ${email}. Make sure you have signed up in the app first!`);
-      process.exit(1);
+    if (!doc.exists) {
+      console.log(`No user found with UID ${uid}. Creating one or double check the UID.`);
+      // Actually we should just set it with merge: true
     }
 
-    const userDoc = snapshot.docs[0];
+    console.log(`Updating role to 'admin' for ${uid}...`);
     
-    console.log(`Found user: ${userDoc.id}. Updating role to 'admin'...`);
-    
-    await userDoc.ref.update({
+    await userRef.set({
       role: 'admin',
-      updatedAt: admin.firestore.FieldValue.serverTimestamp()
-    });
+      tier: 'admin',
+      updatedAt: FieldValue.serverTimestamp()
+    }, { merge: true });
 
-    console.log(`Success! ${email} is now an admin. You can now log into the admin dashboard.`);
+    console.log(`Success! ${uid} is now an admin. You can now log into the admin dashboard.`);
     process.exit(0);
   } catch (error) {
     console.error("Error updating user:", error);
@@ -49,12 +46,11 @@ async function seedAdmin(email) {
   }
 }
 
-// Get email from command line arguments
-const targetEmail = process.argv[2];
+const targetUid = process.argv[2];
 
-if (!targetEmail) {
-  console.log("Usage: node scripts/seed-admin.cjs <your-email@example.com>");
+if (!targetUid) {
+  console.log("Usage: node scripts/seed-admin.cjs <your-uid>");
   process.exit(1);
 }
 
-seedAdmin(targetEmail);
+seedAdmin(targetUid);
