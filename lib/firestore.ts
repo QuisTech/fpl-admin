@@ -10,6 +10,7 @@ export function getFirestore(): Firestore {
         client_email: process.env.GOOGLE_CLOUD_CLIENT_EMAIL,
         private_key: process.env.GOOGLE_CLOUD_PRIVATE_KEY?.replace(/\\n/g, '\n')
       },
+      ignoreUndefinedProperties: true,
       // In development, use emulator if available
       ...(process.env.NODE_ENV === 'development' && process.env.FIRESTORE_EMULATOR_HOST ? {
         host: process.env.FIRESTORE_EMULATOR_HOST,
