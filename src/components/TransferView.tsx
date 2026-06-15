@@ -104,7 +104,7 @@ export const TransferView = ({ syncedData, tier, setTab, userId }: TransferViewP
               </span>
             </div>
 
-            {tier === 'free' && tier !== 'admin' ? (
+            {tier === 'free' ? (
               <div className="text-center py-10 bg-slate-950/40 border border-fpl-border rounded-2xl flex flex-col items-center justify-center space-y-4">
                 <div className="w-12 h-12 bg-slate-900 rounded-full flex items-center justify-center border border-fpl-border">
                   <ShieldCheck className="w-5 h-5 text-fpl-green opacity-50" />
