@@ -4,25 +4,33 @@ import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import DodoPayments from 'dodopayments';
 
-const dodo = new DodoPayments({
-  bearerToken: process.env.DODO_SECRET_KEY?.trim(),
-  environment: process.env.DODO_SECRET_KEY?.includes('test') ? 'test_mode' : 'live_mode'
-});
+let dodo: any = null;
+let initError: string | null = null;
 
-// Initialize firebase-admin for auth if not already initialized
-if (!getApps().length) {
-  const privateKey = process.env.GOOGLE_CLOUD_PRIVATE_KEY?.replace(/\\n/g, '\n');
-  if (privateKey) {
-    initializeApp({
-      credential: cert({
-        project_id: process.env.GOOGLE_CLOUD_PROJECT_ID?.trim(),
-        client_email: process.env.GOOGLE_CLOUD_CLIENT_EMAIL,
-        private_key: privateKey,
-      }),
-    });
-  } else {
-    initializeApp();
+try {
+  dodo = new DodoPayments({
+    bearerToken: process.env.DODO_SECRET_KEY?.trim() || 'test',
+    environment: process.env.DODO_SECRET_KEY?.includes('test') ? 'test_mode' : 'live_mode'
+  });
+
+  // Initialize firebase-admin for auth if not already initialized
+  if (!getApps().length) {
+    const privateKey = process.env.GOOGLE_CLOUD_PRIVATE_KEY?.replace(/\\n/g, '\n');
+    if (privateKey) {
+      initializeApp({
+        credential: cert({
+          project_id: process.env.GOOGLE_CLOUD_PROJECT_ID?.trim(),
+          client_email: process.env.GOOGLE_CLOUD_CLIENT_EMAIL,
+          private_key: privateKey,
+        }),
+      });
+    } else {
+      initializeApp({ projectId: process.env.GOOGLE_CLOUD_PROJECT_ID?.trim() });
+    }
   }
+} catch (e: any) {
+  initError = e.message || String(e);
+  console.error("Top-level init error:", e);
 }
 
 const app = express();
@@ -34,6 +42,10 @@ const db = getFirestore();
 async function adminAuthMiddleware(req: Request, res: Response, next: NextFunction) {
   // Allow OPTIONS preflight
   if (req.method === 'OPTIONS') return next();
+
+  if (initError) {
+    return res.status(500).json({ error: 'Server initialization error', details: initError });
+  }
 
   try {
     const authHeader = req.headers.authorization;
