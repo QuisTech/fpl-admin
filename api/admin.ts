@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { getFirestore } from '../lib/firestore.js';
-import * as admin from 'firebase-admin';
+import { initializeApp, getApps, cert } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
 import DodoPayments from 'dodopayments';
 
 const dodo = new DodoPayments({
@@ -9,18 +10,18 @@ const dodo = new DodoPayments({
 });
 
 // Initialize firebase-admin for auth if not already initialized
-if (!admin.apps.length) {
+if (!getApps().length) {
   const privateKey = process.env.GOOGLE_CLOUD_PRIVATE_KEY?.replace(/\\n/g, '\n');
   if (privateKey) {
-    admin.initializeApp({
-      credential: admin.credential.cert({
+    initializeApp({
+      credential: cert({
         projectId: process.env.GOOGLE_CLOUD_PROJECT_ID?.trim(),
         clientEmail: process.env.GOOGLE_CLOUD_CLIENT_EMAIL,
         privateKey: privateKey,
       }),
     });
   } else {
-    admin.initializeApp();
+    initializeApp();
   }
 }
 
@@ -41,7 +42,7 @@ async function adminAuthMiddleware(req: Request, res: Response, next: NextFuncti
     }
 
     const token = authHeader.split('Bearer ')[1];
-    const decodedToken = await admin.auth().verifyIdToken(token);
+    const decodedToken = await getAuth().verifyIdToken(token);
     const userId = decodedToken.uid;
 
     const userDoc = await db.collection('users').doc(userId).get();
@@ -68,7 +69,7 @@ async function logAudit(adminId: string, action: string, targetUserId: string, c
     action,
     targetUserId,
     changes,
-    timestamp: admin.firestore.FieldValue.serverTimestamp()
+    timestamp: new Date()
   });
 }
 
@@ -109,9 +110,9 @@ app.post('/api/admin/revoke-access', async (req, res) => {
 
     const updates = {
       tier: 'free',
-      beta_tester: admin.firestore.FieldValue.delete(),
-      beta_expires_at: admin.firestore.FieldValue.delete(),
-      beta_tier: admin.firestore.FieldValue.delete(),
+      beta_tester: null,
+      beta_expires_at: null,
+      beta_tier: null,
       updatedAt: new Date()
     };
 
