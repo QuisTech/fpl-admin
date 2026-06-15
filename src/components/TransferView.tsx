@@ -218,8 +218,8 @@ export const TransferView = ({ syncedData, tier, setTab, userId }: TransferViewP
                           <div className="flex items-center gap-3">
                             <div className="w-px h-8 bg-slate-800/80 hidden sm:block"></div>
                             <div className="flex flex-col items-end sm:items-center justify-center min-w-[60px]">
-                              <span className="text-sm sm:text-lg font-black text-fpl-green flex items-center gap-0.5">
-                                +{rec.xPDelta.toFixed(1)}
+                              <span className={cn("text-sm sm:text-lg font-black flex items-center gap-0.5", rec.xPDelta > 0 ? "text-fpl-green" : "text-rose-400")}>
+                                {rec.xPDelta > 0 ? '+' : ''}{rec.xPDelta.toFixed(1)}
                               </span>
                               <span className="text-[8px] text-slate-500 font-bold uppercase">xP Gain</span>
                             </div>
