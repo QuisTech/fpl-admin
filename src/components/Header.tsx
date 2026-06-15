@@ -10,14 +10,14 @@ interface HeaderProps {
   tier: string;
   onSignOut: () => void;
   setTeamId: (id: string) => void;
+  profileTab?: string | null;
+  setProfileTab?: (tab: string | null) => void;
 }
 
-import { useState } from 'react';
 import { UserProfile } from './UserProfile';
-import { UserCircle, LogOut, User } from 'lucide-react';
+import { UserCircle, User } from 'lucide-react';
 
-export const Header = ({ data, riskMode, setRiskMode, onOpenAuth, authUser, tier, onSignOut, setTeamId }: HeaderProps) => {
-  const [showProfile, setShowProfile] = useState(false);
+export const Header = ({ data, riskMode, setRiskMode, onOpenAuth, authUser, tier, onSignOut, setTeamId, profileTab, setProfileTab }: HeaderProps) => {
   return (
     <header className="col-span-12 flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between mb-4">
       <div className="flex items-center gap-4">
@@ -70,7 +70,7 @@ export const Header = ({ data, riskMode, setRiskMode, onOpenAuth, authUser, tier
         {authUser ? (
           <>
             <button 
-              onClick={() => setShowProfile(true)}
+              onClick={() => setProfileTab?.('account')}
               className="flex items-center gap-3 hover:bg-slate-900 rounded-lg p-2 transition-colors"
             >
               <div className="flex flex-col text-right hidden sm:flex">
@@ -81,7 +81,7 @@ export const Header = ({ data, riskMode, setRiskMode, onOpenAuth, authUser, tier
                 <User className="w-4 h-4 text-white" />
               </div>
             </button>
-            {showProfile && (
+            {profileTab && (
               <UserProfile 
                 user={{
                   email: authUser.email,
@@ -90,7 +90,8 @@ export const Header = ({ data, riskMode, setRiskMode, onOpenAuth, authUser, tier
                   uid: authUser.uid,
                   lastLoginAt: authUser.metadata?.lastSignInTime
                 }} 
-                onClose={() => setShowProfile(false)} 
+                initialTab={profileTab}
+                onClose={() => setProfileTab?.(null)} 
                 onSignOut={onSignOut}
                 onTeamIdChange={setTeamId}
               />

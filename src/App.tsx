@@ -31,6 +31,7 @@ function FPLApp() {
   const [tab, setTab] = useState<'optimizer' | 'pitch' | 'picks' | 'transfers' | 'chips' | 'performance' | 'agent'>('optimizer');
   
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [profileTab, setProfileTab] = useState<string | null>(null);
   const [authUser, setAuthUser] = useState<any>(null);
 
   useEffect(() => {
@@ -71,7 +72,8 @@ function FPLApp() {
   const handleSync = async () => {
     if (tier !== 'free' && tier !== 'admin' && !isTeamIdLocked) {
       alert("Premium Account: Please link your FPL Team ID in your Settings profile before running an analysis.");
-      setIsAuthModalOpen(true);
+      if (authUser) setProfileTab('fpl');
+      else setIsAuthModalOpen(true);
       return;
     }
     const success = await syncTeam();
@@ -105,7 +107,7 @@ function FPLApp() {
       )}
       <div className="max-w-[1400px] mx-auto grid grid-cols-12 gap-4 auto-rows-min">
 
-        <Header data={data} riskMode={riskMode} setRiskMode={setRiskMode} authUser={authUser} tier={tier} onOpenAuth={() => setIsAuthModalOpen(true)} onSignOut={() => signOut(auth)} setTeamId={setTeamId} />
+        <Header data={data} riskMode={riskMode} setRiskMode={setRiskMode} authUser={authUser} tier={tier} onOpenAuth={() => setIsAuthModalOpen(true)} onSignOut={() => signOut(auth)} setTeamId={setTeamId} profileTab={profileTab} setProfileTab={setProfileTab} />
 
         <MetricsColumn data={data} syncedData={syncedData} riskMode={riskMode} />
 
@@ -146,7 +148,8 @@ function FPLApp() {
                     disabled={tier !== 'free' && tier !== 'admin' && isTeamIdLocked}
                     onClick={() => {
                       if (tier !== 'free' && tier !== 'admin' && !isTeamIdLocked) {
-                        setIsAuthModalOpen(true);
+                        if (authUser) setProfileTab('fpl');
+                        else setIsAuthModalOpen(true);
                       }
                     }}
                     className={cn("bg-slate-950 border border-fpl-border rounded-lg px-3 py-1 text-[10px] font-mono text-fpl-green w-24 focus:outline-none focus:border-fpl-green",

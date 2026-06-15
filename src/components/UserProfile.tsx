@@ -7,8 +7,8 @@ import {
   Shield, CheckCircle, Edit2, RefreshCw, Lock
 } from 'lucide-react';
 
-export const UserProfile = ({ user, onClose, onSignOut, onTeamIdChange }: { user: any, onClose: () => void, onSignOut: () => void, onTeamIdChange?: (id: string) => void }) => {
-  const [activeTab, setActiveTab] = useState('account');
+export const UserProfile = ({ user, onClose, onSignOut, onTeamIdChange, initialTab = 'account' }: { user: any, onClose: () => void, onSignOut: () => void, onTeamIdChange?: (id: string) => void, initialTab?: string }) => {
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [editingFplId, setEditingFplId] = useState(false);
   const [fplTeamId, setFplTeamId] = useState(user?.fplTeamId || '');
   const [isLocked, setIsLocked] = useState(!!user?.fplTeamId);
