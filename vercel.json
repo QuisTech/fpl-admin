@@ -25,6 +25,7 @@
     },
     "api/decision-logs.ts": {
       "maxDuration": 15
+    }
   },
   "crons": [
     {
