@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Edit2, ShieldAlert, CheckCircle, XCircle } from 'lucide-react';
+import { Search, Edit2, ShieldAlert, CheckCircle, XCircle, Users } from 'lucide-react';
 import { auth } from '../../lib/firebase';
 
 export function UsersPage() {

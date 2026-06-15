@@ -16,10 +16,24 @@ export function AnalyticsPage() {
       const res = await fetch('/api/admin/analytics/stats', {
         headers: { Authorization: `Bearer ${token}` }
       });
+      
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      
       const data = await res.json();
       setStats(data);
     } catch (e) {
-      console.error(e);
+      console.error("Failed to fetch stats:", e);
+      setStats({
+        error: true,
+        totalUsers: 0,
+        betaTesters: 0,
+        payingUsers: 0,
+        mrr: 0,
+        recentPayments: [],
+        tierDistribution: []
+      });
     } finally {
       setLoading(false);
     }
