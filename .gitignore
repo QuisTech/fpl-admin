@@ -10,3 +10,11 @@ coverage/
 .vercel
 
 .vercel
+.env*.local
+
+# Keys
+firebase-key.json
+
+# Scratch scripts
+check_tier.ts
+test_firebase_init.mjs
