@@ -15,9 +15,9 @@ if (!getApps().length) {
   if (privateKey) {
     initializeApp({
       credential: cert({
-        projectId: process.env.GOOGLE_CLOUD_PROJECT_ID?.trim(),
-        clientEmail: process.env.GOOGLE_CLOUD_CLIENT_EMAIL,
-        privateKey: privateKey,
+        project_id: process.env.GOOGLE_CLOUD_PROJECT_ID?.trim(),
+        client_email: process.env.GOOGLE_CLOUD_CLIENT_EMAIL,
+        private_key: privateKey,
       }),
     });
   } else {
