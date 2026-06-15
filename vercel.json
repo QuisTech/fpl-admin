@@ -6,6 +6,10 @@
       "destination": "/api/decision-logs"
     },
     {
+      "source": "/api/admin/(.*)",
+      "destination": "/api/admin"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api"
     },
@@ -21,6 +25,11 @@
     },
     "api/decision-logs.ts": {
       "maxDuration": 15
+  },
+  "crons": [
+    {
+      "path": "/api/cron-beta-expiry",
+      "schedule": "0 0 * * *"
     }
-  }
+  ]
 }

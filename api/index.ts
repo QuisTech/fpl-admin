@@ -443,7 +443,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const profileDoc = await db.collection('user_profiles').doc(userId).get();
       const registeredTeamId = profileDoc.exists ? profileDoc.data()?.fplTeamId : null;
       
-      if (tier !== 'free' && registeredTeamId && teamId !== registeredTeamId) {
+      if (tier !== 'admin' && tier !== 'free' && registeredTeamId && teamId !== registeredTeamId) {
         return res.status(403).json({ error: "Premium features are securely locked to your registered FPL Team ID." });
       }
 

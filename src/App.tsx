@@ -18,8 +18,15 @@ import { Camera } from 'lucide-react';
 import { cn } from './lib/utils';
 import { auth, onAuthStateChanged, signOut } from './lib/firebase';
 import { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
-export default function App() {
+import { AdminLayout } from './components/AdminLayout';
+import { UsersPage } from './pages/admin/UsersPage';
+import { BetaPage } from './pages/admin/BetaPage';
+import { AnalyticsPage } from './pages/admin/AnalyticsPage';
+import { FeatureFlagsPage } from './pages/admin/FeatureFlagsPage';
+
+function FPLApp() {
   const [riskMode, setRiskMode] = useState<'safe' | 'aggressive' | 'value'>('safe');
   const [tab, setTab] = useState<'optimizer' | 'pitch' | 'picks' | 'transfers' | 'chips' | 'performance' | 'agent'>('optimizer');
   
@@ -193,5 +200,22 @@ export default function App() {
         anonymousId={anonymousId}
       />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<FPLApp />} />
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Navigate to="analytics" replace />} />
+          <Route path="users" element={<UsersPage />} />
+          <Route path="beta" element={<BetaPage />} />
+          <Route path="analytics" element={<AnalyticsPage />} />
+          <Route path="features" element={<FeatureFlagsPage />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
