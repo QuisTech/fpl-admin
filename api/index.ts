@@ -313,7 +313,7 @@ export class FPLService {
     let optimalFirstMove = 'ROLL';
     let bestFutures: any[] = [];
     
-    if (tier === 'grandCru' || tier === 'aiAgent' || tier === 'betaPilot') {
+    if (tier === 'grandCru' || tier === 'aiAgent' || tier === 'betaPilot' || tier === 'admin') {
       console.log(`[V3 Engine] Executing Beam Search for Team ${teamId}...`);
       bestFutures = simulator.simulateHorizon(initialState, oracle, riskMode);
       if (bestFutures.length > 0) {

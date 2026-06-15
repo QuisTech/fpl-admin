@@ -77,7 +77,7 @@ export const OptimizerPositioning = ({ userId, currentTier }: { userId: string; 
 
       <section className="grid grid-cols-1 xl:grid-cols-4 gap-4">
         {optimizerPlans.map((plan) => {
-          const normalizedCurrentTier = currentTier === 'aiAgent' ? 'betaPilot' : currentTier;
+          const normalizedCurrentTier = currentTier === 'aiAgent' || currentTier === 'admin' ? 'betaPilot' : currentTier;
           const tierHierarchy: Record<string, number> = { free: 0, strategist: 1, grandCru: 2, betaPilot: 3 };
           const currentTierValue = tierHierarchy[normalizedCurrentTier] || 0;
           const planTierValue = tierHierarchy[plan.id] || 0;
