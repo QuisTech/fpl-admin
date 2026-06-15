@@ -25,7 +25,7 @@
     "dotenv": "^17.4.2",
     "express": "^4.21.2",
     "firebase": "^12.14.0",
-    "firebase-admin": "^14.0.0",
+    "firebase-admin": "^12.1.0",
     "javascript-lp-solver": "^1.0.3",
     "jose": "^4.15.9",
     "lucide-react": "^0.546.0",
