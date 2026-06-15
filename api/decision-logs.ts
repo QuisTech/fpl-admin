@@ -34,15 +34,23 @@ export default async function handler(req, res) {
     // Get AI decisions
     const decisionsSnapshot = await db.collection('ai_decisions')
       .where('userId', '==', userId)
-      .orderBy('timestamp', 'desc')
-      .limit(parseInt(limit))
       .get();
     
-    const decisions = decisionsSnapshot.docs.map(doc => ({
+    let decisions = decisionsSnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
       timestamp: doc.data().timestamp?.toDate?.() || doc.data().timestamp
     }));
+
+    // Sort in-memory to avoid needing a Firestore composite index on (userId, timestamp)
+    decisions.sort((a: any, b: any) => {
+      const timeA = new Date(a.timestamp).getTime();
+      const timeB = new Date(b.timestamp).getTime();
+      return timeB - timeA;
+    });
+
+    // Apply limit
+    decisions = decisions.slice(0, parseInt(limit as string));
 
     // Get revenue from Dodo Payments — wrapped separately so it can't crash decisions
     let revenue: any[] = [];

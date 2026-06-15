@@ -36,7 +36,8 @@ export async function getLLMTransferDecision(
   bank: number,
   freeTransfers: number,
   chipState: Record<string, number>,
-  riskMode: string
+  riskMode: string,
+  userPrompt?: string
 ): Promise<TransferDecision> {
   
   // Build context for LLM
@@ -64,6 +65,8 @@ export async function getLLMTransferDecision(
     
     CHIPS AVAILABLE:
     ${Object.entries(chipState).filter(([_, avail]) => avail).map(([chip]) => chip).join(', ') || 'None'}
+    
+    ${userPrompt && userPrompt.trim() !== '' ? `USER QUESTION/CONTEXT:\n    "${userPrompt}"\n    (Address this question specifically in your reasoning!)` : ''}
     
     RESPOND WITH VALID JSON OBJECT:
     {

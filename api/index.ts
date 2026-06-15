@@ -464,7 +464,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (url.includes('/api/agent/ask') && req.method === 'POST') {
-      const { userId: reqUserId, gameweek, squad, bank, freeTransfers = 1, chips = {}, riskMode = 'safe' } = req.body || {};
+      const { userId: reqUserId, gameweek, squad, bank, freeTransfers = 1, chips = {}, riskMode = 'safe', userPrompt } = req.body || {};
       if (!reqUserId || !squad) return res.status(400).json({ error: "Missing payload" });
       
       const userTier = await getUserTier(reqUserId);
@@ -477,7 +477,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const upcoming = fixturesRes.data.filter((f: any) => f.event >= gameweek && f.event < gameweek + 5);
 
       const decision = await getLLMTransferDecision(
-        reqUserId, squad, gameweek, upcoming, bank, freeTransfers, chips, riskMode
+        reqUserId, squad, gameweek, upcoming, bank, freeTransfers, chips, riskMode, userPrompt
       );
       
       return res.status(200).json({ decision });

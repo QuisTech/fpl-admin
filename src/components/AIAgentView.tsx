@@ -34,7 +34,8 @@ export const AIAgentView = ({ syncedData, tier, userId }: AIAgentViewProps) => {
         chips: {
           WC: 1, FH: 1, BB: 1, TC: 1 // mock chip state
         },
-        riskMode: 'safe' // or whatever
+        riskMode: 'safe', // or whatever
+        userPrompt: prompt
       });
       setResponse(res.data.decision);
       setPrompt('');
