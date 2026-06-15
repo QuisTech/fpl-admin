@@ -1,5 +1,8 @@
-import solver from "javascript-lp-solver";
-import { XPOracle } from "./ingestion";
+import { XPOracle } from "./ingestion.js";
+
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const solver = require("javascript-lp-solver");
 
 interface LPSolverModel {
   optimize: string;
