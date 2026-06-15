@@ -115,7 +115,7 @@ export function AnalyticsPage() {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
           <h3 className="font-bold mb-6 flex items-center justify-between">
             Recent Payments
-            <a href="https://dashboard.dodopayments.com" target="_blank" rel="noreferrer" className="text-xs text-fpl-green flex items-center gap-1 hover:underline">
+            <a href="https://app.dodopayments.com" target="_blank" rel="noreferrer" className="text-xs text-fpl-green flex items-center gap-1 hover:underline">
               Dodo Dashboard <ArrowUpRight className="w-3 h-3" />
             </a>
           </h3>
