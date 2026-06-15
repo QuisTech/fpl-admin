@@ -3,11 +3,11 @@
   "rewrites": [
     {
       "source": "/api/decision-logs",
-      "destination": "/api/decision-logs.ts"
+      "destination": "/api/decision-logs"
     },
     {
       "source": "/api/(.*)",
-      "destination": "/api/index.ts"
+      "destination": "/api"
     },
     {
       "source": "/(.*)",
