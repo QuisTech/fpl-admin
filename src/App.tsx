@@ -64,10 +64,16 @@ function FPLApp() {
     history,
     takeSnapshot,
     fetchLivePoints,
-    tier
+    tier,
+    isTeamIdLocked
   } = useFPLData(riskMode, activeUserId);
 
   const handleSync = async () => {
+    if (tier !== 'free' && tier !== 'admin' && !isTeamIdLocked) {
+      alert("Premium Account: Please link your FPL Team ID in your Settings profile before running an analysis.");
+      setIsAuthModalOpen(true);
+      return;
+    }
     const success = await syncTeam();
     if (success) setTab('transfers');
   };
@@ -134,10 +140,19 @@ function FPLApp() {
                 <div className="flex items-center gap-2">
                   <input 
                     type="text" 
-                    placeholder="TEAM ID" 
+                    placeholder={tier !== 'free' && tier !== 'admin' && !isTeamIdLocked ? "LINK ID" : "TEAM ID"} 
                     value={teamId}
                     onChange={(e) => setTeamId(e.target.value)}
-                    className="bg-slate-950 border border-fpl-border rounded-lg px-3 py-1 text-[10px] font-mono text-fpl-green w-24 focus:outline-none focus:border-fpl-green"
+                    disabled={tier !== 'free' && tier !== 'admin' && isTeamIdLocked}
+                    onClick={() => {
+                      if (tier !== 'free' && tier !== 'admin' && !isTeamIdLocked) {
+                        setIsAuthModalOpen(true);
+                      }
+                    }}
+                    className={cn("bg-slate-950 border border-fpl-border rounded-lg px-3 py-1 text-[10px] font-mono text-fpl-green w-24 focus:outline-none focus:border-fpl-green",
+                      tier !== 'free' && tier !== 'admin' && isTeamIdLocked ? "opacity-50 cursor-not-allowed" : "",
+                      tier !== 'free' && tier !== 'admin' && !isTeamIdLocked ? "cursor-pointer hover:bg-slate-900 text-rose-400" : ""
+                    )}
                   />
                   <button 
                     onClick={handleSync}

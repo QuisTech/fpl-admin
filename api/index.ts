@@ -443,8 +443,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const profileDoc = await db.collection('user_profiles').doc(userId).get();
       const registeredTeamId = profileDoc.exists ? profileDoc.data()?.fplTeamId : null;
       
-      if (tier !== 'admin' && tier !== 'free' && registeredTeamId && teamId !== registeredTeamId) {
-        return res.status(403).json({ error: "Premium features are securely locked to your registered FPL Team ID." });
+      if (tier !== 'admin' && tier !== 'free') {
+        if (!registeredTeamId) {
+          return res.status(403).json({ error: "Premium Account: Please link your FPL Team ID in your Settings profile before running an analysis." });
+        }
+        if (teamId !== registeredTeamId) {
+          return res.status(403).json({ error: "Premium features are securely locked to your registered FPL Team ID. You cannot analyze other teams." });
+        }
       }
 
       const result = await FPLService.syncTeam(teamId, riskMode, tier);

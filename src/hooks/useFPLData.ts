@@ -10,6 +10,7 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', userId: st
   const [syncedData, setSyncedData] = useState<TeamSyncResponse | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [tier, setTier] = useState<string>('free');
+  const [isTeamIdLocked, setIsTeamIdLocked] = useState(false);
 
   const [history, setHistory] = useState<any>(() => {
     const saved = localStorage.getItem('fpl_optimizer_history');
@@ -34,6 +35,7 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', userId: st
         .then(res => {
           if (res.data?.fplTeamId) {
             setTeamId(res.data.fplTeamId);
+            setIsTeamIdLocked(true);
           }
         })
         .catch(() => {});
@@ -140,6 +142,7 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', userId: st
     history,
     takeSnapshot,
     fetchLivePoints,
-    tier
+    tier,
+    isTeamIdLocked
   };
 };
