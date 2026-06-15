@@ -1,5 +1,5 @@
-import { callGeminiWithFallback, GeminiExhaustedError } from '../lib/gemini-client.js';
-import { logAIDecision } from '../lib/firestore.js';
+import { callGeminiWithFallback, GeminiExhaustedError } from '../../lib/gemini-client.js';
+import { logAIDecision } from '../../lib/firestore.js';
 
 export interface TransferDecision {
   action: 'ROLL' | 'TRANSFER' | 'CHIP';

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import fs from 'fs';
 import path from 'path';
-import { FPLService } from './index';
+import { FPLService } from '../index';
 import { FPLPlayer, FPLFixture } from './types';
 import { CSVOracle, XPOracle } from './ingestion';
 import { Simulator, SquadState } from './simulator';

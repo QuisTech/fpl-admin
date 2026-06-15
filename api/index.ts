@@ -6,12 +6,12 @@ import {
   FPLPlayer, FPLTeam, FPLFixture, ScoredPlayer, 
   FPLPlayerSchema, FPLTeamSchema, FPLFixtureSchema,
   RecommendationResponse, TeamSyncResponse, TransferRecommendation, ChipAdvice
-} from './types.js';
-import { CSVOracle } from './ingestion.js';
-import { Simulator } from './simulator.js';
-import { solveOptimalSquad } from './lp-solver.js';
+} from './_lib/types.js';
+import { CSVOracle } from './_lib/ingestion.js';
+import { Simulator } from './_lib/simulator.js';
+import { solveOptimalSquad } from './_lib/lp-solver.js';
 import { getUserTier, mergeUserTiers, getFirestore } from '../lib/firestore.js';
-import { getGeminiTransferDecision } from './gemini-agent.js';
+import { getGeminiTransferDecision } from './_lib/gemini-agent.js';
 
 const FPL_BASE_URL = "https://fantasy.premierleague.com/api";
 
