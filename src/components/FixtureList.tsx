@@ -35,7 +35,7 @@ export const FixtureList = ({ data }: FixtureListProps) => {
       {/* Optimization Note */}
       <div className="mt-6 p-2 bg-slate-950 rounded-xl border border-fpl-border">
         <div className="text-[9px] text-slate-500 uppercase mb-1 font-black tracking-widest">Logic Engine</div>
-        <p className="text-[10px] leading-tight text-slate-400 italic">Expected points modeled and optimized using Gemini AI simulations.</p>
+        <p className="text-[10px] leading-tight text-slate-400 italic">Expected points modeled and optimized using AI simulations.</p>
       </div>
     </div>
   );

@@ -14,7 +14,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       getAuth = authModule.getAuth;
 
       const dodoModule = await import('dodopayments');
-      const DodoPayments = dodoModule.default || dodoModule;
+      const DodoPayments = (dodoModule.default || dodoModule) as any;
 
       dodo = new DodoPayments({
         bearerToken: process.env.DODO_SECRET_KEY?.trim() || 'test',
@@ -26,9 +26,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (privateKey) {
           initializeApp({
             credential: cert({
-              project_id: process.env.GOOGLE_CLOUD_PROJECT_ID?.trim() || '',
-              client_email: process.env.GOOGLE_CLOUD_CLIENT_EMAIL || '',
-              private_key: privateKey,
+              projectId: process.env.GOOGLE_CLOUD_PROJECT_ID?.trim() || '',
+              clientEmail: process.env.GOOGLE_CLOUD_CLIENT_EMAIL || '',
+              privateKey: privateKey,
             }),
           });
         } else {

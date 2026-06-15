@@ -1,4 +1,4 @@
-import { callGeminiWithFallback, GeminiExhaustedError } from '../../lib/gemini-client.js';
+import { callLLMWithFallback, LLMExhaustedError } from '../../lib/llm-client.js';
 import { logAIDecision } from '../../lib/firestore.js';
 
 export interface TransferDecision {
@@ -11,7 +11,7 @@ export interface TransferDecision {
 }
 
 /**
- * Safely parse JSON from Gemini response text.
+ * Safely parse JSON from LLM response text.
  * Handles markdown-wrapped JSON (```json ... ```) and malformed responses.
  */
 function safeParseJSON(text: string): any {
@@ -23,12 +23,12 @@ function safeParseJSON(text: string): any {
   try {
     return JSON.parse(cleaned);
   } catch (e) {
-    console.error("[GeminiAgent] Failed to parse JSON response:", cleaned.substring(0, 200));
-    throw new Error(`Invalid JSON from Gemini: ${(e as Error).message}`);
+    console.error("[LLMAgent] Failed to parse JSON response:", cleaned.substring(0, 200));
+    throw new Error(`Invalid JSON from LLM: ${(e as Error).message}`);
   }
 }
 
-export async function getGeminiTransferDecision(
+export async function getLLMTransferDecision(
   userId: string,
   squad: any[],
   gameweek: number,
@@ -39,7 +39,7 @@ export async function getGeminiTransferDecision(
   riskMode: string
 ): Promise<TransferDecision> {
   
-  // Build context for Gemini
+  // Build context for LLM
   const squadSummary = squad.map(p => 
     `${p.name} (${p.position}) - £${(p.cost/10).toFixed(1)}M - xP: ${p.xP}`
   ).join('\n');
@@ -65,7 +65,7 @@ export async function getGeminiTransferDecision(
     CHIPS AVAILABLE:
     ${Object.entries(chipState).filter(([_, avail]) => avail).map(([chip]) => chip).join(', ') || 'None'}
     
-    RESPOND WITH JSON:
+    RESPOND WITH VALID JSON OBJECT:
     {
       "action": "ROLL" or "TRANSFER" or "CHIP",
       "transfersIn": [playerIds] (if action is TRANSFER),
@@ -76,7 +76,7 @@ export async function getGeminiTransferDecision(
     }
   `;
   
-  const result = await callGeminiWithFallback({
+  const result = await callLLMWithFallback({
     prompt,
     temperature: 0.3,
     jsonMode: true,
@@ -99,13 +99,13 @@ export async function getGeminiTransferDecision(
     modelUsed: result.modelUsed,
     riskMode
   }).catch(err => {
-    console.error("[GeminiAgent] Non-fatal: Failed to log decision to Firestore:", err.message);
+    console.error("[LLMAgent] Non-fatal: Failed to log decision to Firestore:", err.message);
   });
   
   return decision;
 }
 
-export async function getGeminiChipAdvice(
+export async function getLLMChipAdvice(
   userId: string,
   squad: any[],
   chips: Record<string, number>,
@@ -120,10 +120,10 @@ export async function getGeminiChipAdvice(
     Chips available: ${Object.entries(chips).filter(([_,a]) => a).map(([c]) => c).join(', ')}
     
     Recommend: WC, FH, BB, TC, or HOLD.
-    Respond with JSON: {"recommendation": "WC/HOLD/etc", "reasoning": "...", "confidence": 0-100}
+    Respond with VALID JSON OBJECT: {"recommendation": "WC/HOLD/etc", "reasoning": "...", "confidence": 0-100}
   `;
   
-  const result = await callGeminiWithFallback({
+  const result = await callLLMWithFallback({
     prompt,
     temperature: 0.2,
     jsonMode: true,
@@ -141,7 +141,7 @@ export async function getGeminiChipAdvice(
     details: { chipName: decision.recommendation !== 'HOLD' ? decision.recommendation : undefined },
     modelUsed: result.modelUsed
   }).catch(err => {
-    console.error("[GeminiAgent] Non-fatal: Failed to log chip advice to Firestore:", err.message);
+    console.error("[LLMAgent] Non-fatal: Failed to log chip advice to Firestore:", err.message);
   });
   
   return decision;

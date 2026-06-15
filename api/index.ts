@@ -11,7 +11,7 @@ import { CSVOracle } from './_lib/ingestion.js';
 import { Simulator } from './_lib/simulator.js';
 import { solveOptimalSquad } from './_lib/lp-solver.js';
 import { getUserTier, mergeUserTiers, getFirestore } from '../lib/firestore.js';
-import { getGeminiTransferDecision } from './_lib/gemini-agent.js';
+import { getLLMTransferDecision } from './_lib/llm-agent.js';
 
 const FPL_BASE_URL = "https://fantasy.premierleague.com/api";
 
@@ -476,7 +476,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const fixturesRes = await axios.get(`${FPL_BASE_URL}/fixtures/`, { headers: (FPLService as any).getHeaders() });
       const upcoming = fixturesRes.data.filter((f: any) => f.event >= gameweek && f.event < gameweek + 5);
 
-      const decision = await getGeminiTransferDecision(
+      const decision = await getLLMTransferDecision(
         reqUserId, squad, gameweek, upcoming, bank, freeTransfers, chips, riskMode
       );
       

@@ -24,7 +24,7 @@ export const AIAgentView = ({ syncedData, tier, userId }: AIAgentViewProps) => {
     setAsking(true);
     setError(null);
     try {
-      // Create body matching getGeminiTransferDecision signature roughly
+      // Create body matching getLLMTransferDecision signature roughly
       const res = await axios.post('/api/agent/ask', {
         userId,
         gameweek: (syncedData as any).gameweek || 1,
@@ -59,7 +59,7 @@ export const AIAgentView = ({ syncedData, tier, userId }: AIAgentViewProps) => {
         </div>
         <h3 className="text-xl text-white font-black uppercase tracking-widest mb-3">AI Optimizer Agent</h3>
         <p className="text-slate-400 text-sm max-w-md leading-relaxed mb-8">
-          Unlock your personal FPL assistant powered by Google Gemini 2.0 Flash. The agent scrapes press conferences, interprets injury reports, and makes contextual recommendations that the mathematical solver might miss.
+          Unlock your personal FPL assistant powered by AI. The agent scrapes press conferences, interprets injury reports, and makes contextual recommendations that the mathematical solver might miss.
         </p>
         
         <div className="grid grid-cols-1 gap-3 text-left w-full max-w-sm mb-8">
@@ -109,7 +109,7 @@ export const AIAgentView = ({ syncedData, tier, userId }: AIAgentViewProps) => {
             <Bot className="w-5 h-5 text-fpl-green" />
           </div>
           <div>
-            <h3 className="text-white font-bold">FPL Gemini Agent</h3>
+            <h3 className="text-white font-bold">FPL AI Agent</h3>
             <p className="text-[10px] text-fpl-green uppercase tracking-widest font-black">Online & Ready</p>
           </div>
         </div>

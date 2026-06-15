@@ -1,11 +1,9 @@
-import { GoogleGenAI } from "@google/genai";
+import Groq from "groq-sdk";
 
 // ─── Model Tiers (priority order: best → most available) ───────────────
 const MODEL_TIERS = [
-  "gemini-2.0-flash",
-  "gemini-2.0-flash-lite",
-  "gemini-1.5-flash",
-  "gemini-1.5-pro",
+  "llama-3.3-70b-versatile",
+  "llama-3.1-8b-instant",
 ] as const;
 
 type ModelTier = (typeof MODEL_TIERS)[number];
@@ -14,18 +12,18 @@ type ModelTier = (typeof MODEL_TIERS)[number];
 function getApiKeys(): string[] {
   const keys: string[] = [];
   const envKeys = [
-    process.env.GEMINI_API_KEY,
-    process.env.GEMINI_API_KEY_2,
-    process.env.GEMINI_API_KEY_3,
+    process.env.GROQ_API_KEY,
+    process.env.GROQ_API_KEY_2,
+    process.env.GROQ_API_KEY_3,
   ];
   for (const k of envKeys) {
-    if (k && k.trim() && !k.startsWith("AIza...")) {
+    if (k && k.trim()) {
       keys.push(k.trim());
     }
   }
   if (keys.length === 0) {
     throw new Error(
-      "[GeminiClient] FATAL: No valid GEMINI_API_KEY environment variables found."
+      "[LLMClient] FATAL: No valid GROQ_API_KEY environment variables found."
     );
   }
   return keys;
@@ -60,13 +58,13 @@ async function sleep(ms: number) {
 }
 
 // ─── Types ─────────────────────────────────────────────────────────────
-export interface GeminiCallOptions {
+export interface LLMCallOptions {
   prompt: string;
   temperature?: number;
   jsonMode?: boolean;
 }
 
-export interface GeminiCallResult {
+export interface LLMCallResult {
   text: string;
   modelUsed: ModelTier;
   keyIndex: number;
@@ -74,19 +72,9 @@ export interface GeminiCallResult {
 }
 
 // ─── Main Resilient Caller ─────────────────────────────────────────────
-/**
- * Calls Gemini with full fallback chain:
- *   For each MODEL (best → fallback):
- *     For each API KEY (primary → backup):
- *       Retry up to 3x with exponential backoff
- *
- * Total worst-case attempts: 4 models × 3 keys × 3 retries = 36
- * But we bail early on non-retryable errors (auth, bad request, etc.)
- * Practical worst-case time: ~18s (safe under Vercel 30s limit)
- */
-export async function callGeminiWithFallback(
-  options: GeminiCallOptions
-): Promise<GeminiCallResult> {
+export async function callLLMWithFallback(
+  options: LLMCallOptions
+): Promise<LLMCallResult> {
   const keys = getApiKeys();
   const errors: Array<{
     model: string;
@@ -98,33 +86,31 @@ export async function callGeminiWithFallback(
 
   for (const model of MODEL_TIERS) {
     for (let keyIndex = 0; keyIndex < keys.length; keyIndex++) {
-      const ai = new GoogleGenAI({ apiKey: keys[keyIndex] });
+      const groq = new Groq({ apiKey: keys[keyIndex] });
 
       for (let attempt = 1; attempt <= MAX_RETRIES_PER_KEY; attempt++) {
         totalAttempts++;
         try {
           console.log(
-            `[GeminiClient] Trying model=${model} key=${keyIndex + 1}/${keys.length} attempt=${attempt}/${MAX_RETRIES_PER_KEY}`
+            `[LLMClient] Trying model=${model} key=${keyIndex + 1}/${keys.length} attempt=${attempt}/${MAX_RETRIES_PER_KEY}`
           );
 
-          const response = await ai.models.generateContent({
+          const response = await groq.chat.completions.create({
             model,
-            contents: [{ role: "user", parts: [{ text: options.prompt }] }],
-            config: {
-              temperature: options.temperature ?? 0.3,
-              ...(options.jsonMode
-                ? { responseMimeType: "application/json" }
-                : {}),
-            },
+            messages: [{ role: "user", content: options.prompt }],
+            temperature: options.temperature ?? 0.3,
+            ...(options.jsonMode
+              ? { response_format: { type: "json_object" } }
+              : {}),
           });
 
-          const text = response.text;
+          const text = response.choices[0]?.message?.content;
           if (!text || text.trim().length === 0) {
-            throw new Error("Empty response from Gemini");
+            throw new Error("Empty response from LLM");
           }
 
           console.log(
-            `[GeminiClient] ✓ Success on model=${model} key=${keyIndex + 1} after ${totalAttempts} total attempt(s)`
+            `[LLMClient] ✓ Success on model=${model} key=${keyIndex + 1} after ${totalAttempts} total attempt(s)`
           );
 
           return {
@@ -142,21 +128,20 @@ export async function callGeminiWithFallback(
             error: errorMsg,
           });
           console.warn(
-            `[GeminiClient] ✗ Failed model=${model} key=${keyIndex + 1} attempt=${attempt}: ${errorMsg}`
+            `[LLMClient] ✗ Failed model=${model} key=${keyIndex + 1} attempt=${attempt}: ${errorMsg}`
           );
 
           // Non-retryable errors: skip retries, move to next key
           if (!isRetryableError(err)) {
             console.warn(
-              `[GeminiClient] Non-retryable error, skipping remaining retries for this key`
+              `[LLMClient] Non-retryable error, skipping remaining retries for this key`
             );
             break;
           }
 
-          // Exponential backoff before retry (but not after last attempt)
           if (attempt < MAX_RETRIES_PER_KEY) {
             const delay = BASE_DELAY_MS * Math.pow(2, attempt - 1);
-            console.log(`[GeminiClient] Backing off ${delay}ms...`);
+            console.log(`[LLMClient] Backing off ${delay}ms...`);
             await sleep(delay);
           }
         }
@@ -164,20 +149,18 @@ export async function callGeminiWithFallback(
     }
   }
 
-  // All keys × all models × all retries exhausted
   console.error(
-    `[GeminiClient] EXHAUSTED all ${totalAttempts} attempts across ${MODEL_TIERS.length} models and ${keys.length} keys`
+    `[LLMClient] EXHAUSTED all ${totalAttempts} attempts across ${MODEL_TIERS.length} models and ${keys.length} keys`
   );
-  console.error(`[GeminiClient] Error log:`, JSON.stringify(errors, null, 2));
+  console.error(`[LLMClient] Error log:`, JSON.stringify(errors, null, 2));
 
-  throw new GeminiExhaustedError(
-    `All Gemini API keys and models exhausted after ${totalAttempts} attempts. Last error: ${errors[errors.length - 1]?.error}`,
+  throw new LLMExhaustedError(
+    `All LLM API keys and models exhausted after ${totalAttempts} attempts. Last error: ${errors[errors.length - 1]?.error}`,
     errors
   );
 }
 
-// ─── Custom Error ──────────────────────────────────────────────────────
-export class GeminiExhaustedError extends Error {
+export class LLMExhaustedError extends Error {
   public readonly errors: Array<{
     model: string;
     keyIndex: number;
@@ -195,7 +178,7 @@ export class GeminiExhaustedError extends Error {
     }>
   ) {
     super(message);
-    this.name = "GeminiExhaustedError";
+    this.name = "LLMExhaustedError";
     this.errors = errors;
   }
 }
