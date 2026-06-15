@@ -8,6 +8,7 @@ interface AIDecision {
   reasoning: string;
   confidence: number;
   timestamp: string;
+  userPrompt?: string;
 }
 
 export const AIDecisionLog = ({ userId }: { userId: string }) => {
@@ -52,10 +53,16 @@ export const AIDecisionLog = ({ userId }: { userId: string }) => {
               </span>
             </div>
             
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-2 mt-3">
               <TrendingUp className="w-4 h-4 text-fpl-green" />
               <span className="text-sm font-bold text-white">{decision.decision}</span>
             </div>
+            
+            {decision.userPrompt && decision.userPrompt.trim() !== '' && (
+              <div className="bg-slate-900/80 rounded-lg p-3 border-l-2 border-slate-600 mb-2">
+                <p className="text-[11px] text-slate-400 italic">"Q: {decision.userPrompt}"</p>
+              </div>
+            )}
             
             <div className="bg-slate-900/50 rounded-lg p-3 border-l-2 border-fpl-green">
               <p className="text-xs text-slate-300">{decision.reasoning}</p>

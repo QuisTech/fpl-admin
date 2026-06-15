@@ -62,6 +62,7 @@ export interface AIDecision {
   timestamp?: Date;
   modelUsed: string;
   riskMode?: string;
+  userPrompt?: string;
 }
 
 export async function logAIDecision(decision: AIDecision): Promise<string> {

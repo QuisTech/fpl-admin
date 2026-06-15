@@ -16,6 +16,7 @@ interface AIAgentViewProps {
 export const AIAgentView = ({ syncedData, tier, userId }: AIAgentViewProps) => {
   const [asking, setAsking] = useState(false);
   const [prompt, setPrompt] = useState('');
+  const [lastPrompt, setLastPrompt] = useState<string | null>(null);
   const [response, setResponse] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,6 +38,7 @@ export const AIAgentView = ({ syncedData, tier, userId }: AIAgentViewProps) => {
         riskMode: 'safe', // or whatever
         userPrompt: prompt
       });
+      setLastPrompt(prompt);
       setResponse(res.data.decision);
       setPrompt('');
     } catch (err: any) {
@@ -122,12 +124,19 @@ export const AIAgentView = ({ syncedData, tier, userId }: AIAgentViewProps) => {
         )}
 
         {response && (
-          <div className="bg-slate-900 border border-slate-700 rounded-xl p-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-slate-300">Action: <span className="text-fpl-green">{response.action}</span></span>
-              <span className="text-[10px] bg-slate-800 px-2 py-1 rounded text-slate-400">Confidence: {response.confidence}%</span>
+          <div className="flex flex-col gap-3">
+            {lastPrompt && lastPrompt.trim() !== '' && (
+              <div className="self-end bg-fpl-green/10 border border-fpl-green/20 rounded-xl p-3 max-w-[85%]">
+                <p className="text-sm text-fpl-green leading-relaxed text-right italic">"{lastPrompt}"</p>
+              </div>
+            )}
+            <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 self-start max-w-[95%]">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold text-slate-300">Action: <span className="text-fpl-green">{response.action}</span></span>
+                <span className="text-[10px] bg-slate-800 px-2 py-1 rounded text-slate-400">Confidence: {response.confidence}%</span>
+              </div>
+              <p className="text-sm text-slate-300 leading-relaxed">{response.reasoning}</p>
             </div>
-            <p className="text-sm text-slate-300 leading-relaxed">{response.reasoning}</p>
           </div>
         )}
 

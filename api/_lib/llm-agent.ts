@@ -87,8 +87,8 @@ export async function getLLMTransferDecision(
 
   const decision = safeParseJSON(result.text);
   
-  // Log the decision to Firestore (non-blocking — don't let log failure crash the response)
-  logAIDecision({
+  // Log the decision to Firestore (await it but catch errors so it doesn't crash the main flow)
+  await logAIDecision({
     userId,
     gameweek,
     decision: decision.action,
@@ -100,7 +100,8 @@ export async function getLLMTransferDecision(
       chipName: decision.chipName
     },
     modelUsed: result.modelUsed,
-    riskMode
+    riskMode,
+    userPrompt
   }).catch(err => {
     console.error("[LLMAgent] Non-fatal: Failed to log decision to Firestore:", err.message);
   });
@@ -134,8 +135,8 @@ export async function getLLMChipAdvice(
 
   const decision = safeParseJSON(result.text);
   
-  // Non-blocking Firestore log
-  logAIDecision({
+  // Await Firestore log but catch errors
+  await logAIDecision({
     userId,
     gameweek,
     decision: `CHIP_${decision.recommendation}`,
