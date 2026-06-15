@@ -255,8 +255,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const customerId = userDoc.data()?.dodoCustomerId;
       if (!customerId) return res.status(400).json({ error: 'User does not have a linked Dodo Payments Customer ID' });
       
-      const portalSession = await dodo.customerPortal.create({ customer_id: customerId });
-      return res.json({ url: portalSession.url });
+      const portalSession = await dodo.customers.customerPortal.create(customerId);
+      return res.json({ url: portalSession.url || portalSession.customer_portal_url });
     }
 
     return res.status(404).json({ error: "Admin route not found" });
