@@ -1,54 +1,61 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getFirestore } from '../lib/firestore.js';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getAuth } from 'firebase-admin/auth';
-import DodoPayments from 'dodopayments';
 
 let dodo: any = null;
+let getAuth: any = null;
 let initError: string | null = null;
 
-try {
-  dodo = new DodoPayments({
-    bearerToken: process.env.DODO_SECRET_KEY?.trim() || 'test',
-    environment: process.env.DODO_SECRET_KEY?.includes('test') ? 'test_mode' : 'live_mode'
-  });
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // Try dynamic imports inside the handler to prevent top-level Vercel crashes
+  if (!dodo || !getAuth) {
+    try {
+      const authModule = await import('firebase-admin/auth');
+      getAuth = authModule.getAuth;
 
-  if (!getApps().length) {
-    const privateKey = process.env.GOOGLE_CLOUD_PRIVATE_KEY?.replace(/\\n/g, '\n');
-    if (privateKey) {
-      initializeApp({
-        credential: cert({
-          project_id: process.env.GOOGLE_CLOUD_PROJECT_ID?.trim() || '',
-          client_email: process.env.GOOGLE_CLOUD_CLIENT_EMAIL || '',
-          private_key: privateKey,
-        }),
+      const dodoModule = await import('dodopayments');
+      const DodoPayments = dodoModule.default || dodoModule;
+
+      dodo = new DodoPayments({
+        bearerToken: process.env.DODO_SECRET_KEY?.trim() || 'test',
+        environment: process.env.DODO_SECRET_KEY?.includes('test') ? 'test_mode' : 'live_mode'
       });
-    } else {
-      initializeApp({ projectId: process.env.GOOGLE_CLOUD_PROJECT_ID?.trim() });
+
+      if (!getApps().length) {
+        const privateKey = process.env.GOOGLE_CLOUD_PRIVATE_KEY?.replace(/\\n/g, '\n');
+        if (privateKey) {
+          initializeApp({
+            credential: cert({
+              project_id: process.env.GOOGLE_CLOUD_PROJECT_ID?.trim() || '',
+              client_email: process.env.GOOGLE_CLOUD_CLIENT_EMAIL || '',
+              private_key: privateKey,
+            }),
+          });
+        } else {
+          initializeApp({ projectId: process.env.GOOGLE_CLOUD_PROJECT_ID?.trim() });
+        }
+      }
+    } catch (e: any) {
+      initError = e.message || String(e);
+      console.error("Dynamic import init error:", e);
     }
   }
-} catch (e: any) {
-  initError = e.message || String(e);
-  console.error("Top-level init error:", e);
-}
 
-const db = getFirestore();
-
-async function logAudit(adminId: string, action: string, targetUserId: string, changes: any) {
-  await db.collection('audit_log').add({
-    adminId,
-    action,
-    targetUserId,
-    changes,
-    timestamp: new Date()
-  });
-}
-
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const db = getFirestore();
   const url = req.url || "/";
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   if (req.method === 'OPTIONS') return res.status(200).end();
+
+  async function logAudit(adminId: string, action: string, targetUserId: string, changes: any) {
+    await db.collection('audit_log').add({
+      adminId,
+      action,
+      targetUserId,
+      changes,
+      timestamp: new Date()
+    });
+  }
 
   if (initError) {
     return res.status(500).json({ error: 'Server initialization error', details: initError });
