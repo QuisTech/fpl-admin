@@ -116,17 +116,53 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (url.includes('/api/admin/search-users') && req.method === 'GET') {
-      const q = req.query.q as string;
-      if (!q) return res.json({ users: [] });
+      const q = (req.query.q as string || '').trim();
 
-      const byEmail = await db.collection('users').where('email', '>=', q).where('email', '<=', q + '\uf8ff').limit(10).get();
-      let users = byEmail.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-      if (users.length === 0) {
-        const byId = await db.collection('users').doc(q).get();
-        if (byId.exists) users = [{ id: byId.id, ...byId.data() }];
+      if (q) {
+        if (q.includes('@')) {
+          try {
+            const authUser = await getAuth().getUserByEmail(q);
+            const userDoc = await db.collection('users').doc(authUser.uid).get();
+            const data = userDoc.exists ? userDoc.data() : { tier: 'free' };
+            return res.status(200).json({ users: [{ id: authUser.uid, email: authUser.email, ...data }] });
+          } catch (e) {
+            return res.status(200).json({ users: [] });
+          }
+        } else {
+          // Try search by UID
+          try {
+            const authUser = await getAuth().getUser(q);
+            const userDoc = await db.collection('users').doc(q).get();
+            const data = userDoc.exists ? userDoc.data() : { tier: 'free' };
+            return res.status(200).json({ users: [{ id: authUser.uid, email: authUser.email, ...data }] });
+          } catch (e) {
+            return res.status(200).json({ users: [] });
+          }
+        }
       }
-      return res.json({ users });
+
+      // No search, list recent 50 users
+      const usersQuery = db.collection('users').limit(50);
+      const usersSnapshot = await usersQuery.get();
+      const firestoreUsers = usersSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      // Fetch emails from Firebase Auth
+      const identifiers = firestoreUsers.map(u => ({ uid: u.id }));
+      if (identifiers.length > 0) {
+        const authRecords = await getAuth().getUsers(identifiers);
+        const emailMap = new Map();
+        authRecords.users.forEach((r: any) => emailMap.set(r.uid, r.email));
+        
+        const mergedUsers = firestoreUsers.map(u => ({
+          ...u,
+          email: emailMap.get(u.id) || 'Unknown Email'
+        }));
+        return res.status(200).json({ users: mergedUsers });
+      }
+      return res.status(200).json({ users: [] });
     }
 
     if (url.includes('/api/admin/beta-testers') && req.method === 'GET') {
