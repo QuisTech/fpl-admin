@@ -474,9 +474,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       // Fetch fixtures
+      const baseData = await FPLService.getBaseData();
+      const teamsList = baseData.teams || [];
       const fixturesRes = await axios.get(`${FPL_BASE_URL}/fixtures/`, { headers: (FPLService as any).getHeaders() });
-      let upcoming = fixturesRes.data.filter((f: any) => f.event >= gameweek && f.event < gameweek + 5);
-      if (upcoming.length === 0) upcoming = fixturesRes.data.slice(0, 5); // Fallback if no exact match
+      let rawUpcoming = fixturesRes.data.filter((f: any) => f.event >= (gameweek || 1) && f.event < (gameweek || 1) + 5);
+      if (rawUpcoming.length === 0) rawUpcoming = fixturesRes.data.slice(0, 5); // Fallback if no exact match
+      
+      const upcoming = rawUpcoming.map((f: any) => {
+        const homeTeam = teamsList.find((t: any) => t.id === f.team_h)?.name || `Team ${f.team_h}`;
+        const awayTeam = teamsList.find((t: any) => t.id === f.team_a)?.name || `Team ${f.team_a}`;
+        return {
+          gw: f.event || 'TBD',
+          team: homeTeam,
+          opponent: awayTeam,
+          difficulty: `H:${f.team_h_difficulty} A:${f.team_a_difficulty}`
+        };
+      });
 
       // Fetch targets
       const recommendations = await FPLService.getRecommendations(riskMode, bank, userTier);

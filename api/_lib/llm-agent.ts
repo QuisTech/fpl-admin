@@ -44,7 +44,7 @@ export async function getLLMTransferDecision(
   
   // Build context for LLM
   const squadSummary = squad.map(p => 
-    `${p.name || p.web_name} (ID: ${p.id}) (${p.position}) - £${((p.cost || p.now_cost || 0)/10).toFixed(1)}M - xP: ${(p.xP || 0).toFixed(1)}`
+    `${p.name || p.web_name || 'Unknown'} (ID: ${p.id || p.element || 'Unknown'}) (${p.position}) - £${((p.cost || p.now_cost || p.selling_price || 0)/10).toFixed(1)}M - xP: ${(p.xP || 0).toFixed(1)}`
   ).join('\n');
   
   const fixturesSummary = fixtures.slice(0, 5).map(f => 
