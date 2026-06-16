@@ -77,7 +77,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // --- Routes ---
-    
+
     if (url.includes('/api/admin/check') && req.method === 'GET') {
       return res.json({ success: true });
     }
@@ -113,6 +113,49 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       await db.collection('users').doc(userId).update(updates);
       await logAudit(adminId, 'REVOKE_ACCESS', userId, { tier: 'free' });
       return res.json({ success: true });
+    }
+
+    if (url.includes('/api/admin/clear-team-id') && req.method === 'POST') {
+      const { userId } = req.body;
+      if (!userId) return res.status(400).json({ error: 'Missing userId' });
+
+      await db.collection('user_profiles').doc(userId).set({
+        fplTeamId: null,
+        fplResetCount: 0
+      }, { merge: true });
+      await logAudit(adminId, 'CLEAR_TEAM_ID', userId, { fplTeamId: null, fplResetCount: 0 });
+      return res.json({ success: true });
+    }
+
+    if (url.includes('/api/admin/global-season-reset') && req.method === 'POST') {
+      const snapshot = await db.collection('user_profiles').get();
+
+      // Firestore batches are limited to 500 operations. We need to chunk if large, 
+      // but assuming < 500 for hackathon MVP. We'll use a standard batch here.
+      const batches = [];
+      let currentBatch = db.batch();
+      let operationCounter = 0;
+      let totalCount = 0;
+
+      snapshot.docs.forEach(doc => {
+        currentBatch.set(doc.ref, { fplTeamId: null, fplResetCount: 0 }, { merge: true });
+        operationCounter++;
+        totalCount++;
+
+        if (operationCounter === 499) {
+          batches.push(currentBatch.commit());
+          currentBatch = db.batch();
+          operationCounter = 0;
+        }
+      });
+
+      if (operationCounter > 0) {
+        batches.push(currentBatch.commit());
+      }
+
+      await Promise.all(batches);
+      await logAudit(adminId, 'GLOBAL_SEASON_RESET', 'ALL_USERS', { count_affected: totalCount });
+      return res.json({ success: true, count: totalCount });
     }
 
     if (url.includes('/api/admin/search-users') && req.method === 'GET') {
@@ -155,7 +198,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const authRecords = await getAuth().getUsers(identifiers);
         const emailMap = new Map();
         authRecords.users.forEach((r: any) => emailMap.set(r.uid, r.email));
-        
+
         const mergedUsers = firestoreUsers.map(u => ({
           ...u,
           email: emailMap.get(u.id) || 'Unknown Email'
@@ -254,7 +297,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!userDoc.exists) return res.status(404).json({ error: 'User not found' });
       const customerId = userDoc.data()?.dodoCustomerId;
       if (!customerId) return res.status(400).json({ error: 'User does not have a linked Dodo Payments Customer ID' });
-      
+
       const portalSession = await dodo.customers.customerPortal.create(customerId);
       return res.json({ url: portalSession.link });
     }

@@ -3,7 +3,7 @@ import type { Request, Response } from "express";
 
 export default async function handler(req: Request, res: Response) {
   const { userId } = req.query as { userId?: string };
-  
+
   if (!userId) {
     return res.status(400).json({ error: "Missing userId" });
   }
@@ -19,11 +19,24 @@ export default async function handler(req: Request, res: Response) {
       }
       return res.json(profile.data());
     }
-    
+
     if (req.method === 'PUT') {
       // Update profile
       const updates = req.body;
-      
+
+      if (updates.action === 'request_reset') {
+        const existingDoc = await db.collection('user_profiles').doc(userId).get();
+        const data = existingDoc.data() || {};
+        if ((data.fplResetCount || 0) >= 1) {
+          return res.status(403).json({ error: "You have already used your 1 free reset this season." });
+        }
+        await db.collection('user_profiles').doc(userId).set({
+          fplTeamId: null,
+          fplResetCount: (data.fplResetCount || 0) + 1
+        }, { merge: true });
+        return res.json({ success: true, message: "Team ID reset successfully." });
+      }
+
       // If trying to set fplTeamId, check if one already exists
       if (updates.fplTeamId) {
         const existingDoc = await db.collection('user_profiles').doc(userId).get();
@@ -35,7 +48,7 @@ export default async function handler(req: Request, res: Response) {
       await db.collection('user_profiles').doc(userId).set(updates, { merge: true });
       return res.json({ success: true });
     }
-    
+
     if (req.method === 'DELETE') {
       // Soft delete (anonymize data)
       await db.collection('user_profiles').doc(userId).update({

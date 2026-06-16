@@ -40,8 +40,8 @@ export function UsersPage() {
       <div className="md:col-span-1 border-r border-slate-800 pr-8 min-h-[500px]">
         <h2 className="text-xl font-bold mb-6">User Management</h2>
         <div className="relative mb-6">
-          <input 
-            type="text" 
+          <input
+            type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search email or ID..."
@@ -54,7 +54,7 @@ export function UsersPage() {
 
         <div className="space-y-2">
           {users.map(u => (
-            <button 
+            <button
               key={u.id}
               onClick={() => setSelectedUser(u)}
               className={`w-full text-left p-3 rounded-lg border ${selectedUser?.id === u.id ? 'border-fpl-green bg-fpl-green/10' : 'border-slate-800 bg-slate-900 hover:border-slate-700'}`}
@@ -109,14 +109,14 @@ function UserDetails({ user, onUpdate }: { user: any, onUpdate: () => void }) {
       });
       const data = await res.json();
       setLogs(data.logs || []);
-    } catch(e) {}
+    } catch (e) { }
   };
 
   const handleGrant = async () => {
     setSaving(true);
     try {
       const token = await auth.currentUser?.getIdToken();
-      
+
       const payload: any = { userId: user.id, tier, notes };
       if (isBeta) {
         const d = new Date();
@@ -126,9 +126,9 @@ function UserDetails({ user, onUpdate }: { user: any, onUpdate: () => void }) {
 
       await fetch('/api/admin/grant-tier-access', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}` 
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(payload)
       });
@@ -149,9 +149,9 @@ function UserDetails({ user, onUpdate }: { user: any, onUpdate: () => void }) {
       const token = await auth.currentUser?.getIdToken();
       await fetch('/api/admin/revoke-access', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}` 
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({ userId: user.id })
       });
@@ -165,14 +165,36 @@ function UserDetails({ user, onUpdate }: { user: any, onUpdate: () => void }) {
     }
   };
 
+  const handleClearTeamId = async () => {
+    if (!confirm("Clear this user's FPL Team ID? They will have to set it up again.")) return;
+    setSaving(true);
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      await fetch('/api/admin/clear-team-id', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ userId: user.id })
+      });
+      fetchLogs();
+      alert('Team ID cleared');
+    } catch (e) {
+      alert('Error clearing Team ID');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleGeneratePortal = async () => {
     try {
       const token = await auth.currentUser?.getIdToken();
       const res = await fetch('/api/admin/customer-portal', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}` 
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({ userId: user.id })
       });
@@ -194,7 +216,10 @@ function UserDetails({ user, onUpdate }: { user: any, onUpdate: () => void }) {
           <h3 className="text-xl font-bold">{user.email}</h3>
           <p className="text-slate-400 text-sm font-mono mt-1">{user.id}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 justify-end">
+          <button onClick={handleClearTeamId} className="px-3 py-1 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-500 text-xs font-bold rounded-lg transition border border-yellow-500/30">
+            Clear Team ID
+          </button>
           {user.dodoCustomerId && (
             <button onClick={handleGeneratePortal} className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-lg transition border border-slate-700">
               Dodo Portal
@@ -209,7 +234,7 @@ function UserDetails({ user, onUpdate }: { user: any, onUpdate: () => void }) {
       <div className="grid grid-cols-2 gap-6 mb-8">
         <div>
           <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Subscription Tier</label>
-          <select 
+          <select
             value={tier}
             onChange={(e) => setTier(e.target.value)}
             className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-sm focus:border-fpl-green focus:outline-none"
@@ -228,8 +253,8 @@ function UserDetails({ user, onUpdate }: { user: any, onUpdate: () => void }) {
           </label>
           {isBeta && (
             <div className="flex items-center gap-2">
-              <input 
-                type="number" 
+              <input
+                type="number"
                 value={expiryDays}
                 onChange={(e) => setExpiryDays(parseInt(e.target.value))}
                 className="w-20 bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm focus:border-fpl-green"
@@ -242,7 +267,7 @@ function UserDetails({ user, onUpdate }: { user: any, onUpdate: () => void }) {
 
       <div className="mb-6">
         <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Admin Notes</label>
-        <textarea 
+        <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Internal notes about this user..."
@@ -250,7 +275,7 @@ function UserDetails({ user, onUpdate }: { user: any, onUpdate: () => void }) {
         ></textarea>
       </div>
 
-      <button 
+      <button
         onClick={handleGrant}
         disabled={saving}
         className="w-full bg-fpl-green text-slate-900 font-bold py-3 rounded-xl hover:bg-emerald-400 transition flex items-center justify-center gap-2"

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import axios from 'axios';
-import { 
-  User, Mail, Key, Globe, CreditCard, 
+import {
+  User, Mail, Key, Globe, CreditCard,
   Github, Facebook, Chrome, Trash2,
   Shield, CheckCircle, Edit2, RefreshCw, Lock
 } from 'lucide-react';
@@ -21,27 +21,27 @@ export const UserProfile = ({ user, onClose, onSignOut, onTeamIdChange, initialT
           setFplTeamId(res.data.fplTeamId);
           setIsLocked(true);
         }
-      }).catch(() => {});
+      }).catch(() => { });
     }
   }, [user?.uid]);
-  
+
   const tabs = [
     { id: 'account', label: 'Account', icon: User },
     { id: 'fpl', label: 'FPL', icon: Shield },
     { id: 'billing', label: 'Billing', icon: CreditCard },
     { id: 'connections', label: 'Connections', icon: Chrome },
   ];
-  
+
   return (
     <AnimatePresence>
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
         onClick={onClose}
       >
-        <motion.div 
+        <motion.div
           initial={{ scale: 0.95, y: 20 }}
           animate={{ scale: 1, y: 0 }}
           exit={{ scale: 0.95, y: 20 }}
@@ -63,25 +63,24 @@ export const UserProfile = ({ user, onClose, onSignOut, onTeamIdChange, initialT
               <span className="text-2xl text-slate-400">✕</span>
             </button>
           </div>
-          
+
           {/* Tabs */}
           <div className="flex gap-1 px-4 sm:px-6 pt-4 border-b border-fpl-border overflow-x-auto scrollbar-hide shrink-0 whitespace-nowrap">
             {tabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-t-lg transition-all ${
-                  activeTab === tab.id 
-                    ? 'bg-slate-900 text-fpl-green border-t border-x border-fpl-border' 
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-t-lg transition-all ${activeTab === tab.id
+                  ? 'bg-slate-900 text-fpl-green border-t border-x border-fpl-border'
+                  : 'text-slate-400 hover:text-slate-200'
+                  }`}
               >
                 <tab.icon className="w-4 h-4" />
                 {tab.label}
               </button>
             ))}
           </div>
-          
+
           {/* Content */}
           <div className="p-6 overflow-y-auto max-h-[60vh] space-y-6">
             {activeTab === 'account' && (
@@ -97,7 +96,7 @@ export const UserProfile = ({ user, onClose, onSignOut, onTeamIdChange, initialT
                     </div>
                     <button className="text-xs text-fpl-green font-bold">Change</button>
                   </div>
-                  
+
                   <div className="flex justify-between items-center p-3 bg-slate-900/50 rounded-xl">
                     <div className="flex items-center gap-3">
                       <Key className="w-4 h-4 text-slate-400" />
@@ -108,7 +107,7 @@ export const UserProfile = ({ user, onClose, onSignOut, onTeamIdChange, initialT
                     </div>
                     <button className="text-xs text-fpl-green font-bold">Reset</button>
                   </div>
-                  
+
                   <div className="flex justify-between items-center p-3 bg-slate-900/50 rounded-xl">
                     <div className="flex items-center gap-3">
                       <Globe className="w-4 h-4 text-slate-400" />
@@ -123,14 +122,14 @@ export const UserProfile = ({ user, onClose, onSignOut, onTeamIdChange, initialT
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="p-4 bg-slate-900/30 rounded-xl border border-fpl-border">
                   <p className="text-xs text-slate-400 mb-2">Last Login</p>
                   <p className="text-sm text-white">{user?.lastLoginAt ? new Date(user?.lastLoginAt).toLocaleString() : 'N/A'}</p>
                 </div>
               </>
             )}
-            
+
             {activeTab === 'fpl' && (
               <>
                 <div className="space-y-4">
@@ -139,7 +138,7 @@ export const UserProfile = ({ user, onClose, onSignOut, onTeamIdChange, initialT
                       <div>
                         <p className="text-xs text-slate-400">FPL Team ID</p>
                         {editingFplId ? (
-                          <input 
+                          <input
                             type="text"
                             value={fplTeamId}
                             onChange={(e) => setFplTeamId(e.target.value)}
@@ -153,12 +152,33 @@ export const UserProfile = ({ user, onClose, onSignOut, onTeamIdChange, initialT
                         )}
                       </div>
                       {isLocked ? (
-                        <div className="flex items-center gap-1 text-xs text-slate-500 font-bold bg-slate-900 px-3 py-1 rounded">
-                          <Lock className="w-3 h-3" /> Locked
+                        <div className="flex flex-col items-end gap-2">
+                          <div className="flex items-center gap-1 text-xs text-slate-500 font-bold bg-slate-900 px-3 py-1 rounded">
+                            <Lock className="w-3 h-3" /> Locked
+                          </div>
+                          <button
+                            onClick={async () => {
+                              if (!user?.uid) return;
+                              if (confirm("Are you sure you want to use your 1 free reset for this season?")) {
+                                try {
+                                  await axios.put(`/api/user-profile?userId=${user.uid}`, { action: 'request_reset' });
+                                  setFplTeamId('');
+                                  setIsLocked(false);
+                                  if (onTeamIdChange) onTeamIdChange('');
+                                  alert("Team ID has been reset successfully. You can now link a new ID.");
+                                } catch (e: any) {
+                                  alert(e.response?.data?.error || "Failed to reset FPL Team ID.");
+                                }
+                              }
+                            }}
+                            className="text-[10px] text-fpl-green border border-fpl-green/30 px-2 py-1 rounded hover:bg-fpl-green/10 transition"
+                          >
+                            Use 1 Free Reset
+                          </button>
                         </div>
                       ) : editingFplId ? (
                         <div className="flex gap-2">
-                          <button 
+                          <button
                             onClick={async () => {
                               if (!user?.uid) return;
                               setSavingId(true);
@@ -178,7 +198,7 @@ export const UserProfile = ({ user, onClose, onSignOut, onTeamIdChange, initialT
                           >
                             {savingId ? 'Saving...' : 'Save'}
                           </button>
-                          <button 
+                          <button
                             onClick={() => setEditingFplId(false)}
                             className="text-xs bg-slate-800 px-3 py-1 rounded text-white"
                           >
@@ -186,7 +206,7 @@ export const UserProfile = ({ user, onClose, onSignOut, onTeamIdChange, initialT
                           </button>
                         </div>
                       ) : (
-                        <button 
+                        <button
                           onClick={() => setEditingFplId(true)}
                           className="text-xs text-fpl-green font-bold flex items-center gap-1"
                         >
@@ -194,24 +214,31 @@ export const UserProfile = ({ user, onClose, onSignOut, onTeamIdChange, initialT
                         </button>
                       )}
                     </div>
-                    
+
                     {user?.fplVerified && (
                       <div className="flex items-center gap-2 text-xs text-fpl-green mt-2">
                         <CheckCircle className="w-3 h-3" />
                         Verified Team ✓
                       </div>
                     )}
-                    
-                    <a 
-                      href="https://fantasy.premierleague.com/" 
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-slate-400 hover:text-fpl-green mt-3 inline-block"
-                    >
-                      How do I find my Team ID? →
-                    </a>
+
+                    <div className="mt-4 pt-4 border-t border-slate-800/50">
+                      <a
+                        href="https://fantasy.premierleague.com/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-slate-400 hover:text-fpl-green block mb-2"
+                      >
+                        How do I find my Team ID? →
+                      </a>
+                      {isLocked && (
+                        <p className="text-xs text-slate-500">
+                          Locked to a Team ID by mistake? <a href="mailto:michquis@gmail.com" className="text-fpl-green hover:underline">Contact Support</a> to request a manual reset.
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  
+
                   <button className="w-full p-3 bg-slate-900 rounded-xl flex items-center justify-between hover:bg-slate-800 transition-colors">
                     <div className="flex items-center gap-3">
                       <RefreshCw className="w-4 h-4 text-fpl-green" />
@@ -222,7 +249,7 @@ export const UserProfile = ({ user, onClose, onSignOut, onTeamIdChange, initialT
                 </div>
               </>
             )}
-            
+
             {activeTab === 'connections' && (
               <div className="space-y-3">
                 <div className="p-4 bg-slate-900/50 rounded-xl flex items-center justify-between">
@@ -239,7 +266,7 @@ export const UserProfile = ({ user, onClose, onSignOut, onTeamIdChange, initialT
                     <button className="text-xs text-fpl-green">Connect</button>
                   )}
                 </div>
-                
+
                 <div className="p-4 bg-slate-900/50 rounded-xl flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Github className="w-6 h-6" />
@@ -250,7 +277,7 @@ export const UserProfile = ({ user, onClose, onSignOut, onTeamIdChange, initialT
                   </div>
                   <button className="text-xs text-fpl-green">Connect</button>
                 </div>
-                
+
                 <div className="p-4 bg-slate-900/50 rounded-xl flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Facebook className="w-6 h-6 text-blue-400" />
@@ -263,7 +290,7 @@ export const UserProfile = ({ user, onClose, onSignOut, onTeamIdChange, initialT
                 </div>
               </div>
             )}
-            
+
             {activeTab === 'billing' && (
               <div className="space-y-4">
                 <div className="p-4 bg-gradient-to-r from-fpl-green/10 to-fpl-purple/10 rounded-xl border border-fpl-green/20">
@@ -271,7 +298,7 @@ export const UserProfile = ({ user, onClose, onSignOut, onTeamIdChange, initialT
                   <p className="text-2xl font-black text-fpl-green">{user?.tier || 'Free'}</p>
                   <p className="text-xs text-slate-400 mt-2">Renews Next Month</p>
                 </div>
-                
+
                 <div className="p-4 bg-slate-900/50 rounded-xl">
                   <p className="text-xs text-slate-400 mb-2">Payment Method</p>
                   <div className="flex items-center justify-between">
@@ -282,8 +309,8 @@ export const UserProfile = ({ user, onClose, onSignOut, onTeamIdChange, initialT
                     <button className="text-xs text-fpl-green">Update</button>
                   </div>
                 </div>
-                
-                <button 
+
+                <button
                   onClick={() => alert('To view invoice history, please check your email for Dodo Payments receipts or contact support.')}
                   className="w-full text-left p-3 bg-slate-900 rounded-xl text-sm hover:bg-slate-800 transition-colors"
                 >
@@ -292,17 +319,17 @@ export const UserProfile = ({ user, onClose, onSignOut, onTeamIdChange, initialT
               </div>
             )}
           </div>
-          
+
           {/* Footer */}
           <div className="p-6 border-t border-fpl-border flex justify-between items-center">
-            <button 
+            <button
               onClick={onSignOut}
               className="px-4 py-2 bg-rose-500/10 text-rose-400 rounded-lg text-sm font-bold hover:bg-rose-500/20 transition-colors"
             >
               Sign Out
             </button>
-            
-            <button 
+
+            <button
               onClick={async () => {
                 if (!user?.uid) return;
                 if (confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
