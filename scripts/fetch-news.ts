@@ -11,42 +11,42 @@ interface FPLPlayer {
 }
 
 // 1. Fetch from Reddit using Playwright
-async function fetchRedditNews(page: any): Promise<string> {
-  let texts = '';
+async function fetchAllNews(page: any): Promise<string> {
+  let redditTexts = '';
   try {
     await page.goto('https://www.reddit.com/r/FantasyPL/search.json?q=flair_name%3A%22News%22%20OR%20flair_name%3A%22Press%20Conference%22&restrict_sr=1&sort=new&limit=10', { waitUntil: 'networkidle' });
     const jsonContent = await page.evaluate(() => document.body.innerText);
     const data = JSON.parse(jsonContent);
     const posts = data?.data?.children || [];
-    texts = posts.map((p: any) => `Title: ${p.data.title}\n${p.data.selftext}`).join('\n\n---\n\n');
+    redditTexts = posts.map((p: any) => `Title: ${p.data.title}\n${p.data.selftext}`).join('\n\n---\n\n');
     console.log('[NewsFetcher] Successfully fetched from Reddit via Playwright');
   } catch (err: any) {
-    console.warn('[NewsFetcher] Failed to fetch reddit, falling back to RSS', err.message);
+    console.warn('[NewsFetcher] Failed to fetch reddit', err.message);
   }
 
-  // 2. RSS Fallback
-  if (!texts || texts.trim() === '') {
-    try {
-      const res = await axios.get('https://www.fantasyfootballscout.co.uk/feed/', {
-        headers: { 'User-Agent': 'Mozilla/5.0' },
-        timeout: 5000
-      });
-      const items = res.data.match(/<item>([\s\S]*?)<\/item>/g) || [];
-      texts = items.slice(0, 15).map((item: string) => {
-        const titleMatch = item.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/) || item.match(/<title>(.*?)<\/title>/);
-        const title = titleMatch ? titleMatch[1] : '';
-        const descMatch = item.match(/<content:encoded><!\[CDATA\[([\s\S]*?)\]\]><\/content:encoded>/) || item.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/) || item.match(/<description>([\s\S]*?)<\/description>/);
-        let desc = descMatch ? descMatch[1] : '';
-        desc = desc.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim();
-        return `Title: ${title}\n${desc}`;
-      }).join('\n\n---\n\n');
-      console.log('[NewsFetcher] Successfully fetched from RSS fallback');
-    } catch (e: any) {
-      console.error('[NewsFetcher] Failed to fetch RSS', e.message);
-    }
+  // 2. Fetch from RSS Scout
+  let scoutTexts = '';
+  try {
+    const res = await axios.get('https://www.fantasyfootballscout.co.uk/feed/', {
+      headers: { 'User-Agent': 'Mozilla/5.0' },
+      timeout: 5000
+    });
+    const items = res.data.match(/<item>([\s\S]*?)<\/item>/g) || [];
+    scoutTexts = items.slice(0, 15).map((item: string) => {
+      const titleMatch = item.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/) || item.match(/<title>(.*?)<\/title>/);
+      const title = titleMatch ? titleMatch[1] : '';
+      const descMatch = item.match(/<content:encoded><!\[CDATA\[([\s\S]*?)\]\]><\/content:encoded>/) || item.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/) || item.match(/<description>([\s\S]*?)<\/description>/);
+      let desc = descMatch ? descMatch[1] : '';
+      desc = desc.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim();
+      return `Title: ${title}\n${desc}`;
+    }).join('\n\n---\n\n');
+    console.log('[NewsFetcher] Successfully fetched from RSS scout');
+  } catch (e: any) {
+    console.error('[NewsFetcher] Failed to fetch RSS', e.message);
   }
 
-  return texts;
+  const combinedTexts = [redditTexts, scoutTexts].filter(t => t.trim() !== '').join('\n\n=== FANTASY FOOTBALL SCOUT RSS ===\n\n');
+  return combinedTexts;
 }
 
 function safeParseJSON(text: string): any {
@@ -79,7 +79,7 @@ async function getFPLPlayers(): Promise<FPLPlayer[]> {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
   
-  const rawNews = await fetchRedditNews(page);
+  const rawNews = await fetchAllNews(page);
   await browser.close();
 
   if (!rawNews || rawNews.trim() === '') {
