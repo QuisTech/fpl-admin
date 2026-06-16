@@ -34,7 +34,7 @@
     },
     {
       "path": "/api/cron-news",
-      "schedule": "0 */4 * * *"
+      "schedule": "0 0 * * *"
     }
   ]
 }
