@@ -28,22 +28,19 @@ jobs:
         
       - name: Check FPL Deadline (Sniper Window)
         id: sniper
-        # This will exit with 1 if it's not the right time, failing this step.
-        # We use continue-on-error so the workflow just stops gracefully instead of sending you a massive "FAILURE" email every hour.
-        continue-on-error: true
         run: npx tsx scripts/check-deadline.ts
         
-      # The subsequent steps only run if the sniper step exited with 0 (SUCCESS)
+      # The subsequent steps only run if should_run was set to 'true'
       - name: Fetch FPLForm Data
-        if: steps.sniper.outcome == 'success'
+        if: steps.sniper.outputs.should_run == 'true'
         run: npx tsx scripts/fetch-xp.ts
 
       - name: Fetch Top 1k Manager Sentiment
-        if: steps.sniper.outcome == 'success'
+        if: steps.sniper.outputs.should_run == 'true'
         run: npx tsx scripts/fetch-top-1k.ts
 
       - name: Commit and Push New Data
-        if: steps.sniper.outcome == 'success'
+        if: steps.sniper.outputs.should_run == 'true'
         run: |
           git config --global user.name "FPL Sniper Bot"
           git config --global user.email "bot@quistech.com"

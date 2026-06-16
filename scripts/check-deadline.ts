@@ -1,4 +1,5 @@
 import axios from 'axios';
+import fs from 'fs';
 
 const FPL_BASE_URL = 'https://fantasy.premierleague.com/api/bootstrap-static/';
 
@@ -20,7 +21,10 @@ const FPL_BASE_URL = 'https://fantasy.premierleague.com/api/bootstrap-static/';
     
     if (!nextEvent) {
       console.log('[Deadline Sniper] No upcoming gameweek found. Sleeping.');
-      process.exit(1);
+      if (process.env.GITHUB_OUTPUT) {
+        fs.appendFileSync(process.env.GITHUB_OUTPUT, 'should_run=false\n');
+      }
+      process.exit(0);
     }
 
     const deadlineTime = new Date(nextEvent.deadline_time).getTime();
@@ -37,10 +41,16 @@ const FPL_BASE_URL = 'https://fantasy.premierleague.com/api/bootstrap-static/';
     // we never miss the execution opportunity.
     if (hoursUntilDeadline > 0.9 && hoursUntilDeadline <= 2.1) {
       console.log('✅ [Deadline Sniper] GOLDEN WINDOW REACHED! Time to fetch live data.');
-      process.exit(0); // Exit 0 tells GitHub Actions to proceed to the next step
+      if (process.env.GITHUB_OUTPUT) {
+        fs.appendFileSync(process.env.GITHUB_OUTPUT, 'should_run=true\n');
+      }
+      process.exit(0); 
     } else {
       console.log('⏳ [Deadline Sniper] Not in the window. Going back to sleep.');
-      process.exit(1); // Exit 1 tells GitHub Actions to abort the rest of the workflow silently
+      if (process.env.GITHUB_OUTPUT) {
+        fs.appendFileSync(process.env.GITHUB_OUTPUT, 'should_run=false\n');
+      }
+      process.exit(0); 
     }
   } catch (err: any) {
     console.error('Error fetching FPL API:', err.message);
