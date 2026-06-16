@@ -23,9 +23,15 @@ export async function verifyAuth(req: VercelRequest, res: VercelResponse): Promi
     const auth = getAuth();
     const decodedToken = await auth.verifyIdToken(token);
     return decodedToken.uid;
-  } catch (error) {
+  } catch (error: any) {
     console.error("[Auth] Invalid ID token", error);
-    res.status(403).json({ error: "Forbidden: Invalid token" });
+    res.status(403).json({ 
+      error: "Forbidden: Invalid token", 
+      details: error?.message || String(error),
+      hasProjectId: !!process.env.GOOGLE_CLOUD_PROJECT_ID,
+      hasClientEmail: !!process.env.GOOGLE_CLOUD_CLIENT_EMAIL,
+      hasPrivateKey: !!process.env.GOOGLE_CLOUD_PRIVATE_KEY
+    });
     return null;
   }
 }

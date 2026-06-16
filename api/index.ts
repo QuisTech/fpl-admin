@@ -402,7 +402,7 @@ export class FPLService {
 }
 
 // --- ENVIRONMENT VALIDATION ---
-if (!process.env.VITE_FIREBASE_PROJECT_ID || !process.env.GROQ_API_KEY) {
+if (!process.env.GOOGLE_CLOUD_PROJECT_ID || !process.env.GROQ_API_KEY) {
   throw new Error("FATAL: Missing critical environment variables.");
 }
 // ------------------------------
