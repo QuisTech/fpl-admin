@@ -1,9 +1,12 @@
 import { getFirestore } from '../lib/firestore.js';
+import { verifyAuth } from './_lib/auth.js';
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const origin = req.headers.origin || '';
+  const allowedOrigin = origin.includes('localhost') || origin.includes('vercel.app') ? origin : (process.env.APP_URL || '*');
+  res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
@@ -16,6 +19,10 @@ export default async function handler(req, res) {
   if (!userId) {
     return res.status(400).json({ error: 'Missing userId' });
   }
+
+  const uid = await verifyAuth(req, res);
+  if (!uid) return;
+  if (uid !== userId) return res.status(403).json({ error: 'Forbidden: Token mismatch' });
 
   let db;
   try {

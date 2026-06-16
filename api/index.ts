@@ -13,6 +13,7 @@ import { solveOptimalSquad } from './_lib/lp-solver.js';
 import { getUserTier, mergeUserTiers, getFirestore } from '../lib/firestore.js';
 import { getLLMTransferDecision } from './_lib/llm-agent.js';
 import { getNewsContextFromCache } from './_lib/news-service.js';
+import { verifyAuth } from './_lib/auth.js';
 
 const FPL_BASE_URL = "https://fantasy.premierleague.com/api";
 
@@ -402,8 +403,13 @@ export class FPLService {
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const url = req.url || "/";
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  
+  const origin = req.headers.origin || '';
+  const allowedOrigin = origin.includes('localhost') || origin.includes('vercel.app') ? origin : (process.env.APP_URL || '*');
+  res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
@@ -416,6 +422,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (url.includes('/api/user')) {
       if (userId === 'unknown') return res.status(400).json({ error: "Missing userId" });
+      const uid = await verifyAuth(req, res);
+      if (!uid) return; // verifyAuth handles the response
       tier = await getUserTier(userId);
       return res.status(200).json({ userId, tier });
     }
@@ -424,19 +432,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const { newUserId, anonymousId } = req.body || {};
       if (!newUserId || !anonymousId) return res.status(400).json({ error: "Missing user IDs" });
       
+      const uid = await verifyAuth(req, res);
+      if (!uid || uid !== newUserId) return res.status(403).json({ error: "Forbidden: You can only merge into your own account." });
+
       const success = await mergeUserTiers(anonymousId, newUserId);
       return res.status(200).json({ success });
     }
 
     if (url.includes('/api/recommendations')) {
-      tier = await getUserTier(userId);
+      const uid = await verifyAuth(req, res);
+      if (!uid) return;
+      if (userId !== 'unknown' && uid !== userId) return res.status(403).json({ error: "Forbidden: Token mismatch" });
+
+      tier = await getUserTier(uid);
       const budget = query.budget ? parseInt(query.budget as string) : 1000;
       const result = await FPLService.getRecommendations(riskMode, budget, tier);
       return res.status(200).json(result);
     } 
     
     if (url.includes('/api/sync')) {
-      tier = await getUserTier(userId);
+      const uid = await verifyAuth(req, res);
+      if (!uid) return;
+      if (userId !== 'unknown' && uid !== userId) return res.status(403).json({ error: "Forbidden: Token mismatch" });
+
+      tier = await getUserTier(uid);
       const teamId = url.split('/').pop()?.split('?')[0];
       if (!teamId) return res.status(400).json({ error: "Missing Team ID" });
       
@@ -468,10 +487,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const { userId: reqUserId, gameweek, squad, bank, freeTransfers = 1, chips = {}, riskMode = 'safe', userPrompt } = req.body || {};
       if (!reqUserId || !squad) return res.status(400).json({ error: "Missing payload" });
       
-      const userTier = await getUserTier(reqUserId);
-      if (userTier !== 'aiAgent' && userTier !== 'betaPilot') {
+      const uid = await verifyAuth(req, res);
+      if (!uid || uid !== reqUserId) return res.status(403).json({ error: "Forbidden: Token mismatch" });
+
+      const userTier = await getUserTier(uid);
+      if (userTier !== 'aiAgent' && userTier !== 'betaPilot' && userTier !== 'admin') {
         return res.status(403).json({ error: "Beta Pilot tier required" });
       }
+
+      // --- RATE LIMITING ---
+      const db = getFirestore();
+      const profileRef = db.collection('user_profiles').doc(uid);
+      const profileDoc = await profileRef.get();
+      const profileData = profileDoc.data() || {};
+      
+      const now = Date.now();
+      const oneHour = 60 * 60 * 1000;
+      const lastCall = profileData.lastLLMCall?.toMillis?.() || 0;
+      let callCount = profileData.llmCallCount || 0;
+
+      if (now - lastCall < oneHour) {
+        if (callCount >= 20 && userTier !== 'admin') {
+          return res.status(429).json({ error: "Rate limit exceeded. Maximum 20 AI questions per hour." });
+        }
+        callCount++;
+      } else {
+        callCount = 1;
+      }
+
+      await profileRef.set({
+        lastLLMCall: new Date(),
+        llmCallCount: callCount
+      }, { merge: true });
+      // ---------------------
 
       // Fetch fixtures
       const baseData = await FPLService.getBaseData();

@@ -16,9 +16,23 @@ import { AuthModal } from './components/AuthModal';
 import { AIAgentView } from './components/AIAgentView';
 import { Camera } from 'lucide-react';
 import { cn } from './lib/utils';
-import { auth, onAuthStateChanged, signOut } from './lib/firebase';
+import { auth, onAuthStateChanged, signOut, signInAnonymously } from './lib/firebase';
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import axios from 'axios';
+
+// Configure Axios to automatically attach Firebase JWT to all outgoing requests
+axios.interceptors.request.use(async (config) => {
+  if (auth.currentUser) {
+    try {
+      const token = await auth.currentUser.getIdToken();
+      config.headers.Authorization = `Bearer ${token}`;
+    } catch (e) {
+      console.error("Failed to get auth token", e);
+    }
+  }
+  return config;
+});
 
 import { AdminLayout } from './components/AdminLayout';
 import { UsersPage } from './pages/admin/UsersPage';
@@ -33,25 +47,28 @@ function FPLApp() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [profileTab, setProfileTab] = useState<string | null>(null);
   const [authUser, setAuthUser] = useState<any>(null);
+  const [authInitialized, setAuthInitialized] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setAuthUser(user);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setAuthUser(user);
+      } else {
+        // Automatically sign in anonymously if no user is found
+        try {
+          const cred = await signInAnonymously(auth);
+          setAuthUser(cred.user);
+        } catch (e) {
+          console.error("Anonymous auth failed", e);
+        }
+      }
+      setAuthInitialized(true);
     });
     return () => unsubscribe();
   }, []);
 
-  const [anonymousId] = useState(() => {
-    let id = localStorage.getItem('fpl_user_id');
-    if (!id) {
-      id = 'user_' + Math.random().toString(36).substr(2, 9);
-      localStorage.setItem('fpl_user_id', id);
-    }
-    return id;
-  });
-  
-  const activeUserId = authUser?.uid || anonymousId;
-  
+  const activeUserId = authUser?.uid || '';
+
   const { 
     data, 
     loading, 
@@ -215,7 +232,7 @@ function FPLApp() {
       <AuthModal 
         isOpen={isAuthModalOpen} 
         onClose={() => setIsAuthModalOpen(false)} 
-        anonymousId={anonymousId}
+        anonymousId={activeUserId}
       />
     </div>
   );
