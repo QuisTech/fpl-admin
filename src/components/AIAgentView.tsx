@@ -161,7 +161,7 @@ export const AIAgentView = ({ syncedData, tier, userId }: AIAgentViewProps) => {
 
       {/* Embedded Decision Log History */}
       <div className="flex-grow overflow-auto bg-slate-950/50 rounded-2xl border border-fpl-border p-5">
-        <AIDecisionLog userId={userId} />
+        <AIDecisionLog userId={userId} refreshTrigger={response ? response.reasoning : ''} />
       </div>
     </motion.div>
   );

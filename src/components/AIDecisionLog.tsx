@@ -11,19 +11,24 @@ interface AIDecision {
   userPrompt?: string;
 }
 
-export const AIDecisionLog = ({ userId }: { userId: string }) => {
+import axios from 'axios';
+
+export const AIDecisionLog = ({ userId, refreshTrigger }: { userId: string, refreshTrigger?: string }) => {
   const [decisions, setDecisions] = useState<AIDecision[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/decision-logs?userId=${userId}`)
-      .then(res => res.json())
-      .then(data => {
-        setDecisions(data.decisions || []);
+    if (!userId) return;
+    axios.get(`/api/decision-logs?userId=${userId}`)
+      .then(res => {
+        setDecisions(res.data.decisions || []);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
-  }, [userId]);
+      .catch((err) => {
+        console.error("Failed to fetch decision logs", err);
+        setLoading(false);
+      });
+  }, [userId, refreshTrigger]);
 
   if (loading) return <div className="animate-pulse text-center p-4">Loading AI decisions...</div>;
 
