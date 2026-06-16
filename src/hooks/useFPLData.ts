@@ -43,7 +43,7 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', userId: st
   }, [userId, authInitialized]);
 
   const fetchRecommendations = async () => {
-    if (!authInitialized) return;
+    if (!authInitialized || !userId) return;
     setLoading(true);
     try {
       const budgetQuery = syncedData ? `&budget=${(syncedData.totalCost || 0) + (syncedData.bank || 0)}` : '';
