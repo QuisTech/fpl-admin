@@ -475,7 +475,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       // Fetch fixtures
       const fixturesRes = await axios.get(`${FPL_BASE_URL}/fixtures/`, { headers: (FPLService as any).getHeaders() });
-      const upcoming = fixturesRes.data.filter((f: any) => f.event >= gameweek && f.event < gameweek + 5);
+      let upcoming = fixturesRes.data.filter((f: any) => f.event >= gameweek && f.event < gameweek + 5);
+      if (upcoming.length === 0) upcoming = fixturesRes.data.slice(0, 5); // Fallback if no exact match
 
       // Fetch targets
       const recommendations = await FPLService.getRecommendations(riskMode, bank, userTier);

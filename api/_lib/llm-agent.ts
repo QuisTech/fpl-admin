@@ -44,7 +44,7 @@ export async function getLLMTransferDecision(
   
   // Build context for LLM
   const squadSummary = squad.map(p => 
-    `${p.name || p.web_name} (${p.position}) - £${(p.cost ? p.cost/10 : p.now_cost/10).toFixed(1)}M - xP: ${p.xP}`
+    `${p.name || p.web_name} (ID: ${p.id}) (${p.position}) - £${((p.cost || p.now_cost || 0)/10).toFixed(1)}M - xP: ${(p.xP || 0).toFixed(1)}`
   ).join('\n');
   
   const fixturesSummary = fixtures.slice(0, 5).map(f => 
@@ -52,13 +52,15 @@ export async function getLLMTransferDecision(
   ).join('\n');
   
   let newsSummary = '';
-  if (fplContext) {
+  if (fplContext && (fplContext.injuries?.length > 0 || fplContext.opportunities?.length > 0 || fplContext.returns?.length > 0)) {
     const inj = fplContext.injuries.map((i: any) => `${i.playerName} (${i.status})`).join(', ');
     const ret = fplContext.returns.map((r: any) => `${r.playerName} (${r.status})`).join(', ');
     const risks = fplContext.rotationRisks.map((r: any) => `${r.playerName} (${r.reason})`).join(', ');
     const opps = fplContext.opportunities.map((o: any) => `${o.playerName} (${o.reason})`).join(', ');
     
     newsSummary = `\nLATEST TEAM NEWS:\nINJURIES: ${inj || 'None'}\nRETURNS: ${ret || 'None'}\nRISKS: ${risks || 'None'}\nOPPORTUNITIES: ${opps || 'None'}\n`;
+  } else {
+    newsSummary = `\nLATEST TEAM NEWS:\nNo significant injury news or updates currently available. Assume players are fit unless noted otherwise.\n`;
   }
 
   let targetsSummary = '';
