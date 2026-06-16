@@ -487,7 +487,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ];
 
       // Fetch context & staleness override
-      const fplContext = await getNewsContextFromCache();
+      let fplContext = await getNewsContextFromCache();
       
       const host = req.headers.host || 'localhost:3000';
       const proto = host.includes('localhost') ? 'http' : 'https';
@@ -495,8 +495,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const cronConfig = { headers: { Authorization: `Bearer ${process.env.CRON_SECRET || ''}` } };
 
       if (!fplContext) {
-        // Cache is completely empty (first run). Trigger background fill.
-        axios.get(cronUrl, cronConfig).catch(() => {});
+        // Cache is completely empty (first run). Await background fill.
+        try {
+          await axios.get(cronUrl, cronConfig);
+          fplContext = await getNewsContextFromCache();
+        } catch(e) {}
       } else {
         const ageMs = Date.now() - new Date(fplContext.generatedAt).getTime();
         if (ageMs > 90 * 60 * 1000) {

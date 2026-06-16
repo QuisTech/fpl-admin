@@ -20,20 +20,41 @@ function safeParseJSON(text: string): any {
   return JSON.parse(cleaned);
 }
 
-// 1. Fetch Reddit
+// 1. Fetch News
 async function fetchRawNews(): Promise<string> {
+  let texts = '';
   try {
     const res = await axios.get('https://www.reddit.com/r/FantasyPL/search.json?q=flair_name%3A%22News%22%20OR%20flair_name%3A%22Press%20Conference%22&restrict_sr=1&sort=new&limit=10', {
-      headers: { 'User-Agent': 'FPL-Agent-Bot/1.0' },
+      headers: { 'User-Agent': 'FPL-Agent-Bot/1.0 (Contact: agent@fpl.local)' },
       timeout: 5000
     });
     const posts = res.data?.data?.children || [];
-    const texts = posts.map((p: any) => `Title: ${p.data.title}\n${p.data.selftext}`).join('\n\n---\n\n');
-    return texts;
+    texts = posts.map((p: any) => `Title: ${p.data.title}\n${p.data.selftext}`).join('\n\n---\n\n');
   } catch (err: any) {
-    console.error('[NewsService] Failed to fetch reddit', err.message);
-    return '';
+    console.warn('[NewsService] Failed to fetch reddit, falling back to RSS', err.message);
   }
+
+  if (!texts || texts.trim() === '') {
+    try {
+      const res = await axios.get('https://www.fantasyfootballscout.co.uk/feed/', {
+        headers: { 'User-Agent': 'Mozilla/5.0' },
+        timeout: 5000
+      });
+      const items = res.data.match(/<item>([\s\S]*?)<\/item>/g) || [];
+      texts = items.slice(0, 15).map((item: string) => {
+        const titleMatch = item.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/) || item.match(/<title>(.*?)<\/title>/);
+        const title = titleMatch ? titleMatch[1] : '';
+        const descMatch = item.match(/<content:encoded><!\[CDATA\[([\s\S]*?)\]\]><\/content:encoded>/) || item.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/) || item.match(/<description>([\s\S]*?)<\/description>/);
+        let desc = descMatch ? descMatch[1] : '';
+        desc = desc.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim();
+        return `Title: ${title}\n${desc}`;
+      }).join('\n\n---\n\n');
+    } catch (e: any) {
+      console.error('[NewsService] Failed to fetch RSS', e.message);
+    }
+  }
+
+  return texts;
 }
 
 // 2. Fuzzy match player by name
