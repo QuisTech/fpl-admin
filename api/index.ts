@@ -401,8 +401,6 @@ export class FPLService {
   }
 }
 
-const FPL_BASE_URL = "https://fantasy.premierleague.com/api";
-
 // --- ENVIRONMENT VALIDATION ---
 if (!process.env.VITE_FIREBASE_PROJECT_ID || !process.env.GROQ_API_KEY) {
   throw new Error("FATAL: Missing critical environment variables.");
