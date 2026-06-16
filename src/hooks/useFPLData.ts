@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { RecommendationResponse, TeamSyncResponse, ScoredPlayer } from '../types';
 
-export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', userId: string) => {
+export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', userId: string, authInitialized: boolean) => {
   const [data, setData] = useState<RecommendationResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,10 +23,10 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', userId: st
 
   useEffect(() => {
     fetchRecommendations();
-  }, [riskMode, syncedData?.totalCost, syncedData?.bank, userId]);
+  }, [riskMode, syncedData?.totalCost, syncedData?.bank, userId, authInitialized]);
 
   useEffect(() => {
-    if (userId) {
+    if (authInitialized && userId) {
       axios.get(`/api/user?userId=${userId}`)
         .then(res => setTier(res.data.tier))
         .catch(console.error);
@@ -40,9 +40,10 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', userId: st
         })
         .catch(() => {});
     }
-  }, [userId]);
+  }, [userId, authInitialized]);
 
   const fetchRecommendations = async () => {
+    if (!authInitialized) return;
     setLoading(true);
     try {
       const budgetQuery = syncedData ? `&budget=${(syncedData.totalCost || 0) + (syncedData.bank || 0)}` : '';

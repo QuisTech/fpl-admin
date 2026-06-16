@@ -84,7 +84,7 @@ function FPLApp() {
     fetchLivePoints,
     tier,
     isTeamIdLocked
-  } = useFPLData(riskMode, activeUserId);
+  } = useFPLData(riskMode, activeUserId, authInitialized);
 
   const handleSync = async () => {
     if (tier !== 'free' && tier !== 'admin' && !isTeamIdLocked) {
