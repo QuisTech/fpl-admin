@@ -12,6 +12,7 @@ import { Simulator } from './_lib/simulator.js';
 import { solveOptimalSquad } from './_lib/lp-solver.js';
 import { getUserTier, mergeUserTiers, getFirestore } from '../lib/firestore.js';
 import { getLLMTransferDecision } from './_lib/llm-agent.js';
+import { getNewsContextFromCache } from './_lib/news-service.js';
 
 const FPL_BASE_URL = "https://fantasy.premierleague.com/api";
 
@@ -476,8 +477,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const fixturesRes = await axios.get(`${FPL_BASE_URL}/fixtures/`, { headers: (FPLService as any).getHeaders() });
       const upcoming = fixturesRes.data.filter((f: any) => f.event >= gameweek && f.event < gameweek + 5);
 
+      // Fetch targets
+      const recommendations = await FPLService.getRecommendations(riskMode, bank, userTier);
+      const allTargets = [
+        ...recommendations.topPicks.gkp,
+        ...recommendations.topPicks.def,
+        ...recommendations.topPicks.mid,
+        ...recommendations.topPicks.fwd
+      ];
+
+      // Fetch context & staleness override
+      const fplContext = await getNewsContextFromCache();
+      if (fplContext) {
+        const ageMs = Date.now() - new Date(fplContext.generatedAt).getTime();
+        if (ageMs > 90 * 60 * 1000) {
+          const host = req.headers.host || 'localhost:3000';
+          const proto = host.includes('localhost') ? 'http' : 'https';
+          axios.get(`${proto}://${host}/api/cron-news`).catch(() => {});
+        }
+      }
+
+      const injuredIds = new Set(fplContext?.injuries.map((i: any) => i.playerId) || []);
+      const validTargets = allTargets.filter(p => !injuredIds.has(p.id)).sort((a, b) => (b.xP || 0) - (a.xP || 0)).slice(0, 20).map(p => ({
+        id: p.id,
+        name: p.web_name,
+        price: p.now_cost,
+        xP: p.xP,
+        ownership: p.ownership,
+        form: p.form
+      }));
+
       const decision = await getLLMTransferDecision(
-        reqUserId, squad, gameweek, upcoming, bank, freeTransfers, chips, riskMode, userPrompt
+        reqUserId, squad, gameweek, upcoming, bank, freeTransfers, chips, riskMode, userPrompt, fplContext, validTargets
       );
       
       return res.status(200).json({ decision });

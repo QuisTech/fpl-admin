@@ -37,18 +37,35 @@ export async function getLLMTransferDecision(
   freeTransfers: number,
   chipState: Record<string, number>,
   riskMode: string,
-  userPrompt?: string
+  userPrompt?: string,
+  fplContext?: any | null,
+  validTargets?: any[]
 ): Promise<TransferDecision> {
   
   // Build context for LLM
   const squadSummary = squad.map(p => 
-    `${p.name} (${p.position}) - £${(p.cost/10).toFixed(1)}M - xP: ${p.xP}`
+    `${p.name || p.web_name} (${p.position}) - £${(p.cost ? p.cost/10 : p.now_cost/10).toFixed(1)}M - xP: ${p.xP}`
   ).join('\n');
   
   const fixturesSummary = fixtures.slice(0, 5).map(f => 
     `GW${f.gw}: ${f.team} vs ${f.opponent} (FDR: ${f.difficulty})`
   ).join('\n');
   
+  let newsSummary = '';
+  if (fplContext) {
+    const inj = fplContext.injuries.map((i: any) => `${i.playerName} (${i.status})`).join(', ');
+    const ret = fplContext.returns.map((r: any) => `${r.playerName} (${r.status})`).join(', ');
+    const risks = fplContext.rotationRisks.map((r: any) => `${r.playerName} (${r.reason})`).join(', ');
+    const opps = fplContext.opportunities.map((o: any) => `${o.playerName} (${o.reason})`).join(', ');
+    
+    newsSummary = `\nLATEST TEAM NEWS:\nINJURIES: ${inj || 'None'}\nRETURNS: ${ret || 'None'}\nRISKS: ${risks || 'None'}\nOPPORTUNITIES: ${opps || 'None'}\n`;
+  }
+
+  let targetsSummary = '';
+  if (validTargets && validTargets.length > 0) {
+    targetsSummary = `\nTOP TRANSFER TARGETS (Filtered & Valid):\n${validTargets.map(t => `${t.name} (ID: ${t.id}) - £${(t.price/10).toFixed(1)}M - xP: ${(t.xP || 0).toFixed(1)} - Own: ${t.ownership}% - Form: ${t.form}`).join('\n')}\n`;
+  }
+
   const prompt = `
     You are an elite FPL AI agent. Analyze this situation and make a decision.
     
@@ -65,7 +82,7 @@ export async function getLLMTransferDecision(
     
     CHIPS AVAILABLE:
     ${Object.entries(chipState).filter(([_, avail]) => avail).map(([chip]) => chip).join(', ') || 'None'}
-    
+    ${newsSummary}${targetsSummary}
     ${userPrompt && userPrompt.trim() !== '' ? `USER QUESTION/CONTEXT:\n    "${userPrompt}"\n    (Address this question specifically in your reasoning!)` : ''}
     
     RESPOND WITH VALID JSON OBJECT:
