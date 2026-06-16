@@ -67,15 +67,15 @@ export const Header = ({ data, riskMode, setRiskMode, onOpenAuth, authUser, tier
         
         <div className="h-8 w-px bg-slate-800 hidden sm:block"></div>
         
-        {authUser ? (
+        {authUser && !authUser.isAnonymous ? (
           <>
             <button 
               onClick={() => setProfileTab?.('account')}
               className="flex items-center gap-3 hover:bg-slate-900 rounded-lg p-2 transition-colors"
             >
               <div className="flex flex-col text-right hidden sm:flex">
-                <span className="text-[10px] font-bold text-slate-300">{authUser.email?.split('@')[0]}</span>
-                <span className="text-[8px] uppercase text-fpl-green">{tier || 'Claimed'}</span>
+                <span className="text-[10px] font-bold text-slate-300">{authUser.email?.split('@')[0] || 'User'}</span>
+                <span className="text-[8px] uppercase text-fpl-green">{tier || 'free'}</span>
               </div>
               <div className="w-8 h-8 bg-gradient-to-br from-fpl-green to-fpl-purple rounded-full flex items-center justify-center">
                 <User className="w-4 h-4 text-white" />
@@ -85,7 +85,7 @@ export const Header = ({ data, riskMode, setRiskMode, onOpenAuth, authUser, tier
               <UserProfile 
                 user={{
                   email: authUser.email,
-                  displayName: authUser.displayName || authUser.email?.split('@')[0],
+                  displayName: authUser.displayName || authUser.email?.split('@')[0] || 'User',
                   tier: tier || 'free',
                   uid: authUser.uid,
                   lastLoginAt: authUser.metadata?.lastSignInTime
