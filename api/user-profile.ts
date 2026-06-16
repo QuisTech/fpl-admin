@@ -10,15 +10,10 @@ export default async function handler(req: Request, res: Response) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
-  const { userId } = req.query as { userId?: string };
-
-  if (!userId) {
-    return res.status(400).json({ error: "Missing userId" });
-  }
-
   const uid = await verifyAuth(req as any, res as any);
   if (!uid) return;
-  if (uid !== userId) return res.status(403).json({ error: "Forbidden: Token mismatch" });
+  // Exclusively use cryptographically verified uid as the identity
+  const userId = uid;
 
   const db = getFirestore();
 

@@ -14,15 +14,11 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { userId, limit = '50' } = req.query;
-  
-  if (!userId) {
-    return res.status(400).json({ error: 'Missing userId' });
-  }
+  const { limit = '50' } = req.query;
 
   const uid = await verifyAuth(req, res);
   if (!uid) return;
-  if (uid !== userId) return res.status(403).json({ error: 'Forbidden: Token mismatch' });
+  const userId = uid;
 
   let db;
   try {
