@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getAuth } from 'firebase-admin/auth';
-import { getFirestore } from '../../lib/firestore.js';
+import { initializeApp, getApps, cert } from 'firebase-admin/app';
 
 export async function verifyAuth(req: VercelRequest, res: VercelResponse): Promise<string | null> {
   const authHeader = req.headers.authorization;
@@ -11,6 +11,15 @@ export async function verifyAuth(req: VercelRequest, res: VercelResponse): Promi
 
   const token = authHeader.split('Bearer ')[1];
   try {
+    if (getApps().length === 0) {
+      initializeApp({
+        credential: cert({
+          projectId: process.env.GOOGLE_CLOUD_PROJECT_ID?.trim() || '',
+          clientEmail: process.env.GOOGLE_CLOUD_CLIENT_EMAIL || '',
+          privateKey: (process.env.GOOGLE_CLOUD_PRIVATE_KEY || '').replace(/\\n/g, '\n')
+        })
+      });
+    }
     const auth = getAuth();
     const decodedToken = await auth.verifyIdToken(token);
     return decodedToken.uid;
