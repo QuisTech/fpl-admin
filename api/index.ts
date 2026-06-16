@@ -500,27 +500,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         ...recommendations.topPicks.fwd
       ];
 
-      // Fetch context & staleness override
-      let fplContext = await getNewsContextFromCache();
-      
-      const host = req.headers.host || 'localhost:3000';
-      const proto = host.includes('localhost') ? 'http' : 'https';
-      const cronUrl = `${proto}://${host}/api/cron-news`;
-      const cronConfig = { headers: { Authorization: `Bearer ${process.env.CRON_SECRET || ''}` } };
-
-      if (!fplContext) {
-        // Cache is completely empty (first run). Await background fill.
-        try {
-          await axios.get(cronUrl, cronConfig);
-          fplContext = await getNewsContextFromCache();
-        } catch(e) {}
-      } else {
-        const ageMs = Date.now() - new Date(fplContext.generatedAt).getTime();
-        if (ageMs > 90 * 60 * 1000) {
-          // Cache is stale. Trigger background fill.
-          axios.get(cronUrl, cronConfig).catch(() => {});
-        }
-      }
+      // Fetch context
+      const fplContext = await getNewsContextFromCache();
 
       const injuredIds = new Set(fplContext?.injuries.map((i: any) => i.playerId) || []);
       const validTargets = allTargets.filter(p => !injuredIds.has(p.id)).sort((a, b) => (b.xP || 0) - (a.xP || 0)).slice(0, 20).map(p => ({

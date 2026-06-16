@@ -31,10 +31,6 @@
     {
       "path": "/api/cron-beta-expiry",
       "schedule": "0 0 * * *"
-    },
-    {
-      "path": "/api/cron-news",
-      "schedule": "0 0 * * *"
     }
   ]
 }
