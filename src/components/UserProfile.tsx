@@ -45,7 +45,7 @@ export const UserProfile = ({ user, onClose, onSignOut, onTeamIdChange, initialT
           initial={{ scale: 0.95, y: 20 }}
           animate={{ scale: 1, y: 0 }}
           exit={{ scale: 0.95, y: 20 }}
-          className="bg-slate-950 border border-fpl-border rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
+          className="bg-slate-950 border border-fpl-border rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl flex flex-col"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -71,8 +71,8 @@ export const UserProfile = ({ user, onClose, onSignOut, onTeamIdChange, initialT
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-t-lg transition-all ${activeTab === tab.id
-                  ? 'bg-slate-900 text-fpl-green border-t border-x border-fpl-border'
-                  : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-slate-900 text-fpl-green border-t border-x border-fpl-border'
+                    : 'text-slate-400 hover:text-slate-200'
                   }`}
               >
                 <tab.icon className="w-4 h-4" />
@@ -82,7 +82,7 @@ export const UserProfile = ({ user, onClose, onSignOut, onTeamIdChange, initialT
           </div>
 
           {/* Content */}
-          <div className="p-6 overflow-y-auto max-h-[60vh] space-y-6">
+          <div className="p-6 overflow-y-auto flex-1 max-h-[60vh] space-y-6">
             {activeTab === 'account' && (
               <>
                 <div className="space-y-4">
