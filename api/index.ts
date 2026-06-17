@@ -160,7 +160,7 @@ export class FPLService {
 
     if (tier !== 'free') {
       try {
-        const availableIds = new Set(available.map(p => p.id));
+        const availableIds = new Set<number>(available.map(p => p.id));
         const optimalIds = solveOptimalSquad(oracle, nextEventId, budget, 8, riskMode, availableIds);
         squad = scored.filter(p => optimalIds.includes(p.id));
       } catch (err: any) {
