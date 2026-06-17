@@ -143,7 +143,8 @@ export class FPLService {
   static async getRecommendations(riskMode: string, budget: number = 1000, tier: string = 'free'): Promise<RecommendationResponse> {
     const { players, teams, fixtures, nextEventId } = await this.getBaseData();
 
-    const oracle = new CSVOracle('data/fplform_scraped.csv', players, riskMode, fixtures, teams, nextEventId);
+    // Use the continuously updated fplform.csv
+    const oracle = new CSVOracle('data/fplform.csv', players, riskMode, fixtures, teams, nextEventId);
 
     const available = players.filter(p => p.status === 'a' || p.chance_of_playing_next_round === 100);
     const scored = available.map(p => {
@@ -158,8 +159,18 @@ export class FPLService {
     const sortByScore = (a: ScoredPlayer, b: ScoredPlayer) => (b.score || 0) - (a.score || 0);
 
     if (tier !== 'free') {
-      const optimalIds = solveOptimalSquad(oracle, nextEventId, budget, 8, riskMode);
-      squad = scored.filter(p => optimalIds.includes(p.id));
+      try {
+        const optimalIds = solveOptimalSquad(oracle, nextEventId, budget, 8, riskMode);
+        squad = scored.filter(p => optimalIds.includes(p.id));
+      } catch (err: any) {
+        console.warn("[FPLService] LP Solver failed, falling back to heuristic selection:", err.message);
+        // Fallback to free tier selection
+        const gkps = scored.filter(p => p.position === 'GKP').sort(sortByScore).slice(0, 2);
+        const defs = scored.filter(p => p.position === 'DEF').sort(sortByScore).slice(0, 5);
+        const mids = scored.filter(p => p.position === 'MID').sort(sortByScore).slice(0, 5);
+        const fwds = scored.filter(p => p.position === 'FWD').sort(sortByScore).slice(0, 3);
+        squad = [...gkps, ...defs, ...mids, ...fwds];
+      }
     } else {
       // Free tier: fallback to highest projected points enforcing 15-man constraints
       const gkps = scored.filter(p => p.position === 'GKP').sort(sortByScore).slice(0, 2);
@@ -277,7 +288,7 @@ export class FPLService {
     const currentEvent = baseData.currentEventId || Math.max(1, baseData.nextEventId - 1);
     
     // 1. Initialize the V3 Engine Oracle first
-    const oracle = new CSVOracle('data/fplform_scraped.csv', baseData.players, riskMode, baseData.fixtures, baseData.teams, baseData.nextEventId);
+    const oracle = new CSVOracle('data/fplform.csv', baseData.players, riskMode, baseData.fixtures, baseData.teams, baseData.nextEventId);
 
     // 2. Fetch live user team
     const teamRes = await this.fetchWithRetry(`${FPL_BASE_URL}/entry/${teamId}/event/${currentEvent}/picks/`);

@@ -22,7 +22,21 @@ export default async function handler(req: Request, res: Response) {
       // Fetch profile
       const profile = await db.collection('user_profiles').doc(userId).get();
       if (!profile.exists) {
-        return res.status(404).json({ error: "Profile not found" });
+        // Return a default profile for new anonymous users instead of 404
+        return res.json({
+          userId,
+          email: 'Anonymous User',
+          displayName: 'Guest Manager',
+          username: 'guest_' + userId.substring(0, 5),
+          fplVerified: false,
+          tier: 'free',
+          preferences: {
+            defaultRiskMode: 'safe',
+            emailNotifications: false,
+            deadlineReminders: false,
+            weeklyReports: false
+          }
+        });
       }
       return res.json(profile.data());
     }
