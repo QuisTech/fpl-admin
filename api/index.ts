@@ -164,6 +164,17 @@ export class FPLService {
         squad = scored.filter(p => optimalIds.includes(p.id));
       } catch (err: any) {
         console.warn("[FPLService] LP Solver failed, falling back to heuristic selection:", err.message);
+        try {
+          const db = getFirestore();
+          await db.collection('system_alerts').add({
+            type: 'CRITICAL_FALLBACK',
+            component: 'LP_SOLVER',
+            message: err.message,
+            timestamp: new Date()
+          });
+        } catch (dbErr) {
+          // ignore
+        }
         // Fallback to free tier selection
         const gkps = scored.filter(p => p.position === 'GKP').sort(sortByScore).slice(0, 2);
         const defs = scored.filter(p => p.position === 'DEF').sort(sortByScore).slice(0, 5);
