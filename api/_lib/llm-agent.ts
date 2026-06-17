@@ -81,7 +81,7 @@ export async function getLLMTransferDecision(
 
     CRITICAL RISK MODE INSTRUCTIONS:
     ${riskMode === 'safe' ? '- You are in SAFE mode. You MUST prioritize highly-owned "template" players to defend rank. Avoid wild punts.' : ''}
-    ${riskMode === 'aggressive' ? '- You are in AGGRESSIVE mode. You MUST prioritize low-ownership "differential" players (ideally under 10% ownership) to catch up in rank, even if they have slightly lower raw xP than the popular picks. Actively look for hidden gems in the Top Transfer Targets.' : ''}
+    ${riskMode === 'aggressive' ? '- You are in AGGRESSIVE mode. You MUST prioritize low-ownership "differential" players (under 10% ownership) to catch up in rank. HOWEVER, you must PROTECT premium players (£10.0M+). Do NOT suggest transferring out a premium captaincy option just because they are highly owned.' : ''}
     ${riskMode === 'value' ? '- You are in VALUE mode. Prioritize cheap enablers and players with the highest expected points per million (PPM). Build long-term budget.' : ''}
     
     CURRENT SQUAD:
