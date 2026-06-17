@@ -199,7 +199,7 @@ function FPLApp() {
               ) : tab === 'chips' ? (
                 <ChipAdvisor syncedData={syncedData} tier={tier} setTab={setTab} userId={activeUserId} />
               ) : (
-                <AIAgentView syncedData={syncedData} tier={tier} userId={activeUserId} />
+                <AIAgentView syncedData={syncedData} tier={tier} userId={activeUserId} riskMode={riskMode} />
               )}
             </AnimatePresence>
           </div>

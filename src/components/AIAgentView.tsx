@@ -11,9 +11,10 @@ interface AIAgentViewProps {
   syncedData: TeamSyncResponse | null;
   tier: string;
   userId: string;
+  riskMode: string;
 }
 
-export const AIAgentView = ({ syncedData, tier, userId }: AIAgentViewProps) => {
+export const AIAgentView = ({ syncedData, tier, userId, riskMode }: AIAgentViewProps) => {
   const [asking, setAsking] = useState(false);
   const [prompt, setPrompt] = useState('');
   const [lastPrompt, setLastPrompt] = useState<string | null>(null);
@@ -35,7 +36,7 @@ export const AIAgentView = ({ syncedData, tier, userId }: AIAgentViewProps) => {
         chips: {
           WC: 1, FH: 1, BB: 1, TC: 1 // mock chip state
         },
-        riskMode: 'safe', // or whatever
+        riskMode: riskMode,
         userPrompt: prompt
       });
       setLastPrompt(prompt);
