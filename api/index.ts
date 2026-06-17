@@ -160,7 +160,8 @@ export class FPLService {
 
     if (tier !== 'free') {
       try {
-        const optimalIds = solveOptimalSquad(oracle, nextEventId, budget, 8, riskMode);
+        const availableIds = new Set(available.map(p => p.id));
+        const optimalIds = solveOptimalSquad(oracle, nextEventId, budget, 8, riskMode, availableIds);
         squad = scored.filter(p => optimalIds.includes(p.id));
       } catch (err: any) {
         console.warn("[FPLService] LP Solver failed, falling back to heuristic selection:", err.message);
