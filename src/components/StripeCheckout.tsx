@@ -15,18 +15,16 @@ const tierPrices = {
   betaPilot: '$49.99'
 };
 
+import axios from 'axios';
+
 export const StripeCheckout = ({ userId, tier, buttonText, className }: Props) => {
   const [loading, setLoading] = useState(false);
 
   const handleCheckout = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/create-checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, tier })
-      });
-      const data = await response.json();
+      const response = await axios.post('/api/create-checkout', { userId, tier });
+      const data = response.data;
       
       if (data.url) {
         window.location.href = data.url;
@@ -35,7 +33,7 @@ export const StripeCheckout = ({ userId, tier, buttonText, className }: Props) =
         setLoading(false);
       }
     } catch (err: any) {
-      alert("Failed to connect to checkout service.");
+      alert("Checkout failed: " + (err.response?.data?.error || err.message || 'Unknown error'));
       setLoading(false);
     }
   };
