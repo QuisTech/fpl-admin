@@ -5,6 +5,8 @@ const dodo = new DodoPayments({
   environment: process.env.DODO_SECRET_KEY?.includes('test') ? 'test_mode' : 'live_mode'
 });
 
+import { verifyAuth } from './_lib/auth.js';
+
 export default async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -17,11 +19,16 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  // 1. Authenticate user securely
+  const uid = await verifyAuth(req, res);
+  if (!uid) return;
   
-  const { userId, tier, successUrl, cancelUrl, customerEmail, customerName } = req.body;
+  const { tier, successUrl, cancelUrl, customerEmail, customerName } = req.body;
+  const userId = uid; // Enforce Zero-Trust: Ignore client-provided userId
   
-  if (!userId || !tier) {
-    return res.status(400).json({ error: 'Missing userId or tier' });
+  if (!tier) {
+    return res.status(400).json({ error: 'Missing tier' });
   }
   
   // Product IDs from Dodo Payments dashboard (pdt_...)
