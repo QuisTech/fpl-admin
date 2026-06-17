@@ -588,11 +588,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const fplContext = await getNewsContextFromCache();
 
       const injuredIds = new Set(fplContext?.injuries.map((i: any) => i.playerId) || []);
-      const validTargets = allTargets.filter(p => !injuredIds.has(p.id)).sort((a, b) => (b.xP || 0) - (a.xP || 0)).slice(0, 20).map(p => ({
+      const validTargets = allTargets.filter(p => !injuredIds.has(p.id)).sort((a, b) => (b.score || 0) - (a.score || 0)).slice(0, 20).map(p => ({
         id: p.id,
         name: p.web_name,
+        position: p.position,
         price: p.now_cost,
         xP: p.xP,
+        riskAdjustedScore: p.score,
         ownership: p.ownership,
         form: p.form
       }));

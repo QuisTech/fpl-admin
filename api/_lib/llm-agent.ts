@@ -65,7 +65,7 @@ export async function getLLMTransferDecision(
 
   let targetsSummary = '';
   if (validTargets && validTargets.length > 0) {
-    targetsSummary = `\nTOP TRANSFER TARGETS (Filtered & Valid):\n${validTargets.map(t => `${t.name} (ID: ${t.id}) - £${(t.price/10).toFixed(1)}M - xP: ${(t.xP || 0).toFixed(1)} - Own: ${t.ownership}% - Form: ${t.form}`).join('\n')}\n`;
+    targetsSummary = `\nTOP TRANSFER TARGETS (Filtered & Valid):\n${validTargets.map(t => `${t.name} (ID: ${t.id}, Pos: ${t.position || 'Unknown'}) - £${(t.price/10).toFixed(1)}M - riskAdjXP: ${(t.riskAdjustedScore || t.xP || 0).toFixed(2)} - Own: ${t.ownership}% - Form: ${t.form}`).join('\n')}\n`;
   }
 
   const prompt = `
@@ -76,6 +76,9 @@ export async function getLLMTransferDecision(
     FREE TRANSFERS: ${freeTransfers}
     BANK: £${(bank/10).toFixed(1)}M
     
+    CRITICAL FPL TRANSFER RULES:
+    1. If suggesting a single transfer, the incoming player MUST have the EXACT SAME POSITION (e.g., DEF for DEF, MID for MID) as the outgoing player. Do not suggest swapping a Midfielder for a Defender.
+
     CRITICAL RISK MODE INSTRUCTIONS:
     ${riskMode === 'safe' ? '- You are in SAFE mode. You MUST prioritize highly-owned "template" players to defend rank. Avoid wild punts.' : ''}
     ${riskMode === 'aggressive' ? '- You are in AGGRESSIVE mode. You MUST prioritize low-ownership "differential" players (ideally under 10% ownership) to catch up in rank, even if they have slightly lower raw xP than the popular picks. Actively look for hidden gems in the Top Transfer Targets.' : ''}
