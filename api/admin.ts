@@ -219,15 +219,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       let successCount = 0;
       for (const row of rows) {
         const { email, tier, expiryDays } = row;
-        const snapshot = await db.collection('users').where('email', '==', email).limit(1).get();
-        if (!snapshot.empty) {
-          const userDoc = snapshot.docs[0];
+        try {
+          const userRecord = await getAuth().getUserByEmail(email);
+          const userId = userRecord.uid;
+          
           const expiry = new Date();
           expiry.setDate(expiry.getDate() + (parseInt(expiryDays) || 14));
           const updates = { tier, beta_tester: true, beta_expires_at: expiry, beta_tier: tier, updatedAt: new Date() };
-          await userDoc.ref.set(updates, { merge: true });
-          await logAudit(adminId, 'BULK_GRANT_BETA', userDoc.id, updates);
+          
+          await db.collection('users').doc(userId).set(updates, { merge: true });
+          await logAudit(adminId, 'BULK_GRANT_BETA', userId, updates);
           successCount++;
+        } catch (e: any) {
+          console.warn(`[Bulk Grant] Failed for ${email}:`, e.message);
         }
       }
       return res.json({ success: true, count: successCount });
