@@ -1,4 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect width="100" height="100" rx="20" fill="#39003e"/>
+  <defs>
+    <!-- Smooth transition passing through a rich blue to prevent muddy colors between pink and green -->
+    <linearGradient id="grad5" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#39003e" />
+      <stop offset="40%" stop-color="#bd1a62" />
+      <stop offset="65%" stop-color="#2a66b2" /> <!-- Rich blue bridge to prevent brown/gray muddiness -->
+      <stop offset="100%" stop-color="#00ff86" />
+    </linearGradient>
+  </defs>
+  <rect width="100" height="100" rx="20" fill="url(#grad5)"/>
   <text x="50" y="70" font-family="sans-serif" font-weight="900" font-size="65" fill="#ffffff" text-anchor="middle">F</text>
 </svg>
