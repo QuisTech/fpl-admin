@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FPL Horizon & Strategist - 2026/27 Season Playbook</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@800;900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@800;900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap"
+    rel="stylesheet">
   <style>
     :root {
       --bg-dark: #020617;
@@ -238,9 +241,17 @@
       font-weight: 700;
     }
 
-    .mode-safe { color: var(--fpl-green); }
-    .mode-risky { color: var(--fpl-pink); }
-    .mode-value { color: #38bdf8; }
+    .mode-safe {
+      color: var(--fpl-green);
+    }
+
+    .mode-risky {
+      color: var(--fpl-pink);
+    }
+
+    .mode-value {
+      color: #38bdf8;
+    }
 
     ul {
       list-style-type: none;
@@ -302,18 +313,29 @@
         print-color-adjust: exact !important;
         padding: 3rem !important;
       }
+
       .container {
         max-width: 100%;
       }
-      h1, h2, .card-title, .timeline-title, strong {
+
+      h1,
+      h2,
+      .card-title,
+      .timeline-title,
+      strong {
         color: #fff !important;
       }
+
       h1 span {
         color: var(--fpl-green) !important;
       }
-      p, li, .subtitle {
+
+      p,
+      li,
+      .subtitle {
         color: var(--text-slate) !important;
       }
+
       .card {
         background-color: var(--card-bg) !important;
         border: 1px solid var(--border-color) !important;
@@ -321,6 +343,7 @@
         print-color-adjust: exact !important;
         page-break-inside: avoid;
       }
+
       .card::after {
         content: '';
         position: absolute;
@@ -332,6 +355,7 @@
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
+
       .formula-box {
         background-color: rgba(2, 6, 23, 0.7) !important;
         border: 1px dashed var(--border-color) !important;
@@ -339,14 +363,17 @@
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
+
       .brand-pill {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
+
       .timeline-dot {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
+
       section {
         page-break-before: always;
         page-break-inside: avoid;
@@ -356,22 +383,26 @@
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
+
       section:first-of-type {
         page-break-before: avoid;
         padding-top: 1.5rem !important;
       }
+
       .promo-box {
         background: linear-gradient(135deg, rgba(55, 0, 60, 0.6) 0%, rgba(255, 0, 127, 0.15) 100%) !important;
         border: 1px solid rgba(255, 0, 127, 0.3) !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
+
       .promo-link {
         background-color: var(--fpl-green) !important;
         color: #020617 !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
+
       .screenshot-container {
         box-shadow: none !important;
         border: 1px solid var(--border-color) !important;
@@ -443,6 +474,7 @@
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <header>
@@ -452,50 +484,68 @@
         <span class="brand-pill pill-pink">FPL Optimizer</span>
       </div>
       <h1>The 2026/27 FPL <span>Playbook</span></h1>
-      <p class="subtitle">A mathematical guide to navigating variance, exploiting fixture swings, and choosing the optimal strategy mode for the upcoming season.</p>
+      <p class="subtitle">A mathematical guide to navigating variance, exploiting fixture swings, and choosing the
+        optimal strategy mode for the upcoming season.</p>
     </header>
 
     <!-- SECTION 1: INTRODUCTION -->
     <section>
       <h2>The Core Philosophy: Math vs. Variance</h2>
-      <p>Fantasy Premier League is a game of <strong>high short-term variance</strong>. In any given gameweek, random noise (deflections, red cards, missed penalties) can override statistical data. However, over a 38-gameweek season, FPL behaves like a marathon. By using mathematical optimization (Integer Programming and Beam Search simulation), we isolate and exploit the <strong>long-term statistical edge</strong>.</p>
-      
-      <p>Rather than reacting emotionally to last week’s points, this handbook outlines how to leverage the strategy profiles in your apps to out-grind and out-plan your competition.</p>
+      <p>Fantasy Premier League is a game of <strong>high short-term variance</strong>. In any given gameweek, random
+        noise (deflections, red cards, missed penalties) can override statistical data. However, over a 38-gameweek
+        season, FPL behaves like a marathon. By using mathematical optimization (Integer Programming and Beam Search
+        simulation), we isolate and exploit the <strong>long-term statistical edge</strong>.</p>
+
+      <p>Rather than reacting emotionally to last week’s points, this handbook outlines how to leverage the strategy
+        profiles in your apps to out-grind and out-plan your competition.</p>
     </section>
 
     <!-- SECTION 2: THE PLAYBOOKS -->
     <section>
       <h2>Playbook I: Horizon Grand Cru / FPL Optimizer</h2>
-      <p>These apps run the <strong>V3 Grand Cru Engine</strong>, which simulates over 5,000 future paths over an 8-Gameweek horizon. It uses expected utility theory, balancing projected points against statistical variance.</p>
-      
+      <p>These apps run the <strong>V3 Grand Cru Engine</strong>, which simulates over 5,000 future paths over an
+        8-Gameweek horizon. It uses expected utility theory, balancing projected points against statistical variance.
+      </p>
+
       <div class="timeline">
         <div class="timeline-item">
           <div class="timeline-dot"></div>
-          <div class="timeline-title">Gameweeks 1–6: The Template Shield <span class="timeline-mode mode-safe">SAFE MODE</span></div>
-          <p>The beginning of the season lacks fresh player data. Run the engine in <strong>SAFE Mode</strong> to shield your rank from early volatile swings.</p>
+          <div class="timeline-title">Gameweeks 1–6: The Template Shield <span class="timeline-mode mode-safe">SAFE
+              MODE</span></div>
+          <p>The beginning of the season lacks fresh player data. Run the engine in <strong>SAFE Mode</strong> to shield
+            your rank from early volatile swings.</p>
           <ul>
-            <li><strong>Strategy:</strong> The engine will align your picks closely with high-ownership elite assets (e.g., Salah, Haaland) to neutralize their points.</li>
-            <li><strong>Goal:</strong> Preserve your budget, build squad value, and avoid early rank drops before the first international break.</li>
+            <li><strong>Strategy:</strong> The engine will align your picks closely with high-ownership elite assets
+              (e.g., Salah, Haaland) to neutralize their points.</li>
+            <li><strong>Goal:</strong> Preserve your budget, build squad value, and avoid early rank drops before the
+              first international break.</li>
           </ul>
         </div>
 
         <div class="timeline-item">
           <div class="timeline-dot"></div>
-          <div class="timeline-title">Gameweeks 7–25: The Tactical Grind <span class="timeline-mode mode-risky">SAFE / RISKY MODE</span></div>
+          <div class="timeline-title">Gameweeks 7–25: The Tactical Grind <span class="timeline-mode mode-risky">SAFE /
+              RISKY MODE</span></div>
           <p>With solid form metrics established, toggle your strategy based on your league position.</p>
           <ul>
-            <li><strong>If Leading:</strong> Keep the engine in <strong>SAFE Mode</strong> to match the template and defend your lead.</li>
-            <li><strong>If Chasing:</strong> Switch to <strong>RISKY Mode</strong>. The engine will smoothly adjust the objective function to favor low-ownership differentials (under 5% owned) before they become popular.</li>
+            <li><strong>If Leading:</strong> Keep the engine in <strong>SAFE Mode</strong> to match the template and
+              defend your lead.</li>
+            <li><strong>If Chasing:</strong> Switch to <strong>RISKY Mode</strong>. The engine will smoothly adjust the
+              objective function to favor low-ownership differentials (under 5% owned) before they become popular.</li>
           </ul>
         </div>
 
         <div class="timeline-item">
           <div class="timeline-dot"></div>
-          <div class="timeline-title">Gameweeks 26–38: The Double Exploit <span class="timeline-mode mode-value">VALUE MODE</span></div>
+          <div class="timeline-title">Gameweeks 26–38: The Double Exploit <span class="timeline-mode mode-value">VALUE
+              MODE</span></div>
           <p>The second half of the season is dominated by Blank and Double Gameweeks (DGWs).</p>
           <ul>
-            <li><strong>Strategy:</strong> Switch to <strong>VALUE Mode</strong>. This completely disables ownership sentiment filters.</li>
-            <li><strong>Goal:</strong> The 8-GW beam search simulator will focus purely on expected points, planning transfers 4–5 weeks in advance to load up on double gameweek players, automatically out-planning reactive managers.</li>
+            <li><strong>Strategy:</strong> Switch to <strong>VALUE Mode</strong>. This completely disables ownership
+              sentiment filters.</li>
+            <li><strong>Goal:</strong> The 8-GW beam search simulator will focus purely on expected points, planning
+              transfers 4–5 weeks in advance to load up on double gameweek players, automatically out-planning reactive
+              managers.</li>
           </ul>
         </div>
       </div>
@@ -504,35 +554,45 @@
     <!-- SECTION 3: STRATEGIST PLAYBOOK -->
     <section>
       <h2>Playbook II: FPL Strategist</h2>
-      <p>FPL Strategist runs a <strong>1-GW lookahead Integer Programming solver</strong>. It maximizes immediate points and handles chips via static heuristics. Because it doesn't automate multi-week planning, you must play the long game manually.</p>
-      
+      <p>FPL Strategist runs a <strong>1-GW lookahead Integer Programming solver</strong>. It maximizes immediate points
+        and handles chips via static heuristics. Because it doesn't automate multi-week planning, you must play the long
+        game manually.</p>
+
       <div class="timeline">
         <div class="timeline-item">
           <div class="timeline-dot"></div>
-          <div class="timeline-title">Gameweeks 1–6: Price & Template Stability <span class="timeline-mode mode-safe">SAFE MODE</span></div>
+          <div class="timeline-title">Gameweeks 1–6: Price & Template Stability <span
+              class="timeline-mode mode-safe">SAFE MODE</span></div>
           <p>Avoid taking early risks. Keep the solver in <strong>SAFE Mode</strong>.</p>
           <ul>
-            <li><strong>Focus:</strong> Match template ownership, lock in key premium players, and let the solver find cheap value enablers that maintain structure.</li>
+            <li><strong>Focus:</strong> Match template ownership, lock in key premium players, and let the solver find
+              cheap value enablers that maintain structure.</li>
           </ul>
         </div>
 
         <div class="timeline-item">
           <div class="timeline-dot"></div>
-          <div class="timeline-title">Gameweeks 7–25: Hunting Differentials <span class="timeline-mode mode-risky">RISKY MODE</span></div>
+          <div class="timeline-title">Gameweeks 7–25: Hunting Differentials <span class="timeline-mode mode-risky">RISKY
+              MODE</span></div>
           <p>Switch to <strong>RISKY Mode</strong> to hunt for rank climbs.</p>
           <ul>
-            <li><strong>Mechanism:</strong> The solver automatically applies a <strong>1.25x score multiplier</strong> to low-owned players (&lt; 5% selected by percent).</li>
-            <li><strong>Execution:</strong> This triggers differential transfer options that bypass mainstream template choices, giving you high-leverage opportunities.</li>
+            <li><strong>Mechanism:</strong> The solver automatically applies a <strong>1.25x score multiplier</strong>
+              to low-owned players (&lt; 5% selected by percent).</li>
+            <li><strong>Execution:</strong> This triggers differential transfer options that bypass mainstream template
+              choices, giving you high-leverage opportunities.</li>
           </ul>
         </div>
 
         <div class="timeline-item">
           <div class="timeline-dot"></div>
-          <div class="timeline-title">Gameweeks 26–38: Double Gameweek Maximization <span class="timeline-mode mode-value">VALUE MODE</span></div>
+          <div class="timeline-title">Gameweeks 26–38: Double Gameweek Maximization <span
+              class="timeline-mode mode-value">VALUE MODE</span></div>
           <p>Switch to <strong>VALUE Mode</strong> during fixtures chaos.</p>
           <ul>
-            <li><strong>Mechanism:</strong> Deactivates ownership filters, optimizing solely on expected points and costs.</li>
-            <li><strong>Your Manual Step:</strong> Since the solver only looks 1 week ahead, check the upcoming fixture table and manually prioritize transfers that bring in double gameweek players.</li>
+            <li><strong>Mechanism:</strong> Deactivates ownership filters, optimizing solely on expected points and
+              costs.</li>
+            <li><strong>Your Manual Step:</strong> Since the solver only looks 1 week ahead, check the upcoming fixture
+              table and manually prioritize transfers that bring in double gameweek players.</li>
           </ul>
         </div>
       </div>
@@ -542,17 +602,22 @@
     <section>
       <h2>Understanding the Chip Advisor Logic</h2>
       <p>How the app determines when to recommend chip plays depends on the engine:</p>
-      
+
       <div class="grid">
         <div class="card">
           <div class="card-title">V3 Simulation (Horizon/Optimizer)</div>
-          <p>Powered by <strong>multiverse lookahead</strong>. The engine simulates playing the Wildcard, Free Hit, Bench Boost, or Triple Captain <em>this week</em> and compares it against saving it. If playing the chip today yields the highest 8-GW expected utility, it triggers a <strong>STRONG BUY</strong>.</p>
+          <p>Powered by <strong>multiverse lookahead</strong>. The engine simulates playing the Wildcard, Free Hit,
+            Bench Boost, or Triple Captain <em>this week</em> and compares it against saving it. If playing the chip
+            today yields the highest 8-GW expected utility, it triggers a <strong>STRONG BUY</strong>.</p>
         </div>
         <div class="card">
           <div class="card-title">Squad Heuristics (Strategist)</div>
-          <p>Powered by <strong>average squad scores</strong>. The engine calculates the average performance score of your 15 players. If it falls below a threshold (due to blank gameweeks or multiple injuries), it suggests a chip play:</p>
+          <p>Powered by <strong>average squad scores</strong>. The engine calculates the average performance score of
+            your 15 players. If it falls below a threshold (due to blank gameweeks or multiple injuries), it suggests a
+            chip play:</p>
           <ul>
-            <li><strong>Wildcard:</strong> Triggers if squad average falls below <strong>4.0</strong> (or <strong>5.0</strong> in Risky Mode).</li>
+            <li><strong>Wildcard:</strong> Triggers if squad average falls below <strong>4.0</strong> (or
+              <strong>5.0</strong> in Risky Mode).</li>
             <li><strong>Free Hit:</strong> Triggers in Risky Mode if average falls below <strong>4.5</strong>.</li>
           </ul>
         </div>
@@ -569,20 +634,24 @@
     <!-- SECTION 5: PLATFORM SHOWCASE -->
     <section>
       <h2>Take Action: Dominate with FPL Horizon</h2>
-      <p>This playbook manual outlines the mathematical framework for optimization, but executing it manually every week is a major grind. The <strong>FPL Horizon</strong> application automates this entire process: it syncs with your team data instantly, runs high-dimensional solvers, and builds your perfect squad path with one click.</p>
-      
+      <p>This playbook manual outlines the mathematical framework for optimization, but executing it manually every week
+        is a major grind. The <strong>FPL Horizon</strong> application automates this entire process: it syncs with your
+        team data instantly, runs high-dimensional solvers, and builds your perfect squad path with one click.</p>
+
       <div class="screenshot-container">
         <img class="screenshot-img" src="fpl_horizon_dashboard.png" alt="FPL Horizon Dashboard Screenshot">
       </div>
 
       <div class="promo-box">
         <div class="promo-title">Ready to Dominate Your Mini-Leagues?</div>
-        <p class="promo-desc">Get access to live expected points models, multi-gameweek transfer planners, and custom risk-adjusted squad simulations.</p>
-        <a class="promo-link" href="https://fpl-horizon.vercel.app/" target="_blank">
+        <p class="promo-desc">Get access to live expected points models, multi-gameweek transfer planners, and custom
+          risk-adjusted squad simulations.</p>
+        <a class="promo-link" href="https://fpl-admin-eight.vercel.app/" target="_blank">
           Launch App at fpl-horizon.vercel.app
         </a>
       </div>
     </section>
   </div>
 </body>
+
 </html>
