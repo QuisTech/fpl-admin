@@ -1,10 +1,13 @@
-# FPL Optimizer (V3)
+# FPL Horizon
+
+[![Live App](https://img.shields.io/badge/Live-fplhorizon.app-00ff86?style=for-the-badge)](https://fplhorizon.app/)
+[![Strategy Playbook](https://img.shields.io/badge/Docs-Strategy_Playbook-bd1a62?style=for-the-badge)](https://fplhorizon.app/fpl_strategy_manual_updated.html)
 
 An elite Fantasy Premier League (FPL) optimization engine that uses **Multi-Horizon Beam Search**, **Linear Programming (LP)**, and **Generative AI** to project the absolute mathematical and contextual optimum for your squad.
 
 ## 🚀 The V3 Architecture
 
-Unlike traditional FPL tools that only look at the immediate upcoming gameweek, the V3 Engine simulates multiple gameweeks into the future. It traverses thousands of potential squad states, evaluating the mathematical Expected Value (EV) of free transfers, points hits, and chip usage.
+Unlike traditional FPL tools that only look at the immediate upcoming gameweek, the FPL Horizon Engine simulates multiple gameweeks into the future. It traverses thousands of potential squad states, evaluating the mathematical Expected Value (EV) of free transfers, points hits, and chip usage.
 
 ### 🧠 The Core Components
 1. **The Multi-Horizon Simulator (`api/simulator.ts`)**
@@ -16,8 +19,8 @@ Unlike traditional FPL tools that only look at the immediate upcoming gameweek, 
    - Built on `javascript-lp-solver`.
    - Used heavily during `Wildcard` and `Free Hit` simulation branches. When a chip is played in a simulated future, the Simulator passes the exact available budget to the LP Solver, which instantly returns the mathematically perfect 15-man squad for that Gameweek horizon.
 
-3. **Gemini AI Agent (`api/agent/ask.ts`)**
-   - A natural language FPL assistant powered by Google Gemini 2.0 Flash.
+3. **Groq AI Agent (`api/agent/ask.ts`)**
+   - A natural language FPL assistant powered by blazing-fast Groq models.
    - The agent acts as a Beta Pilot, parsing press conferences, injury reports, and tactical nuances that pure mathematics might miss, giving users an edge in their decision-making.
 
 4. **The Autonomous Oracle (`scripts/fetch-xp.ts` & `scripts/check-deadline.ts`)**
@@ -27,10 +30,10 @@ Unlike traditional FPL tools that only look at the immediate upcoming gameweek, 
 
 ## 💳 Monetization & Tiers
 
-The V3 engine is fully monetized using Stripe and Firebase Auth, offering distinct tiers:
+The Horizon engine is fully monetized using Stripe and Firebase Auth, offering distinct tiers:
 - **Free Tier**: Basic Pitch View and xP metrics.
 - **Strategist Tier (£9.99/mo)**: Unlocks the full Multi-Horizon Simulation Engine and LP Solver for multi-gameweek transfer planning.
-- **Beta Pilot Tier (£49.99/mo)**: Unlocks the elite Gemini AI Agent, providing full contextual analysis and natural language tactical advice.
+- **Beta Pilot Tier (£49.99/mo)**: Unlocks the elite Groq AI Agent, providing full contextual analysis and natural language tactical advice.
 
 ## ⚙️ Running Locally
 
@@ -40,7 +43,7 @@ npm install
 ```
 
 2. Configure Environment Variables (`.env`):
-Set up your Firebase credentials, Stripe secret keys, and Gemini API keys.
+Set up your Firebase credentials, Stripe secret keys, and Groq API keys.
 
 3. Run the development server:
 ```bash
