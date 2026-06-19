@@ -48,9 +48,13 @@ async function waitForServer(url, maxRetries = 30, interval = 1000) {
     console.log("Waiting for data to load (10s)...");
     await page.waitForTimeout(10000); 
 
+    console.log("Switching to OPTIMIZER tab...");
+    await page.getByRole('button', { name: 'OPTIMIZER' }).click();
+    await page.waitForTimeout(1000); // Wait a second for tab transition
+
     console.log(`Taking screenshot and saving to ${OUT_FILE}...`);
-    // Capture the full dashboard view
-    await page.screenshot({ path: OUT_FILE, fullPage: true });
+    // Capture the normal viewport dashboard view
+    await page.screenshot({ path: OUT_FILE });
 
     console.log("Screenshot saved successfully!");
   } catch (e) {
