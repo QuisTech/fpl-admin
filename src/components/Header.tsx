@@ -24,7 +24,7 @@ export const Header = ({ data, riskMode, setRiskMode, onOpenAuth, authUser, tier
         <div className="w-10 h-10 bg-fpl-purple rounded flex items-center justify-center font-black text-xl text-white shadow-lg shadow-fpl-purple/20 shrink-0">F</div>
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight">FPL <span className="text-fpl-green">OPTIMIZER</span></h1>
+            <h1 className="text-2xl font-bold tracking-tight">FPL <span className="text-fpl-green">HORIZON</span></h1>
             <span className="bg-fpl-pink text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow-sm shadow-fpl-pink/20">V3</span>
             <span className="bg-slate-900 text-cyan-400 text-[8px] font-mono px-2 py-0.5 rounded border border-cyan-500/20">AI POWERED</span>
           </div>
