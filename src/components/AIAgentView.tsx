@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Bot, Sparkles, Send, ShieldAlert } from 'lucide-react';
-import { TeamSyncResponse } from '../types';
+import { TeamSyncResponse, RecommendationResponse } from '../types';
 import { StripeCheckout } from './StripeCheckout';
 import { AIDecisionLog } from './AIDecisionLog';
 import { cn } from '../lib/utils';
@@ -9,12 +9,13 @@ import axios from 'axios';
 
 interface AIAgentViewProps {
   syncedData: TeamSyncResponse | null;
+  optimalData: RecommendationResponse | null;
   tier: string;
   userId: string;
   riskMode: string;
 }
 
-export const AIAgentView = ({ syncedData, tier, userId, riskMode }: AIAgentViewProps) => {
+export const AIAgentView = ({ syncedData, optimalData, tier, userId, riskMode }: AIAgentViewProps) => {
   const [asking, setAsking] = useState(false);
   const [prompt, setPrompt] = useState('');
   const [lastPrompt, setLastPrompt] = useState<string | null>(null);
@@ -177,17 +178,17 @@ export const AIAgentView = ({ syncedData, tier, userId, riskMode }: AIAgentViewP
           </div>
           <button 
             onClick={async () => {
-              if (!syncedData) return;
+              if (!optimalData) return;
               setGeneratingThread(true);
               setThreadError(null);
               try {
-                // Pass optimal squad info (fallback to synced data if optimal not in context, though syncedData has squad)
+                // Pass optimal squad info
                 const res = await axios.post('/api/agent/thread', {
-                  squad: syncedData.squad,
+                  squad: optimalData.squad,
                   riskMode,
-                  totalCost: syncedData.totalCost,
-                  expectedPoints: syncedData.expectedPoints,
-                  topPicks: syncedData.topPicks?.mid || []
+                  totalCost: optimalData.totalCost,
+                  expectedPoints: optimalData.expectedPoints,
+                  topPicks: optimalData.topPicks?.mid || []
                 });
                 setGeneratedThread(res.data.tweets);
               } catch (err: any) {
