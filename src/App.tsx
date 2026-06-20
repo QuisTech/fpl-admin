@@ -126,7 +126,7 @@ function FPLApp() {
 
         <Header data={data} riskMode={riskMode} setRiskMode={setRiskMode} authUser={authUser} tier={tier} onOpenAuth={() => setIsAuthModalOpen(true)} onSignOut={() => signOut(auth)} setTeamId={setTeamId} profileTab={profileTab} setProfileTab={setProfileTab} />
 
-        <MetricsColumn data={data} syncedData={syncedData} riskMode={riskMode} />
+        <MetricsColumn data={data} syncedData={syncedData} riskMode={riskMode} tab={tab} />
 
         {/* Primary Content Area */}
         <div className="col-span-12 lg:col-span-6 bg-card-bg border border-fpl-border rounded-3xl overflow-hidden relative shadow-xl min-h-[600px]">

@@ -8,13 +8,13 @@ interface MetricsColumnProps {
   riskMode: 'safe' | 'aggressive' | 'value';
 }
 
-export const MetricsColumn = ({ data, syncedData, riskMode }: MetricsColumnProps) => {
-  const isSynced = !!syncedData;
-  const squadValue = isSynced ? (syncedData.totalCost || 0) : (data?.totalCost || 0);
-  const itb = isSynced
+export const MetricsColumn = ({ data, syncedData, riskMode, tab }: MetricsColumnProps & { tab: string }) => {
+  const isViewingMySquad = !!syncedData && ['transfers', 'performance', 'chips'].includes(tab);
+  const squadValue = isViewingMySquad ? (syncedData.totalCost || 0) : (data?.totalCost || 0);
+  const itb = isViewingMySquad
     ? (syncedData.bank || 0)
     : Math.max(0, 1000 - (data?.totalCost || 0));
-  const badgeText = isSynced ? "MY SQUAD" : "OPTIMAL";
+  const badgeText = isViewingMySquad ? "MY SQUAD" : "OPTIMAL";
 
   return (
     <div className="col-span-12 lg:col-span-3 grid grid-cols-1 gap-4">
