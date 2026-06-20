@@ -211,7 +211,9 @@ export class FPLService {
       if (a.position !== 'GKP' && b.position === 'GKP') return 1;
       return (b.xP || 0) - (a.xP || 0);
     });
-    return { 
+      const sortByUtility = (a: ScoredPlayer, b: ScoredPlayer) => (b.score || 0) - (a.score || 0);
+      
+      return { 
       squad, startingXI, 
       bench,
       captain: startingXI.sort(sortByScore)[0] || null,
@@ -219,10 +221,10 @@ export class FPLService {
       expectedPoints: startingXI.reduce((sum, p) => sum + (p.xP || 0), 0),
       totalCost: squad.reduce((sum, p) => sum + (p.now_cost || 0), 0),
       topPicks: {
-        gkp: scored.filter(p => p.position === "GKP").sort(sortByScore).slice(0, 5),
-        def: scored.filter(p => p.position === "DEF").sort(sortByScore).slice(0, 5),
-        mid: scored.filter(p => p.position === "MID").sort(sortByScore).slice(0, 5),
-        fwd: scored.filter(p => p.position === "FWD").sort(sortByScore).slice(0, 5)
+        gkp: scored.filter(p => p.position === "GKP").sort(sortByUtility).slice(0, 5),
+        def: scored.filter(p => p.position === "DEF").sort(sortByUtility).slice(0, 5),
+        mid: scored.filter(p => p.position === "MID").sort(sortByUtility).slice(0, 5),
+        fwd: scored.filter(p => p.position === "FWD").sort(sortByUtility).slice(0, 5)
       },
       nextEventId,
       lastUpdated: Date.now()
