@@ -156,7 +156,7 @@ export class FPLService {
     });
 
     let squad: ScoredPlayer[] = [];
-    const sortByScore = (a: ScoredPlayer, b: ScoredPlayer) => (b.score || 0) - (a.score || 0);
+    const sortByScore = (a: ScoredPlayer, b: ScoredPlayer) => (b.xP || 0) - (a.xP || 0);
 
     if (tier !== 'free') {
       try {
@@ -209,7 +209,7 @@ export class FPLService {
     const bench = squad.filter(p => !startingIds.has(p.id)).sort((a, b) => {
       if (a.position === 'GKP' && b.position !== 'GKP') return -1;
       if (a.position !== 'GKP' && b.position === 'GKP') return 1;
-      return (b.score || 0) - (a.score || 0);
+      return (b.xP || 0) - (a.xP || 0);
     });
     return { 
       squad, startingXI, 

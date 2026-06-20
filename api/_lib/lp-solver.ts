@@ -41,23 +41,33 @@ export function solveOptimalSquad(oracle: XPOracle, gameweek: number, budget: nu
     const v = `p_${id}`;
     const pos = oracle.getPosition(id).toLowerCase(); // "gkp", "def", "mid", "fwd"
     
-    // Sum expected points over the lookahead horizon
+    // Sum expected points and variance over the lookahead horizon
     let score = 0;
+    let varSum = 0;
     for (let i = 0; i < horizon; i++) {
       score += oracle.getXP(id, gameweek + i);
-    }
-    
-    // Add deterministic tie-breaker to prevent search explosion in branch-and-bound LP solver
-    if (score > 0 && riskMode === 'value') {
-      score += (id % 10000) * 1e-4;
+      varSum += oracle.getVariance(id, gameweek + i);
     }
     
     const cost = oracle.getCost(id);
+    const costInMillions = cost / 10;
+
+    // UTILITY DEFORMATION LAYER
+    if (riskMode === 'safe') {
+      score = score - (0.5 * varSum);
+    } else if (riskMode === 'aggressive') {
+      score = score + (0.7 * varSum);
+    } else if (riskMode === 'value') {
+      if (costInMillions > 0) {
+        score = score / costInMillions;
+      }
+      // Add deterministic tie-breaker to prevent search explosion in branch-and-bound LP solver
+      score += (id % 10000) * 1e-4;
+    }
 
     // Apply EO/Risk utility adjustments to the LP objective score
     if (score > 0 && riskMode !== 'value') {
       // 1. Premium Captaincy Protection
-      const costInMillions = cost / 10;
       if (costInMillions >= 10.0) {
         score *= 1.15;
       } else if (costInMillions >= 8.0) {
@@ -146,23 +156,33 @@ export function solveOptimalTransfers(
     const v = `p_${id}`;
     const pos = oracle.getPosition(id).toLowerCase();
     
-    // Sum expected points over the lookahead horizon
+    // Sum expected points and variance over the lookahead horizon
     let score = 0;
+    let varSum = 0;
     for (let i = 0; i < horizon; i++) {
       score += oracle.getXP(id, gameweek + i);
-    }
-    
-    // Add deterministic tie-breaker to prevent search explosion in branch-and-bound LP solver
-    if (score > 0 && riskMode === 'value') {
-      score += (id % 10000) * 1e-4;
+      varSum += oracle.getVariance(id, gameweek + i);
     }
     
     const cost = oracle.getCost(id);
+    const costInMillions = cost / 10;
+
+    // UTILITY DEFORMATION LAYER
+    if (riskMode === 'safe') {
+      score = score - (0.5 * varSum);
+    } else if (riskMode === 'aggressive') {
+      score = score + (0.7 * varSum);
+    } else if (riskMode === 'value') {
+      if (costInMillions > 0) {
+        score = score / costInMillions;
+      }
+      // Add deterministic tie-breaker to prevent search explosion in branch-and-bound LP solver
+      score += (id % 10000) * 1e-4;
+    }
 
     // Apply EO/Risk utility adjustments to the LP objective score
     if (score > 0 && riskMode !== 'value') {
       // 1. Premium Captaincy Protection
-      const costInMillions = cost / 10;
       if (costInMillions >= 10.0) {
         score *= 1.15;
       } else if (costInMillions >= 8.0) {
