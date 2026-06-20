@@ -30,7 +30,11 @@ export const FPLTeamSchema = z.object({
   name: z.string(),
   short_name: z.string(),
   strength: z.number(),
-});
+  strength_attack_home: z.number().optional(),
+  strength_attack_away: z.number().optional(),
+  strength_defence_home: z.number().optional(),
+  strength_defence_away: z.number().optional(),
+}).passthrough();
 
 export const FPLFixtureSchema = z.object({
   id: z.number(),
