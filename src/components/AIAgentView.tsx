@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Bot, Sparkles, Send, ShieldAlert } from 'lucide-react';
 import { TeamSyncResponse, RecommendationResponse } from '../types';
@@ -6,6 +6,7 @@ import { StripeCheckout } from './StripeCheckout';
 import { AIDecisionLog } from './AIDecisionLog';
 import { cn } from '../lib/utils';
 import axios from 'axios';
+import { auth } from '../lib/firebase';
 
 interface AIAgentViewProps {
   syncedData: TeamSyncResponse | null;
@@ -24,6 +25,25 @@ export const AIAgentView = ({ syncedData, optimalData, tier, userId, riskMode }:
   const [generatingThread, setGeneratingThread] = useState(false);
   const [generatedThread, setGeneratedThread] = useState<string[] | null>(null);
   const [threadError, setThreadError] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    // Check if the current user is an actual admin (role: 'admin') regardless of their tier
+    const checkAdmin = async () => {
+      if (auth.currentUser) {
+        try {
+          const token = await auth.currentUser.getIdToken();
+          const res = await fetch('/api/admin/check', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setIsAdmin(res.ok);
+        } catch (e) {
+          setIsAdmin(false);
+        }
+      }
+    };
+    checkAdmin();
+  }, [auth.currentUser]);
 
   const handleAskAgent = async () => {
     if (!syncedData) return;
@@ -53,7 +73,7 @@ export const AIAgentView = ({ syncedData, optimalData, tier, userId, riskMode }:
     }
   };
 
-  if (tier !== 'aiAgent' && tier !== 'betaPilot' && tier !== 'admin') {
+  if (tier !== 'aiAgent' && tier !== 'betaPilot' && tier !== 'admin' && !isAdmin) {
     return (
       <motion.div
         key="agent-locked"
@@ -165,7 +185,7 @@ export const AIAgentView = ({ syncedData, optimalData, tier, userId, riskMode }:
       </div>
 
       {/* Twitter/X Thread Generator (ADMIN ONLY) */}
-      {tier === 'admin' && (
+      {isAdmin && (
         <div className="bg-slate-950/80 border border-fpl-border rounded-2xl p-5 flex flex-col gap-4">
           <div className="flex items-center justify-between border-b border-fpl-border pb-4">
             <div className="flex items-center gap-3">
