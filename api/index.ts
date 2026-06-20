@@ -388,6 +388,22 @@ export class FPLService {
 
       if (transfers.length === 0) {
         transfers = this.generateTransfers(myPicks, candidates, oracle, riskMode, baseData.nextEventId);
+      } else {
+        // The LP Solver found the 1 true optimal path. 
+        // We will append 4 alternative independent swaps for variety in the UI.
+        const alternativeSwaps = this.generateTransfers(myPicks, candidates, oracle, riskMode, baseData.nextEventId);
+        
+        // Keep track of the exact swaps we already have
+        const existingSwapSignatures = new Set(transfers.map(t => `${t.out.id}-${t.in.id}`));
+        
+        for (const swap of alternativeSwaps) {
+          if (transfers.length >= 5) break;
+          const sig = `${swap.out.id}-${swap.in.id}`;
+          if (!existingSwapSignatures.has(sig)) {
+            transfers.push(swap);
+            existingSwapSignatures.add(sig);
+          }
+        }
       }
     }
 
