@@ -31,8 +31,8 @@ export function solveOptimalSquad(oracle: XPOracle, gameweek: number, budget: nu
   };
 
   if (riskMode === 'safe') {
-    model.constraints.eo_total = { min: 300 };
-    model.constraints.elite_eo_count = { min: 2 };
+    model.constraints.eo_total = { min: 250 };
+    model.constraints.elite_eo_count = { min: 1 };
   }
 
   allIds.forEach(id => {
@@ -149,8 +149,8 @@ export function solveOptimalTransfers(
   };
 
   if (riskMode === 'safe') {
-    model.constraints.eo_total = { min: 300 };
-    model.constraints.elite_eo_count = { min: 2 };
+    model.constraints.eo_total = { min: 250 };
+    model.constraints.elite_eo_count = { min: 1 };
   }
 
   allIds.forEach(id => {
