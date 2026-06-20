@@ -1,6 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 
+const SHORT_REST_ROTATION_PENALTY = 0.90;
+const DGW_ROTATION_PENALTY = 0.85;
+
 export interface XPOracle {
   getXP(playerId: number, gameweek: number): number;
   getVariance(playerId: number, gameweek: number): number;
@@ -110,9 +113,8 @@ export class CSVOracle implements XPOracle {
         const cost = parseFloat(cols[5]) * 10; 
         const meritScore = parseFloat(cols[6]) || 0; 
         
-        // Match player name to real FPL ID
         let fplId = syntheticId++; 
-        let rawOwnership = 100.0; // default safe value
+        let rawOwnership = 100.0;
         let realTeamId = 0;
         if (players.length > 0) {
           const match = players.find(p => 
@@ -129,7 +131,6 @@ export class CSVOracle implements XPOracle {
         }
         
         const teamId = teamMap[team.toLowerCase()] || realTeamId || 0;
-
         const adjustedMerit = meritScore;
 
         this.playerNames[fplId] = playerName;
@@ -138,7 +139,6 @@ export class CSVOracle implements XPOracle {
         this.playerTeams[fplId] = team;
         this.allIds.push(fplId);
         
-        // Calculate P(play) from cols[8] (Prob. of Appearing) or FPL metadata
         let probPlay = parseFloat(cols[8]);
         if (isNaN(probPlay)) {
           let chance = 100;
@@ -157,43 +157,94 @@ export class CSVOracle implements XPOracle {
         }
         probPlay = Math.max(0, Math.min(1.0, probPlay));
 
-        // Model P(0), P(60), P(90)
-        const p0 = 1 - probPlay;
-        let p90 = 0;
-        let p60 = 0;
+        // Base Probabilities
+        let baseP90 = 0;
+        let baseP60 = 0;
         if (probPlay >= 0.8) {
-          p90 = probPlay * 0.85;
-          p60 = probPlay * 0.15;
+          baseP90 = probPlay * 0.85;
+          baseP60 = probPlay * 0.15;
         } else {
-          p90 = probPlay * 0.5;
-          p60 = probPlay * 0.5;
+          baseP90 = probPlay * 0.5;
+          baseP60 = probPlay * 0.5;
         }
-
-        // Appearance expected value and variance
-        const eApp = p60 + 2 * p90;
-        const eApp2 = p60 + 4 * p90;
-        const varApp = Math.max(0, eApp2 - eApp * eApp);
 
         this.xpMatrix[fplId] = {};
         this.varianceMatrix[fplId] = {};
+
         for (let step = 0; step < 15; step++) {
           const gw = nextEventId + step;
           
-          if (fixtures && fixtures.length > 0 && teamId > 0) {
+          if (fixtures && fixtures.length > 0 && teamId > 0 && teams && teams.length > 0) {
             const teamFixtures = fixtures.filter(f => f.event === gw && (f.team_h === teamId || f.team_a === teamId));
+            
             if (teamFixtures.length > 0) {
+              let p90 = baseP90;
+              let p60 = baseP60;
+
+              // Apply dynamic congestion penalty conditionally based on rotation risk
+              if (teamFixtures.length > 1) {
+                p90 *= 1 - ((1 - probPlay) * DGW_ROTATION_PENALTY);
+                p60 *= 1 - ((1 - probPlay) * DGW_ROTATION_PENALTY);
+              }
+
+              const eApp = p60 + 2 * p90;
+              const eApp2 = p60 + 4 * p90;
+              const varApp = Math.max(0, eApp2 - eApp * eApp);
+
               let gwXP = 0;
+              let gwVarReturns = 0;
               const decayFactor = Math.pow(0.9, step);
+
               teamFixtures.forEach(f => {
-                const fdr = f.team_h === teamId ? f.team_h_difficulty : f.team_a_difficulty;
-                const diffMultiplier = 1 + (3 - fdr) * 0.1;
-                gwXP += adjustedMerit * diffMultiplier * decayFactor;
+                let diffMultiplier = 1.0;
+                
+                const isHome = f.team_h === teamId;
+                const opponentId = isHome ? f.team_a : f.team_h;
+                
+                const teamData = teams.find(t => t.id === teamId);
+                const opponentData = teams.find(t => t.id === opponentId);
+
+                if (teamData && opponentData) {
+                    let ratio = 1.0;
+                    if (pos === 'GKP' || pos === 'DEF') {
+                        if (isHome) {
+                            ratio = teamData.strength_defence_home / opponentData.strength_attack_away;
+                        } else {
+                            ratio = teamData.strength_defence_away / opponentData.strength_attack_home;
+                        }
+                    } else { // MID or FWD
+                        if (isHome) {
+                            ratio = teamData.strength_attack_home / opponentData.strength_defence_away;
+                        } else {
+                            ratio = teamData.strength_attack_away / opponentData.strength_defence_home;
+                        }
+                    }
+                    
+                    // Dampen and clamp the fixture ratio to avoid double counting FPLForm's fixture signal
+                    let dampened = 1 + ((ratio - 1) * 0.5);
+                    diffMultiplier = Math.max(0.85, Math.min(1.20, dampened));
+                } else {
+                    const fdr = f.team_h === teamId ? f.team_h_difficulty : f.team_a_difficulty;
+                    diffMultiplier = 1 + (3 - fdr) * 0.1;
+                }
+
+                const fixtureXP = adjustedMerit * diffMultiplier * decayFactor;
+                // Calculate returns beyond basic appearance points
+                const expectedReturns = Math.max(0, fixtureXP - eApp);
+                let fixtureVarReturns = 1.5 * expectedReturns;
+
+                // Scale variance by sqrt of the multiplier to maintain utility curve consistency
+                fixtureVarReturns *= Math.sqrt(diffMultiplier);
+
+                gwXP += Math.max(0, eApp + expectedReturns);
+                gwVarReturns += fixtureVarReturns;
               });
 
-              const expectedReturns = Math.max(0, gwXP - eApp);
-              const varReturns = 1.5 * expectedReturns;
-              this.xpMatrix[fplId][gw] = Math.max(0, eApp + expectedReturns);
-              this.varianceMatrix[fplId][gw] = varApp + varReturns;
+              // The total appearance variance across multiple games
+              const totalVarApp = varApp * teamFixtures.length;
+
+              this.xpMatrix[fplId][gw] = gwXP;
+              this.varianceMatrix[fplId][gw] = totalVarApp + gwVarReturns;
             } else {
               // Blank Gameweek
               this.xpMatrix[fplId][gw] = 0;
@@ -201,6 +252,10 @@ export class CSVOracle implements XPOracle {
             }
           } else {
             // Fallback for tests/isolated execution
+            const eApp = baseP60 + 2 * baseP90;
+            const eApp2 = baseP60 + 4 * baseP90;
+            const varApp = Math.max(0, eApp2 - eApp * eApp);
+
             const gwXP = adjustedMerit * Math.pow(0.9, step);
             const expectedReturns = Math.max(0, gwXP - eApp);
             const varReturns = 1.5 * expectedReturns;
