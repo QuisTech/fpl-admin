@@ -12,6 +12,14 @@
   <meta property="og:url" content="https://fplhorizon.app/fpl_v3_quant_playbook.html" />
   <meta property="og:title" content="FPL Horizon V3 | The Quant Architecture Whitepaper" />
   <meta property="og:description" content="Discover how the V3 Engine shifted from basic Expected Points (xP) to a Hedge-Fund grade Constrained Portfolio Optimizer." />
+  <meta property="og:image" content="https://fplhorizon.app/og-image-playbook.png" />
+  
+  <!-- Twitter / X -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content="https://fplhorizon.app/fpl_v3_quant_playbook.html" />
+  <meta property="twitter:title" content="FPL Horizon V3 | The Quant Architecture Whitepaper" />
+  <meta property="twitter:description" content="Discover how the V3 Engine shifted from basic Expected Points (xP) to a Hedge-Fund grade Constrained Portfolio Optimizer." />
+  <meta property="twitter:image" content="https://fplhorizon.app/og-image-playbook.png" />
   
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <title>FPL Horizon V3 | Quant Architecture Whitepaper</title>
@@ -225,6 +233,70 @@
       margin-bottom: 1.5rem;
       border: 1px solid rgba(0, 255, 133, 0.2);
     }
+
+    /* Promo Showcase Section */
+    .screenshot-container {
+      margin: 2rem 0;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      background-color: var(--card-bg);
+    }
+
+    .screenshot-img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .promo-box {
+      background: linear-gradient(135deg, rgba(55, 0, 60, 0.6) 0%, rgba(255, 0, 127, 0.15) 100%);
+      border: 1px solid rgba(255, 0, 127, 0.3);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      margin-top: 2rem;
+      page-break-inside: avoid;
+    }
+
+    .promo-title {
+      font-family: 'Cabinet Grotesk', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.75rem;
+    }
+
+    .promo-desc {
+      font-size: 0.95rem;
+      color: var(--text-slate);
+      margin-bottom: 1.5rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .promo-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background-color: var(--fpl-green);
+      color: #020617;
+      font-weight: 800;
+      text-decoration: none;
+      padding: 0.85rem 2rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+      box-shadow: 0 4px 15px rgba(0, 255, 133, 0.3);
+    }
+
+    .promo-link:hover {
+      transform: translateY(-2px);
+      opacity: 0.95;
+    }
   </style>
 </head>
 
@@ -302,6 +374,26 @@ maximize: EV / Cost
       <p>Because the engine is now mathematically honest, you can calculate the exact cost of protecting your rank in any given gameweek.</p>
       <p>If the <strong>RISKY</strong> squad projects to score <em>54.1 xP</em>, but the <strong>SAFE</strong> squad projects to score <em>52.0 xP</em>, the engine is explicitly telling you that the "insurance premium" required to cover heavily-owned assets is exactly <strong>2.1 Expected Points</strong>.</p>
       <p>Winning FPL is not simply an optimization problem—it is a <strong>Positioning and Variance Capture System</strong>. The V3 Engine gives you the exact mathematical framework to execute both flawlessly.</p>
+    </section>
+
+    <!-- SECTION 5: PLATFORM SHOWCASE -->
+    <section>
+      <h2>Take Action: Access the V3 Engine</h2>
+      <p>This whitepaper outlines the mathematical framework for constrained portfolio optimization, but executing it manually via spreadsheets is a major grind. The <strong>FPL Horizon V3 Engine</strong> automates this entire process: it syncs with your team data instantly, runs high-dimensional solvers, and builds your mathematically perfect squad path with one click.</p>
+
+      <div class="screenshot-container">
+        <a href="https://fplhorizon.app/" target="_blank">
+          <img class="screenshot-img" src="fpl_horizon_dashboard.png" alt="FPL Horizon Dashboard Screenshot">
+        </a>
+      </div>
+
+      <div class="promo-box">
+        <div class="promo-title">Ready to Capture Positive Variance?</div>
+        <p class="promo-desc">Get access to live expected value models, risk-adjusted constraints, and the only multi-horizon transfer planner powered by true Linear Programming.</p>
+        <a class="promo-link" href="https://fplhorizon.app/" target="_blank">
+          Launch App at fplhorizon.app
+        </a>
+      </div>
     </section>
   </div>
 </body>
