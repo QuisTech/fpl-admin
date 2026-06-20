@@ -11,7 +11,7 @@ import { CSVOracle } from './_lib/ingestion.js';
 import { Simulator } from './_lib/simulator.js';
 import { solveOptimalSquad } from './_lib/lp-solver.js';
 import { getUserTier, mergeUserTiers, getFirestore } from '../lib/firestore.js';
-import { getLLMTransferDecision } from './_lib/llm-agent.js';
+import { getLLMTransferDecision, getLLMChipAdvice, generateSocialThread } from './_lib/llm-agent.js';
 import { getNewsContextFromCache } from './_lib/news-service.js';
 import { verifyAuth } from './_lib/auth.js';
 
@@ -606,6 +606,57 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       );
       
       return res.status(200).json({ decision });
+    }
+
+    if (url.includes('/api/agent/thread') && req.method === 'POST') {
+      const { squad, riskMode = 'safe', topPicks = [], totalCost = 0, expectedPoints = 0 } = req.body || {};
+      if (!squad) return res.status(400).json({ error: "Missing squad payload" });
+      
+      const uid = await verifyAuth(req, res);
+      if (!uid) return;
+
+      const userTier = await getUserTier(uid);
+      if (userTier !== 'aiAgent' && userTier !== 'betaPilot' && userTier !== 'admin') {
+        return res.status(403).json({ error: "Beta Pilot tier required" });
+      }
+
+      // --- RATE LIMITING (reuse same logic as ask) ---
+      const db = getFirestore();
+      const profileRef = db.collection('user_profiles').doc(uid);
+      
+      try {
+        await db.runTransaction(async (t) => {
+          const doc = await t.get(profileRef);
+          const data = doc.data() || {};
+          const now = Date.now();
+          const oneHour = 60 * 60 * 1000;
+          const lastCall = data.lastLLMCall?.toMillis?.() || 0;
+          let callCount = data.llmCallCount || 0;
+
+          if (now - lastCall < oneHour) {
+            if (callCount >= 20 && userTier !== 'admin') {
+              throw new Error("RATE_LIMIT_EXCEEDED");
+            }
+            callCount++;
+          } else {
+            callCount = 1;
+          }
+
+          t.set(profileRef, {
+            lastLLMCall: new Date(),
+            llmCallCount: callCount
+          }, { merge: true });
+        });
+      } catch (e: any) {
+        if (e.message === "RATE_LIMIT_EXCEEDED") {
+          return res.status(429).json({ error: "Rate limit exceeded. Maximum 20 AI generations per hour." });
+        }
+        throw e;
+      }
+      // -------------------------------------
+
+      const tweets = await generateSocialThread(squad, riskMode, topPicks, totalCost, expectedPoints);
+      return res.status(200).json({ tweets });
     }
 
     if (url.includes('/api/ping')) {

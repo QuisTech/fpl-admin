@@ -177,3 +177,57 @@ export async function getLLMChipAdvice(
   
   return decision;
 }
+
+export async function generateSocialThread(
+  squad: any[],
+  riskMode: string,
+  topPicks: any[],
+  totalCost: number,
+  expectedPoints: number
+): Promise<string[]> {
+  const squadSummary = squad.map(p => 
+    `${p.name || p.web_name || 'Unknown'} (${p.position}) £${((p.cost || p.now_cost || 0)/10).toFixed(1)}M`
+  ).join(', ');
+
+  const topPicksSummary = topPicks.map(p => p.web_name || p.name).join(', ');
+
+  const prompt = `
+    You are an elite quantitative FPL Analyst (the "Hedge Fund FPL" persona).
+    You just ran a mathematical optimization engine (Branch-and-Bound LP Solver) to find the absolute mathematically perfect squad for the upcoming gameweek.
+    
+    Data from the Engine:
+    - Selected Risk Strategy: ${riskMode.toUpperCase()}
+    - Total Squad Cost: £${(totalCost/10).toFixed(1)}M (Must strictly be under £100.0M)
+    - Projected Points: ${expectedPoints.toFixed(1)} xP
+    - Engine Top Picks: ${topPicksSummary}
+    - 15-Man Optimal Squad: ${squadSummary}
+
+    Write a highly engaging, professional 3-to-4 part Twitter (X) thread explaining the mathematical logic behind this optimal squad.
+    
+    Guidelines:
+    - Tone: Confident, data-driven, analytical (like a hedge fund quant). No fluffy generic FPL advice.
+    - Mention the "FPL Horizon V3 Engine" or "LP Solver".
+    - Explain WHY this specific Risk Strategy (${riskMode.toUpperCase()}) resulted in these specific players.
+    - Format as a thread: Start tweets with "1/", "2/", "3/".
+    - Keep each tweet under 280 characters.
+    - Use relevant emojis minimally but effectively.
+
+    Respond with a STRICT VALID JSON OBJECT matching this exact structure:
+    {
+      "tweets": ["Tweet 1 text here...", "Tweet 2 text here...", "Tweet 3 text here..."]
+    }
+  `;
+
+  const result = await callLLMWithFallback({
+    prompt,
+    temperature: 0.7, // slightly more creative for social media
+    jsonMode: true,
+  });
+
+  const parsed = safeParseJSON(result.text);
+  if (!parsed.tweets || !Array.isArray(parsed.tweets)) {
+    throw new Error("Invalid response format from LLM for social thread");
+  }
+
+  return parsed.tweets;
+}
