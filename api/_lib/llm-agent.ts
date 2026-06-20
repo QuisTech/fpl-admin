@@ -202,19 +202,23 @@ export async function generateSocialThread(
     - Engine Top Picks: ${topPicksSummary}
     - 15-Man Optimal Squad: ${squadSummary}
 
-    Write a highly engaging, professional 3-to-4 part Twitter (X) thread explaining the mathematical logic behind this optimal squad.
+    Write a highly engaging, controversial, and professional 4-part Twitter (X) thread explaining the mathematical logic behind this optimal squad.
     
-    Guidelines:
-    - Tone: Confident, data-driven, analytical (like a hedge fund quant). No fluffy generic FPL advice.
-    - Mention the "FPL Horizon V3 Engine" or "LP Solver".
-    - Explain WHY this specific Risk Strategy (${riskMode.toUpperCase()}) resulted in these specific players.
-    - Format as a thread: Start tweets with "1/", "2/", "3/".
-    - Keep each tweet under 280 characters.
-    - Use relevant emojis minimally but effectively.
+    Guidelines for the Thread:
+    - Tweet 1 (The Hook): State the Risk Strategy (${riskMode.toUpperCase()}), the total cost, and the projected xP. Sound like a hedge fund quant dropping alpha.
+    - Tweet 2 (The Math): Highlight 1-2 highly-owned "popular" players that the engine MATHEMTICALLY REJECTED or highlight budget enablers that made the math work. Be unapologetic about trusting the algorithm over human emotion.
+    - Tweet 3 (The Alpha): Name the top Captaincy pick from the "Engine Top Picks" list. Explain why they have the highest risk-adjusted Expected Points (xP).
+    - Tweet 4 (The CTA): A Call-To-Action asking followers to drop a screenshot of their squad below for an AI analysis, or telling them to try the FPL Horizon V3 Engine themselves.
+    
+    CRITICAL CONSTRAINTS:
+    - You must output exactly 4 tweets.
+    - Start tweets with "1/4", "2/4", "3/4", "4/4".
+    - EVERY SINGLE TWEET MUST BE STRICTLY UNDER 250 CHARACTERS to comfortably fit Twitter's 280 limit. Do NOT use overly long words.
+    - Use numbers and stats to sound authoritative.
 
     Respond with a STRICT VALID JSON OBJECT matching this exact structure:
     {
-      "tweets": ["Tweet 1 text here...", "Tweet 2 text here...", "Tweet 3 text here..."]
+      "tweets": ["Tweet 1 text here...", "Tweet 2 text here...", "Tweet 3 text here...", "Tweet 4 text here..."]
     }
   `;
 
