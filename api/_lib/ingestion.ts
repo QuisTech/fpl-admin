@@ -113,16 +113,31 @@ export class CSVOracle implements XPOracle {
         const cost = parseFloat(cols[5]) * 10; 
         const meritScore = parseFloat(cols[6]) || 0; 
         
+        const parsedTeamId = teamMap[team.toLowerCase()] || 0;
+        const expectedElementType = pos === 'GKP' ? 1 : pos === 'DEF' ? 2 : pos === 'MID' ? 3 : pos === 'FWD' ? 4 : 0;
+
         let fplId = syntheticId++; 
         let rawOwnership = 100.0;
-        let realTeamId = 0;
+        let realTeamId = parsedTeamId;
+
         if (players.length > 0) {
-          const match = players.find(p => 
-            p.web_name?.toLowerCase() === playerName.toLowerCase() ||
-            p.second_name?.toLowerCase().includes(playerName.toLowerCase()) ||
-            playerName.toLowerCase().includes(p.second_name?.toLowerCase()) ||
-            playerName.toLowerCase().includes(p.web_name?.toLowerCase())
-          );
+          const match = players.find(p => {
+            // Must match team and position to avoid cross-contamination of similar names
+            if (parsedTeamId > 0 && p.team !== parsedTeamId) return false;
+            if (expectedElementType > 0 && p.element_type !== expectedElementType) return false;
+
+            const wName = (p.web_name || '').toLowerCase();
+            const sName = (p.second_name || '').toLowerCase();
+            const pName = playerName.toLowerCase();
+
+            return (
+              wName === pName ||
+              sName.includes(pName) ||
+              pName.includes(sName) ||
+              pName.includes(wName)
+            );
+          });
+
           if (match) {
             fplId = match.id;
             rawOwnership = parseFloat(match.selected_by_percent) || 100.0;
@@ -130,7 +145,7 @@ export class CSVOracle implements XPOracle {
           }
         }
         
-        const teamId = teamMap[team.toLowerCase()] || realTeamId || 0;
+        const teamId = parsedTeamId || realTeamId || 0;
         const adjustedMerit = meritScore;
 
         this.playerNames[fplId] = playerName;
