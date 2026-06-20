@@ -72,7 +72,13 @@ export class Simulator {
   }
 
   public calculateFitness(state: SquadState): number {
-    return state.accumulatedScore;
+    let fitness = state.accumulatedScore;
+    // Add terminal holding value for unused chips to prevent burning them just because the horizon ends
+    fitness += (state.chipState['WC'] || 0) * 25.0; // Wildcard is worth ~25 points long-term
+    fitness += (state.chipState['FH'] || 0) * 15.0; // Free Hit is worth ~15 points
+    fitness += (state.chipState['BB'] || 0) * 12.0; // Bench Boost is worth ~12 points
+    fitness += (state.chipState['TC'] || 0) * 8.0;  // Triple Captain is worth ~8 points
+    return fitness;
   }
 
   public generateValidActions(
