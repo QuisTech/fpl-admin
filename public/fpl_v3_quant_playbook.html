@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="FPL Horizon V3 Quant Whitepaper. A deep dive into Constrained Portfolio Optimization, Expected Value, and Risk Management in Fantasy Premier League." />
+  <meta name="keywords" content="FPL Quant, FPL Horizon V3, Expected Utility, FPL Optimization, Fantasy Premier League Math" />
+  
+  <!-- Open Graph -->
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://fplhorizon.app/fpl_v3_quant_playbook.html" />
+  <meta property="og:title" content="FPL Horizon V3 | The Quant Architecture Whitepaper" />
+  <meta property="og:description" content="Discover how the V3 Engine shifted from basic Expected Points (xP) to a Hedge-Fund grade Constrained Portfolio Optimizer." />
+  
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>FPL Horizon V3 | Quant Architecture Whitepaper</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@800;900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #020617;
+      --card-bg: #0b1329;
+      --fpl-purple: #37003c;
+      --fpl-green: #00ff85;
+      --fpl-pink: #ff007f;
+      --text-white: #f8fafc;
+      --text-slate: #94a3b8;
+      --border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-white);
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      padding: 3rem 1.5rem;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* Cover Page / Header */
+    header {
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 3rem;
+      margin-bottom: 4rem;
+      position: relative;
+    }
+
+    .brand-pill-container {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .brand-pill {
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      padding: 0.35rem 0.75rem;
+      border-radius: 4px;
+    }
+
+    .pill-green {
+      background-color: rgba(0, 255, 133, 0.1);
+      color: var(--fpl-green);
+      border: 1px solid rgba(0, 255, 133, 0.2);
+    }
+
+    .pill-pink {
+      background-color: rgba(255, 0, 127, 0.1);
+      color: var(--fpl-pink);
+      border: 1px solid rgba(255, 0, 127, 0.2);
+    }
+
+    .pill-purple {
+      background-color: rgba(55, 0, 60, 0.4);
+      color: #e879f9;
+      border: 1px solid rgba(232, 121, 249, 0.2);
+    }
+
+    h1 {
+      font-family: 'Cabinet Grotesk', sans-serif;
+      font-size: 3.5rem;
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin-bottom: 1rem;
+    }
+
+    h1 span {
+      color: var(--fpl-green);
+    }
+
+    .subtitle {
+      font-size: 1.25rem;
+      color: var(--text-slate);
+      font-weight: 300;
+      max-width: 650px;
+    }
+
+    /* Sections */
+    section {
+      margin-bottom: 4rem;
+      page-break-inside: avoid;
+    }
+
+    h2 {
+      font-family: 'Cabinet Grotesk', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: #fff;
+    }
+
+    h2::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 1.5rem;
+      background-color: var(--fpl-pink);
+      border-radius: 2px;
+    }
+
+    p {
+      color: var(--text-slate);
+      font-size: 0.975rem;
+      margin-bottom: 1.25rem;
+      font-weight: 400;
+    }
+
+    strong {
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* Grid & Cards */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    @media (min-width: 640px) {
+      .grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.75rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--fpl-purple), var(--fpl-pink), var(--fpl-green));
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.75rem;
+      font-family: 'Cabinet Grotesk', sans-serif;
+      letter-spacing: 0.02em;
+    }
+
+    /* Math Box */
+    .formula-box {
+      background-color: rgba(2, 6, 23, 0.7);
+      border: 1px dashed var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: #38bdf8;
+      margin: 1.5rem 0;
+    }
+
+    .formula-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-slate);
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+    }
+    
+    .code-block {
+      background-color: #000;
+      color: #00ff85;
+      padding: 1rem;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(0, 255, 133, 0.2);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <div class="brand-pill-container">
+        <span class="brand-pill pill-purple">Horizon Grand Cru</span>
+        <span class="brand-pill pill-green">Mathematical Architecture</span>
+        <span class="brand-pill pill-pink">Quant Engine V3</span>
+      </div>
+      <h1>The V3 Quant Engine <span>Whitepaper</span></h1>
+      <p class="subtitle">An architectural breakdown of the transition from raw expected points optimization to a hedge-fund grade, behaviorally constrained portfolio optimizer.</p>
+    </header>
+
+    <!-- SECTION 1 -->
+    <section>
+      <h2>1. The Problem with "Expected Points" (xP)</h2>
+      <p>In the casual FPL community, managers build their teams around <strong>Expected Points (xP)</strong>. However, at the elite quantitative level, optimizing purely for xP—or manually inflating xP based on a player's popularity—is mathematically flawed.</p>
+      <p>Prior models attempted to create "Safe" squads by taking a highly-owned player's xP and multiplying it by an Expected Ownership (EO) factor. This effectively <em>lied</em> to the linear programming solver, tricking it into believing popular players would physically score more goals.</p>
+      <p>The result was an engine that confused popularity with mathematical efficiency, leading to over-investment in expensive template players and a collapse in true differential discovery.</p>
+    </section>
+
+    <!-- SECTION 2 -->
+    <section>
+      <h2>2. The New Architecture: Layered Optimization</h2>
+      <p>The FPL Horizon V3 Engine abandons xP multipliers entirely. It operates on a dual-layered Hedge Fund architecture, separating the "Truth Engine" from the "Risk Overlay."</p>
+
+      <div class="grid">
+        <div class="card">
+          <div class="card-title">Layer 1: The Truth Engine</div>
+          <p>The objective function of the LP Solver is now completely isolated from ownership statistics. It seeks only to maximize pure, risk-adjusted <strong>Expected Utility (EV)</strong>.</p>
+          <div class="formula-box">
+            <div class="formula-title">Objective Function</div>
+            Maximize U = EV - &lambda;(Variance)
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Layer 2: Portfolio Constraints</div>
+          <p>Rank protection is no longer smuggled into the player's score. Instead, it is enforced via strict structural constraints within the LP matrix, forcing the solver to purchase "insurance" without corrupting the EV math.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3 -->
+    <section>
+      <h2>3. Strategy Modes Redefined</h2>
+      <p>By moving behavioral logic into strict constraints, the engine's Strategy Modes now have distinct, mathematically pure identities.</p>
+
+      <div class="code-block">
+// SAFE MODE: Positioning & Rank Shield
+maximize: EV - Variance
+subject to: 
+  eo_total >= 250
+  elite_eo_count >= 1
+      </div>
+      <p><strong>SAFE MODE</strong> acts as a positioning system. It acknowledges the true mathematical cost of players like Salah or Palmer, but forcibly retains them to satisfy the portfolio's safety mandate, guaranteeing you never fall out of the elite pack.</p>
+
+      <div class="code-block">
+// RISKY MODE: Pure Variance Capture
+maximize: EV + Upside (No EO Constraints)
+      </div>
+      <p><strong>RISKY MODE</strong> is a pure variance capture system. It strips away all ownership constraints, allowing the solver to ruthlessly exploit pricing inefficiencies and hunt for asymmetric upside to close massive rank deficits.</p>
+
+      <div class="code-block">
+// VALUE MODE: Efficiency Exploitation
+maximize: EV / Cost
+      </div>
+      <p><strong>VALUE MODE</strong> focuses strictly on Points-Per-Million (PPM), allowing you to build massive squad value for future Wildcards.</p>
+    </section>
+
+    <!-- SECTION 4 -->
+    <section>
+      <h2>4. The Mathematical "Cost of Insurance"</h2>
+      <p>Because the engine is now mathematically honest, you can calculate the exact cost of protecting your rank in any given gameweek.</p>
+      <p>If the <strong>RISKY</strong> squad projects to score <em>54.1 xP</em>, but the <strong>SAFE</strong> squad projects to score <em>52.0 xP</em>, the engine is explicitly telling you that the "insurance premium" required to cover heavily-owned assets is exactly <strong>2.1 Expected Points</strong>.</p>
+      <p>Winning FPL is not simply an optimization problem—it is a <strong>Positioning and Variance Capture System</strong>. The V3 Engine gives you the exact mathematical framework to execute both flawlessly.</p>
+    </section>
+  </div>
+</body>
+
+</html>
