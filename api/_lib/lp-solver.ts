@@ -30,6 +30,11 @@ export function solveOptimalSquad(oracle: XPOracle, gameweek: number, budget: nu
     ints: {}
   };
 
+  if (riskMode === 'safe') {
+    model.constraints.eo_total = { min: 300 };
+    model.constraints.elite_eo_count = { min: 2 };
+  }
+
   allIds.forEach(id => {
     if (availableIds && !availableIds.has(id)) return;
     
@@ -73,16 +78,10 @@ export function solveOptimalSquad(oracle: XPOracle, gameweek: number, budget: nu
       } else if (costInMillions >= 8.0) {
         score *= 1.08;
       }
-
-      // 2. Smooth EO Sentiment scaling
-      if (riskMode === 'safe') {
-        const eo = oracle.getTop1kEO?.(id) ?? 0;
-        score *= (1 + 0.15 * (eo / 100));
-      } else if (riskMode === 'aggressive') {
-        const eo = oracle.getTop1kEO?.(id) ?? 0;
-        score *= (1 + 0.25 * (1 - eo / 100));
-      }
     }
+
+    const eo = oracle.getTop1kEO?.(id) ?? 0;
+    const isElite = eo >= 80 ? 1 : 0;
 
     // Only consider players who have a score > 0 to keep the model small
     if (score > 0) {
@@ -92,7 +91,9 @@ export function solveOptimalSquad(oracle: XPOracle, gameweek: number, budget: nu
         total: 1, 
         [pos]: 1, 
         [`team_${team}`]: 1, 
-        [v]: 1 
+        [v]: 1,
+        eo_total: eo,
+        elite_eo_count: isElite
       };
       model.constraints[v] = { max: 1 };
       model.ints[v] = 1;
@@ -147,6 +148,11 @@ export function solveOptimalTransfers(
     ints: {}
   };
 
+  if (riskMode === 'safe') {
+    model.constraints.eo_total = { min: 300 };
+    model.constraints.elite_eo_count = { min: 2 };
+  }
+
   allIds.forEach(id => {
     const team = oracle.getTeam(id);
     if (!model.constraints[`team_${team}`]) {
@@ -188,16 +194,10 @@ export function solveOptimalTransfers(
       } else if (costInMillions >= 8.0) {
         score *= 1.08;
       }
-
-      // 2. Smooth EO Sentiment scaling
-      if (riskMode === 'safe') {
-        const eo = oracle.getTop1kEO?.(id) ?? 0;
-        score *= (1 + 0.15 * (eo / 100));
-      } else if (riskMode === 'aggressive') {
-        const eo = oracle.getTop1kEO?.(id) ?? 0;
-        score *= (1 + 0.25 * (1 - eo / 100));
-      }
     }
+
+    const eo = oracle.getTop1kEO?.(id) ?? 0;
+    const isElite = eo >= 80 ? 1 : 0;
 
     const isCurrent = currentSet.has(id);
 
@@ -210,7 +210,9 @@ export function solveOptimalTransfers(
         [pos]: 1, 
         [`team_${team}`]: 1, 
         keep: isCurrent ? 1 : 0,
-        [v]: 1 
+        [v]: 1,
+        eo_total: eo,
+        elite_eo_count: isElite
       };
       model.constraints[v] = { max: 1 };
       model.ints[v] = 1;

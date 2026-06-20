@@ -128,10 +128,6 @@ export class Simulator {
         const costInMillions = inCost / 10;
         if (costInMillions >= 10.0) inXP *= 1.15;
         else if (costInMillions >= 8.0) inXP *= 1.08;
-
-        const eo = oracle.getTop1kEO?.(inId) ?? 0;
-        if (riskMode === 'safe') inXP *= (1 + 0.15 * (eo / 100));
-        else if (riskMode === 'aggressive') inXP *= (1 + 0.25 * (1 - eo / 100));
       }
       candidateXPs[inId] = inXP;
     });
@@ -149,10 +145,6 @@ export class Simulator {
         const costInMillions = outCost / 10;
         if (costInMillions >= 10.0) outXP *= 1.15;
         else if (costInMillions >= 8.0) outXP *= 1.08;
-
-        const eo = oracle.getTop1kEO?.(outId) ?? 0;
-        if (riskMode === 'safe') outXP *= (1 + 0.15 * (eo / 100));
-        else if (riskMode === 'aggressive') outXP *= (1 + 0.25 * (1 - eo / 100));
       }
 
       candidateIds.forEach(inId => {
