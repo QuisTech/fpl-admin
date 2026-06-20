@@ -208,7 +208,7 @@ export async function generateSocialThread(
     - Tweet 1 (The Hook): State the Risk Strategy (${riskMode.toUpperCase()}), the total cost, and the projected xP. Sound like a hedge fund quant dropping alpha.
     - Tweet 2 (The Math): Highlight 1-2 highly-owned "popular" players that the engine MATHEMTICALLY REJECTED or highlight budget enablers that made the math work. Be unapologetic about trusting the algorithm over human emotion.
     - Tweet 3 (The Alpha): Name the top Captaincy pick from the "Engine Top Picks" list. Explain their mathematical advantage EXACTLY in the context of the chosen Risk Strategy (e.g., if SAFE, emphasize their low variance and high floor; if AGGRESSIVE, emphasize their high ceiling and explosive upside; if VALUE, emphasize their high points-per-million efficiency).
-    - Tweet 4 (The CTA): A Call-To-Action asking followers to drop a screenshot of their squad below for an AI analysis, or telling them to try the FPL Horizon V3 Engine themselves. MUST conclude with relevant hashtags: #FPL #FPLCommunity #FantasyPremierLeague.
+    - Tweet 4 (The CTA): A Call-To-Action asking followers to drop a screenshot of their squad below for an AI analysis, or telling them to try the FPL Horizon V3 Engine themselves. MUST conclude with the link "fplhorizon.app" and relevant hashtags: #FPL #FPLCommunity #FantasyPremierLeague.
     
     CRITICAL CONSTRAINTS:
     - You must output exactly 4 tweets.
