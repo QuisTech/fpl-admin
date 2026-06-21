@@ -38,6 +38,7 @@ The Horizon engine is fully monetized using Stripe and Firebase Auth, offering d
 - **Free Tier**: Basic Pitch View and xP metrics.
 - **Strategist Tier (£9.99/mo)**: Unlocks the full Constrained Portfolio Optimizer and the 3 Strategy Modes (SAFE, RISKY, VALUE).
 - **Beta Pilot Tier (£49.99/mo)**: Unlocks the elite Groq AI Agent, providing full contextual analysis and natural language tactical advice.
+- **Horizon Grand Cru (£499.00/mo)**: The ultimate Hedge-Fund concierge service. Bespoke 1-on-1 Slack access, custom risk profiling, and direct API access to the V3 Engine.
 
 ## ⚙️ Running Locally
 
