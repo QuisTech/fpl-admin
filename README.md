@@ -34,10 +34,11 @@ Winning FPL is not an optimization problem—it is a Positioning and Variance Ca
 
 ## 💳 Monetization & Tiers
 
-The Horizon engine is fully monetized using Stripe and Firebase Auth, offering distinct tiers:
-- **Free Tier**: Basic Pitch View and xP metrics.
-- **Strategist Tier (£9.99/mo)**: Unlocks the full Constrained Portfolio Optimizer and the 3 Strategy Modes (SAFE, RISKY, VALUE).
-- **Beta Pilot Tier (£49.99/mo)**: Unlocks the elite Groq AI Agent, providing full contextual analysis and natural language tactical advice.
+The Horizon engine is fully monetized using Stripe and Firebase Auth, offering four distinct tiers:
+- **Free Scout (£0)**: Basic 1-gameweek squad view and safe-mode recommendations.
+- **Horizon Strategist (£9.99/mo)**: Unlocks the full Constrained Portfolio Optimizer (LP), the 3 Strategy Modes (SAFE, RISKY, VALUE), and team sync.
+- **Horizon Grand Cru (£24.99/mo)**: Unlocks the V3 multiverse engine for 8-gameweek beam-search simulations, multi-transfer LP optimization, and autonomous chip state guidance.
+- **AI Optimizer Agent / Beta Pilot (£49.99/mo)**: The flagship Hybrid FPL Agent combining LLM reasoning with mathematical simulation. Includes conversational chat, press conference parsing, and priority solver access.
 
 ## ⚙️ Running Locally
 
