@@ -1,38 +1,42 @@
-# FPL Horizon
+# FPL Horizon V3: Quant Engine
 
 [![Live App](https://img.shields.io/badge/Live-fplhorizon.app-00ff86?style=for-the-badge)](https://fplhorizon.app/)
+[![Quant Whitepaper](https://img.shields.io/badge/Docs-Quant_Whitepaper-bd1a62?style=for-the-badge)](https://fplhorizon.app/fpl_v3_quant_playbook.html)
 [![Strategy Playbook](https://img.shields.io/badge/Docs-Strategy_Playbook-bd1a62?style=for-the-badge)](https://fplhorizon.app/fpl_strategy_manual_updated.html)
 
-An elite Fantasy Premier League (FPL) optimization engine that uses **Multi-Horizon Beam Search**, **Linear Programming (LP)**, and **Generative AI** to project the absolute mathematical and contextual optimum for your squad.
+An elite Fantasy Premier League (FPL) optimization engine built on **Constrained Portfolio Theory**, **Linear Programming (LP)**, and **Generative AI**. The V3 Engine abandons flawed raw "Expected Points" (xP) models in favor of a true Hedge-Fund grade positioning system that balances variance capture and mathematical rank protection.
 
 ## 🚀 The V3 Architecture
 
-Unlike traditional FPL tools that only look at the immediate upcoming gameweek, the FPL Horizon Engine simulates multiple gameweeks into the future. It traverses thousands of potential squad states, evaluating the mathematical Expected Value (EV) of free transfers, points hits, and chip usage.
+Winning FPL is not an optimization problem—it is a Positioning and Variance Capture system. The V3 Engine separates the "Truth Engine" (Expected Value) from the "Risk Overlay" (Expected Ownership) to generate the optimal mathematical squad.
 
 ### 🧠 The Core Components
-1. **The Multi-Horizon Simulator (`api/simulator.ts`)**
-   - Implements a Beam Search algorithm to explore the massive combinatorial tree of future Gameweeks.
-   - Natively understands FPL constraints (Budget limits, 2/5/5/3 positional rules).
-   - Tracks the **Chip State Machine**, allowing it to autonomously decide when to play `Wildcard`, `Free Hit`, `Bench Boost`, or `Triple Captain`.
 
-2. **The LP Solver (`api/lp-solver.ts`)**
+1. **Constrained Portfolio Optimizer (`api/_lib/lp-solver.ts`)**
    - Built on `javascript-lp-solver`.
-   - Used heavily during `Wildcard` and `Free Hit` simulation branches. When a chip is played in a simulated future, the Simulator passes the exact available budget to the LP Solver, which instantly returns the mathematically perfect 15-man squad for that Gameweek horizon.
+   - Natively understands FPL constraints (Budget limits, 2/5/5/3 positional rules, 3-players-per-team limits).
+   - Dynamically injects Top 1k Manager Expected Ownership (EO) constraints based on the user's selected Risk Profile.
 
-3. **Groq AI Agent (`api/agent/ask.ts`)**
+2. **The 3 Strategy Modes**
+   - **🛡️ SAFE MODE:** The Rank Shield. Enforces strict EO constraints (`eo_total >= 250` and `elite_eo_count >= 1`). Forces the solver to buy highly-owned elite players to protect your rank against the hive-mind consensus.
+   - **🎯 RISKY MODE:** The Variance Hunter. Drops all EO constraints and optimizes purely for total Expected Value (EV). Buys high-upside differentials to attack rank.
+   - **💸 VALUE MODE:** The Efficiency Engine. Drops all EO and overall score constraints to maximize pure **Points-Per-Million (£)**. Exposes underpriced gems and actively rejects expensive premium players.
+
+3. **The Autonomous Data Pipeline (`scripts/`)**
+   - **Sniper Bot:** A GitHub Action (`.github/workflows/sniper-fetch.yml`) wakes up every hour and checks the Official FPL API for the upcoming deadline.
+   - Exactly 1-2 hours before the deadline (the "Golden Window"), it scrapes the freshest xP data from FPLForm and live Elite Manager Sentiment from Top 1k accounts.
+   - **Marketing Bot:** A headless Playwright script (`capture-dashboard.js`) autonomously screenshots the live dashboard and updates the marketing assets to prove the engine's validity.
+   - Commits and deploys the new data directly to Vercel without human intervention.
+
+4. **Groq AI Agent (`api/agent/ask.ts`)**
    - A natural language FPL assistant powered by blazing-fast Groq models.
-   - The agent acts as a Beta Pilot, parsing press conferences, injury reports, and tactical nuances that pure mathematics might miss, giving users an edge in their decision-making.
-
-4. **The Autonomous Oracle (`scripts/fetch-xp.ts` & `scripts/check-deadline.ts`)**
-   - Powered by Expected Points (xP) data ingested from FPLForm.
-   - We utilize a **"Sniper Bot"** GitHub Action (`.github/workflows/sniper-fetch.yml`). 
-   - Every hour, the bot checks the Official FPL API for the upcoming deadline. Exactly 1-2 hours before the deadline (after all press conferences and leaks), it fires up a headless Playwright browser, scrapes the freshest xP data, and commits it back to the repository autonomously.
+   - Acts as a Beta Pilot, parsing press conferences, injury reports, and tactical nuances that pure mathematics might miss.
 
 ## 💳 Monetization & Tiers
 
 The Horizon engine is fully monetized using Stripe and Firebase Auth, offering distinct tiers:
 - **Free Tier**: Basic Pitch View and xP metrics.
-- **Strategist Tier (£9.99/mo)**: Unlocks the full Multi-Horizon Simulation Engine and LP Solver for multi-gameweek transfer planning.
+- **Strategist Tier (£9.99/mo)**: Unlocks the full Constrained Portfolio Optimizer and the 3 Strategy Modes (SAFE, RISKY, VALUE).
 - **Beta Pilot Tier (£49.99/mo)**: Unlocks the elite Groq AI Agent, providing full contextual analysis and natural language tactical advice.
 
 ## ⚙️ Running Locally
@@ -50,14 +54,15 @@ Set up your Firebase credentials, Stripe secret keys, and Groq API keys.
 npm run dev
 ```
 
-4. Test the V3 Engine locally (without spinning up the frontend):
+4. Trigger the Autonomous Sniper Bot locally:
 ```bash
-npx tsx test_api.ts
+npx tsx scripts/fetch-xp.ts
+npx tsx scripts/fetch-top-1k.ts
 ```
 
 ## ☁️ Vercel Deployment
 
-This project is perfectly tuned for Vercel. Because Vercel serverless functions have strict execution time limits, the Simulator automatically scales its `beamWidth` and `maxDepth` based on the environment to ensure it always returns a result before the Vercel timeout.
+This project is perfectly tuned for Vercel Serverless Functions. The LP solver executes its complex constraint matrix in milliseconds, ensuring lightning-fast squad generation before Vercel timeouts.
 
 To deploy manually:
 ```bash
