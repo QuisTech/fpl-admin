@@ -1,15 +1,23 @@
-Copyright (c) 2026 QuisTech / FPL Horizon. All rights reserved.
+QuisTech Proprietary License
 
-Proprietary and Confidential License
-------------------------------------
+Copyright (c) 2026 QuisTech. All Rights Reserved.
 
-This software and all associated documentation files (the "Software") are the exclusive property of the Copyright Holder. All rights are reserved.
+This software and associated documentation files (the "Software") are the 
+proprietary property of QuisTech. 
 
-Permission is hereby strictly denied to any person or entity to:
-1. Copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software.
-2. Permit persons to whom the Software is furnished to do so.
-3. Disassemble, decompile, decrypt, or reverse-engineer the Software, except to the extent that such restriction is prohibited by law.
+Access to this source code is provided solely for the purpose of evaluation 
+and review. 
 
-Any unauthorized use, reproduction, or distribution of this Software is strictly prohibited and may result in severe civil and criminal penalties, and will be prosecuted to the maximum extent possible under the law.
+You may NOT:
+1. Use, copy, modify, merge, publish, distribute, sublicense, or sell copies 
+   of the Software.
+2. Use the Software for any commercial or production purposes.
+3. Use the Software to build a competitive product or service.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
