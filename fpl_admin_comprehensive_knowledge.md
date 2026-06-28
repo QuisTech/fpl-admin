@@ -1,6 +1,6 @@
 # Comprehensive fpl-admin Knowledge Base (Extended V3)
 
-This document is the ultimate, exhaustive reference architecture for the `fpl-admin` project (Horizon V3 Engine), capturing every quantitative mechanism, autonomous pipeline, monetization structure, and AI integration ever discussed.
+This document is the ultimate, exhaustive reference architecture for the `fpl-admin` project (Horizon V3 Engine), capturing every quantitative mechanism, autonomous pipeline, monetization structure, infrastructure setup, and AI integration ever discussed since the beginning of this workspace.
 
 ---
 
@@ -19,12 +19,14 @@ This document is the ultimate, exhaustive reference architecture for the `fpl-ad
 
 ## 2. Monetization & Subscription Tiers
 
-The Horizon engine is fully monetized using Stripe and Firebase Auth. The backend routes adjust optimization depth based on these tiers:
+The Horizon engine is fully monetized. The backend routes adjust optimization depth based on these tiers:
 
 - **Free Scout (£0)**: Basic 1-gameweek squad view and safe-mode recommendations. Only utilizes raw xP sorting (top N per position), never hitting the LP solver or Herd data.
 - **Horizon Strategist (£9.99/mo)**: Unlocks the full Constrained Portfolio Optimizer (LP) with access to the 3 Strategy Modes (SAFE, AGGRESSIVE, VALUE) and team synchronization.
 - **Horizon Grand Cru (£24.99/mo)**: Unlocks the V3 Multiverse Engine for 8-gameweek beam-search simulations, multi-transfer LP optimization, and autonomous chip state guidance.
 - **AI Optimizer Agent / Beta Pilot (£49.99/mo)**: The flagship Hybrid FPL Agent combining LLM reasoning with mathematical simulation. Includes conversational chat, press conference parsing, and priority solver access.
+
+**Payment Gateways**: The application integrates both **Stripe** and **DodoPayments** (`dodopayments` SDK) for checkout sessions, dynamically switching between environments (test mode vs live mode). Firebase Auth maps user UID to subscription claims.
 
 ---
 
@@ -73,5 +75,13 @@ Recommends transfers based on the existing squad.
 
 ---
 
+## 5. Engineering & Infrastructure
+
+- **Data Validation Layer**: Employs **Zod schemas** (`FPLPlayer`, `FPLTeam`, `FPLFixture`) mapped to the official FPL API responses. If the FPL API unexpectedly changes its schema, the application fails explicitly with an error rather than generating corrupt recommendations.
+- **Local Proxy Server**: Uses a custom `server.ts` utilizing `express` and `vite` in middleware mode. It proxies local development requests directly to Vercel Serverless functions (`/api/create-checkout`, `/api/user-profile`) allowing complete end-to-end testing of Firebase/Payments/Solver logic offline.
+- **Serverless Architecture**: Perfectly tuned for Vercel. The LP solver executes its complex constraint matrix (simulating thousands of multi-horizon paths) in milliseconds, ensuring squad generation occurs rapidly before Vercel timeouts trigger.
+
+---
+
 ## Summary
-The `fpl-admin` quant engine represents a true masterpiece of Serverless engineering. It seamlessly binds headless browser scraping, FPL API crowd wisdom, operations research (LP Solver), AI-driven parallel universe modeling (Beam Search), LLM news analysis (Gemini/Groq), and Stripe monetization into a unified Vercel application.
+The `fpl-admin` quant engine represents a true masterpiece of Serverless engineering. It seamlessly binds headless browser scraping, FPL API crowd wisdom, operations research (LP Solver), AI-driven parallel universe modeling (Beam Search), LLM news analysis (Gemini/Groq), and Stripe/Dodo monetization into a unified Vercel application.
