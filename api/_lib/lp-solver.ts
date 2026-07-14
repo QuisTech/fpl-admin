@@ -100,7 +100,30 @@ export function solveOptimalSquad(oracle: XPOracle, gameweek: number, budget: nu
     }
   });
 
-  const solution = solver.Solve(model) as Record<string, any>;
+  let solution: Record<string, any> | null = null;
+
+  const relaxationSteps = riskMode === 'safe'
+    ? [ { eo: 250, elite: 1 }, { eo: 200, elite: 1 }, { eo: 150, elite: 0 }, { eo: 0, elite: 0 } ]
+    : [ { eo: 0, elite: 0 } ];
+
+  for (const step of relaxationSteps) {
+    if (riskMode === 'safe') {
+      if (step.eo > 0) model.constraints.eo_total = { min: step.eo };
+      else delete model.constraints.eo_total;
+      
+      if (step.elite > 0) model.constraints.elite_eo_count = { min: step.elite };
+      else delete model.constraints.elite_eo_count;
+    }
+
+    solution = solver.Solve(model) as Record<string, any>;
+    if (solution && solution.feasible) {
+      break;
+    }
+  }
+
+  if (!solution || !solution.feasible) {
+    return []; // Failsafe, though eo:0 should generally always find a solution
+  }
   
   const squadIds: number[] = [];
   for (const key in solution) {
@@ -219,7 +242,27 @@ export function solveOptimalTransfers(
     }
   });
 
-  const solution = solver.Solve(model) as Record<string, any>;
+  let solution: Record<string, any> | null = null;
+
+  const relaxationSteps = riskMode === 'safe'
+    ? [ { eo: 250, elite: 1 }, { eo: 200, elite: 1 }, { eo: 150, elite: 0 }, { eo: 0, elite: 0 } ]
+    : [ { eo: 0, elite: 0 } ];
+
+  for (const step of relaxationSteps) {
+    if (riskMode === 'safe') {
+      if (step.eo > 0) model.constraints.eo_total = { min: step.eo };
+      else delete model.constraints.eo_total;
+      
+      if (step.elite > 0) model.constraints.elite_eo_count = { min: step.elite };
+      else delete model.constraints.elite_eo_count;
+    }
+
+    solution = solver.Solve(model) as Record<string, any>;
+    if (solution && solution.feasible) {
+      break;
+    }
+  }
+
   if (!solution || !solution.feasible) {
     return null;
   }
