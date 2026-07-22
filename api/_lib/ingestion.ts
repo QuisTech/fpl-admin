@@ -106,7 +106,7 @@ export class CSVOracle implements XPOracle {
         throw err;
       }
       
-      if (cols.length > 10 && cols[3] && cols[3].length === 3) {
+      if (cols.length >= 9 && cols[3] && cols[3].length === 3) {
         const playerName = cols[1];
         const team = cols[3];
         const pos = cols[4] === 'GK' ? 'GKP' : cols[4];
