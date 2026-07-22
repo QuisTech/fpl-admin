@@ -535,7 +535,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (url.includes('/api/agent/ask') && req.method === 'POST') {
-      const { gameweek, squad, bank, freeTransfers = 1, chips = {}, riskMode = 'safe', userPrompt } = req.body || {};
+      const { gameweek, squad, bank, freeTransfers = 1, chips = {}, riskMode = 'safe', userPrompt, fuel = 'fplform' } = req.body || {};
       if (!squad) return res.status(400).json({ error: "Missing payload" });
       
       const uid = await verifyAuth(req, res);
@@ -601,7 +601,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
 
       // Fetch targets
-      const recommendations = await FPLService.getRecommendations(riskMode, bank, userTier);
+      const recommendations = await FPLService.getRecommendations(riskMode, bank, userTier, fuel);
       const allTargets = [
         ...recommendations.topPicks.gkp,
         ...recommendations.topPicks.def,
