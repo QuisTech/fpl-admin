@@ -44,7 +44,7 @@ jobs:
         run: |
           git config --global user.name "FPL Sniper Bot"
           git config --global user.email "bot@quistech.com"
-          git add data/fplform.csv data/top_1000_eo.json
+          git add data/fplform.csv data/top_1000_eo.json data/fpl_native.csv
           git commit -m "Auto-update: Scraped latest FPLForm predictions and Top 1k EO 2 hours before deadline"
           git push
 
