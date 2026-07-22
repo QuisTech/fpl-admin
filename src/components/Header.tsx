@@ -5,6 +5,8 @@ interface HeaderProps {
   data: RecommendationResponse | null;
   riskMode: 'safe' | 'aggressive' | 'value';
   setRiskMode: (mode: 'safe' | 'aggressive' | 'value') => void;
+  fuel: 'fplform' | 'native';
+  setFuel: (fuel: 'fplform' | 'native') => void;
   onOpenAuth: () => void;
   authUser: any;
   tier: string;
@@ -17,7 +19,7 @@ interface HeaderProps {
 import { UserProfile } from './UserProfile';
 import { UserCircle, User } from 'lucide-react';
 
-export const Header = ({ data, riskMode, setRiskMode, onOpenAuth, authUser, tier, onSignOut, setTeamId, profileTab, setProfileTab }: HeaderProps) => {
+export const Header = ({ data, riskMode, setRiskMode, fuel, setFuel, onOpenAuth, authUser, tier, onSignOut, setTeamId, profileTab, setProfileTab }: HeaderProps) => {
   return (
     <header className="col-span-12 flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between mb-4">
       <div className="flex items-center gap-4">
@@ -59,6 +61,27 @@ export const Header = ({ data, riskMode, setRiskMode, onOpenAuth, authUser, tier
             >VALUE</button>
           </div>
         </div>
+        
+        <div className="flex flex-col">
+          <span className="text-[10px] uppercase tracking-widest text-slate-400 text-right font-medium">Fuel Source</span>
+          <div className="flex items-center gap-2 bg-slate-950 p-1 rounded mt-1">
+            <button 
+              onClick={() => setFuel('fplform')}
+              className={cn(
+                "px-3 py-0.5 text-[10px] rounded font-bold transition-all",
+                fuel === 'fplform' ? "bg-fpl-purple text-white" : "text-slate-400 hover:text-slate-200"
+              )}
+            >FPLFORM</button>
+            <button 
+              onClick={() => setFuel('native')}
+              className={cn(
+                "px-3 py-0.5 text-[10px] rounded font-bold transition-all",
+                fuel === 'native' ? "bg-fpl-pink text-white" : "text-slate-400 hover:text-slate-200"
+              )}
+            >NATIVE</button>
+          </div>
+        </div>
+        
         <div className="h-8 w-px bg-slate-800"></div>
         <div className="flex flex-col text-right">
           <span className="text-[10px] uppercase tracking-widest text-slate-400 font-medium">Expected Points</span>

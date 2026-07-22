@@ -124,11 +124,12 @@ export class FPLService {
     };
   }
 
-  static async getRecommendations(riskMode: string, budget: number = 1000, tier: string = 'free'): Promise<RecommendationResponse> {
+  static async getRecommendations(riskMode: string, budget: number = 1000, tier: string = 'free', fuel: string = 'fplform'): Promise<RecommendationResponse> {
     const { players, teams, fixtures, nextEventId } = await this.getBaseData();
 
-    // Use the continuously updated fplform.csv
-    const oracle = new CSVOracle('data/fplform.csv', players, riskMode, fixtures, teams, nextEventId);
+    // Dynamically load the fuel source (fplform scraped vs native FPL API)
+    const csvFileName = fuel === 'native' ? 'fpl_native.csv' : 'fplform.csv';
+    const oracle = new CSVOracle(`data/${csvFileName}`, players, riskMode, fixtures, teams, nextEventId);
 
     const available = players.filter(p => p.status === 'a' || p.chance_of_playing_next_round === 100);
     const scored = available.map(p => {
@@ -301,12 +302,13 @@ export class FPLService {
     ];
   }
 
-  static async syncTeam(teamId: string, riskMode: string, tier: string = 'free'): Promise<TeamSyncResponse> {
+  static async syncTeam(teamId: string, riskMode: string, tier: string = 'free', fuel: string = 'fplform'): Promise<TeamSyncResponse> {
     const baseData = await this.getBaseData();
     const currentEvent = baseData.currentEventId || Math.max(1, baseData.nextEventId - 1);
     
-    // 1. Initialize the V3 Engine Oracle first
-    const oracle = new CSVOracle('data/fplform.csv', baseData.players, riskMode, baseData.fixtures, baseData.teams, baseData.nextEventId);
+    // 1. Initialize the V3 Engine Oracle first based on selected fuel
+    const csvFileName = fuel === 'native' ? 'fpl_native.csv' : 'fplform.csv';
+    const oracle = new CSVOracle(`data/${csvFileName}`, baseData.players, riskMode, baseData.fixtures, baseData.teams, baseData.nextEventId);
 
     // 2. Fetch live user team
     const teamRes = await this.fetchWithRetry(`${FPL_BASE_URL}/entry/${teamId}/event/${currentEvent}/picks/`);
@@ -352,7 +354,7 @@ export class FPLService {
       }
     }
 
-    const recommendations = await this.getRecommendations(riskMode, bank, tier);
+    const recommendations = await this.getRecommendations(riskMode, bank, tier, fuel);
     const candidates = [
       ...recommendations.topPicks.gkp,
       ...recommendations.topPicks.def,
@@ -466,6 +468,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const query = req.query || {};
     const riskMode = (query.riskMode as string) || 'safe';
+    const fuel = (query.fuel as string) || 'fplform';
     const userId = (query.userId as string) || 'unknown';
     
     // Default tier if not found in db
@@ -495,7 +498,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       tier = await getUserTier(uid);
       const budget = query.budget ? parseInt(query.budget as string) : 1000;
-      const result = await FPLService.getRecommendations(riskMode, budget, tier);
+      const result = await FPLService.getRecommendations(riskMode, budget, tier, fuel);
       return res.status(200).json(result);
     } 
     
@@ -520,7 +523,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       }
 
-      const result = await FPLService.syncTeam(teamId, riskMode, tier);
+      const result = await FPLService.syncTeam(teamId, riskMode, tier, fuel);
       return res.status(200).json(result);
     }
 

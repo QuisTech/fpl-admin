@@ -42,6 +42,7 @@ import { FeatureFlagsPage } from './pages/admin/FeatureFlagsPage';
 
 function FPLApp() {
   const [riskMode, setRiskMode] = useState<'safe' | 'aggressive' | 'value'>('safe');
+  const [fuel, setFuel] = useState<'fplform' | 'native'>('fplform');
   const [tab, setTab] = useState<'optimizer' | 'pitch' | 'picks' | 'transfers' | 'chips' | 'performance' | 'agent'>('optimizer');
   
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -84,7 +85,7 @@ function FPLApp() {
     fetchLivePoints,
     tier,
     isTeamIdLocked
-  } = useFPLData(riskMode, activeUserId, authInitialized);
+  } = useFPLData(riskMode, fuel, activeUserId, authInitialized);
 
   const handleSync = async () => {
     if (tier !== 'free' && tier !== 'admin' && !isTeamIdLocked) {
@@ -124,7 +125,7 @@ function FPLApp() {
       )}
       <div className="max-w-[1400px] mx-auto grid grid-cols-12 gap-4 auto-rows-min">
 
-        <Header data={data} riskMode={riskMode} setRiskMode={setRiskMode} authUser={authUser} tier={tier} onOpenAuth={() => setIsAuthModalOpen(true)} onSignOut={() => signOut(auth)} setTeamId={setTeamId} profileTab={profileTab} setProfileTab={setProfileTab} />
+        <Header data={data} riskMode={riskMode} setRiskMode={setRiskMode} fuel={fuel} setFuel={setFuel} authUser={authUser} tier={tier} onOpenAuth={() => setIsAuthModalOpen(true)} onSignOut={() => signOut(auth)} setTeamId={setTeamId} profileTab={profileTab} setProfileTab={setProfileTab} />
 
         <MetricsColumn data={data} syncedData={syncedData} riskMode={riskMode} tab={tab} />
 

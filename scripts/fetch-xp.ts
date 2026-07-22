@@ -144,7 +144,7 @@ async function generateNativeFallback() {
     if (!fs.existsSync(destDir)) {
       fs.mkdirSync(destDir, { recursive: true });
     }
-    const destPath = path.join(destDir, 'fplform.csv');
+    const destPath = path.join(destDir, 'fpl_native.csv');
     fs.writeFileSync(destPath, csvData);
     
     console.log(`[Native Fallback] ✅ Successfully generated internal xP fuel to: ${destPath}`);
@@ -157,6 +157,13 @@ async function generateNativeFallback() {
 
 (async () => {
   console.log('[Fetcher] Launching Headless Browser to test BOTH data sources...');
+  
+  // ALWAYS generate native fallback
+  const nativeSuccess = await generateNativeFallback();
+  if (!nativeSuccess) {
+    console.error('❌ FATAL: Native fallback generation failed.');
+  }
+
   const browser = await chromium.launch({ headless: true });
 
   let fplFormSuccess = false;
@@ -176,8 +183,10 @@ async function generateNativeFallback() {
 
   if (!fplFormSuccess) {
     console.warn('⚠️ CRITICAL: FPLForm data could not be fetched. Falling back to native FPL API generation...');
-    const fallbackSuccess = await generateNativeFallback();
-    if (!fallbackSuccess) {
+    if (nativeSuccess) {
+      fs.copyFileSync(path.resolve(process.cwd(), 'data', 'fpl_native.csv'), path.resolve(process.cwd(), 'data', 'fplform.csv'));
+      console.log('✅ Copied fpl_native.csv to fplform.csv to ensure backwards compatibility.');
+    } else {
       console.error('❌ FATAL: Both external scrapers AND native fallback failed.');
       process.exit(1);
     }

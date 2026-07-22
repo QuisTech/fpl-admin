@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { RecommendationResponse, TeamSyncResponse, ScoredPlayer } from '../types';
 
-export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', userId: string, authInitialized: boolean) => {
+export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fplform' | 'native', userId: string, authInitialized: boolean) => {
   const [data, setData] = useState<RecommendationResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +23,7 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', userId: st
 
   useEffect(() => {
     fetchRecommendations();
-  }, [riskMode, syncedData?.totalCost, syncedData?.bank, userId, authInitialized]);
+  }, [riskMode, fuel, syncedData?.totalCost, syncedData?.bank, userId, authInitialized]);
 
   useEffect(() => {
     if (authInitialized && userId) {
@@ -47,7 +47,7 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', userId: st
     setLoading(true);
     try {
       const budgetQuery = syncedData ? `&budget=${(syncedData.totalCost || 0) + (syncedData.bank || 0)}` : '';
-      const res = await axios.get(`/api/recommendations?riskMode=${riskMode}${budgetQuery}&userId=${userId}`);
+      const res = await axios.get(`/api/recommendations?riskMode=${riskMode}&fuel=${fuel}${budgetQuery}&userId=${userId}`);
       if (res.data) {
         setData(res.data);
       }
@@ -105,7 +105,7 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', userId: st
     if (!teamId) return;
     setSyncing(true);
     try {
-      const res = await axios.get(`/api/sync/${teamId}?riskMode=${riskMode}&userId=${userId}`);
+      const res = await axios.get(`/api/sync/${teamId}?riskMode=${riskMode}&fuel=${fuel}&userId=${userId}`);
       setSyncedData(res.data);
       setError(null);
       return true;
