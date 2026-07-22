@@ -1,6 +1,7 @@
 import { chromium } from 'playwright';
 import path from 'path';
 import fs from 'fs';
+import axios from 'axios';
 
 async function fetchFPLForm(browser: any) {
   console.log('\n--- Fetching from FPLForm ---');
@@ -106,6 +107,54 @@ async function fetchFPLReview(browser: any) {
   }
 }
 
+async function generateNativeFallback() {
+  console.log('\n--- Generating Native API Fallback (Hybrid Engine) ---');
+  try {
+    const response = await axios.get('https://fantasy.premierleague.com/api/bootstrap-static/', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+        'Accept': 'application/json'
+      }
+    });
+    const data = response.data;
+    
+    const teamMap: Record<number, string> = {};
+    data.teams.forEach((t: any) => teamMap[t.id] = t.short_name);
+    
+    const posMap: Record<number, string> = {};
+    data.element_types.forEach((p: any) => posMap[p.id] = p.singular_name_short);
+
+    let csvData = "";
+    data.elements.forEach((el: any) => {
+      // Legacy cols: [0]="", [1]=Name, [2]="", [3]=Team, [4]=Pos, [5]=Cost, [6]=Merit, [7]="", [8]=PlayProb
+      const name = (el.web_name || '').replace(/"/g, '""');
+      const team = teamMap[el.team] || 'UNK';
+      const pos = posMap[el.element_type] || 'UNK';
+      const cost = (el.now_cost / 10).toFixed(1);
+      const merit = parseFloat(el.ep_next) || 0;
+      
+      let prob = el.chance_of_playing_next_round;
+      if (prob === null || prob === undefined) prob = 100;
+      prob = (prob / 100).toFixed(2);
+      
+      csvData += `"","${name}","","${team}","${pos}","${cost}","${merit}","","${prob}"\n`;
+    });
+
+    const destDir = path.resolve(process.cwd(), 'data');
+    if (!fs.existsSync(destDir)) {
+      fs.mkdirSync(destDir, { recursive: true });
+    }
+    const destPath = path.join(destDir, 'fplform.csv');
+    fs.writeFileSync(destPath, csvData);
+    
+    console.log(`[Native Fallback] ✅ Successfully generated internal xP fuel to: ${destPath}`);
+    return true;
+  } catch (err: any) {
+    console.log(`[Native Fallback] ❌ Error generating native fallback: ${err.message}`);
+    return false;
+  }
+}
+
 (async () => {
   console.log('[Fetcher] Launching Headless Browser to test BOTH data sources...');
   const browser = await chromium.launch({ headless: true });
@@ -119,7 +168,6 @@ async function fetchFPLReview(browser: any) {
   }
 
   const fplReviewSuccess = await fetchFPLReview(browser);
-
   await browser.close();
 
   console.log('\n--- Final Fetch Report ---');
@@ -127,7 +175,11 @@ async function fetchFPLReview(browser: any) {
   console.log(`FPLReview: ${fplReviewSuccess ? '✅ SUCCESS' : '❌ FAILED'}`);
 
   if (!fplFormSuccess) {
-    console.error('CRITICAL: FPLForm data could not be fetched after 3 retries.');
-    process.exit(1); 
+    console.warn('⚠️ CRITICAL: FPLForm data could not be fetched. Falling back to native FPL API generation...');
+    const fallbackSuccess = await generateNativeFallback();
+    if (!fallbackSuccess) {
+      console.error('❌ FATAL: Both external scrapers AND native fallback failed.');
+      process.exit(1);
+    }
   }
 })();
