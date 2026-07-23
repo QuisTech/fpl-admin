@@ -22,7 +22,14 @@ export const MetricsColumn = ({ data, syncedData, riskMode, tab }: MetricsColumn
       <div className="bg-card-bg border border-fpl-border rounded-3xl p-5 flex flex-col justify-between shadow-sm">
         <div className="flex justify-between items-start mb-4">
           <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Squad Value</h2>
-          <span className="text-fpl-green text-[10px] font-bold">{badgeText}</span>
+          <div className="flex items-center gap-2">
+            {data?.isHeuristicFallback && !isViewingMySquad && (
+              <span title="Exact budget constraints failed; falling back to naive point selection" className="text-amber-500 text-[9px] font-black uppercase tracking-wider bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20 flex items-center gap-1">
+                ⚠️ Heuristic Fallback
+              </span>
+            )}
+            <span className="text-fpl-green text-[10px] font-bold">{badgeText}</span>
+          </div>
         </div>
         <div>
           <div className="text-4xl font-bold font-mono tracking-tighter text-white">

@@ -77,16 +77,19 @@ export interface RecommendationResponse {
   squad: ScoredPlayer[];
   startingXI: ScoredPlayer[];
   bench: ScoredPlayer[];
-  captain: ScoredPlayer;
-  viceCaptain: ScoredPlayer;
+  captain: ScoredPlayer | null;
+  viceCaptain: ScoredPlayer | null;
+  expectedPoints: number;
+  totalCost: number;
+  isHeuristicFallback?: boolean;
   topPicks: {
     gkp: ScoredPlayer[];
     def: ScoredPlayer[];
     mid: ScoredPlayer[];
     fwd: ScoredPlayer[];
   };
-  totalCost: number;
-  expectedPoints: number;
+  nextEventId: number;
+  lastUpdated: number;
 }
 
 export interface TransferRecommendation {

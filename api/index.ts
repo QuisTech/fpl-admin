@@ -141,15 +141,20 @@ export class FPLService {
     });
 
     let squad: ScoredPlayer[] = [];
+    let isHeuristicFallback = false;
     const sortByScore = (a: ScoredPlayer, b: ScoredPlayer) => (b.xP || 0) - (a.xP || 0);
 
     if (tier !== 'free') {
       try {
         const availableIds = new Set<number>(available.map(p => p.id));
         const optimalIds = solveOptimalSquad(oracle, nextEventId, budget, 8, riskMode, availableIds);
+        if (!optimalIds || optimalIds.length === 0) {
+          throw new Error("LP Solver returned empty or infeasible solution.");
+        }
         squad = scored.filter(p => optimalIds.includes(p.id));
       } catch (err: any) {
         console.warn("[FPLService] LP Solver failed, falling back to heuristic selection:", err.message);
+        isHeuristicFallback = true;
         try {
           const db = getFirestore();
           await db.collection('system_alerts').add({
@@ -225,6 +230,7 @@ export class FPLService {
       viceCaptain,
       expectedPoints: startingXI.reduce((sum, p) => sum + (p.xP || 0), 0),
       totalCost: squad.reduce((sum, p) => sum + (p.now_cost || 0), 0),
+      isHeuristicFallback,
       topPicks: {
         gkp: scored.filter(p => p.position === "GKP").sort(sortByUtility).slice(0, 5),
         def: scored.filter(p => p.position === "DEF").sort(sortByUtility).slice(0, 5),
