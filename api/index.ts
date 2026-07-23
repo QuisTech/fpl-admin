@@ -207,7 +207,7 @@ export class FPLService {
       const captaincyCandidates = [...startingXI].sort((a, b) => {
         const aWeight = (a.position === 'MID' || a.position === 'FWD') ? 1.2 : 1.0;
         const bWeight = (b.position === 'MID' || b.position === 'FWD') ? 1.2 : 1.0;
-        return ((b.score || 0) * bWeight) - ((a.score || 0) * aWeight);
+        return ((b.xP || 0) * bWeight) - ((a.xP || 0) * aWeight);
       });
   
       const captain = captaincyCandidates[0] || null;

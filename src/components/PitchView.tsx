@@ -22,7 +22,7 @@ export const PitchView = ({ data, formation }: PitchViewProps) => {
       className="flex-grow flex flex-col justify-around py-4"
     >
       <div className="flex justify-around items-center">
-        {formation.gkp.map(p => <PlayerCard key={p.id} player={p} />)}
+        {formation.gkp.map(p => <PlayerCard key={p.id} player={p} isCaptain={!!(data?.captain?.id && p.id === data.captain.id)} isViceCaptain={!!(data?.viceCaptain?.id && p.id === data.viceCaptain.id)} />)}
       </div>
       <div className="flex justify-around items-center">
         {formation.def.map(p => <PlayerCard key={p.id} player={p} isCaptain={!!(data?.captain?.id && p.id === data.captain.id)} isViceCaptain={!!(data?.viceCaptain?.id && p.id === data.viceCaptain.id)} />)}
