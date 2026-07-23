@@ -219,7 +219,13 @@ export class CSVOracle implements XPOracle {
                 const teamData = teams.find(t => t.id === teamId);
                 const opponentData = teams.find(t => t.id === opponentId);
 
-                if (teamData && opponentData) {
+                const hasValidStrengths = teamData && opponentData && 
+                                          opponentData.strength_attack_away > 0 && 
+                                          opponentData.strength_attack_home > 0 &&
+                                          opponentData.strength_defence_away > 0 &&
+                                          opponentData.strength_defence_home > 0;
+
+                if (hasValidStrengths) {
                     let ratio = 1.0;
                     if (pos === 'GKP' || pos === 'DEF') {
                         if (isHome) {
