@@ -311,7 +311,15 @@ export class FPLService {
     const oracle = new CSVOracle(`data/${csvFileName}`, baseData.players, riskMode, baseData.fixtures, baseData.teams, baseData.nextEventId);
 
     // 2. Fetch live user team
-    const teamRes = await this.fetchWithRetry(`${FPL_BASE_URL}/entry/${teamId}/event/${currentEvent}/picks/`);
+    let teamRes;
+    try {
+      teamRes = await this.fetchWithRetry(`${FPL_BASE_URL}/entry/${teamId}/event/${currentEvent}/picks/`);
+    } catch (err: any) {
+      if (err.response?.status === 404) {
+        throw new Error(`FPL API Error: Team ID ${teamId} not found, or squads are currently locked and hidden by FPL until the Gameweek 1 deadline.`);
+      }
+      throw err;
+    }
 
     const myPicks = teamRes.data.picks.map((p: any) => {
       const player = baseData.players.find((pl: any) => pl.id === p.element);

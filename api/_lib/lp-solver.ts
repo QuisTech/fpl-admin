@@ -83,8 +83,8 @@ export function solveOptimalSquad(oracle: XPOracle, gameweek: number, budget: nu
     const eo = oracle.getTop1kEO?.(id) ?? 0;
     const isElite = eo >= 80 ? 1 : 0;
 
-    // Only consider players who have a score > 0 to keep the model small
-    if (score > 0) {
+    // Only consider players who have a score > 0, OR cheap bench fodder (<= 4.5m) to ensure the model can find a valid budget team
+    if (score > 0 || cost <= 45) {
       model.variables[v] = { 
         score, 
         cost, 
@@ -224,8 +224,8 @@ export function solveOptimalTransfers(
 
     const isCurrent = currentSet.has(id);
 
-    // Consider current squad players OR players with score > 0
-    if (isCurrent || score > 0) {
+    // Consider current squad players OR players with score > 0 OR cheap bench fodder
+    if (isCurrent || score > 0 || cost <= 45) {
       model.variables[v] = { 
         score, 
         cost, 
