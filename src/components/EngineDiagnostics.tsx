@@ -32,32 +32,32 @@ export const EngineDiagnostics = ({ data }: EngineDiagnosticsProps) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 relative z-10">
-        <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-800">
-          <p className="text-[10px] text-slate-500 uppercase font-bold mb-1">Constraint: Budget</p>
-          <div className="flex items-end justify-between">
-            <p className="text-sm font-mono font-black text-white">£{(budgetUsed / 10).toFixed(1)}M</p>
-            <p className="text-[10px] text-slate-500 font-mono">/ £{(budgetLimit / 10).toFixed(1)}M</p>
+      <div className="grid grid-cols-2 gap-2 relative z-10">
+        <div className="bg-slate-900/50 p-2 rounded-xl border border-slate-800">
+          <p className="text-[9px] text-slate-500 uppercase font-bold mb-1 truncate">Constraint: Budget</p>
+          <div className="flex items-end gap-1">
+            <p className="text-xs font-mono font-black text-white">£{(budgetUsed / 10).toFixed(1)}M</p>
+            <p className="text-[9px] text-slate-500 font-mono hidden sm:block">/ £{(budgetLimit / 10).toFixed(1)}M</p>
           </div>
         </div>
 
-        <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-800">
-          <p className="text-[10px] text-slate-500 uppercase font-bold mb-1">Objective Math</p>
-          <p className="text-sm font-black text-white capitalize">
+        <div className="bg-slate-900/50 p-2 rounded-xl border border-slate-800">
+          <p className="text-[9px] text-slate-500 uppercase font-bold mb-1 truncate">Objective Math</p>
+          <p className="text-[11px] font-black text-white capitalize truncate">
             {riskMode === 'value' ? 'Max ROI (Pts/£M)' : 'Max Total xP'}
           </p>
         </div>
 
-        <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-800">
-          <p className="text-[10px] text-slate-500 uppercase font-bold mb-1">Rank Shield</p>
-          <p className={`text-sm font-black ${riskMode === 'safe' ? 'text-emerald-400' : 'text-slate-400'}`}>
+        <div className="bg-slate-900/50 p-2 rounded-xl border border-slate-800">
+          <p className="text-[9px] text-slate-500 uppercase font-bold mb-1 truncate">Rank Shield</p>
+          <p className={`text-[11px] font-black truncate ${riskMode === 'safe' ? 'text-emerald-400' : 'text-slate-400'}`}>
             {riskMode === 'safe' ? `EO > ${activeConstraints.minEoTotal}%` : 'Disabled'}
           </p>
         </div>
 
-        <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-800">
-          <p className="text-[10px] text-slate-500 uppercase font-bold mb-1">Premium Core</p>
-          <p className={`text-sm font-black ${riskMode === 'safe' ? 'text-emerald-400' : 'text-slate-400'}`}>
+        <div className="bg-slate-900/50 p-2 rounded-xl border border-slate-800">
+          <p className="text-[9px] text-slate-500 uppercase font-bold mb-1 truncate">Premium Core</p>
+          <p className={`text-[11px] font-black truncate ${riskMode === 'safe' ? 'text-emerald-400' : 'text-slate-400'}`}>
             {riskMode === 'safe' ? `Min ${activeConstraints.minElitePlayers} Elite` : 'Flexible'}
           </p>
         </div>
