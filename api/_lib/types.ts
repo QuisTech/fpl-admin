@@ -75,6 +75,7 @@ export interface RecommendationResponse {
   viceCaptain: ScoredPlayer;
   expectedPoints: number;
   totalCost: number;
+  isHeuristicFallback?: boolean;
   topPicks: {
     gkp: ScoredPlayer[];
     def: ScoredPlayer[];
