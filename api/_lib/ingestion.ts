@@ -110,7 +110,7 @@ export class CSVOracle implements XPOracle {
         const playerName = cols[1];
         const team = cols[3];
         const pos = cols[4] === 'GK' ? 'GKP' : cols[4];
-        const cost = parseFloat(cols[5]) * 10; 
+        let cost = parseFloat(cols[5]) * 10; 
         const meritScore = parseFloat(cols[6]) || 0; 
         
         const parsedTeamId = teamMap[team.toLowerCase()] || 0;
@@ -142,6 +142,7 @@ export class CSVOracle implements XPOracle {
             fplId = match.id;
             rawOwnership = parseFloat(match.selected_by_percent) || 100.0;
             realTeamId = match.team;
+            cost = match.now_cost; // OVERWRITE CSV COST WITH LIVE FPL PRICE
           }
         }
         
