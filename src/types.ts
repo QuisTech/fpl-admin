@@ -82,6 +82,16 @@ export interface RecommendationResponse {
   expectedPoints: number;
   totalCost: number;
   isHeuristicFallback?: boolean;
+  engineDiagnostics?: {
+    budgetUsed: number;
+    budgetLimit: number;
+    riskMode: string;
+    solverStatus: 'optimal' | 'heuristic_fallback';
+    activeConstraints: {
+      minEoTotal?: number;
+      minElitePlayers?: number;
+    };
+  };
   topPicks: {
     gkp: ScoredPlayer[];
     def: ScoredPlayer[];

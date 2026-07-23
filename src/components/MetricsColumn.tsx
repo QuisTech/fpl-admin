@@ -1,6 +1,7 @@
 import { Star } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { RecommendationResponse, TeamSyncResponse } from '../types';
+import { EngineDiagnostics } from './EngineDiagnostics';
 
 interface MetricsColumnProps {
   data: RecommendationResponse | null;
@@ -71,6 +72,9 @@ export const MetricsColumn = ({ data, syncedData, riskMode, tab }: MetricsColumn
           </div>
         </div>
       </div>
+
+      {/* Engine Diagnostics */}
+      <EngineDiagnostics data={data} />
     </div>
   );
 };

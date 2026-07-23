@@ -19,7 +19,7 @@ export const PlayerCard = ({
   
   return (
     <div className={cn(
-      "relative flex flex-col p-1 sm:p-2 bg-slate-950 border-2 rounded-lg shadow-lg transition-transform hover:scale-105",
+      "group relative flex flex-col p-1 sm:p-2 bg-slate-950 border-2 rounded-lg shadow-lg transition-transform hover:scale-105",
       isCaptain ? "border-fpl-green shadow-[0_0_15px_rgba(0,255,133,0.2)]" : isViceCaptain ? "border-fpl-pink" : "border-slate-800",
       compact 
         ? "w-[54px] h-[72px] sm:w-20 sm:h-28" 
@@ -61,6 +61,14 @@ export const PlayerCard = ({
                 : 'Diff'}
           </span>
         </div>
+      </div>
+      
+      {/* Mathematical Engine Proof Tooltip */}
+      <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity z-50 bg-slate-900/95 backdrop-blur-sm border border-slate-700 text-slate-300 text-[9px] p-2 rounded shadow-2xl w-32 bottom-full mb-2 left-1/2 -translate-x-1/2 pointer-events-none">
+        <div className="font-bold border-b border-slate-800 pb-1 mb-1 text-white">Engine Math</div>
+        <div className="flex justify-between"><span>Raw xP:</span> <span className="text-fpl-green font-mono">{player.xP?.toFixed(2)}</span></div>
+        <div className="flex justify-between"><span>Cost:</span> <span className="font-mono">£{(player.now_cost/10).toFixed(1)}M</span></div>
+        <div className="flex justify-between font-bold border-t border-slate-800 pt-1 mt-1"><span>ROI:</span> <span className="text-cyan-400 font-mono">{((player.xP || 0) / (player.now_cost / 10)).toFixed(2)}</span></div>
       </div>
     </div>
   );

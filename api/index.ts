@@ -231,6 +231,16 @@ export class FPLService {
       expectedPoints: startingXI.reduce((sum, p) => sum + (p.xP || 0), 0),
       totalCost: squad.reduce((sum, p) => sum + (p.now_cost || 0), 0),
       isHeuristicFallback,
+      engineDiagnostics: {
+        budgetUsed: squad.reduce((sum, p) => sum + (p.now_cost || 0), 0),
+        budgetLimit: budget,
+        riskMode: riskMode,
+        solverStatus: isHeuristicFallback ? 'heuristic_fallback' : 'optimal',
+        activeConstraints: {
+          minEoTotal: riskMode === 'safe' ? 150 : 0,
+          minElitePlayers: riskMode === 'safe' ? 1 : 0
+        }
+      },
       topPicks: {
         gkp: scored.filter(p => p.position === "GKP").sort(sortByUtility).slice(0, 5),
         def: scored.filter(p => p.position === "DEF").sort(sortByUtility).slice(0, 5),
