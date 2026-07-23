@@ -34,51 +34,51 @@ export const Header = ({ data, riskMode, setRiskMode, fuel, setFuel, onOpenAuth,
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between sm:justify-end gap-3 sm:gap-6 bg-card-bg/50 p-3 rounded-xl border border-fpl-border w-full sm:w-auto">
+      <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between xl:justify-end gap-4 xl:gap-6 bg-card-bg/50 p-3 sm:p-4 rounded-xl border border-fpl-border w-full xl:w-auto">
         
         {/* Toggles Row (Mobile) / Left Side (Desktop) */}
-        <div className="flex flex-wrap sm:flex-nowrap items-center justify-between sm:justify-end gap-3 sm:gap-6 w-full sm:w-auto">
-          <div className="flex flex-col flex-1 sm:flex-auto">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between sm:justify-end gap-3 sm:gap-6 w-full xl:w-auto">
+          <div className="flex flex-col w-full sm:w-auto">
             <span className="text-[10px] uppercase tracking-widest text-slate-400 text-left sm:text-right font-medium">Strategy Mode</span>
-            <div className="flex items-center justify-between sm:justify-start gap-1 sm:gap-2 bg-slate-950 p-1 rounded mt-1 w-full sm:w-auto">
+            <div className="flex items-center gap-1 sm:gap-2 bg-slate-950 p-1 rounded mt-1 w-full sm:w-auto">
               <button 
                 onClick={() => setRiskMode('safe')}
                 className={cn(
-                  "flex-1 sm:flex-none px-2 sm:px-3 py-1 sm:py-0.5 text-[9px] sm:text-[10px] rounded font-bold transition-all text-center",
+                  "flex-1 sm:flex-none px-2 sm:px-3 py-1.5 sm:py-0.5 text-[9px] sm:text-[10px] rounded font-bold transition-all text-center",
                   riskMode === 'safe' ? "bg-fpl-green text-slate-950" : "text-slate-400 hover:text-slate-200"
                 )}
               >SAFE</button>
               <button 
                 onClick={() => setRiskMode('aggressive')}
                 className={cn(
-                  "flex-1 sm:flex-none px-2 sm:px-3 py-1 sm:py-0.5 text-[9px] sm:text-[10px] rounded font-bold transition-all text-center",
+                  "flex-1 sm:flex-none px-2 sm:px-3 py-1.5 sm:py-0.5 text-[9px] sm:text-[10px] rounded font-bold transition-all text-center",
                   riskMode === 'aggressive' ? "bg-orange-500 text-slate-950" : "text-slate-400 hover:text-slate-200"
                 )}
               >RISKY</button>
               <button 
                 onClick={() => setRiskMode('value')}
                 className={cn(
-                  "flex-1 sm:flex-none px-2 sm:px-3 py-1 sm:py-0.5 text-[9px] sm:text-[10px] rounded font-bold transition-all text-center",
+                  "flex-1 sm:flex-none px-2 sm:px-3 py-1.5 sm:py-0.5 text-[9px] sm:text-[10px] rounded font-bold transition-all text-center",
                   riskMode === 'value' ? "bg-cyan-500 text-slate-950" : "text-slate-400 hover:text-slate-200"
                 )}
               >VALUE</button>
             </div>
           </div>
           
-          <div className="flex flex-col flex-1 sm:flex-auto">
-            <span className="text-[10px] uppercase tracking-widest text-slate-400 text-right font-medium">Fuel Source</span>
-            <div className="flex items-center justify-between sm:justify-start gap-1 sm:gap-2 bg-slate-950 p-1 rounded mt-1 w-full sm:w-auto">
+          <div className="flex flex-col w-full sm:w-auto">
+            <span className="text-[10px] uppercase tracking-widest text-slate-400 text-left sm:text-right font-medium">Fuel Source</span>
+            <div className="flex items-center gap-1 sm:gap-2 bg-slate-950 p-1 rounded mt-1 w-full sm:w-auto">
               <button 
                 onClick={() => setFuel('fplform')}
                 className={cn(
-                  "flex-1 sm:flex-none px-2 sm:px-3 py-1 sm:py-0.5 text-[9px] sm:text-[10px] rounded font-bold transition-all text-center",
+                  "flex-1 sm:flex-none px-2 sm:px-3 py-1.5 sm:py-0.5 text-[9px] sm:text-[10px] rounded font-bold transition-all text-center",
                   fuel === 'fplform' ? "bg-fpl-purple text-white" : "text-slate-400 hover:text-slate-200"
                 )}
               >FPLFORM</button>
               <button 
                 onClick={() => setFuel('native')}
                 className={cn(
-                  "flex-1 sm:flex-none px-2 sm:px-3 py-1 sm:py-0.5 text-[9px] sm:text-[10px] rounded font-bold transition-all text-center",
+                  "flex-1 sm:flex-none px-2 sm:px-3 py-1.5 sm:py-0.5 text-[9px] sm:text-[10px] rounded font-bold transition-all text-center",
                   fuel === 'native' ? "bg-fpl-pink text-white" : "text-slate-400 hover:text-slate-200"
                 )}
               >NATIVE</button>
@@ -86,17 +86,17 @@ export const Header = ({ data, riskMode, setRiskMode, fuel, setFuel, onOpenAuth,
           </div>
         </div>
         
-        {/* Divider: Horizontal on mobile, Vertical on desktop */}
-        <div className="h-px sm:h-8 w-full sm:w-px bg-slate-800 my-1 sm:my-0"></div>
+        {/* Divider: Horizontal on mobile/tablet, Vertical on desktop */}
+        <div className="h-px xl:h-8 w-full xl:w-px bg-slate-800 my-1 xl:my-0"></div>
         
         {/* Metrics Row (Mobile) / Right Side (Desktop) */}
-        <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6 w-full sm:w-auto">
-          <div className="flex flex-col text-left sm:text-right">
+        <div className="flex items-center justify-between xl:justify-end gap-4 xl:gap-6 w-full xl:w-auto">
+          <div className="flex flex-col text-left xl:text-right">
             <span className="text-[10px] uppercase tracking-widest text-slate-400 font-medium">Expected Points</span>
             <span className="text-xl font-bold text-fpl-green tabular-nums">+{(data?.expectedPoints || 0).toFixed(1)} xP</span>
           </div>
           
-          <div className="h-8 w-px bg-slate-800 hidden sm:block"></div>
+          <div className="h-8 w-px bg-slate-800 hidden xl:block"></div>
           
           {authUser && !authUser.isAnonymous ? (
             <>
@@ -104,7 +104,7 @@ export const Header = ({ data, riskMode, setRiskMode, fuel, setFuel, onOpenAuth,
                 onClick={() => setProfileTab?.('account')}
                 className="flex items-center gap-3 hover:bg-slate-900 rounded-lg p-2 transition-colors shrink-0"
               >
-                <div className="flex flex-col text-right hidden sm:flex">
+                <div className="flex flex-col text-right hidden xl:flex">
                   <span className="text-[10px] font-bold text-slate-300">{authUser.email?.split('@')[0] || 'User'}</span>
                   <span className="text-[8px] uppercase text-fpl-green">{tier || 'free'}</span>
                 </div>
