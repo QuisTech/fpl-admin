@@ -29,11 +29,11 @@ export const FPLTeamSchema = z.object({
   id: z.number(),
   name: z.string(),
   short_name: z.string(),
-  strength: z.number(),
-  strength_attack_home: z.number().optional(),
-  strength_attack_away: z.number().optional(),
-  strength_defence_home: z.number().optional(),
-  strength_defence_away: z.number().optional(),
+  strength: z.number().nullish().default(0),
+  strength_attack_home: z.number().nullish().default(0),
+  strength_attack_away: z.number().nullish().default(0),
+  strength_defence_home: z.number().nullish().default(0),
+  strength_defence_away: z.number().nullish().default(0),
 }).passthrough();
 
 export const FPLFixtureSchema = z.object({
