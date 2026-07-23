@@ -109,7 +109,7 @@ function FPLApp() {
 
   if (loading && !data) {
     return (
-      <div className="min-h-screen bg-[#020617] flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-[#bb1a34] flex flex-col items-center justify-center p-4">
         <RefreshCw className="w-8 h-8 text-fpl-green animate-spin mb-4" />
         <p className="text-slate-400 font-mono text-sm tracking-widest uppercase">Optimizing Strategy...</p>
       </div>
@@ -117,7 +117,7 @@ function FPLApp() {
   }
 
   return (
-    <div className="min-h-screen bg-[#020617] text-[#f8fafc] p-4 sm:p-6 font-sans">
+    <div className="min-h-screen bg-[#bb1a34] text-[#f8fafc] p-4 sm:p-6 font-sans">
       {error && (
         <div className="max-w-[1400px] mx-auto mb-4 p-4 bg-red-500/10 border border-red-500/50 rounded-2xl text-red-400 text-xs font-mono">
           <span className="font-bold uppercase mr-2">[Engine Error]:</span> {error}

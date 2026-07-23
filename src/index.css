@@ -1,16 +1,15 @@
 @import "tailwindcss";
 
 @theme {
-  --color-fpl-green: #00ff85;
-  --color-fpl-pink: #ff005a;
-  --color-fpl-purple: #37003c;
-  --color-card-bg: #0f172a;
-  --color-fpl-border: rgba(255,255,255,0.1);
+  --color-fpl-green: #04fb88;
+  --color-fpl-pink: #c90e32;
+  --color-fpl-purple: #38003d;
+  --color-card-bg: #04b95a;
+  --color-fpl-border: rgba(255,255,255,0.2);
 }
 
 body {
-  background-color: #020617;
+  background-color: #bb1a34;
   color: #f8fafc;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
-
