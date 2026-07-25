@@ -5,8 +5,8 @@ interface HeaderProps {
   data: RecommendationResponse | null;
   riskMode: 'safe' | 'aggressive' | 'value';
   setRiskMode: (mode: 'safe' | 'aggressive' | 'value') => void;
-  fuel: 'fplform' | 'native';
-  setFuel: (fuel: 'fplform' | 'native') => void;
+  fuel: 'fplform' | 'native' | 'eye-test';
+  setFuel: (fuel: 'fplform' | 'native' | 'eye-test') => void;
   onOpenAuth: () => void;
   authUser: any;
   tier: string;
@@ -82,6 +82,13 @@ export const Header = ({ data, riskMode, setRiskMode, fuel, setFuel, onOpenAuth,
                   fuel === 'native' ? "bg-fpl-pink text-white" : "text-slate-400 hover:text-slate-200"
                 )}
               >NATIVE</button>
+              <button 
+                onClick={() => setFuel('eye-test')}
+                className={cn(
+                  "flex-1 sm:flex-none px-2 sm:px-3 py-1.5 sm:py-0.5 text-[9px] sm:text-[10px] rounded font-bold transition-all text-center",
+                  fuel === 'eye-test' ? "bg-amber-400 text-slate-950" : "text-slate-400 hover:text-slate-200"
+                )}
+              >EYE-TEST</button>
             </div>
           </div>
         </div>

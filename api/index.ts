@@ -87,8 +87,16 @@ export class FPLService {
     return result;
   }
 
-  static calculatePlayerScore(baseXp: number, player: FPLPlayer, riskMode: string): number {
+  static calculatePlayerScore(baseXp: number, player: FPLPlayer, riskMode: string, fuel: string = 'fplform'): number {
     let score = baseXp;
+    
+    if (fuel === 'eye-test') {
+      const ppm = (player.total_points || 0) / (player.now_cost / 10);
+      const form = parseFloat(player.form || "0");
+      const xG = parseFloat(player.expected_goals || "0");
+      const xA = parseFloat(player.expected_assists || "0");
+      score = ppm + (form * 2) + (xG * 5) + (xA * 3);
+    }
     
     if (riskMode !== 'value') {
       if (riskMode === 'aggressive' && player.selected_by_percent && parseFloat(player.selected_by_percent) < 5) {
@@ -105,7 +113,7 @@ export class FPLService {
     return score;
   }
 
-  static mapToScoredPlayer(p: FPLPlayer, teams: FPLTeam[], fixtures: FPLFixture[], nextEventId: number, riskMode: string, baseXp: number = 0): ScoredPlayer {
+  static mapToScoredPlayer(p: FPLPlayer, teams: FPLTeam[], fixtures: FPLFixture[], nextEventId: number, riskMode: string, baseXp: number = 0, fuel: string = 'fplform'): ScoredPlayer {
     const posMap: Record<number, string> = { 1: "GKP", 2: "DEF", 3: "MID", 4: "FWD" };
     const position = posMap[p.element_type] || "MID";
     const team = teams.find(t => t.id === p.team);
@@ -115,7 +123,7 @@ export class FPLService {
       position,
       team_name: team?.name || "Unknown",
       team_short_name: team?.short_name || "UNK",
-      score: this.calculatePlayerScore(baseXp, p, riskMode),
+      score: this.calculatePlayerScore(baseXp, p, riskMode, fuel),
       xP: baseXp,
       ppm: (p.total_points || 0) / (p.now_cost / 10),
       next_fixtures: [],
@@ -134,7 +142,7 @@ export class FPLService {
     const available = players.filter(p => p.status === 'a' || p.chance_of_playing_next_round === 100);
     const scored = available.map(p => {
       const baseXp = oracle.getXP(p.id, nextEventId);
-      const mapped = this.mapToScoredPlayer(p, teams, fixtures, nextEventId, riskMode, baseXp);
+      const mapped = this.mapToScoredPlayer(p, teams, fixtures, nextEventId, riskMode, baseXp, fuel);
       mapped.eo = oracle.getTop1kEO?.(p.id) ?? 0;
       mapped.ownership = oracle.getTop1kOwnership?.(p.id) ?? parseFloat(p.selected_by_percent || "0") ?? 0;
       return mapped;
@@ -341,7 +349,7 @@ export class FPLService {
       const player = baseData.players.find((pl: any) => pl.id === p.element);
       if (!player) return null;
       const baseXp = oracle.getXP(player.id, baseData.nextEventId);
-      const baseMapped = this.mapToScoredPlayer(player, baseData.teams, baseData.fixtures, baseData.nextEventId, riskMode, baseXp);
+      const baseMapped = this.mapToScoredPlayer(player, baseData.teams, baseData.fixtures, baseData.nextEventId, riskMode, baseXp, fuel);
       return {
         ...baseMapped,
         eo: oracle.getTop1kEO?.(player.id) ?? 0,
@@ -399,7 +407,7 @@ export class FPLService {
           const outPlayer = myPicks.find(p => p.id === outs[i]);
           if (inPlayer && outPlayer) {
             const inXp = oracle.getXP(inPlayer.id, baseData.nextEventId);
-            const inScored = FPLService.mapToScoredPlayer(inPlayer, baseData.teams, baseData.fixtures, baseData.nextEventId, riskMode, inXp);
+            const inScored = FPLService.mapToScoredPlayer(inPlayer, baseData.teams, baseData.fixtures, baseData.nextEventId, riskMode, inXp, fuel);
             
             const inVar = oracle.getVariance(inPlayer.id, baseData.nextEventId);
             const outVar = oracle.getVariance(outPlayer.id, baseData.nextEventId);

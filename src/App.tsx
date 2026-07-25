@@ -42,7 +42,7 @@ import { FeatureFlagsPage } from './pages/admin/FeatureFlagsPage';
 
 function FPLApp() {
   const [riskMode, setRiskMode] = useState<'safe' | 'aggressive' | 'value'>('safe');
-  const [fuel, setFuel] = useState<'fplform' | 'native'>('fplform');
+  const [fuel, setFuel] = useState<'fplform' | 'native' | 'eye-test'>('fplform');
   const [tab, setTab] = useState<'optimizer' | 'pitch' | 'picks' | 'transfers' | 'chips' | 'performance' | 'agent'>('optimizer');
   
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
