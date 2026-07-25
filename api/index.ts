@@ -87,7 +87,7 @@ export class FPLService {
     return result;
   }
 
-  static calculatePlayerScore(baseXp: number, player: FPLPlayer, riskMode: string, fuel: string = 'fplform'): number {
+  static calculatePlayerScore(baseXp: number, player: FPLPlayer, riskMode: string, fuel: string = 'fplform', fixtures?: FPLFixture[], nextEventId?: number): number {
     let score = baseXp;
     
     if (fuel === 'eye-test') {
@@ -96,6 +96,18 @@ export class FPLService {
       const xG = parseFloat(player.expected_goals || "0");
       const xA = parseFloat(player.expected_assists || "0");
       score = ppm + (form * 2) + (xG * 5) + (xA * 3);
+      
+      if (fixtures && nextEventId) {
+        const upcoming = fixtures.filter(f => f.event >= nextEventId && f.event < nextEventId + 3)
+          .filter(f => f.team_h === player.team || f.team_a === player.team);
+
+        let difficultyMultiplier = 1.0;
+        upcoming.forEach(f => {
+          const fdr = f.team_h === player.team ? f.team_h_difficulty : f.team_a_difficulty;
+          difficultyMultiplier *= (1 + (3 - fdr) * 0.1);
+        });
+        score *= difficultyMultiplier;
+      }
     }
     
     if (riskMode !== 'value') {
@@ -123,7 +135,7 @@ export class FPLService {
       position,
       team_name: team?.name || "Unknown",
       team_short_name: team?.short_name || "UNK",
-      score: this.calculatePlayerScore(baseXp, p, riskMode, fuel),
+      score: this.calculatePlayerScore(baseXp, p, riskMode, fuel, fixtures, nextEventId),
       xP: baseXp,
       ppm: (p.total_points || 0) / (p.now_cost / 10),
       next_fixtures: [],
