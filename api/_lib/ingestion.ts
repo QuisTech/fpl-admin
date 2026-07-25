@@ -169,7 +169,9 @@ export class CSVOracle implements XPOracle {
         // This ensures eye-test scores flow through the full LP Solver pipeline
         let adjustedMerit = meritScore;
         if (fuel === 'eye-test' && matchedPlayer) {
-          const gamesPlayed = Math.max(1, (matchedPlayer.minutes || 0) / 90);
+          // Add minimum 3-game (270 mins) threshold to prevent small sample size bias 
+          // where players with 10 mins and 1 shot get massive artificially inflated per-90 stats
+          const gamesPlayed = Math.max(3.0, (matchedPlayer.minutes || 0) / 90);
           const ppg = parseFloat(matchedPlayer.points_per_game || "0");
           const form = parseFloat(matchedPlayer.form || "0");
           const xG90 = parseFloat(matchedPlayer.expected_goals || "0") / gamesPlayed;
