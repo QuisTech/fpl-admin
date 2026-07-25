@@ -12,7 +12,7 @@ interface LPSolverModel {
   ints: Record<string, 1>;
 }
 
-export function solveOptimalSquad(oracle: XPOracle, gameweek: number, budget: number, horizon: number = 8, riskMode: string = 'safe', availableIds?: Set<number>): number[] {
+export function solveOptimalSquad(oracle: XPOracle, gameweek: number, budget: number, horizon: number = 8, riskMode: string = 'safe', availableIds?: Set<number>, playerScores?: Map<number, number>): number[] {
   const allIds = oracle.getAllPlayerIds();
   
   const model: LPSolverModel = {
@@ -49,34 +49,40 @@ export function solveOptimalSquad(oracle: XPOracle, gameweek: number, budget: nu
     // Sum expected points and variance over the lookahead horizon
     let score = 0;
     let varSum = 0;
-    for (let i = 0; i < horizon; i++) {
-      score += oracle.getXP(id, gameweek + i);
-      varSum += oracle.getVariance(id, gameweek + i);
-    }
-    
     const cost = oracle.getCost(id);
-    const costInMillions = cost / 10;
-
-    // UTILITY DEFORMATION LAYER
-    if (riskMode === 'safe') {
-      score = score - (0.5 * varSum);
-    } else if (riskMode === 'aggressive') {
-      score = score + (0.7 * varSum);
-    } else if (riskMode === 'value') {
-      if (costInMillions > 0) {
-        score = score / costInMillions;
+    
+    if (playerScores && playerScores.has(id)) {
+      // Direct pass-through of precalculated heuristic scores (which already contain risk deformation)
+      score = playerScores.get(id)!;
+    } else {
+      for (let i = 0; i < horizon; i++) {
+        score += oracle.getXP(id, gameweek + i);
+        varSum += oracle.getVariance(id, gameweek + i);
       }
-      // Add deterministic tie-breaker to prevent search explosion in branch-and-bound LP solver
-      score += (id % 10000) * 1e-4;
-    }
+      
+      const costInMillions = cost / 10;
 
-    // Apply EO/Risk utility adjustments to the LP objective score
-    if (score > 0 && riskMode !== 'value') {
-      // 1. Premium Captaincy Protection
-      if (costInMillions >= 10.0) {
-        score *= 1.15;
-      } else if (costInMillions >= 8.0) {
-        score *= 1.08;
+      // UTILITY DEFORMATION LAYER
+      if (riskMode === 'safe') {
+        score = score - (0.5 * varSum);
+      } else if (riskMode === 'aggressive') {
+        score = score + (0.7 * varSum);
+      } else if (riskMode === 'value') {
+        if (costInMillions > 0) {
+          score = score / costInMillions;
+        }
+        // Add deterministic tie-breaker to prevent search explosion in branch-and-bound LP solver
+        score += (id % 10000) * 1e-4;
+      }
+
+      // Apply EO/Risk utility adjustments to the LP objective score
+      if (score > 0 && riskMode !== 'value') {
+        // 1. Premium Captaincy Protection
+        if (costInMillions >= 10.0) {
+          score *= 1.15;
+        } else if (costInMillions >= 8.0) {
+          score *= 1.08;
+        }
       }
     }
 

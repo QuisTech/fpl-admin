@@ -155,7 +155,14 @@ export class FPLService {
     if (tier !== 'free') {
       try {
         const availableIds = new Set<number>(available.map(p => p.id));
-        const optimalIds = solveOptimalSquad(oracle, nextEventId, budget, 8, riskMode, availableIds);
+        
+        let playerScores: Map<number, number> | undefined;
+        if (fuel === 'eye-test') {
+          playerScores = new Map<number, number>();
+          scored.forEach(p => playerScores!.set(p.id, p.score));
+        }
+        
+        const optimalIds = solveOptimalSquad(oracle, nextEventId, budget, 8, riskMode, availableIds, playerScores);
         if (!optimalIds || optimalIds.length === 0) {
           throw new Error("LP Solver returned empty or infeasible solution.");
         }
