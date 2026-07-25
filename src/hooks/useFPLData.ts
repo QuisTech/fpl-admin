@@ -26,6 +26,13 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
   }, [riskMode, fuel, syncedData?.totalCost, syncedData?.bank, userId, authInitialized]);
 
   useEffect(() => {
+    if (teamId && syncedData) {
+      syncTeam();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [riskMode, fuel]);
+
+  useEffect(() => {
     if (authInitialized && userId) {
       axios.get(`/api/user?userId=${userId}`)
         .then(res => setTier(res.data.tier))
