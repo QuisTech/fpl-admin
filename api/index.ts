@@ -124,7 +124,7 @@ export class FPLService {
       team_name: team?.name || "Unknown",
       team_short_name: team?.short_name || "UNK",
       score: this.calculatePlayerScore(baseXp, p, riskMode, fuel),
-      xP: fuel === 'eye-test' ? this.calculatePlayerScore(baseXp, p, 'value', fuel) : baseXp,
+      xP: baseXp,
       ppm: (p.total_points || 0) / (p.now_cost / 10),
       next_fixtures: [],
       isCaptain: false,
