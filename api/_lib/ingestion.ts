@@ -8,7 +8,6 @@ export interface XPOracle {
   getXP(playerId: number, gameweek: number): number;
   getVariance(playerId: number, gameweek: number): number;
   getPriceDelta(playerId: number): number;
-  getFixtures(gameweek: number): any[]; 
   getPosition(playerId: number): string;
   getCost(playerId: number): number;
   getTeam(playerId: number): string;
@@ -89,7 +88,7 @@ export class CSVOracle implements XPOracle {
     const fileContent = fs.readFileSync(fullPath, 'utf-8');
     const lines = fileContent.split('\n');
 
-    let syntheticId = 9000;
+    let syntheticId = 100000; // Increased to 100000 to prevent collisions with future FPL API IDs
 
     const teamMap: Record<string, number> = {};
     if (teams && teams.length > 0) {
@@ -102,7 +101,21 @@ export class CSVOracle implements XPOracle {
       const line = lines[i].trim();
       let cols: string[] = [];
       try {
-        cols = line.split(',').map(c => (c || '').replace(/"/g, ''));
+        let inQuotes = false;
+        let current = '';
+        for (let j = 0; j < line.length; j++) {
+          const char = line[j];
+          if (char === '"') {
+            inQuotes = !inQuotes;
+          } else if (char === ',' && !inQuotes) {
+            cols.push(current);
+            current = '';
+          } else {
+            current += char;
+          }
+        }
+        cols.push(current);
+        cols = cols.map(c => c.trim().replace(/^"|"$/g, ''));
       } catch (err: any) {
         console.error(`[CSVOracle] Parsing failed at line ${i}: "${line}"`);
         throw err;
@@ -311,7 +324,6 @@ export class CSVOracle implements XPOracle {
   getXP(playerId: number, gameweek: number): number { return this.xpMatrix[playerId]?.[gameweek] || 0; }
   getVariance(playerId: number, gameweek: number): number { return this.varianceMatrix[playerId]?.[gameweek] || 0; }
   getPriceDelta(playerId: number): number { return 0; }
-  getFixtures(gameweek: number): any[] { return []; }
   getPosition(playerId: number): string {
     const pos = this.playerPositions[playerId];
     return pos === 'GK' ? 'GKP' : pos;
