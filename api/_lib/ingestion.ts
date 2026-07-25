@@ -169,11 +169,14 @@ export class CSVOracle implements XPOracle {
         // This ensures eye-test scores flow through the full LP Solver pipeline
         let adjustedMerit = meritScore;
         if (fuel === 'eye-test' && matchedPlayer) {
-          const ppm = (matchedPlayer.total_points || 0) / (matchedPlayer.now_cost / 10);
+          const gamesPlayed = Math.max(1, (matchedPlayer.minutes || 0) / 90);
+          const ppg = parseFloat(matchedPlayer.points_per_game || "0");
           const form = parseFloat(matchedPlayer.form || "0");
-          const xG = parseFloat(matchedPlayer.expected_goals || "0");
-          const xA = parseFloat(matchedPlayer.expected_assists || "0");
-          adjustedMerit = ppm + (form * 2) + (xG * 5) + (xA * 3);
+          const xG90 = parseFloat(matchedPlayer.expected_goals || "0") / gamesPlayed;
+          const xA90 = parseFloat(matchedPlayer.expected_assists || "0") / gamesPlayed;
+          
+          // Construct a true per-game merit score (similar scale to normal xP, usually 2.0 to 10.0)
+          adjustedMerit = (ppg * 0.3) + (form * 0.4) + (xG90 * 3.0) + (xA90 * 2.0);
         }
 
         this.playerNames[fplId] = playerName;
