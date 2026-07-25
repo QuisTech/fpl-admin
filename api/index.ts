@@ -89,26 +89,8 @@ export class FPLService {
 
   static calculatePlayerScore(baseXp: number, player: FPLPlayer, riskMode: string, fuel: string = 'fplform', fixtures?: FPLFixture[], nextEventId?: number): number {
     let score = baseXp;
-    
-    if (fuel === 'eye-test') {
-      const ppm = (player.total_points || 0) / (player.now_cost / 10);
-      const form = parseFloat(player.form || "0");
-      const xG = parseFloat(player.expected_goals || "0");
-      const xA = parseFloat(player.expected_assists || "0");
-      score = ppm + (form * 2) + (xG * 5) + (xA * 3);
-      
-      if (fixtures && nextEventId) {
-        const upcoming = fixtures.filter(f => f.event >= nextEventId && f.event < nextEventId + 3)
-          .filter(f => f.team_h === player.team || f.team_a === player.team);
-
-        let difficultyMultiplier = 1.0;
-        upcoming.forEach(f => {
-          const fdr = f.team_h === player.team ? f.team_h_difficulty : f.team_a_difficulty;
-          difficultyMultiplier *= (1 + (3 - fdr) * 0.1);
-        });
-        score *= difficultyMultiplier;
-      }
-    }
+    // Eye-test merit + FDR is now computed inside the oracle (ingestion.ts)
+    // so baseXp already contains the correct eye-test score with fixture modifiers
     
     if (riskMode !== 'value') {
       if (riskMode === 'aggressive' && player.selected_by_percent && parseFloat(player.selected_by_percent) < 5) {
@@ -148,8 +130,10 @@ export class FPLService {
     const { players, teams, fixtures, nextEventId } = await this.getBaseData();
 
     // Dynamically load the fuel source (fplform scraped vs native FPL API)
+    // Eye-test merit + FDR is now computed inside the oracle so all fuel sources
+    // flow through the same LP Solver pipeline with full utility deformation
     const csvFileName = fuel === 'native' ? 'fpl_native.csv' : 'fplform.csv';
-    const oracle = new CSVOracle(`data/${csvFileName}`, players, riskMode, fixtures, teams, nextEventId);
+    const oracle = new CSVOracle(`data/${csvFileName}`, players, riskMode, fixtures, teams, nextEventId, fuel);
 
     const available = players.filter(p => p.status === 'a' || p.chance_of_playing_next_round === 100);
     const scored = available.map(p => {
@@ -168,13 +152,7 @@ export class FPLService {
       try {
         const availableIds = new Set<number>(available.map(p => p.id));
         
-        let playerScores: Map<number, number> | undefined;
-        if (fuel === 'eye-test') {
-          playerScores = new Map<number, number>();
-          scored.forEach(p => playerScores!.set(p.id, p.score));
-        }
-        
-        const optimalIds = solveOptimalSquad(oracle, nextEventId, budget, 8, riskMode, availableIds, playerScores);
+        const optimalIds = solveOptimalSquad(oracle, nextEventId, budget, 8, riskMode, availableIds);
         if (!optimalIds || optimalIds.length === 0) {
           throw new Error("LP Solver returned empty or infeasible solution.");
         }

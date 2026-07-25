@@ -36,10 +36,11 @@ export class CSVOracle implements XPOracle {
     riskMode: string = 'safe',
     fixtures: any[] = [], 
     teams: any[] = [], 
-    nextEventId: number = 1
+    nextEventId: number = 1,
+    fuel: string = 'fplform'
   ) {
     this.loadTop1kData();
-    this.loadData(filePath, players, fixtures, teams, nextEventId, riskMode);
+    this.loadData(filePath, players, fixtures, teams, nextEventId, riskMode, fuel);
   }
 
   private loadTop1kData() {
@@ -76,7 +77,8 @@ export class CSVOracle implements XPOracle {
     fixtures: any[], 
     teams: any[], 
     nextEventId: number, 
-    riskMode: string
+    riskMode: string,
+    fuel: string = 'fplform'
   ) {
     const fullPath = path.resolve(process.cwd(), filePath);
     if (!fs.existsSync(fullPath)) {
@@ -119,6 +121,7 @@ export class CSVOracle implements XPOracle {
         let fplId = syntheticId++; 
         let rawOwnership = 100.0;
         let realTeamId = parsedTeamId;
+        let matchedPlayer: any = null;
 
         if (players.length > 0) {
           const match = players.find(p => {
@@ -143,11 +146,22 @@ export class CSVOracle implements XPOracle {
             rawOwnership = parseFloat(match.selected_by_percent) || 100.0;
             realTeamId = match.team;
             cost = match.now_cost; // OVERWRITE CSV COST WITH LIVE FPL PRICE
+            matchedPlayer = match;
           }
         }
         
         const teamId = parsedTeamId || realTeamId || 0;
-        const adjustedMerit = meritScore;
+
+        // Eye-test: override CSV merit with live FPL API data (form, xG, xA, PPM)
+        // This ensures eye-test scores flow through the full LP Solver pipeline
+        let adjustedMerit = meritScore;
+        if (fuel === 'eye-test' && matchedPlayer) {
+          const ppm = (matchedPlayer.total_points || 0) / (matchedPlayer.now_cost / 10);
+          const form = parseFloat(matchedPlayer.form || "0");
+          const xG = parseFloat(matchedPlayer.expected_goals || "0");
+          const xA = parseFloat(matchedPlayer.expected_assists || "0");
+          adjustedMerit = ppm + (form * 2) + (xG * 5) + (xA * 3);
+        }
 
         this.playerNames[fplId] = playerName;
         this.playerPositions[fplId] = pos;
@@ -242,9 +256,13 @@ export class CSVOracle implements XPOracle {
                         }
                     }
                     
-                    // Dampen and clamp the fixture ratio to avoid double counting FPLForm's fixture signal
-                    let dampened = 1 + ((ratio - 1) * 0.5);
-                    diffMultiplier = Math.max(0.85, Math.min(1.20, dampened));
+                    // Eye-test uses full FDR (100%) with wider clamp to be fixture-aggressive
+                    // FPLFORM/NATIVE use 50% dampening to avoid double-counting their built-in fixture signal
+                    const dampenFactor = fuel === 'eye-test' ? 1.0 : 0.5;
+                    let dampened = 1 + ((ratio - 1) * dampenFactor);
+                    const clampLow = fuel === 'eye-test' ? 0.70 : 0.85;
+                    const clampHigh = fuel === 'eye-test' ? 1.40 : 1.20;
+                    diffMultiplier = Math.max(clampLow, Math.min(clampHigh, dampened));
                 } else {
                     const fdr = f.team_h === teamId ? f.team_h_difficulty : f.team_a_difficulty;
                     diffMultiplier = 1 + (3 - fdr) * 0.1;
