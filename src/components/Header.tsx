@@ -38,7 +38,7 @@ export const Header = ({ data, riskMode, setRiskMode, fuel, setFuel, onOpenAuth,
         
         {/* Toggles Row (Mobile) / Left Side (Desktop) */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between sm:justify-end gap-3 sm:gap-6 w-full xl:w-auto">
-          <div className="flex flex-col w-full sm:w-auto">
+          <div className="flex flex-col w-full sm:w-auto order-2 sm:order-1">
             <span className="text-[10px] uppercase tracking-widest text-slate-400 text-left sm:text-right font-medium">Strategy Mode</span>
             <div className="flex items-center gap-1 sm:gap-2 bg-slate-950 p-1 rounded mt-1 w-full sm:w-auto">
               <button 
@@ -65,7 +65,7 @@ export const Header = ({ data, riskMode, setRiskMode, fuel, setFuel, onOpenAuth,
             </div>
           </div>
           
-          <div className="flex flex-col w-full sm:w-auto">
+          <div className="flex flex-col w-full sm:w-auto order-1 sm:order-2">
             <span className="text-[10px] uppercase tracking-widest text-slate-400 text-left sm:text-right font-medium">Fuel Source</span>
             <div className="flex items-center gap-1 sm:gap-2 bg-slate-950 p-1 rounded mt-1 w-full sm:w-auto">
               <button 
