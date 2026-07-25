@@ -232,8 +232,8 @@ export class FPLService {
       
       // Captaincy Strategy: Heavily favor Attackers (MID/FWD) over DEF/GKP due to higher point ceilings
       const captaincyCandidates = [...startingXI].sort((a, b) => {
-        const aWeight = (a.position === 'MID' || a.position === 'FWD') ? 1.2 : 1.0;
-        const bWeight = (b.position === 'MID' || b.position === 'FWD') ? 1.2 : 1.0;
+        const aWeight = (a.position === 'MID' || a.position === 'FWD') ? 1.5 : 1.0;
+        const bWeight = (b.position === 'MID' || b.position === 'FWD') ? 1.5 : 1.0;
         return ((b.xP || 0) * bWeight) - ((a.xP || 0) * aWeight);
       });
   
