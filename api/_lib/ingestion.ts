@@ -179,7 +179,12 @@ export class CSVOracle implements XPOracle {
           
           // Construct a true per-game merit score (similar scale to normal xP, usually 2.0 to 10.0)
           // Calibrated offline: a 1:1 ratio between xG90 and xA90 provides the highest seasonal return.
-          adjustedMerit = (ppg * 0.3) + (form * 0.4) + (xG90 * 2.5) + (xA90 * 2.5);
+          const liveMerit = (ppg * 0.3) + (form * 0.4) + (xG90 * 2.5) + (xA90 * 2.5);
+          
+          // If the season hasn't started yet (all live stats are 0), fallback to the baseline CSV merit
+          if (liveMerit > 0) {
+            adjustedMerit = liveMerit;
+          }
         }
 
         this.playerNames[fplId] = playerName;

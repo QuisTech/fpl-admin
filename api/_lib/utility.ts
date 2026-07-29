@@ -17,16 +17,17 @@ export function calculatePlayerUtility(
     if (costInMillions > 0) {
       score = (0.7 * totalXP) + (0.3 * (totalXP / costInMillions));
     }
-    // Add deterministic tie-breaker to prevent search explosion in branch-and-bound LP solver
-    if (playerId) {
-      score += (playerId % 10000) * 1e-4;
-    }
-    return score;
+  } else {
+    // Apply risk lambda
+    const lambda = getRiskLambda(riskMode);
+    score = score - (lambda * totalVariance);
   }
 
-  // Apply risk lambda
-  const lambda = getRiskLambda(riskMode);
-  score = score - (lambda * totalVariance);
+  // Add deterministic tie-breaker to prevent search explosion in branch-and-bound LP solver
+  // This ensures identical players always resolve deterministically.
+  if (playerId) {
+    score += (playerId % 10000) * 1e-4;
+  }
 
   return score;
 }
