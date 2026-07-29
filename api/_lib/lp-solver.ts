@@ -1,4 +1,5 @@
 import { XPOracle } from "./ingestion.js";
+import { calculatePlayerUtility } from "./utility.js";
 
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
@@ -61,29 +62,7 @@ export function solveOptimalSquad(oracle: XPOracle, gameweek: number, budget: nu
       }
       
       const costInMillions = cost / 10;
-
-      // UTILITY DEFORMATION LAYER
-      if (riskMode === 'safe') {
-        score = score - (0.5 * varSum);
-      } else if (riskMode === 'aggressive') {
-        score = score + (0.7 * varSum);
-      } else if (riskMode === 'value') {
-        if (costInMillions > 0) {
-          score = score / costInMillions;
-        }
-        // Add deterministic tie-breaker to prevent search explosion in branch-and-bound LP solver
-        score += (id % 10000) * 1e-4;
-      }
-
-      // Apply EO/Risk utility adjustments to the LP objective score
-      if (score > 0 && riskMode !== 'value') {
-        // 1. Premium Captaincy Protection
-        if (costInMillions >= 10.0) {
-          score *= 1.15;
-        } else if (costInMillions >= 8.0) {
-          score *= 1.08;
-        }
-      }
+      score = calculatePlayerUtility(score, varSum, costInMillions, riskMode, id);
     }
 
     const eo = oracle.getTop1kEO?.(id) ?? 0;
@@ -201,29 +180,7 @@ export function solveOptimalTransfers(
     
     const cost = oracle.getCost(id);
     const costInMillions = cost / 10;
-
-    // UTILITY DEFORMATION LAYER
-    if (riskMode === 'safe') {
-      score = score - (0.5 * varSum);
-    } else if (riskMode === 'aggressive') {
-      score = score + (0.7 * varSum);
-    } else if (riskMode === 'value') {
-      if (costInMillions > 0) {
-        score = score / costInMillions;
-      }
-      // Add deterministic tie-breaker to prevent search explosion in branch-and-bound LP solver
-      score += (id % 10000) * 1e-4;
-    }
-
-    // Apply EO/Risk utility adjustments to the LP objective score
-    if (score > 0 && riskMode !== 'value') {
-      // 1. Premium Captaincy Protection
-      if (costInMillions >= 10.0) {
-        score *= 1.15;
-      } else if (costInMillions >= 8.0) {
-        score *= 1.08;
-      }
-    }
+    score = calculatePlayerUtility(score, varSum, costInMillions, riskMode, id);
 
     const eo = oracle.getTop1kEO?.(id) ?? 0;
     const isElite = eo >= 80 ? 1 : 0;

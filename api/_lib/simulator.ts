@@ -1,5 +1,6 @@
 import { XPOracle } from './ingestion.js';
 import { solveOptimalSquad, solveOptimalTransfers } from './lp-solver.js';
+import { getRiskLambda, calculatePlayerUtility, calculateCaptainUtility } from './utility.js';
 
 export interface SquadState {
   squad: number[]; // Array of 15 player IDs
@@ -38,15 +39,22 @@ export class Simulator {
     }
   }
 
-  public simulateMatchday(state: SquadState, gw: number, oracle: XPOracle): { score: number; variance: number } {
-    const playerProjections = state.squad.map(id => ({
-      id,
-      xp: oracle.getXP(id, gw),
-      variance: oracle.getVariance?.(id, gw) ?? (oracle.getXP(id, gw) * 1.5),
-      pos: oracle.getPosition(id)
-    }));
+  public simulateMatchday(state: SquadState, gw: number, oracle: XPOracle, riskMode: string = 'safe'): { score: number; variance: number } {
+    const playerProjections = state.squad.map(id => {
+      const xp = oracle.getXP(id, gw);
+      const variance = oracle.getVariance?.(id, gw) ?? (xp * 1.5);
+      const eo = oracle.getTop1kEO?.(id) ?? 0;
+      const captainUtility = calculateCaptainUtility(xp, variance, eo, riskMode);
+      return {
+        id,
+        xp,
+        variance,
+        pos: oracle.getPosition(id),
+        captainUtility
+      };
+    });
 
-    playerProjections.sort((a, b) => b.xp - a.xp);
+    playerProjections.sort((a, b) => b.captainUtility - a.captainUtility);
 
     let gwScore = 0;
     let gwVariance = 0;
@@ -71,13 +79,24 @@ export class Simulator {
     return { score: gwScore, variance: gwVariance };
   }
 
-  public calculateFitness(state: SquadState): number {
+  public calculateFitness(state: SquadState, oracle: XPOracle, riskMode: string): number {
     let fitness = state.accumulatedScore;
     // Add terminal holding value for unused chips to prevent burning them just because the horizon ends
     fitness += (state.chipState['WC'] || 0) * 25.0; // Wildcard is worth ~25 points long-term
     fitness += (state.chipState['FH'] || 0) * 15.0; // Free Hit is worth ~15 points
     fitness += (state.chipState['BB'] || 0) * 12.0; // Bench Boost is worth ~12 points
     fitness += (state.chipState['TC'] || 0) * 8.0;  // Triple Captain is worth ~8 points
+    
+    // Terminal squad value (quality of the squad exiting the horizon)
+    let terminalSquadValue = 0;
+    state.squad.forEach(id => {
+      const xp = oracle.getXP(id, state.gameweek);
+      const variance = oracle.getVariance?.(id, state.gameweek) ?? (xp * 1.5);
+      const cost = oracle.getCost(id) / 10;
+      terminalSquadValue += calculatePlayerUtility(xp, variance, cost, riskMode, id);
+    });
+    
+    fitness += terminalSquadValue;
     return fitness;
   }
 
@@ -120,16 +139,13 @@ export class Simulator {
     const candidateXPs: Record<number, number> = {};
     candidateIds.forEach(inId => {
       let inXP = 0;
+      let inVar = 0;
       for (let i = 0; i < horizon; i++) {
         inXP += oracle.getXP(inId, gw + i);
+        inVar += oracle.getVariance(inId, gw + i);
       }
-      if (riskMode !== 'value') {
-        const inCost = oracle.getCost(inId);
-        const costInMillions = inCost / 10;
-        if (costInMillions >= 10.0) inXP *= 1.15;
-        else if (costInMillions >= 8.0) inXP *= 1.08;
-      }
-      candidateXPs[inId] = inXP;
+      const inCost = oracle.getCost(inId) / 10;
+      candidateXPs[inId] = calculatePlayerUtility(inXP, inVar, inCost, riskMode, inId);
     });
 
     state.squad.forEach(outId => {
@@ -138,14 +154,13 @@ export class Simulator {
       
       // Sum expected points over the lookahead horizon
       let outXP = 0;
+      let outVar = 0;
       for (let i = 0; i < horizon; i++) {
         outXP += oracle.getXP(outId, gw + i);
+        outVar += oracle.getVariance(outId, gw + i);
       }
-      if (riskMode !== 'value') {
-        const costInMillions = outCost / 10;
-        if (costInMillions >= 10.0) outXP *= 1.15;
-        else if (costInMillions >= 8.0) outXP *= 1.08;
-      }
+      const costInMillions = outCost / 10;
+      outXP = calculatePlayerUtility(outXP, outVar, costInMillions, riskMode, outId);
 
       candidateIds.forEach(inId => {
         if (squadSet.has(inId)) return;
@@ -216,12 +231,7 @@ export class Simulator {
     let currentBeam = [initialState];
 
     // Determine risk-aversion lambda based on riskMode
-    let lambda = 0.05; // default balanced
-    if (riskMode === 'safe') {
-      lambda = 0.15;
-    } else if (riskMode === 'aggressive') {
-      lambda = 0.02;
-    }
+    const lambda = getRiskLambda(riskMode);
 
     for (let step = 0; step < this.maxDepth; step++) {
       const gw = initialState.gameweek + step;
@@ -307,7 +317,7 @@ export class Simulator {
           nextState.freeTransfers = Math.min(5, remainingFTs + 1);
 
           // Simulate Matchday (Expected Value + Analytical Variance)
-          const { score: gwPoints, variance: gwVariance } = this.simulateMatchday(nextState, gw, oracle);
+          const { score: gwPoints, variance: gwVariance } = this.simulateMatchday(nextState, gw, oracle, riskMode);
           
           // Risk-adjusted Expected Utility: Score - (lambda * Variance)
           const gwUtility = gwPoints - (lambda * gwVariance) - action.hitCost;
@@ -317,7 +327,7 @@ export class Simulator {
         }
       }
 
-      nextBeam.sort((a, b) => this.calculateFitness(b) - this.calculateFitness(a));
+      nextBeam.sort((a, b) => this.calculateFitness(b, oracle, riskMode) - this.calculateFitness(a, oracle, riskMode));
       currentBeam = nextBeam.slice(0, this.beamWidth);
     }
 
