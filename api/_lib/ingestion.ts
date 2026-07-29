@@ -178,7 +178,8 @@ export class CSVOracle implements XPOracle {
           const xA90 = parseFloat(matchedPlayer.expected_assists || "0") / gamesPlayed;
           
           // Construct a true per-game merit score (similar scale to normal xP, usually 2.0 to 10.0)
-          adjustedMerit = (ppg * 0.3) + (form * 0.4) + (xG90 * 3.0) + (xA90 * 2.0);
+          // Calibrated offline: a 1:1 ratio between xG90 and xA90 provides the highest seasonal return.
+          adjustedMerit = (ppg * 0.3) + (form * 0.4) + (xG90 * 2.5) + (xA90 * 2.5);
         }
 
         this.playerNames[fplId] = playerName;

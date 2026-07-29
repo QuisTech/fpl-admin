@@ -1,7 +1,7 @@
 export function getRiskLambda(riskMode: string): number {
-  if (riskMode === 'safe') return 0.15;
-  if (riskMode === 'aggressive') return 0.02;
-  return 0.05; // value or default
+  if (riskMode === 'safe') return 0.02; // Mathematically optimized for 2023/24 season
+  if (riskMode === 'aggressive') return 0.00; // Total risk blindness
+  return 0.02; // value or default
 }
 
 export function calculatePlayerUtility(
