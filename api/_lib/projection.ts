@@ -34,14 +34,14 @@ export interface UtilityParameters {
 }
 
 export const DEFAULT_PARAMETERS: UtilityParameters = {
-  betaMinutesBase: 1.0,
+  betaMinutesBase: 0.8,
   betaMinutesTrend: 0.1,
 
   betaAttackBase: 0.5,
-  betaXG: 4.0,
-  betaXA: 3.0,
-  betaXGI3: 1.0,
-  betaXGI5: 0.5,
+  betaXG: 1.5,
+  betaXA: 1.0,
+  betaXGI3: 0.2,
+  betaXGI5: 0.1,
   betaAttFixture: -0.1,
   betaTeamAttack: 0.5,
   betaOppDefense: -0.5,
