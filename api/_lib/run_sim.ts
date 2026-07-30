@@ -5,8 +5,7 @@ import { Simulator, SquadState } from './simulator';
 const oracle = new CSVOracle('data/fplform_scraped.csv');
 
 // We will build a dummy squad using the first 15 player IDs we ingested 
-// (which should be the highest "Merit" players like Haaland, Fernandes, etc.)
-const initialSquadIds = Array.from({ length: 15 }, (_, i) => i + 1);
+const initialSquadIds = oracle.getAllPlayerIds().slice(0, 15);
 
 const initialState: SquadState = {
   squad: initialSquadIds,

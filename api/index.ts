@@ -8,6 +8,7 @@ import {
   RecommendationResponse, TeamSyncResponse, TransferRecommendation, ChipAdvice
 } from './_lib/types.js';
 import { CSVOracle } from './_lib/ingestion.js';
+import { getParamsForRiskMode } from './_lib/projection.js';
 import { Simulator } from './_lib/simulator.js';
 import { solveOptimalSquad } from './_lib/lp-solver.js';
 import { getUserTier, mergeUserTiers, getFirestore } from '../lib/firestore.js';
@@ -152,7 +153,8 @@ export class FPLService {
       try {
         const availableIds = new Set<number>(available.map(p => p.id));
         
-        const optimalIds = solveOptimalSquad(oracle, nextEventId, budget, 8, riskMode, availableIds);
+        const params = getParamsForRiskMode(riskMode);
+        const optimalIds = solveOptimalSquad(oracle, nextEventId, budget, 8, params, availableIds);
         if (!optimalIds || optimalIds.length === 0) {
           throw new Error("LP Solver returned empty or infeasible solution.");
         }
@@ -377,7 +379,8 @@ export class FPLService {
     
     if (tier === 'grandCru' || tier === 'aiAgent' || tier === 'betaPilot' || tier === 'admin') {
       console.log(`[V3 Engine] Executing Beam Search for Team ${teamId}...`);
-      bestFutures = simulator.simulateHorizon(initialState, oracle, riskMode);
+      const params = getParamsForRiskMode(riskMode);
+      bestFutures = simulator.simulateHorizon(initialState, oracle, params);
       if (bestFutures.length > 0) {
         optimalFirstMove = bestFutures[0].firstAction || 'ROLL';
       }

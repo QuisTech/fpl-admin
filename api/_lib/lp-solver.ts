@@ -1,6 +1,6 @@
 import { XPOracle } from "./ingestion.js";
-import { calculatePlayerUtility } from "./utility.js";
-
+import { calculateUtility } from "./utility.js";
+import { UtilityParameters, DEFAULT_PARAMETERS } from "./projection.js";
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const solver = require("javascript-lp-solver");
@@ -13,7 +13,25 @@ interface LPSolverModel {
   ints: Record<string, 1>;
 }
 
-export function solveOptimalSquad(oracle: XPOracle, gameweek: number, budget: number, horizon: number = 8, riskMode: string = 'safe', availableIds?: Set<number>, playerScores?: Map<number, number>): number[] {
+function getPlayerScore(oracle: XPOracle, gameweek: number, id: number, horizon: number, params: UtilityParameters): number {
+  let xp = 0;
+  let varSum = 0;
+  for (let i = 0; i < horizon; i++) {
+    xp += oracle.getXP(id, gameweek + i);
+    varSum += oracle.getVariance(id, gameweek + i);
+  }
+  const eo = oracle.getTop1kEO?.(id) ?? 0;
+  return calculateUtility(xp, varSum, eo, params, id);
+}
+
+export function solveOptimalSquad(
+  oracle: XPOracle, 
+  gameweek: number, 
+  budget: number, 
+  horizon: number = 8, 
+  params: UtilityParameters = DEFAULT_PARAMETERS,
+  availableIds?: Set<number>
+): number[] {
   const allIds = oracle.getAllPlayerIds();
   
   const model: LPSolverModel = {
@@ -31,11 +49,6 @@ export function solveOptimalSquad(oracle: XPOracle, gameweek: number, budget: nu
     ints: {}
   };
 
-  if (riskMode === 'safe') {
-    model.constraints.eo_total = { min: 250 };
-    model.constraints.elite_eo_count = { min: 1 };
-  }
-
   allIds.forEach(id => {
     if (availableIds && !availableIds.has(id)) return;
     
@@ -45,30 +58,12 @@ export function solveOptimalSquad(oracle: XPOracle, gameweek: number, budget: nu
     }
 
     const v = `p_${id}`;
-    const pos = oracle.getPosition(id).toLowerCase(); // "gkp", "def", "mid", "fwd"
+    const pos = oracle.getPosition(id).toLowerCase();
     
-    // Sum expected points and variance over the lookahead horizon
-    let score = 0;
-    let varSum = 0;
+    const score = getPlayerScore(oracle, gameweek, id, horizon, params);
     const cost = oracle.getCost(id);
-    
-    if (playerScores && playerScores.has(id)) {
-      // Direct pass-through of precalculated heuristic scores (which already contain risk deformation)
-      score = playerScores.get(id)!;
-    } else {
-      for (let i = 0; i < horizon; i++) {
-        score += oracle.getXP(id, gameweek + i);
-        varSum += oracle.getVariance(id, gameweek + i);
-      }
-      
-      const costInMillions = cost / 10;
-      score = calculatePlayerUtility(score, varSum, costInMillions, riskMode, id);
-    }
 
-    const eo = oracle.getTop1kEO?.(id) ?? 0;
-    const isElite = eo >= 80 ? 1 : 0;
-
-    // Only consider players who have a score > 0, OR cheap bench fodder (<= 4.5m) to ensure the model can find a valid budget team
+    // Only consider players who have a score > 0, OR cheap bench fodder (<= 45 = 4.5m)
     if (score > 0 || cost <= 45) {
       model.variables[v] = { 
         score, 
@@ -76,38 +71,17 @@ export function solveOptimalSquad(oracle: XPOracle, gameweek: number, budget: nu
         total: 1, 
         [pos]: 1, 
         [`team_${team}`]: 1, 
-        [v]: 1,
-        eo_total: eo,
-        elite_eo_count: isElite
+        [v]: 1
       };
       model.constraints[v] = { max: 1 };
       model.ints[v] = 1;
     }
   });
 
-  let solution: Record<string, any> | null = null;
-
-  const relaxationSteps = riskMode === 'safe'
-    ? [ { eo: 250, elite: 1 }, { eo: 200, elite: 1 }, { eo: 150, elite: 0 }, { eo: 0, elite: 0 } ]
-    : [ { eo: 0, elite: 0 } ];
-
-  for (const step of relaxationSteps) {
-    if (riskMode === 'safe') {
-      if (step.eo > 0) model.constraints.eo_total = { min: step.eo };
-      else delete model.constraints.eo_total;
-      
-      if (step.elite > 0) model.constraints.elite_eo_count = { min: step.elite };
-      else delete model.constraints.elite_eo_count;
-    }
-
-    solution = solver.Solve(model) as Record<string, any>;
-    if (solution && solution.feasible) {
-      break;
-    }
-  }
-
+  const solution = solver.Solve(model) as Record<string, any>;
+  
   if (!solution || !solution.feasible) {
-    return []; // Failsafe, though eo:0 should generally always find a solution
+    return []; 
   }
   
   const squadIds: number[] = [];
@@ -123,22 +97,104 @@ export function solveOptimalSquad(oracle: XPOracle, gameweek: number, budget: nu
   return squadIds;
 }
 
+export function solveStartingXI(
+  oracle: XPOracle,
+  gameweek: number,
+  squadIds: number[],
+  params: UtilityParameters = DEFAULT_PARAMETERS
+): number[] {
+  const model: LPSolverModel = {
+    optimize: "score",
+    opType: "max",
+    constraints: { 
+      total: { equal: 11 }, 
+      gkp: { equal: 1 }, 
+      def: { min: 3, max: 5 }, 
+      mid: { min: 2, max: 5 }, 
+      fwd: { min: 1, max: 3 } 
+    },
+    variables: {},
+    ints: {}
+  };
+
+  squadIds.forEach(id => {
+    const v = `p_${id}`;
+    const pos = oracle.getPosition(id).toLowerCase();
+    
+    // We only care about the single upcoming gameweek for the XI (horizon = 1)
+    const score = getPlayerScore(oracle, gameweek, id, 1, params);
+
+    model.variables[v] = { 
+      score, 
+      total: 1, 
+      [pos]: 1, 
+      [v]: 1
+    };
+    model.constraints[v] = { max: 1 };
+    model.ints[v] = 1;
+  });
+
+  const solution = solver.Solve(model) as Record<string, any>;
+  
+  if (!solution || !solution.feasible) {
+    // Failsafe: Just pick the first valid formation if LP fails for some reason
+    // In practice, LP will never fail here because squad is 2/5/5/3.
+    return squadIds.slice(0, 11);
+  }
+  
+  const xiIds: number[] = [];
+  for (const key in solution) {
+    if (key.startsWith('p_')) {
+      const val = solution[key];
+      if (val === true || val === 1 || (typeof val === 'number' && val > 0.5)) {
+        xiIds.push(parseInt(key.replace('p_', '')));
+      }
+    }
+  }
+
+  return xiIds;
+}
+
+export function solveCaptain(
+  oracle: XPOracle,
+  gameweek: number,
+  xiIds: number[],
+  params: UtilityParameters = DEFAULT_PARAMETERS
+): { captain: number; viceCaptain: number } {
+  if (xiIds.length === 0) return { captain: 0, viceCaptain: 0 };
+  
+  // Sort players by their 1-GW utility
+  const playersWithScores = xiIds.map(id => ({
+    id,
+    score: getPlayerScore(oracle, gameweek, id, 1, params)
+  }));
+  
+  playersWithScores.sort((a, b) => b.score - a.score);
+  
+  return {
+    captain: playersWithScores[0].id,
+    viceCaptain: playersWithScores.length > 1 ? playersWithScores[1].id : playersWithScores[0].id
+  };
+}
+
+import { SquadState, getSellingPrice } from './simulator.js';
+
 export function solveOptimalTransfers(
   oracle: XPOracle, 
   gameweek: number, 
-  currentSquad: number[], 
-  bank: number, 
+  state: SquadState, 
   maxTransfers: number,
   horizon: number = 8,
-  riskMode: string = 'safe'
+  params: UtilityParameters = DEFAULT_PARAMETERS
 ): { squad: number[]; transfersIn: number[]; transfersOut: number[] } | null {
   const allIds = oracle.getAllPlayerIds();
-  const currentSet = new Set(currentSquad);
+  const currentSet = new Set(state.squad);
   
-  // Calculate total squad value
   let squadValue = 0;
-  currentSquad.forEach(id => squadValue += oracle.getCost(id));
-  const budget = squadValue + bank;
+  state.squad.forEach(id => {
+    squadValue += getSellingPrice(oracle.getCost(id), state.purchasePrices[id] || oracle.getCost(id));
+  });
+  const budget = squadValue + state.bank;
 
   const model: LPSolverModel = {
     optimize: "score",
@@ -156,11 +212,6 @@ export function solveOptimalTransfers(
     ints: {}
   };
 
-  if (riskMode === 'safe') {
-    model.constraints.eo_total = { min: 250 };
-    model.constraints.elite_eo_count = { min: 1 };
-  }
-
   allIds.forEach(id => {
     const team = oracle.getTeam(id);
     if (!model.constraints[`team_${team}`]) {
@@ -170,24 +221,12 @@ export function solveOptimalTransfers(
     const v = `p_${id}`;
     const pos = oracle.getPosition(id).toLowerCase();
     
-    // Sum expected points and variance over the lookahead horizon
-    let score = 0;
-    let varSum = 0;
-    for (let i = 0; i < horizon; i++) {
-      score += oracle.getXP(id, gameweek + i);
-      varSum += oracle.getVariance(id, gameweek + i);
-    }
-    
-    const cost = oracle.getCost(id);
-    const costInMillions = cost / 10;
-    score = calculatePlayerUtility(score, varSum, costInMillions, riskMode, id);
-
-    const eo = oracle.getTop1kEO?.(id) ?? 0;
-    const isElite = eo >= 80 ? 1 : 0;
-
+    const score = getPlayerScore(oracle, gameweek, id, horizon, params);
     const isCurrent = currentSet.has(id);
+    const cost = isCurrent 
+      ? getSellingPrice(oracle.getCost(id), state.purchasePrices[id] || oracle.getCost(id)) 
+      : oracle.getCost(id);
 
-    // Consider current squad players OR players with score > 0 OR cheap bench fodder
     if (isCurrent || score > 0 || cost <= 45) {
       model.variables[v] = { 
         score, 
@@ -196,36 +235,15 @@ export function solveOptimalTransfers(
         [pos]: 1, 
         [`team_${team}`]: 1, 
         keep: isCurrent ? 1 : 0,
-        [v]: 1,
-        eo_total: eo,
-        elite_eo_count: isElite
+        [v]: 1
       };
       model.constraints[v] = { max: 1 };
       model.ints[v] = 1;
     }
   });
 
-  let solution: Record<string, any> | null = null;
-
-  const relaxationSteps = riskMode === 'safe'
-    ? [ { eo: 250, elite: 1 }, { eo: 200, elite: 1 }, { eo: 150, elite: 0 }, { eo: 0, elite: 0 } ]
-    : [ { eo: 0, elite: 0 } ];
-
-  for (const step of relaxationSteps) {
-    if (riskMode === 'safe') {
-      if (step.eo > 0) model.constraints.eo_total = { min: step.eo };
-      else delete model.constraints.eo_total;
-      
-      if (step.elite > 0) model.constraints.elite_eo_count = { min: step.elite };
-      else delete model.constraints.elite_eo_count;
-    }
-
-    solution = solver.Solve(model) as Record<string, any>;
-    if (solution && solution.feasible) {
-      break;
-    }
-  }
-
+  const solution = solver.Solve(model) as Record<string, any>;
+  
   if (!solution || !solution.feasible) {
     return null;
   }
@@ -242,7 +260,8 @@ export function solveOptimalTransfers(
 
   const newSet = new Set(squad);
   const transfersIn = squad.filter(id => !currentSet.has(id));
-  const transfersOut = currentSquad.filter(id => !newSet.has(id));
+  const transfersOut = state.squad.filter(id => !newSet.has(id));
 
   return { squad, transfersIn, transfersOut };
 }
+

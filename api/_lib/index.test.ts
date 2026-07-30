@@ -5,6 +5,7 @@ import { FPLService } from '../index';
 import { FPLPlayer, FPLFixture } from './types';
 import { CSVOracle, XPOracle } from './ingestion';
 import { Simulator, SquadState } from './simulator';
+import { DEFAULT_PARAMETERS } from './projection';
 
 // -------------------------------------------------------------
 // 1. Mock Oracle implementation for isolated simulator tests
@@ -84,29 +85,19 @@ describe('FPLService - Scoring Logic', () => {
     }
   ];
 
-  it('should calculate higher score for better fixtures', () => {
-    const scoreEasy = FPLService.calculatePlayerScore(mockPlayer, mockFixtures, 30, 'safe');
+  it('should apply premium player protection multiplier', () => {
+    const nonPremiumPlayer = { ...mockPlayer, now_cost: 60 };
+    const premiumPlayer = { ...mockPlayer, now_cost: 120 };
     
-    const hardFixtures: FPLFixture[] = [
-      {
-        id: 101,
-        team_h: 1,
-        team_a: 2,
-        team_h_difficulty: 5,
-        team_a_difficulty: 2,
-        event: 30,
-        finished: false
-      }
-    ];
-    
-    const scoreHard = FPLService.calculatePlayerScore(mockPlayer, hardFixtures, 30, 'safe');
-    expect(scoreEasy).toBeGreaterThan(scoreHard);
+    const scoreNonPremium = FPLService.calculatePlayerScore(10, nonPremiumPlayer, 'safe');
+    const scorePremium = FPLService.calculatePlayerScore(10, premiumPlayer, 'safe');
+    expect(scorePremium).toBeGreaterThan(scoreNonPremium);
   });
 
   it('should apply risk multiplier for differentials in aggressive mode', () => {
     const differentialPlayer = { ...mockPlayer, selected_by_percent: '4.9' };
-    const scoreSafe = FPLService.calculatePlayerScore(differentialPlayer, mockFixtures, 30, 'safe');
-    const scoreAggressive = FPLService.calculatePlayerScore(differentialPlayer, mockFixtures, 30, 'aggressive');
+    const scoreSafe = FPLService.calculatePlayerScore(10, differentialPlayer, 'safe');
+    const scoreAggressive = FPLService.calculatePlayerScore(10, differentialPlayer, 'aggressive');
     
     expect(scoreAggressive).toBeGreaterThan(scoreSafe);
   });
@@ -728,15 +719,17 @@ describe('Simulator - Probabilistic Player Model & Expected Utility', () => {
     };
 
     // Safe mode horizon run
-    const resultsSafeSalah = simulator.simulateHorizon(stateSalah, testOracle, 'safe');
-    const resultsSafeHaaland = simulator.simulateHorizon(stateHaaland, testOracle, 'safe');
+    const paramsSafe = { ...DEFAULT_PARAMETERS, betaVariance: 0.15, betaEO: 0.5 };
+    const resultsSafeSalah = simulator.simulateHorizon(stateSalah, testOracle, paramsSafe);
+    const resultsSafeHaaland = simulator.simulateHorizon(stateHaaland, testOracle, paramsSafe);
     
     // Salah's trajectory should end up with a higher utility score than Haaland's in safe mode
     expect(resultsSafeSalah[0].accumulatedScore).toBeGreaterThan(resultsSafeHaaland[0].accumulatedScore);
 
     // Aggressive mode horizon run
-    const resultsAggressSalah = simulator.simulateHorizon(stateSalah, testOracle, 'aggressive');
-    const resultsAggressHaaland = simulator.simulateHorizon(stateHaaland, testOracle, 'aggressive');
+    const paramsAggressive = { ...DEFAULT_PARAMETERS, betaVariance: 0.02, betaEO: -0.5 };
+    const resultsAggressSalah = simulator.simulateHorizon(stateSalah, testOracle, paramsAggressive);
+    const resultsAggressHaaland = simulator.simulateHorizon(stateHaaland, testOracle, paramsAggressive);
 
     // Haaland's trajectory should end up with a higher utility score than Salah's in aggressive mode
     expect(resultsAggressHaaland[0].accumulatedScore).toBeGreaterThan(resultsAggressSalah[0].accumulatedScore);

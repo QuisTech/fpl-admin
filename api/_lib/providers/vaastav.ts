@@ -9,6 +9,7 @@ import {
 } from './historical.js';
 
 export class VaastavProvider implements HistoricalDataProvider {
+  public supportsHistoricalAnnouncements = false;
   private season: string = '';
   private dataDir: string = '';
   
@@ -85,6 +86,9 @@ export class VaastavProvider implements HistoricalDataProvider {
       players: {}
     };
 
+    // Store gameweek reference for projection use
+    (snapshot as any).gameweek = gameweek;
+
     // Reconstruct the universe for this Gameweek.
     // To ensure ZERO look-ahead bias, we only look at GW N for price/fixtures, 
     // and GW 1 to (N-1) for observable features (minutes played, xG, xA).
@@ -108,19 +112,10 @@ export class VaastavProvider implements HistoricalDataProvider {
             break;
           }
         }
-        // If still 0 (e.g. they haven't appeared yet), look forward but NEVER beyond their first appearance
-        if (currentPrice === 0) {
-           for (let nextGw = gameweek + 1; nextGw <= 38; nextGw++) {
-             const nextRecords = this.gwDataByPlayer[playerId]?.[nextGw];
-             if (nextRecords && nextRecords.length > 0) {
-                currentPrice = parseFloat(nextRecords[0].value) / 10;
-                break;
-             }
-           }
-        }
+        // If still 0, we gracefully accept 0 as they haven't appeared yet. We do not look forward.
       }
 
-      // Calculate Last 4 GW features (Look-back)
+      // Calculate Last 4 GW features (Look-back) and new metrics
       let minutesLast4 = 0;
       let startsLast4 = 0;
       let xGLast4 = 0;
@@ -128,17 +123,47 @@ export class VaastavProvider implements HistoricalDataProvider {
       let shotsLast4 = 0;
       let keyPassesLast4 = 0;
       
+      let xGI3 = 0;
+      let xGI5 = 0;
+      let minsLast3 = [];
+      
       let matchesCounted = 0;
-      for (let prevGw = gameweek - 1; prevGw >= Math.max(1, gameweek - 4); prevGw--) {
+      for (let prevGw = gameweek - 1; prevGw >= Math.max(1, gameweek - 5); prevGw--) {
         const matches = this.gwDataByPlayer[playerId]?.[prevGw] || [];
         matches.forEach(match => {
           const mins = parseInt(match.minutes) || 0;
-          minutesLast4 += mins;
-          if (mins >= 60) startsLast4 += 1; 
-          xGLast4 += parseFloat(match.expected_goals) || 0;
-          xALast4 += parseFloat(match.expected_assists) || 0;
-          matchesCounted++;
+          const xG = parseFloat(match.expected_goals) || 0;
+          const xA = parseFloat(match.expected_assists) || 0;
+          
+          if (gameweek - prevGw <= 4) {
+            minutesLast4 += mins;
+            if (mins >= 60) startsLast4 += 1; 
+            xGLast4 += xG;
+            xALast4 += xA;
+            matchesCounted++;
+          }
+          
+          if (gameweek - prevGw <= 3) {
+            xGI3 += (xG + xA);
+            minsLast3.push(mins);
+          }
+          
+          if (gameweek - prevGw <= 5) {
+            xGI5 += (xG + xA);
+          }
         });
+      }
+
+      // Calculate minutes trend (e.g., average change between consecutive games)
+      let minutesTrend = 0;
+      if (minsLast3.length >= 2) {
+        // Reverse because we pushed from newest to oldest
+        minsLast3.reverse(); 
+        const changes = [];
+        for (let i = 1; i < minsLast3.length; i++) {
+          changes.push(minsLast3[i] - minsLast3[i-1]);
+        }
+        minutesTrend = changes.reduce((a, b) => a + b, 0) / changes.length;
       }
 
       // Calculate /90 rolling stats
@@ -148,26 +173,74 @@ export class VaastavProvider implements HistoricalDataProvider {
       const shots90 = gamesPlayed90 > 0 ? (shotsLast4 / gamesPlayed90) : 0;
       const keyPasses90 = gamesPlayed90 > 0 ? (keyPassesLast4 / gamesPlayed90) : 0;
 
-      // Determine upcoming fixtures
+      // Determine upcoming fixtures for 8-week horizon
       const teamId = parseInt(raw.team);
-      const upcomingFixtures: HistoricalFixture[] = [];
-      const gwFixtures = this.fixturesByGw[gameweek] || [];
+      const fixturesByGw: Record<number, HistoricalFixture[]> = {};
       
-      gwFixtures.forEach(fix => {
-        const homeId = parseInt(fix.team_h);
-        const awayId = parseInt(fix.team_a);
-        if (homeId === teamId || awayId === teamId) {
-          const isHome = homeId === teamId;
-          upcomingFixtures.push({
-            opponentTeamId: isHome ? awayId : homeId,
-            isHome,
-            difficulty: isHome ? parseInt(fix.team_h_difficulty) : parseInt(fix.team_a_difficulty),
-            // We can enrich these opponent strengths later from team standings
-            opponentStrengthDefense: 3, 
-            opponentStrengthAttack: 3
-          });
-        }
-      });
+      // Compute team strengths based on historical matches before this GW
+      // We will look at all matches up to gameweek - 1 to compute xG, xGC
+      let teamG = 0, teamxG = 0, teamGA = 0, teamxGA = 0, teamMatches = 0;
+      for (let prevGw = 1; prevGw < gameweek; prevGw++) {
+        const gwFixs = this.fixturesByGw[prevGw] || [];
+        gwFixs.forEach(fix => {
+          if (parseInt(fix.team_h) === teamId || parseInt(fix.team_a) === teamId) {
+            teamMatches++;
+            if (parseInt(fix.team_h) === teamId) {
+              teamG += parseInt(fix.team_h_score) || 0;
+              teamGA += parseInt(fix.team_a_score) || 0;
+            } else {
+              teamG += parseInt(fix.team_a_score) || 0;
+              teamGA += parseInt(fix.team_h_score) || 0;
+            }
+          }
+        });
+      }
+      
+      const teamStrengthAttack = teamMatches > 0 ? (teamG / teamMatches) : 1.5;
+      const teamStrengthDefense = teamMatches > 0 ? (teamGA / teamMatches) : 1.5;
+
+      for (let horizonGw = gameweek; horizonGw < gameweek + 8; horizonGw++) {
+        fixturesByGw[horizonGw] = [];
+        const gwFixtures = this.fixturesByGw[horizonGw] || [];
+        
+        gwFixtures.forEach(fix => {
+          const homeId = parseInt(fix.team_h);
+          const awayId = parseInt(fix.team_a);
+          if (homeId === teamId || awayId === teamId) {
+            const isHome = homeId === teamId;
+            
+            // For opponents, calculate their rolling GA to act as our attack multiplier
+            const oppId = isHome ? awayId : homeId;
+            let oppG = 0, oppGA = 0, oppMatches = 0;
+            for (let prevGw = 1; prevGw < gameweek; prevGw++) {
+              const oppGwFixs = this.fixturesByGw[prevGw] || [];
+              oppGwFixs.forEach(ofix => {
+                if (parseInt(ofix.team_h) === oppId || parseInt(ofix.team_a) === oppId) {
+                  oppMatches++;
+                  if (parseInt(ofix.team_h) === oppId) {
+                    oppG += parseInt(ofix.team_h_score) || 0;
+                    oppGA += parseInt(ofix.team_a_score) || 0;
+                  } else {
+                    oppG += parseInt(ofix.team_a_score) || 0;
+                    oppGA += parseInt(ofix.team_h_score) || 0;
+                  }
+                }
+              });
+            }
+            
+            const oppStrengthAttack = oppMatches > 0 ? (oppG / oppMatches) : 1.5;
+            const oppStrengthDefense = oppMatches > 0 ? (oppGA / oppMatches) : 1.5;
+            
+            fixturesByGw[horizonGw].push({
+              opponentTeamId: oppId,
+              isHome,
+              difficulty: isHome ? parseInt(fix.team_h_difficulty) : parseInt(fix.team_a_difficulty),
+              opponentStrengthDefense: oppStrengthDefense, 
+              opponentStrengthAttack: oppStrengthAttack
+            });
+          }
+        });
+      }
 
       const position = raw.element_type === '1' ? 'GKP' : 
                        raw.element_type === '2' ? 'DEF' : 
@@ -187,9 +260,12 @@ export class VaastavProvider implements HistoricalDataProvider {
         keyPassesLast4,
         xG90,
         xA90,
+        xGI3,
+        xGI5,
+        minutesTrend,
         shots90,
         keyPasses90,
-        fixtures: upcomingFixtures,
+        fixturesByGw,
         predictedMinutes: 0, // Computed later by Projection Layer
         injuryStatus: null,
         eo: 0 
@@ -206,5 +282,22 @@ export class VaastavProvider implements HistoricalDataProvider {
       total += parseInt(r.total_points) || 0;
     });
     return total;
+  }
+
+  getSeasonToDateAverage(playerId: number, currentGw: number): number {
+    let totalPoints = 0;
+    let gamesPlayed = 0;
+    
+    for (let gw = 1; gw < currentGw; gw++) {
+      const records = this.gwDataByPlayer[playerId]?.[gw] || [];
+      if (records.length > 0) {
+        records.forEach(r => {
+          totalPoints += parseInt(r.total_points) || 0;
+        });
+        gamesPlayed += records.length;
+      }
+    }
+    
+    return gamesPlayed > 0 ? totalPoints / gamesPlayed : 0;
   }
 }

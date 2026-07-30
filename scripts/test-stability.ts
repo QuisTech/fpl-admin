@@ -1,32 +1,23 @@
 import { VaastavProvider } from '../api/_lib/providers/vaastav.js';
 import { ProjectionEngine, UtilityParameters, DEFAULT_PARAMETERS } from '../api/_lib/projection.js';
 
-// NDCG calculation for ranking evaluation
 function calculateNDCG(predictedScores: number[], actualScores: number[], k: number): number {
   const paired = predictedScores.map((pred, i) => ({ pred, actual: actualScores[i] }));
-  
-  // Sort by predicted score (descending) to get the model's ranking
   paired.sort((a, b) => b.pred - a.pred);
   const dcg = paired.slice(0, k).reduce((sum, item, i) => sum + item.actual / Math.log2(i + 2), 0);
-  
-  // Sort by actual score (descending) to get the ideal ranking
   const ideal = [...actualScores].sort((a, b) => b - a);
   const idcg = ideal.slice(0, k).reduce((sum, score, i) => sum + score / Math.log2(i + 2), 0);
-  
-  if (idcg === 0) return 1; // Perfect by default if no one scored anything
+  if (idcg === 0) return 1;
   return dcg / idcg;
 }
 
-// Simple (1+λ) Evolution Strategy to replace grid search
-async function calibrateWeights() {
-  const season = '2023-24';
+// Extract the fitness function out of the loop
+async function runESCalibration(season: string, seed: number) {
   const provider = new VaastavProvider();
   await provider.loadSeason(season);
 
-  console.log(`\nStarting Evolutionary Calibration on ${season}...`);
-
   const startGw = 1;
-  const endGw = 34; // Use first 34 GWs for training/calibration to avoid final week noise
+  const endGw = 34; 
 
   function evaluateFitness(params: UtilityParameters): number {
     let totalRMSE = 0;
@@ -47,19 +38,16 @@ async function calibrateWeights() {
       const preds = validPlayers.map(id => oracle.getXP(id, gw));
       const actuals = validPlayers.map(id => provider.getActualPoints(id, gw));
       
-      // RMSE
       let sqErr = 0;
       for (let i = 0; i < preds.length; i++) {
         sqErr += Math.pow(preds[i] - actuals[i], 2);
       }
       totalRMSE += Math.sqrt(sqErr / preds.length);
       
-      // Ranking loss via NDCG
       totalNdcgCapt += calculateNDCG(preds, actuals, 1);
       totalNdcgXI += calculateNDCG(preds, actuals, 11);
       count++;
 
-      // Transfer ranking (4-GW horizon)
       if (gw + 3 <= endGw) {
         const preds4 = validPlayers.map(id => {
           let p = 0;
@@ -71,7 +59,7 @@ async function calibrateWeights() {
           for (let i=0; i<4; i++) a += provider.getActualPoints(id, gw+i);
           return a;
         });
-        totalNdcgTrans += calculateNDCG(preds4, actuals4, 5); // top 5 targets
+        totalNdcgTrans += calculateNDCG(preds4, actuals4, 5); 
         count4++;
       }
     }
@@ -81,25 +69,25 @@ async function calibrateWeights() {
     const avgNdcgXI = totalNdcgXI / count;
     const avgNdcgTrans = totalNdcgTrans / Math.max(1, count4);
 
-    // Objective: Minimize Loss 
-    const loss = 
-        0.40 * (avgRMSE / 5.0) 
-      + 0.25 * (1 - avgNdcgCapt) 
-      + 0.20 * (1 - avgNdcgXI) 
-      + 0.15 * (1 - avgNdcgTrans);
-
-    return loss;
+    return 0.40 * (avgRMSE / 5.0) 
+         + 0.25 * (1 - avgNdcgCapt) 
+         + 0.20 * (1 - avgNdcgXI) 
+         + 0.15 * (1 - avgNdcgTrans);
   }
 
-  // (1+λ) ES 
+  // Linear congruential generator for seeded randomness
+  let currentSeed = seed;
+  function random() {
+    currentSeed = (currentSeed * 9301 + 49297) % 233280;
+    return currentSeed / 233280;
+  }
+
   let bestParams = { ...DEFAULT_PARAMETERS };
   let bestLoss = evaluateFitness(bestParams);
-  
-  console.log(`Baseline Loss: ${bestLoss.toFixed(4)}`);
 
-  const generations = 15; // Low for testing
+  const generations = 15;
   const lambda = 10;
-  const stepSize = 0.2; // initial noise std dev
+  const stepSize = 0.2; 
 
   const tunableKeys: (keyof UtilityParameters)[] = [
     'betaAttackBase', 'betaXG', 'betaXA', 'betaXGI3', 'betaXGI5', 
@@ -109,15 +97,15 @@ async function calibrateWeights() {
   ];
 
   for (let g = 0; g < generations; g++) {
-    let currentStepSize = stepSize * Math.pow(0.85, g); // decay step size
+    let currentStepSize = stepSize * Math.pow(0.85, g);
     let bestChildParams = { ...bestParams };
     let bestChildLoss = 999999;
 
     for (let i = 0; i < lambda; i++) {
       const childParams = { ...bestParams };
-      // Mutate
       tunableKeys.forEach(k => {
-        const u1 = Math.random(), u2 = Math.random();
+        const u1 = Math.max(Number.MIN_VALUE, random());
+        const u2 = random();
         const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
         (childParams as any)[k] += z0 * currentStepSize;
       });
@@ -132,18 +120,60 @@ async function calibrateWeights() {
     if (bestChildLoss < bestLoss) {
       bestLoss = bestChildLoss;
       bestParams = bestChildParams;
-      console.log(`Gen ${g}: New Best Loss -> ${bestLoss.toFixed(4)}`);
-    } else {
-      console.log(`Gen ${g}: No improvement.`);
     }
   }
 
-  console.log(`\n=== CALIBRATION COMPLETE ===`);
-  console.log(`Best Loss: ${bestLoss.toFixed(4)}`);
-  console.log(`Optimal Parameters:`, bestParams);
+  return { loss: bestLoss, params: bestParams };
 }
 
-calibrateWeights().catch(err => {
-  console.error(err);
-  process.exit(1);
-});
+async function runStabilityCheck() {
+  console.log("=== Parameter Stability Test ===");
+  
+  // Use N=20 for thorough testing
+  const N = 5; // Set to 5 for speed during development
+  console.log(`Running ES calibration ${N} times...`);
+  
+  const results: any[] = [];
+  
+  for (let i = 1; i <= N; i++) {
+    console.log(`Starting Run ${i}/${N} (Seed: ${i})...`);
+    // Ideally use 21/22 + 22/23 but for speed use a single season for this script
+    const res = await runESCalibration('2023-24', i);
+    console.log(`Run ${i} completed. Loss: ${res.loss.toFixed(4)}`);
+    results.push(res);
+  }
+  
+  const tunableKeys: (keyof UtilityParameters)[] = [
+    'betaAttackBase', 'betaXG', 'betaXA', 'betaXGI3', 'betaXGI5', 
+    'betaAttFixture', 'betaTeamAttack', 'betaOppDefense', 'betaAttHome',
+    'betaCsBase', 'betaTeamDefense', 'betaOppAttack', 'betaCsFixture', 'betaCsHome',
+    'betaBonusBase', 'betaBpsBaseline'
+  ];
+
+  console.log("\n=== Stability Results ===");
+  tunableKeys.forEach(key => {
+    const values = results.map(r => r.params[key]);
+    
+    // Sort for median and CI
+    values.sort((a, b) => a - b);
+    
+    const sum = values.reduce((a, b) => a + b, 0);
+    const mean = sum / N;
+    
+    const sqDiffs = values.map(v => Math.pow(v - mean, 2));
+    const std = Math.sqrt(sqDiffs.reduce((a, b) => a + b, 0) / N);
+    
+    const median = values[Math.floor(N / 2)];
+    // Rough 95% CI
+    const ci95 = 1.96 * std / Math.sqrt(N);
+    
+    console.log(`${String(key).padEnd(20)}: Mean = ${mean.toFixed(3)} | Std = ${std.toFixed(3)} | Median = ${median.toFixed(3)} | 95% CI = [${(mean - ci95).toFixed(3)}, ${(mean + ci95).toFixed(3)}]`);
+  });
+}
+
+if (import.meta.url.includes('test-stability') || (process.argv[1] && process.argv[1].includes('test-stability'))) {
+  runStabilityCheck().catch(err => {
+    console.error(err);
+    process.exit(1);
+  });
+}

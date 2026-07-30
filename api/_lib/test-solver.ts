@@ -29,13 +29,16 @@ const mockCandidates = [
 async function runTests() {
   console.log("=== LP SOLVER CONSTRAINT TESTS ===");
   const oracle = new MockOracle() as any;
+  oracle.getAllPlayerIds = () => mockCandidates.map(c => c.id);
+  oracle.getPosition = (id: number) => mockCandidates.find(c => c.id === id)?.position;
+  oracle.getCost = (id: number) => mockCandidates.find(c => c.id === id)?.now_cost;
+  oracle.getXP = (id: number) => mockCandidates.find(c => c.id === id)?.xP;
+  oracle.getVariance = (id: number) => 1.0;
+  oracle.getTeam = (id: number) => mockCandidates.find(c => c.id === id)?.team;
 
-  // Test 1: Strict Budget Constraint (100.0M)
-  // Our 15 mock players cost exactly 825 (£82.5M) without Expensive FWD.
-  // With Expensive FWD (150), swapping out a 70 FWD, total cost would be 905 (£90.5M).
-  // If budget is 850, it MUST NOT pick Expensive FWD, even though xP is higher.
+  const { DEFAULT_PARAMETERS } = require('./projection.js');
 
-  const result1 = solveOptimalSquad([], mockCandidates, 850, oracle, 'risky');
+  const result1 = solveOptimalSquad(oracle, 1, 850, 1, DEFAULT_PARAMETERS);
   console.log("\n[Test 1] strict budget: 850 (£85.0M)");
   if (!result1) {
     console.log("FAIL: Solver failed to find a team.");

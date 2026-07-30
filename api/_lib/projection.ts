@@ -2,26 +2,78 @@ import { DeadlineSnapshot } from './providers/historical.js';
 import { XPOracle } from './ingestion.js';
 
 export interface UtilityParameters {
-  xpWeight: number;
-  xG90Weight: number;
-  xA90Weight: number;
-  minutesWeight: number;
-  fixtureWeight: number;
-  eoWeight: number;
-  varianceLambda: number;
-  valueWeight: number;
+  // Minutes Model
+  betaMinutesBase: number;
+  betaMinutesTrend: number;
+
+  // Attacking Model
+  betaAttackBase: number;
+  betaXG: number;
+  betaXA: number;
+  betaXGI3: number;
+  betaXGI5: number;
+  betaAttFixture: number;
+  betaTeamAttack: number;
+  betaOppDefense: number;
+  betaAttHome: number;
+
+  // Clean Sheet Model
+  betaCsBase: number;
+  betaTeamDefense: number;
+  betaOppAttack: number;
+  betaCsFixture: number;
+  betaCsHome: number;
+  
+  // Bonus Model
+  betaBonusBase: number;
+  betaBpsBaseline: number; // Derived from xG/xA
+
+  // Variance
+  betaVariance: number;
+  betaEO: number;
 }
 
 export const DEFAULT_PARAMETERS: UtilityParameters = {
-  xpWeight: 1.0,
-  xG90Weight: 0.0,
-  xA90Weight: 0.0,
-  minutesWeight: 0.0,
-  fixtureWeight: 0.0,
-  eoWeight: 0.0,
-  varianceLambda: 0.05,
-  valueWeight: 0.0
+  betaMinutesBase: 1.0,
+  betaMinutesTrend: 0.1,
+
+  betaAttackBase: 0.5,
+  betaXG: 4.0,
+  betaXA: 3.0,
+  betaXGI3: 1.0,
+  betaXGI5: 0.5,
+  betaAttFixture: -0.1,
+  betaTeamAttack: 0.5,
+  betaOppDefense: -0.5,
+  betaAttHome: 0.2,
+
+  betaCsBase: 0.2,
+  betaTeamDefense: 0.6,
+  betaOppAttack: -0.6,
+  betaCsFixture: -0.1,
+  betaCsHome: 0.3,
+
+  betaBonusBase: 0.0,
+  betaBpsBaseline: 0.5,
+
+  betaVariance: 0.05,
+  betaEO: 0.0
 };
+
+export function getParamsForRiskMode(riskMode: string): UtilityParameters {
+  const params = { ...DEFAULT_PARAMETERS };
+  if (riskMode === 'aggressive') {
+    params.betaVariance = 0.02;
+    params.betaEO = -0.5;
+  } else if (riskMode === 'safe') {
+    params.betaVariance = 0.15;
+    params.betaEO = 0.5;
+  } else {
+    params.betaVariance = 0.05;
+    params.betaEO = 0.0;
+  }
+  return params;
+}
 
 export class ProjectionEngine {
   private snapshot: DeadlineSnapshot;
@@ -33,65 +85,108 @@ export class ProjectionEngine {
   }
 
   /**
-   * Generates an XPOracle that the LP Solver and Simulator can use.
-   * This oracle projects future gameweeks using ONLY the data frozen in the DeadlineSnapshot.
+   * Data-driven generic predictor for Expected Points (XP) and Variance
    */
+  public getDistribution(playerId: number, targetGw: number): { expected: number, variance: number } {
+    const player = this.snapshot.players[playerId];
+    if (!player) return { expected: 0, variance: 0 };
+    
+    const fixtures = player.fixturesByGw[targetGw] || [];
+    if (fixtures.length === 0) return { expected: 0, variance: 0 };
+
+    let totalXp = 0;
+    let totalVar = 0;
+    
+    // Stage 1: Minutes Model
+    const expectedMinutes = Math.max(0, Math.min(90, 
+      this.params.betaMinutesBase * (player.minutesLast4 / 4) +
+      this.params.betaMinutesTrend * player.minutesTrend
+    ));
+    // Save to player so oracle can expose it if needed
+    player.predictedMinutes = expectedMinutes;
+    
+    // Weight the points model by expected minutes fraction
+    const minuteFraction = expectedMinutes / 90;
+    
+    fixtures.forEach(fix => {
+      const isHome = fix.isHome ? 1 : 0;
+      const fixtureDiff = fix.difficulty;
+      
+      const oppDefense = fix.opponentStrengthDefense; 
+      const oppAttack = fix.opponentStrengthAttack;
+      
+      // Sub-model 1: Attacking Returns
+      let expectedAttack = this.params.betaAttackBase 
+        + this.params.betaXG * player.xG90
+        + this.params.betaXA * player.xA90
+        + this.params.betaXGI3 * player.xGI3
+        + this.params.betaXGI5 * player.xGI5
+        + this.params.betaAttFixture * fixtureDiff
+        + this.params.betaTeamAttack * 1.5 // Simplified team attack metric
+        + this.params.betaOppDefense * oppDefense
+        + this.params.betaAttHome * isHome;
+        
+      expectedAttack = Math.max(0, expectedAttack) * minuteFraction;
+
+      // Sub-model 2: Clean Sheet Probability
+      // Only Defenders and GKs get full CS points (4). Mids get (1). Fwds get 0.
+      let csMultiplier = player.position === 'DEF' || player.position === 'GKP' ? 4 : (player.position === 'MID' ? 1 : 0);
+      let expectedCsProb = this.params.betaCsBase
+        + this.params.betaTeamDefense * 1.5 
+        + this.params.betaOppAttack * oppAttack
+        + this.params.betaCsFixture * fixtureDiff
+        + this.params.betaCsHome * isHome;
+
+      expectedCsProb = Math.max(0, Math.min(1, expectedCsProb)) * minuteFraction;
+      const expectedCS = expectedCsProb * csMultiplier;
+
+      // Sub-model 3: Bonus
+      const expectedBonus = Math.max(0, this.params.betaBonusBase + this.params.betaBpsBaseline * (expectedAttack / 3));
+
+      // Sub-model 4: Appearance
+      // Roughly 2 points if > 60 mins, 1 pt if < 60 mins
+      const expectedAppearance = expectedMinutes > 60 ? 2 : (expectedMinutes > 0 ? 1 : 0);
+
+      // Appearance variance (Binomial)
+      const pApp = Math.min(1, Math.max(0, expectedMinutes / 90));
+      const appVar = pApp * (1 - pApp) * 4; // 2 points squared
+
+      // Attack variance (Poisson assumption: Var = Mean)
+      // Since goals are ~5 points and assists ~3, the variance in points is much higher than the mean in points.
+      // Roughly Var(Attacking Points) ≈ Mean(Attacking Points) * Average Point Value
+      const attackVar = expectedAttack * 4; 
+
+      // CS variance (Binomial)
+      const csVar = expectedCsProb * (1 - expectedCsProb) * (csMultiplier * csMultiplier);
+
+      // Bonus variance
+      const bonusVar = expectedBonus * 1.5; // Heuristic
+
+      // Total XP and Variance
+      totalXp += expectedAppearance + expectedAttack + expectedCS + expectedBonus;
+      totalVar += appVar + attackVar + csVar + bonusVar;
+    });
+    
+    // Scale by user's risk preference (betaVariance)
+    totalVar *= (1 + this.params.betaVariance);
+
+    return { expected: totalXp, variance: totalVar };
+  }
+
+  public predict(playerId: number, targetGw: number): number {
+    return this.getDistribution(playerId, targetGw).expected;
+  }
+
   public getOracle(): XPOracle {
-    const { players, gameweek: currentGw } = this.snapshot;
+    const { players } = this.snapshot;
     
     return {
       getXP: (playerId: number, targetGw: number) => {
-        const player = players[playerId];
-        if (!player) return 0;
-        
-        // This is a placeholder for a true predictive model.
-        // For now, it heavily weights recent form and fixture difficulty.
-        
-        let projectedXP = 0;
-        
-        // Example logic:
-        // We look at the player's fixtures for the targetGw.
-        // Note: The DeadlineSnapshot only contains fixtures for the CURRENT gameweek.
-        // Wait, to project forward 8 weeks, the snapshot needs the fixture schedule for future weeks too!
-        // We will assume for now that if targetGw > currentGw, we return a baseline xP.
-        // (In a real implementation, the Snapshot should contain the known schedule for the rest of the season).
-        
-        const isCurrentGw = targetGw === currentGw;
-        const fixtures = isCurrentGw ? player.fixtures : [];
-        const numFixtures = fixtures.length;
-        
-        if (numFixtures === 0 && isCurrentGw) {
-          return 0; // Blank Gameweek
-        }
-
-        // Base projection based on parameterized weights
-        const xGI90 = player.xG90 + player.xA90;
-        let baseExpectedPts = player.position === 'DEF' || player.position === 'GKP' ? 2 : 1; 
-        
-        // Example parameterized calculation
-        baseExpectedPts += (player.xG90 * this.params.xG90Weight);
-        baseExpectedPts += (player.xA90 * this.params.xA90Weight);
-        
-        if (player.minutesLast4 < 90) {
-          baseExpectedPts *= 0.5; // High rotation risk
-        }
-
-        // Apply global xpWeight (can scale the whole projection)
-        baseExpectedPts *= this.params.xpWeight;
-
-        // Multiply by number of fixtures (Double Gameweeks)
-        projectedXP = baseExpectedPts * Math.max(1, numFixtures);
-        
-        return projectedXP;
+        return this.predict(playerId, targetGw);
       },
       
       getVariance: (playerId: number, targetGw: number) => {
-        const player = players[playerId];
-        if (!player) return 0;
-        const xGI90 = player.xG90 + player.xA90;
-        // The variance itself is not modified by the lambda here. Lambda is applied in utility.ts
-        // But we can return a baseline variance that the simulator uses.
-        return (xGI90 * 10) + 2; 
+        return this.getDistribution(playerId, targetGw).variance;
       },
       
       getCost: (playerId: number) => {
@@ -119,3 +214,4 @@ export class ProjectionEngine {
     };
   }
 }
+

@@ -1,0 +1,14 @@
+{
+  "models": [
+    {
+      "name": "baseline",
+      "file": "baseline.json",
+      "description": "Heuristic defaults prior to empirical calibration"
+    },
+    {
+      "name": "es-v001",
+      "file": "es-v001.json",
+      "description": "First generation Evolution Strategy calibration on 23-24 dataset"
+    }
+  ]
+}

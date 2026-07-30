@@ -39,9 +39,13 @@ function assertNoFutureFixtures(snapshot: DeadlineSnapshot, gw: number) {
   // Wait, if it contains future fixtures, the projection engine might cheat if those fixtures include results.
   // We just ensure the fixtures array exists and doesn't contain actual results.
   for (const player of Object.values(snapshot.players)) {
-    for (const fixture of player.fixtures) {
-      if ((fixture as any).team_h_score !== undefined || (fixture as any).team_a_score !== undefined) {
-        throw new Error(`GW${gw}: Look-ahead bias! Fixture contains actual scores.`);
+    if (player.fixturesByGw) {
+      for (const gwKey of Object.keys(player.fixturesByGw)) {
+        for (const fixture of player.fixturesByGw[parseInt(gwKey)]) {
+          if ((fixture as any).team_h_score !== undefined || (fixture as any).team_a_score !== undefined) {
+            throw new Error(`GW${gw}: Look-ahead bias! Fixture contains actual scores.`);
+          }
+        }
       }
     }
   }

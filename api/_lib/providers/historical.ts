@@ -24,11 +24,16 @@ export interface HistoricalPlayerFeatures {
   // Rolling Form (/90)
   xG90: number;
   xA90: number;
+  
+  // New Rolling Stats
+  xGI3: number; // xG + xA over last 3 matches
+  xGI5: number; // xG + xA over last 5 matches
+  minutesTrend: number; // derivative of minutes over last 3 matches
   shots90: number;
   keyPasses90: number;
   
   // Fixture(s) in this gameweek (handles Blanks and Doubles)
-  fixtures: HistoricalFixture[];
+  fixturesByGw: Record<number, HistoricalFixture[]>;
   
   // Inferred or provided availability
   predictedMinutes: number; 
@@ -45,6 +50,8 @@ export interface DeadlineSnapshot {
 }
 
 export interface HistoricalDataProvider {
+  supportsHistoricalAnnouncements: boolean;
+
   /**
    * Load a specific season's data into memory.
    */
@@ -65,4 +72,9 @@ export interface HistoricalDataProvider {
    * Used strictly for post-deadline evaluation (The Ground Truth).
    */
   getActualPoints(playerId: number, gameweek: number): number;
+
+  /**
+   * Get average points per game up to the current gameweek (for backtesting projections).
+   */
+  getSeasonToDateAverage(playerId: number, currentGw: number): number;
 }

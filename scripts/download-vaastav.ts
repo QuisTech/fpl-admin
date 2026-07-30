@@ -24,26 +24,29 @@ async function downloadFile(url: string, dest: string): Promise<void> {
 }
 
 async function main() {
-  const season = '2023-24';
-  const outDir = path.resolve(process.cwd(), 'data', 'vaastav', season);
+  const seasons = ['2021-22', '2022-23', '2023-24'];
   
-  if (!fs.existsSync(outDir)) {
-    fs.mkdirSync(outDir, { recursive: true });
-  }
+  for (const season of seasons) {
+    const outDir = path.resolve(process.cwd(), 'data', 'vaastav', season);
+    
+    if (!fs.existsSync(outDir)) {
+      fs.mkdirSync(outDir, { recursive: true });
+    }
 
-  const files = [
-    { urlPath: 'fixtures.csv', dest: 'fixtures.csv' },
-    { urlPath: 'players_raw.csv', dest: 'players_raw.csv' },
-    { urlPath: 'gws/merged_gw.csv', dest: 'merged_gw.csv' }
-  ];
+    const files = [
+      { urlPath: 'fixtures.csv', dest: 'fixtures.csv' },
+      { urlPath: 'players_raw.csv', dest: 'players_raw.csv' },
+      { urlPath: 'gws/merged_gw.csv', dest: 'merged_gw.csv' }
+    ];
 
-  for (const file of files) {
-    const url = `${BASE_URL}${season}/${file.urlPath}`;
-    const dest = path.resolve(outDir, file.dest);
-    await downloadFile(url, dest);
+    for (const file of files) {
+      const url = `${BASE_URL}${season}/${file.urlPath}`;
+      const dest = path.resolve(outDir, file.dest);
+      await downloadFile(url, dest);
+    }
+    
+    console.log(`Finished downloading Vaastav data for ${season}`);
   }
-  
-  console.log(`Finished downloading Vaastav data for ${season}`);
 }
 
 main().catch(console.error);

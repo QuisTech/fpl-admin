@@ -1,0 +1,30 @@
+{
+  "name": "baseline",
+  "train": [],
+  "validation": [],
+  "optimizer": "None",
+  "seed": null,
+  "loss": {},
+  "weights": {
+    "betaMinutesBase": 1.0,
+    "betaMinutesTrend": 0.1,
+    "betaAttackBase": 0.5,
+    "betaXG": 4.0,
+    "betaXA": 3.0,
+    "betaXGI3": 1.0,
+    "betaXGI5": 0.5,
+    "betaAttFixture": -0.1,
+    "betaTeamAttack": 0.5,
+    "betaOppDefense": -0.5,
+    "betaAttHome": 0.2,
+    "betaCsBase": 0.2,
+    "betaTeamDefense": 0.6,
+    "betaOppAttack": -0.6,
+    "betaCsFixture": -0.1,
+    "betaCsHome": 0.3,
+    "betaBonusBase": 0.0,
+    "betaBpsBaseline": 0.5,
+    "betaVariance": 0.05,
+    "betaEO": 0.0
+  }
+}

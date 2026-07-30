@@ -1,9 +1,32 @@
 import fs from 'fs';
 import path from 'path';
 import { VaastavProvider } from '../api/_lib/providers/vaastav.js';
-import { Simulator, SquadState } from '../api/_lib/simulator.js';
-import { ProjectionEngine, DEFAULT_PARAMETERS } from '../api/_lib/projection.js';
-import { solveOptimalSquad } from '../api/_lib/lp-solver.js';
+import { Simulator, SquadState, Action, applyAction, getSellingPrice } from '../api/_lib/simulator.js';
+import { ProjectionEngine, UtilityParameters, DEFAULT_PARAMETERS } from '../api/_lib/projection.js';
+import { solveOptimalSquad, solveStartingXI, solveCaptain } from '../api/_lib/lp-solver.js';
+import { loadWeights } from '../api/_lib/weights-loader.js';
+
+// Setup argument parsing
+const args = process.argv.slice(2);
+let weightName = 'baseline';
+
+for (let i = 0; i < args.length; i++) {
+  if (args[i] === '--weights' && i + 1 < args.length) {
+    weightName = args[i + 1].replace('.json', ''); // allow passing with or without .json
+    i++;
+  }
+}
+
+// Load configurations
+let OPTIMIZED_PARAMETERS: UtilityParameters;
+try {
+  OPTIMIZED_PARAMETERS = loadWeights(weightName);
+} catch (e) {
+  console.error(e.message);
+  process.exit(1);
+}
+
+console.log(`[Backtest] Loaded configuration: ${weightName}`);
 
 // Simple seeded PRNG for deterministic simulation
 function seededRandom(seed: number) {
@@ -21,202 +44,291 @@ async function runBacktest() {
   await provider.loadSeason(season);
 
   console.log(`\nStarting ${season} Backtest Simulation Loop...`);
+  const OPTIMIZED_PARAMETERS = { ...DEFAULT_PARAMETERS };
 
-  // Log container
   const runLog: any = {
+    metadata: {
+      engineVersion: "v1.0.0-research",
+      projectionVersion: "linear-v2",
+      utilityVersion: "ev-unified",
+      riskMode: "safe",
+      beamWidth: 200,
+      timestamp: new Date().toISOString(),
+      configName: weightName,
+      evaluation: {
+        zeroLeakage: provider.supportsHistoricalAnnouncements ? "YES" : "NO",
+        historicalFixtureAnnouncements: provider.supportsHistoricalAnnouncements ? "YES" : "NO"
+      }
+    },
     season,
-    parameters: DEFAULT_PARAMETERS,
+    parameters: OPTIMIZED_PARAMETERS,
     seed: 42,
     gameweeks: [],
     finalScore: 0,
     finalBank: 0,
-    captainAccuracy: 0, // Points from captains vs max possible points
-    totalHits: 0
+    totalHits: 0,
+    transfers: []
   };
 
-  const riskMode = 'safe';
   let currentState: SquadState | null = null;
   const startGw = 1;
   const endGw = 38;
 
+  // Track transfers to calculate ROI
+  const activeTransfers: any[] = [];
+
   for (let gw = startGw; gw <= endGw; gw++) {
     console.log(`\n--- Simulating GW${gw} ---`);
     
-    // 1. Get the pristine Deadline Snapshot
-    // Start with 1000 bank (£100.0m) and 0 free transfers for GW1
     const currentBank = currentState ? currentState.bank : 1000;
     const currentFTs = currentState ? currentState.freeTransfers : 0;
     const chips = currentState ? currentState.chipState : { 'WC': 2, 'FH': 1, 'BB': 1, 'TC': 1 };
     
     const snapshot = provider.getDeadlineSnapshot(gw, currentBank, currentFTs, chips);
-    
-    // 2. Feed it into the ProjectionEngine to get the XPOracle
-    const engine = new ProjectionEngine(snapshot, DEFAULT_PARAMETERS);
+    const engine = new ProjectionEngine(snapshot, OPTIMIZED_PARAMETERS);
     const oracle = engine.getOracle();
 
+    let gwAction = 'ROLL';
+
     if (gw === startGw) {
-      // 3a. GW1 Initial Squad Selection
       console.log("Solving initial squad...");
-      // GW1 we have 1000 budget and optimize for the first 8 weeks
-      const initialSquad = solveOptimalSquad(oracle, gw, 1000, 8, riskMode);
+      const initialSquad = solveOptimalSquad(oracle, gw, 1000, 8, OPTIMIZED_PARAMETERS);
       
       let spent = 0;
-      initialSquad.forEach(id => spent += oracle.getCost(id));
+      const purchasePrices: Record<number, number> = {};
+      initialSquad.forEach(id => {
+        const cost = oracle.getCost(id);
+        spent += cost;
+        purchasePrices[id] = cost;
+      });
 
       currentState = {
         squad: initialSquad,
         bank: 1000 - spent,
-        freeTransfers: 1, // GW2 will start with 1 FT
+        freeTransfers: 1, 
         chipState: { 'WC': 2, 'FH': 1, 'BB': 1, 'TC': 1 },
         gameweek: gw,
-        accumulatedScore: 0
+        accumulatedScore: 0,
+        purchasePrices
       };
       
       console.log(`Initial squad chosen. Bank remaining: £${currentState.bank / 10}m`);
+      gwAction = 'INITIAL';
     } else {
-      // 3b. GW2-GW38 Transfers (Simulator)
       if (!currentState) throw new Error("State lost");
 
-      const simulator = new Simulator(false); // isVercel=false -> beamWidth=500
-      
+      const simulator = new Simulator(false); 
       console.log(`Running beam search from state: FT=${currentState.freeTransfers}, Bank=${currentState.bank/10}`);
       
-      // simulateHorizon evaluates all valid transfer paths
-      const bestPaths = simulator.simulateHorizon(currentState, oracle, riskMode);
-      const bestPath = bestPaths[0]; // the state that maximizes long-term fitness
+      const bestPaths = simulator.simulateHorizon(currentState, oracle, OPTIMIZED_PARAMETERS);
+      const bestPath = bestPaths[0];
+      gwAction = bestPath.firstAction || 'ROLL';
       
-      // The simulator returns the state *after* the entire 8-week horizon.
-      // But we only want to commit the FIRST step's action to our actual state.
+      console.log(`Engine decided: ${gwAction}`);
       
-      // What was the first action? We must reconstruct it since simulator currently just outputs final horizon state.
-      // Wait, simulator tracks `firstTransfersIn`, `firstTransfersOut`, `firstAction`.
-      console.log(`Engine decided: ${bestPath.firstAction}`);
-      
-      // Apply the action to currentState
-      const inIds = bestPath.firstTransfersIn || [];
-      const outIds = bestPath.firstTransfersOut || [];
-      
-      if (bestPath.firstAction === 'TRANSFER' && inIds.length > 0) {
-        console.log(`Transfers: OUT [${outIds.join(',')}] -> IN [${inIds.join(',')}]`);
+      const actionType = (bestPath.firstAction as 'ROLL' | 'TRANSFER' | 'CHIP') || 'ROLL';
+      const actionToApply: Action = {
+        type: actionType,
+        transfersIn: bestPath.firstTransfersIn,
+        transfersOut: bestPath.firstTransfersOut,
+        chipName: actionType === 'CHIP' ? bestPath.firstAction : undefined,
+        hitCost: actionType === 'TRANSFER' ? Math.max(0, (bestPath.firstTransfersIn?.length || 0) - currentState.freeTransfers) * 4 : 0
+      };
+
+      if (actionType === 'TRANSFER' && actionToApply.transfersIn && actionToApply.transfersOut) {
+        console.log(`Transfers: OUT [${actionToApply.transfersOut.join(',')}] -> IN [${actionToApply.transfersIn.join(',')}]`);
+        runLog.totalHits += actionToApply.hitCost / 4;
         
-        let costOut = 0;
-        let costIn = 0;
-        outIds.forEach(id => {
-          costOut += oracle.getCost(id);
-          currentState!.squad = currentState!.squad.filter(s => s !== id);
+        let expectedGain = 0;
+        // Naive expected gain sum for 1 horizon point
+        actionToApply.transfersIn.forEach(id => expectedGain += oracle.getXP(id, gw));
+        actionToApply.transfersOut.forEach(id => expectedGain -= oracle.getXP(id, gw));
+
+        activeTransfers.push({
+          gw,
+          in: actionToApply.transfersIn,
+          out: actionToApply.transfersOut,
+          hitCost: actionToApply.hitCost,
+          expectedGain,
+          actualGain1: 0,
+          actualGain4: 0,
+          actualGain8: 0
         });
-        inIds.forEach(id => {
-          costIn += oracle.getCost(id);
-          currentState!.squad.push(id);
-        });
-        
-        currentState.bank = currentState.bank + costOut - costIn;
-        const hitCost = Math.max(0, inIds.length - currentState.freeTransfers) * 4;
-        currentState.accumulatedScore -= hitCost;
-        runLog.totalHits += hitCost / 4;
-        
-        currentState.freeTransfers = Math.min(5, Math.max(0, currentState.freeTransfers - inIds.length) + 1);
-      } else {
-        // Roll transfer
-        currentState.freeTransfers = Math.min(5, currentState.freeTransfers + 1);
+      } else if (bestPath.firstAction === 'WC' || bestPath.firstAction === 'FH' || bestPath.firstAction === 'BB' || bestPath.firstAction === 'TC') {
+        console.log(`Using Chip: ${bestPath.firstAction}`);
+        actionToApply.type = 'CHIP';
+        actionToApply.chipName = bestPath.firstAction;
       }
+      
+      currentState = applyAction(currentState, actionToApply, oracle, gw, OPTIMIZED_PARAMETERS);
     }
 
-    // 4. Evaluate actual points for this gameweek
-    let gwActualPoints = 0;
+    // Diagnostics Phase
+    const xiIds = solveStartingXI(oracle, gw, currentState.squad, OPTIMIZED_PARAMETERS);
+    const { captain, viceCaptain } = solveCaptain(oracle, gw, xiIds, OPTIMIZED_PARAMETERS);
     
-    // Determine Captain
-    let maxCapUtility = -9999;
-    let captainId = currentState.squad[0];
+    // Evaluate Prediction Errors (RMSE/MAE) for the squad
+    let squadErrorSum = 0;
+    let squadErrorSqSum = 0;
+    let actualSquadPoints = 0;
+    let expectedSquadPoints = 0;
     
-    // Simulate what the engine would pick as captain
     currentState.squad.forEach(id => {
-      const xp = oracle.getXP(id, gw);
-      const variance = oracle.getVariance(id, gw);
-      const eo = oracle.getTop1kEO?.(id) || 0;
-      // We must use the utility.ts logic, but wait, simulator calls calculateCaptainUtility.
-      // We'll approximate by just picking highest xP for this logging script to avoid importing it all.
-      // Better: we can just use the xp.
-      const util = xp + (Math.sqrt(variance) * 0.5); 
-      if (util > maxCapUtility) {
-        maxCapUtility = util;
-        captainId = id;
-      }
+      const pred = oracle.getXP(id, gw);
+      const actual = provider.getActualPoints(id, gw);
+      actualSquadPoints += actual;
+      expectedSquadPoints += pred;
+      squadErrorSum += Math.abs(pred - actual);
+      squadErrorSqSum += Math.pow(pred - actual, 2);
     });
+    
+    const gwMAE = squadErrorSum / 15;
+    const gwRMSE = Math.sqrt(squadErrorSqSum / 15);
 
-    let bestPossibleActual = -999;
-    let actualCaptainPoints = 0;
-
+    // Compute actual points
+    let gwActualPoints = 0;
+    let captainActual = 0;
+    
+    const xiSet = new Set(xiIds);
+    let benchPoints = 0;
+    let benchCost = 0;
+    
     currentState.squad.forEach(id => {
       const pts = provider.getActualPoints(id, gw);
-      if (pts > bestPossibleActual) bestPossibleActual = pts;
       
-      if (id === captainId) {
+      if (id === captain) {
         gwActualPoints += (pts * 2);
-        actualCaptainPoints = pts * 2;
-      } else {
+        captainActual = pts * 2;
+      } else if (xiSet.has(id)) {
         gwActualPoints += pts;
+      } else {
+        benchPoints += pts;
+        benchCost += oracle.getCost(id);
       }
     });
 
-    // Extremely naive Bench (assuming all 15 start, we can refine this later by selecting XI)
-    // For now we just sum the top 11 scoring players to simulate perfect bench behavior, 
-    // or just assume the oracle picks the XI. 
-    // Let's do a naive "auto-sub" simulation: sort squad by actual points, take top 11.
-    // (This slightly overestimates bench points but keeps the loop simple).
+    // Decision vs Projection Error Decomposition
+    let chosenXiXp = 0;
+    xiIds.forEach(id => chosenXiXp += oracle.getXP(id, gw));
+    let chosenCaptainXp = oracle.getXP(captain, gw);
     
-    // Actually, let's just score the top 11 to keep it simple for V1.
-    const playerPoints = currentState.squad.map(id => ({
-      id,
-      pts: provider.getActualPoints(id, gw),
-      isCap: id === captainId
-    }));
-    playerPoints.sort((a, b) => b.pts - a.pts);
-    
-    let totalGwPts = 0;
-    // Cap is always in
-    const capIndex = playerPoints.findIndex(p => p.isCap);
-    const cap = playerPoints.splice(capIndex, 1)[0];
-    totalGwPts += cap.pts * 2;
-    
-    // Take next 10 best
-    for (let i = 0; i < 10; i++) {
-      if (playerPoints[i]) totalGwPts += playerPoints[i].pts;
-    }
-    
-    currentState.accumulatedScore += totalGwPts;
-    
-    console.log(`GW${gw} Actual Points: ${totalGwPts} (Captain: ${captainId} got ${cap.pts * 2})`);
-    
-    // Log
+    const bestXiIds = solveStartingXI(oracle, gw, currentState.squad, OPTIMIZED_PARAMETERS);
+    const { captain: bestCaptain } = solveCaptain(oracle, gw, bestXiIds, OPTIMIZED_PARAMETERS);
+    let bestXiXp = 0;
+    bestXiIds.forEach(id => bestXiXp += oracle.getXP(id, gw));
+    let bestCaptainXp = oracle.getXP(bestCaptain, gw);
+
+    const xiDecisionError = Math.max(0, bestXiXp - chosenXiXp);
+    const capDecisionError = Math.max(0, bestCaptainXp - chosenCaptainXp);
+    const footballRandomness = (chosenXiXp + chosenCaptainXp) - gwActualPoints; // expected - actual
+
+    currentState.accumulatedScore += gwActualPoints;
+    console.log(`GW${gw} Actual Points: ${gwActualPoints} | Proj Error: ${gwMAE.toFixed(2)} | Dec Error: ${(xiDecisionError + capDecisionError).toFixed(2)} | Randomness: ${footballRandomness.toFixed(2)}`);
+
+    // Update active transfers
+    activeTransfers.forEach(t => {
+      const gwsPassed = gw - t.gw;
+      if (gwsPassed >= 0 && gwsPassed < 8) {
+        let ptsIn = 0;
+        let ptsOut = 0;
+        t.in.forEach((id: number) => ptsIn += provider.getActualPoints(id, gw));
+        t.out.forEach((id: number) => ptsOut += provider.getActualPoints(id, gw));
+        const diff = ptsIn - ptsOut;
+        
+        if (gwsPassed === 0) t.actualGain1 += diff;
+        if (gwsPassed < 4) t.actualGain4 += diff;
+        if (gwsPassed < 8) t.actualGain8 += diff;
+      }
+    });
+
+    // Logging GW stats
     runLog.gameweeks.push({
       gw,
-      points: totalGwPts,
-      captainId,
-      captainPoints: cap.pts * 2,
-      maxPossibleCaptain: bestPossibleActual * 2,
-      bank: currentState.bank / 10,
-      squad: [...currentState.squad]
+      points: gwActualPoints,
+      captain: {
+        id: captain,
+        expectedXP: oracle.getXP(captain, gw),
+        actualPoints: captainActual,
+      },
+      viceCaptain: {
+        id: viceCaptain,
+        actualPoints: provider.getActualPoints(viceCaptain, gw)
+      },
+      bench: {
+        points: benchPoints,
+        cost: benchCost / 10
+      },
+      prediction: {
+        mae: gwMAE,
+        rmse: gwRMSE,
+        expectedSquadPoints,
+        actualSquadPoints
+      },
+      diagnostics: {
+        bestXiXp,
+        chosenXiXp,
+        actualXiPoints: gwActualPoints - captainActual,
+        bestCaptainXp,
+        chosenCaptainXp,
+        actualCaptainPoints: captainActual,
+        errors: {
+          projectionError: gwMAE, // Average squad MAE
+          decisionError: xiDecisionError + capDecisionError,
+          decisionDecomp: {
+            xiSelection: xiDecisionError,
+            captainSelection: capDecisionError,
+            squadConstruction: 0, // Placeholder for future logic
+            transferTiming: 0, 
+            chipTiming: 0
+          },
+          footballRandomness
+        }
+      },
+      financials: {
+        bank: currentState.bank / 10,
+        squadPurchaseValue: currentState.squad.reduce((sum, id) => sum + (currentState!.purchasePrices[id] || oracle.getCost(id)), 0) / 10,
+        squadSellingValue: currentState.squad.reduce((sum, id) => sum + getSellingPrice(oracle.getCost(id), currentState!.purchasePrices[id] || oracle.getCost(id)), 0) / 10
+      },
+      action: gwAction,
+      squad: [...currentState.squad],
+      xi: [...xiIds]
     });
-    
-    // Track Captain Accuracy
-    runLog.captainAccuracy += (cap.pts * 2) / (bestPossibleActual * 2);
   }
 
-  runLog.finalScore = currentState!.accumulatedScore;
-  runLog.finalBank = currentState!.bank / 10;
-  runLog.captainAccuracy = runLog.captainAccuracy / endGw;
+  runLog.transfers = activeTransfers;
 
+  let terminalSquadValue = 0;
+  const finalSnapshot = provider.getDeadlineSnapshot(endGw, 1000, 0, {});
+  currentState!.squad.forEach(id => {
+    const player = finalSnapshot.players[id];
+    if (player) {
+      const currentCost = Math.round(player.price * 10);
+      const purchasePrice = currentState!.purchasePrices[id] || currentCost;
+      terminalSquadValue += getSellingPrice(currentCost, purchasePrice) / 10;
+    }
+  });
+
+  const finalBank = currentState!.bank / 10;
+  const OR_EquivalentScore = currentState!.accumulatedScore + (0.1 * finalBank) + terminalSquadValue;
+
+  runLog.finalScore = currentState!.accumulatedScore;
+  runLog.finalBank = finalBank;
+  runLog.terminalSquadValue = terminalSquadValue;
+  runLog.orEquivalentScore = OR_EquivalentScore;
+  
   console.log(`\n=== BACKTEST COMPLETE ===`);
-  console.log(`Final Score: ${runLog.finalScore}`);
+  console.log(`Final Season Points: ${runLog.finalScore}`);
   console.log(`Total Hits Taken: ${runLog.totalHits}`);
+  console.log(`Remaining Bank: £${runLog.finalBank}m`);
+  console.log(`Terminal Squad Value: £${runLog.terminalSquadValue}m`);
+  console.log(`OR-Equivalent Score: ${runLog.orEquivalentScore.toFixed(2)}`);
   
   const outDir = path.resolve(process.cwd(), 'backtests', season);
   if (!fs.existsSync(outDir)) {
     fs.mkdirSync(outDir, { recursive: true });
   }
   
-  const outPath = path.resolve(outDir, 'run-001.json');
+  const outPath = path.resolve(outDir, `run-${weightName}.json`);
   fs.writeFileSync(outPath, JSON.stringify(runLog, null, 2));
   console.log(`Run saved to ${outPath}`);
 }
