@@ -28,6 +28,7 @@ export class CSVOracle implements XPOracle {
   private playerTeams: Record<number, string> = {};
   private allIds: number[] = [];
   private top1kData: Record<number, { ownership: number; started: number; eo: number; captain: number; tripleCaptain: number }> = {};
+  private fuel: string = 'fplform';
 
   constructor(
     filePath: string, 
@@ -38,6 +39,7 @@ export class CSVOracle implements XPOracle {
     nextEventId: number = 1,
     fuel: string = 'fplform'
   ) {
+    this.fuel = fuel;
     this.loadTop1kData(players);
     this.loadData(filePath, players, fixtures, teams, nextEventId, riskMode, fuel);
   }
@@ -153,29 +155,20 @@ export class CSVOracle implements XPOracle {
         let matchedPlayer: any = null;
 
         if (players.length > 0) {
-          let match = null;
-          let providedId = (cols.length > 11 && !isNaN(parseInt(cols[11]))) ? parseInt(cols[11]) : null;
-          
-          if (providedId) {
-            match = players.find(p => p.id === providedId);
-          }
-          
-          if (!match) {
-            match = players.find(p => {
-              if (parsedTeamId > 0 && p.team !== parsedTeamId) return false;
-              if (expectedElementType > 0 && p.element_type !== expectedElementType) return false;
+          let match = players.find(p => {
+            if (parsedTeamId > 0 && p.team !== parsedTeamId) return false;
+            if (expectedElementType > 0 && p.element_type !== expectedElementType) return false;
 
-              const wName = (p.web_name || '').toLowerCase();
-              const sName = (p.second_name || '').toLowerCase();
-              const pName = playerName.toLowerCase();
+            const wName = (p.web_name || '').toLowerCase();
+            const sName = (p.second_name || '').toLowerCase();
+            const pName = playerName.toLowerCase();
 
-              // Require string length > 2 for substring matches to prevent single-letter/empty matches
-              const wMatch = wName === pName || (wName.length > 2 && pName.includes(wName));
-              const sMatch = sName === pName || (sName.length > 2 && pName.includes(sName));
+            // Require string length > 2 for substring matches to prevent single-letter/empty matches
+            const wMatch = wName === pName || (wName.length > 2 && pName.includes(wName));
+            const sMatch = sName === pName || (sName.length > 2 && pName.includes(sName));
               
-              return wMatch || sMatch;
-            });
-          }
+            return wMatch || sMatch;
+          });
 
           if (match) {
             fplId = match.id;
