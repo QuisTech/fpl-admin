@@ -55,12 +55,13 @@ export class CSVOracle implements XPOracle {
             
             if (players.length > 0 && data.name) {
               const pName = data.name.toLowerCase();
-              const match = players.find(p => 
-                (p.web_name || '').toLowerCase() === pName ||
-                (p.second_name || '').toLowerCase().includes(pName) ||
-                pName.includes((p.second_name || '').toLowerCase()) ||
-                pName.includes((p.web_name || '').toLowerCase())
-              );
+              const match = players.find(p => {
+                const wName = (p.web_name || '').toLowerCase();
+                const sName = (p.second_name || '').toLowerCase();
+                return wName === pName || sName === pName || 
+                       (wName.length > 2 && pName.includes(wName)) || 
+                       (sName.length > 2 && pName.includes(sName));
+              });
               if (match) {
                 fplId = match.id;
               }
@@ -168,12 +169,11 @@ export class CSVOracle implements XPOracle {
               const sName = (p.second_name || '').toLowerCase();
               const pName = playerName.toLowerCase();
 
-              return (
-                wName === pName ||
-                sName.includes(pName) ||
-                pName.includes(sName) ||
-                pName.includes(wName)
-              );
+              // Require string length > 2 for substring matches to prevent single-letter/empty matches
+              const wMatch = wName === pName || (wName.length > 2 && pName.includes(wName));
+              const sMatch = sName === pName || (sName.length > 2 && pName.includes(sName));
+              
+              return wMatch || sMatch;
             });
           }
 
