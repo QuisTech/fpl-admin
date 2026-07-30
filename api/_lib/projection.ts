@@ -34,27 +34,27 @@ export interface UtilityParameters {
 }
 
 export const DEFAULT_PARAMETERS: UtilityParameters = {
-  betaMinutesBase: 0.8,
+  betaMinutesBase: 1,
   betaMinutesTrend: 0.1,
 
-  betaAttackBase: 0.5,
-  betaXG: 1.5,
-  betaXA: 1.0,
-  betaXGI3: 0.2,
-  betaXGI5: 0.1,
-  betaAttFixture: -0.1,
-  betaTeamAttack: 0.5,
-  betaOppDefense: -0.5,
-  betaAttHome: 0.2,
+  betaAttackBase: 0.5000114104063873,
+  betaXG: 3.582591460997682,
+  betaXA: 4.51556079674138,
+  betaXGI3: 0.5763166751243092,
+  betaXGI5: 0.4168200350600249,
+  betaAttFixture: -0.903310960687626,
+  betaTeamAttack: 0.5177315230842577,
+  betaOppDefense: -1.1015773188368663,
+  betaAttHome: 0.23988147576371815,
 
-  betaCsBase: 0.2,
-  betaTeamDefense: 0.6,
-  betaOppAttack: -0.6,
-  betaCsFixture: -0.1,
-  betaCsHome: 0.3,
+  betaCsBase: 0.43038643043080904,
+  betaTeamDefense: 0.40298231516850475,
+  betaOppAttack: -0.4238931055237827,
+  betaCsFixture: -0.5559107029345892,
+  betaCsHome: -0.010069692318002456,
 
-  betaBonusBase: 0.0,
-  betaBpsBaseline: 0.5,
+  betaBonusBase: -0.6258759422788792,
+  betaBpsBaseline: 0.9534298244345316,
 
   betaVariance: 0.05,
   betaEO: 0.0

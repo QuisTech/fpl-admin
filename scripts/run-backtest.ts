@@ -117,7 +117,7 @@ async function runBacktest() {
     } else {
       if (!currentState) throw new Error("State lost");
 
-      const simulator = new Simulator(false); 
+      const simulator = new Simulator(true); 
       console.log(`Running beam search from state: FT=${currentState.freeTransfers}, Bank=${currentState.bank/10}`);
       
       const bestPaths = simulator.simulateHorizon(currentState, oracle, OPTIMIZED_PARAMETERS);
