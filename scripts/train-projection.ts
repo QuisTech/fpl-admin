@@ -93,7 +93,8 @@ async function runTraining() {
                 betaXA: bXA,
                 betaXGI3: bXGI3,
                 betaXGI5: bXGI5,
-                betaFixture: bFix,
+                betaAttFixture: bFix,
+                betaCsFixture: bFix,
                 betaMinutesBase: bMin
               };
 
