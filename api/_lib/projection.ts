@@ -31,6 +31,9 @@ export interface UtilityParameters {
   // Variance
   betaVariance: number;
   betaEO: number;
+  // Constraints
+  minEoTotal?: number;
+  minElitePlayers?: number;
 }
 
 export const DEFAULT_PARAMETERS: UtilityParameters = {
@@ -68,6 +71,12 @@ export function getParamsForRiskMode(riskMode: string): UtilityParameters {
   } else if (riskMode === 'safe') {
     params.betaVariance = 0.15;
     params.betaEO = 0.5;
+    params.minEoTotal = 150;
+    params.minElitePlayers = 1;
+  } else if (riskMode === 'value') {
+    params.betaVariance = 0.05;
+    params.betaEO = 0.0;
+    // Value mode constraints? Maybe none, just different beta
   } else {
     params.betaVariance = 0.05;
     params.betaEO = 0.0;

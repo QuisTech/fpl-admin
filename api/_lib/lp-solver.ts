@@ -49,6 +49,13 @@ export function solveOptimalSquad(
     ints: {}
   };
 
+  if (params.minEoTotal) {
+    model.constraints['eo_total'] = { min: params.minEoTotal };
+  }
+  if (params.minElitePlayers) {
+    model.constraints['elite_total'] = { min: params.minElitePlayers };
+  }
+
   allIds.forEach(id => {
     if (availableIds && !availableIds.has(id)) return;
     
@@ -73,6 +80,13 @@ export function solveOptimalSquad(
         [`team_${team}`]: 1, 
         [v]: 1
       };
+
+      if (params.minEoTotal) {
+        model.variables[v]['eo_total'] = oracle.getTop1kEO?.(id) ?? 0;
+      }
+      if (params.minElitePlayers) {
+        model.variables[v]['elite_total'] = cost >= 100 ? 1 : 0;
+      }
       model.constraints[v] = { max: 1 };
       model.ints[v] = 1;
     }
