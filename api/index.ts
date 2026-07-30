@@ -262,7 +262,7 @@ export class FPLService {
   static generateTransfers(squad: ScoredPlayer[], candidates: ScoredPlayer[], oracle: CSVOracle, riskMode: string, gameweek: number): TransferRecommendation[] {
     const transfers: TransferRecommendation[] = [];
     const squadIds = new Set(squad.map(p => p.id));
-    const lambda = riskMode === 'safe' ? 0.15 : riskMode === 'aggressive' ? 0.02 : 0.05;
+    const params = getParamsForRiskMode(riskMode);
 
     squad.forEach(outPlayer => {
       const betterOptions = candidates.filter(p => 
@@ -276,7 +276,9 @@ export class FPLService {
         const inPlayer = betterOptions[0];
         const inVar = oracle.getVariance(inPlayer.id, gameweek);
         const outVar = oracle.getVariance(outPlayer.id, gameweek);
-        const transferUtilityDelta = (inPlayer.xP - outPlayer.xP) - lambda * (inVar - outVar);
+        const inEO = oracle.getTop1kEO?.(inPlayer.id) ?? 0;
+        const outEO = oracle.getTop1kEO?.(outPlayer.id) ?? 0;
+        const transferUtilityDelta = (inPlayer.xP - outPlayer.xP) - params.betaVariance * (inVar - outVar) + params.betaEO * (inEO - outEO);
         const xPDelta = inPlayer.xP - outPlayer.xP;
 
         transfers.push({ 
@@ -364,13 +366,19 @@ export class FPLService {
     
     const bank = teamRes.data.entry_history?.bank || 0;
 
+    const purchasePrices: Record<number, number> = {};
+    myPicks.forEach(p => {
+      purchasePrices[p.id] = oracle.getCost(p.id) || 50;
+    });
+
     const initialState = {
       squad: myPicks.map(p => p.id),
       bank, // Live bank value
       freeTransfers: 1, // Defaulting to 1 for live pull
       chipState: { 'WC': 1, 'BB': 1, 'TC': 1, 'FH': 1 }, // Assuming chips are available for testing
       gameweek: baseData.nextEventId,
-      accumulatedScore: 0
+      accumulatedScore: 0,
+      purchasePrices
     };
 
     // 3. Execute the Multi-Horizon Beam Search (Only for Grand Cru / Beta Pilot)
@@ -401,7 +409,7 @@ export class FPLService {
       if (optimalFirstMove === 'TRANSFER' && bestFutures.length > 0 && bestFutures[0].firstTransfersIn && bestFutures[0].firstTransfersOut) {
         const ins = bestFutures[0].firstTransfersIn;
         const outs = bestFutures[0].firstTransfersOut;
-        const lambda = riskMode === 'safe' ? 0.15 : riskMode === 'aggressive' ? 0.02 : 0.05;
+        const params = getParamsForRiskMode(riskMode);
         for (let i = 0; i < ins.length; i++) {
           const inPlayer = baseData.players.find(p => p.id === ins[i]);
           const outPlayer = myPicks.find(p => p.id === outs[i]);
@@ -411,7 +419,10 @@ export class FPLService {
             
             const inVar = oracle.getVariance(inPlayer.id, baseData.nextEventId);
             const outVar = oracle.getVariance(outPlayer.id, baseData.nextEventId);
-            const transferUtilityDelta = (inScored.xP - outPlayer.xP) - lambda * (inVar - outVar);
+            const inEO = oracle.getTop1kEO?.(inPlayer.id) ?? 0;
+            const outEO = oracle.getTop1kEO?.(outPlayer.id) ?? 0;
+
+            const transferUtilityDelta = (inScored.xP - outPlayer.xP) - params.betaVariance * (inVar - outVar) + params.betaEO * (inEO - outEO);
             const xPDelta = inScored.xP - outPlayer.xP;
 
             transfers.push({

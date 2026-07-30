@@ -38,11 +38,11 @@ export class CSVOracle implements XPOracle {
     nextEventId: number = 1,
     fuel: string = 'fplform'
   ) {
-    this.loadTop1kData();
+    this.loadTop1kData(players);
     this.loadData(filePath, players, fixtures, teams, nextEventId, riskMode, fuel);
   }
 
-  private loadTop1kData() {
+  private loadTop1kData(players: any[] = []) {
     const jsonPath = path.resolve(process.cwd(), 'data', 'top_1000_eo.json');
     if (fs.existsSync(jsonPath)) {
       try {
@@ -50,7 +50,22 @@ export class CSVOracle implements XPOracle {
         const parsed = JSON.parse(raw);
         if (parsed && parsed.players) {
           Object.keys(parsed.players).forEach(pId => {
-            this.top1kData[parseInt(pId)] = parsed.players[pId];
+            const data = parsed.players[pId];
+            let fplId = parseInt(pId);
+            
+            if (players.length > 0 && data.name) {
+              const pName = data.name.toLowerCase();
+              const match = players.find(p => 
+                (p.web_name || '').toLowerCase() === pName ||
+                (p.second_name || '').toLowerCase().includes(pName) ||
+                pName.includes((p.second_name || '').toLowerCase()) ||
+                pName.includes((p.web_name || '').toLowerCase())
+              );
+              if (match) {
+                fplId = match.id;
+              }
+            }
+            this.top1kData[fplId] = data;
           });
           console.log(`[CSVOracle] Loaded Top 1,000 sentiment data for ${Object.keys(this.top1kData).length} players.`);
         }
@@ -137,22 +152,30 @@ export class CSVOracle implements XPOracle {
         let matchedPlayer: any = null;
 
         if (players.length > 0) {
-          const match = players.find(p => {
-            // Must match team and position to avoid cross-contamination of similar names
-            if (parsedTeamId > 0 && p.team !== parsedTeamId) return false;
-            if (expectedElementType > 0 && p.element_type !== expectedElementType) return false;
+          let match = null;
+          let providedId = (cols.length > 11 && !isNaN(parseInt(cols[11]))) ? parseInt(cols[11]) : null;
+          
+          if (providedId) {
+            match = players.find(p => p.id === providedId);
+          }
+          
+          if (!match) {
+            match = players.find(p => {
+              if (parsedTeamId > 0 && p.team !== parsedTeamId) return false;
+              if (expectedElementType > 0 && p.element_type !== expectedElementType) return false;
 
-            const wName = (p.web_name || '').toLowerCase();
-            const sName = (p.second_name || '').toLowerCase();
-            const pName = playerName.toLowerCase();
+              const wName = (p.web_name || '').toLowerCase();
+              const sName = (p.second_name || '').toLowerCase();
+              const pName = playerName.toLowerCase();
 
-            return (
-              wName === pName ||
-              sName.includes(pName) ||
-              pName.includes(sName) ||
-              pName.includes(wName)
-            );
-          });
+              return (
+                wName === pName ||
+                sName.includes(pName) ||
+                pName.includes(sName) ||
+                pName.includes(wName)
+              );
+            });
+          }
 
           if (match) {
             fplId = match.id;
