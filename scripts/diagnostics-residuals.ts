@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { VaastavProvider } from '../api/_lib/providers/vaastav.js';
-import { ProjectionEngine } from '../api/_lib/projection.js';
+import {  ProjectionEngine , HistoricalOracle } from '../api/_lib/projection.js';
 import { loadWeights } from '../api/_lib/weights-loader.js';
 
 async function runResiduals() {
@@ -26,8 +26,8 @@ async function runResiduals() {
 
   for (let gw = startGw; gw <= endGw; gw++) {
     const snapshot = provider.getDeadlineSnapshot(gw, 1000, 0, {});
-    const engine = new ProjectionEngine(snapshot, params);
-    const oracle = engine.getOracle();
+    const engine = new ProjectionEngine(params);
+    const oracle = new HistoricalOracle(snapshot, engine);
 
     const validPlayers = oracle.getAllPlayerIds().filter(id => oracle.getCost(id) > 0);
 
@@ -36,7 +36,7 @@ async function runResiduals() {
       const actual = provider.getActualPoints(id, gw);
       const residual = xp - actual; // Positive = Overpredicted, Negative = Underpredicted
       
-      const distribution = oracle.getDistribution(id, gw);
+      const distribution = engine.predict({playerId: id, source: 'EYE_TEST', features: snapshot.players[id]}, gw);
       const variance = distribution.variance;
 
       const playerMetadata = snapshot.players[id];
@@ -44,7 +44,7 @@ async function runResiduals() {
 
       const position = playerMetadata.position;
       const price = playerMetadata.price;
-      const team = playerMetadata.team;
+      const team = playerMetadata.teamId;
       const playerName = playerMetadata.name.replace(/,/g, ''); 
 
       // Extract specific GW matching data
@@ -52,7 +52,7 @@ async function runResiduals() {
       const actualMins = gwMatches.reduce((acc: number, m: any) => acc + parseInt(m.minutes || 0), 0);
       const wasHome = gwMatches.length > 0 ? (gwMatches[0].was_home === 'True' || gwMatches[0].was_home === true ? 1 : 0) : '';
       const opponent = gwMatches.length > 0 ? gwMatches[0].opponent_team : '';
-      const expMins = oracle.getExpectedMinutes(id, gw);
+      const expMins = snapshot.players[id].predictedMinutes;
 
       // We don't have rolling form readily available in oracle without some custom logic,
       // but we can extract it from provider raw data if needed. Using placeholder for now.

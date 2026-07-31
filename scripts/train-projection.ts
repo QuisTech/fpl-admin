@@ -1,5 +1,7 @@
+import { loadWeights } from '../api/_lib/weights-loader.js';
+const DEFAULT_PARAMETERS = loadWeights('baseline');
 import { VaastavProvider } from '../api/_lib/providers/vaastav.js';
-import { ProjectionEngine, UtilityParameters, DEFAULT_PARAMETERS } from '../api/_lib/projection.js';
+import {  ProjectionEngine, UtilityParameters, HistoricalOracle } from '../api/_lib/projection.js';
 
 // Simple Spearman Rank Correlation implementation
 function spearmanRankCorrelation(x: number[], y: number[]): number {
@@ -111,8 +113,8 @@ async function runTraining() {
                 const provider = providers[season];
                 for (let gw = 1; gw <= 38; gw++) {
                   const snapshot = snapshots[season][gw];
-                  const engine = new ProjectionEngine(snapshot, params);
-                  const oracle = engine.getOracle();
+                  const engine = new ProjectionEngine(params);
+                  const oracle = new HistoricalOracle(snapshot, engine);
                   
                   const gwPredicted: number[] = [];
                   const gwActual: number[] = [];

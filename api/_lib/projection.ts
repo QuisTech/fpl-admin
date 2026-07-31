@@ -37,35 +37,15 @@ export interface UtilityParameters {
   budgetMultiplier?: number;
 }
 
-export const DEFAULT_PARAMETERS: UtilityParameters = {
-  betaMinutesBase: 0.8,
-  betaMinutesTrend: 0.1,
+export interface ProjectionInput {
+  playerId: number;
+  source: 'EYE_TEST' | 'NATIVE' | 'FPLFORM';
+  features?: any; // Will use HistoricalPlayerFeatures
+  externalXP?: number;
+}
 
-  betaAttackBase: 0.5,
-  betaXG: 1.5,
-  betaXA: 1.0,
-  betaXGI3: 0.2,
-  betaXGI5: 0.1,
-  betaAttFixture: -0.1,
-  betaTeamAttack: 0.5,
-  betaOppDefense: -0.5,
-  betaAttHome: 0.2,
-
-  betaCsBase: 0.2,
-  betaTeamDefense: 0.6,
-  betaOppAttack: -0.6,
-  betaCsFixture: -0.1,
-  betaCsHome: 0.3,
-
-  betaBonusBase: 0.0,
-  betaBpsBaseline: 0.5,
-
-  betaVariance: 0.05,
-  betaEO: 0.0
-};
-
-export function getParamsForRiskMode(riskMode: string): UtilityParameters {
-  const params = { ...DEFAULT_PARAMETERS };
+export function getParamsForRiskMode(riskMode: string, baseWeights: UtilityParameters): UtilityParameters {
+  const params = { ...baseWeights };
   if (riskMode === 'aggressive') {
     params.betaVariance = 0.5; // Favor high variance (differentials)
     params.betaEO = -2.0; // Heavily penalize high EO players (-2 points for 100% EO)
@@ -86,22 +66,24 @@ export function getParamsForRiskMode(riskMode: string): UtilityParameters {
 }
 
 export class ProjectionEngine {
-  private snapshot: DeadlineSnapshot;
   private params: UtilityParameters;
 
-  constructor(snapshot: DeadlineSnapshot, params: UtilityParameters = DEFAULT_PARAMETERS) {
-    this.snapshot = snapshot;
+  constructor(params: UtilityParameters) {
     this.params = params;
   }
 
   /**
-   * Data-driven generic predictor for Expected Points (XP) and Variance
+   * Universal Predictor for Expected Points (XP) and Variance
    */
-  public getDistribution(playerId: number, targetGw: number): { expected: number, variance: number } {
-    const player = this.snapshot.players[playerId];
-    if (!player) return { expected: 0, variance: 0 };
+  public predict(input: ProjectionInput, targetGw: number): { expected: number, variance: number } {
+    if (input.source === 'NATIVE' || input.source === 'FPLFORM') {
+      return { expected: input.externalXP || 0, variance: (input.externalXP || 0) * this.params.betaVariance };
+    }
+
+    if (!input.features) return { expected: 0, variance: 0 };
+    const player = input.features;
     
-    const fixtures = player.fixturesByGw[targetGw] || [];
+    const fixtures = player.fixturesByGw?.[targetGw] || [];
     if (fixtures.length === 0) return { expected: 0, variance: 0 };
 
     let totalXp = 0;
@@ -182,46 +164,55 @@ export class ProjectionEngine {
 
     return { expected: totalXp, variance: totalVar };
   }
-
-  public predict(playerId: number, targetGw: number): number {
-    return this.getDistribution(playerId, targetGw).expected;
-  }
-
-  public getOracle(): XPOracle {
-    const { players } = this.snapshot;
-    
-    return {
-      getXP: (playerId: number, targetGw: number) => {
-        return this.predict(playerId, targetGw);
-      },
-      
-      getVariance: (playerId: number, targetGw: number) => {
-        return this.getDistribution(playerId, targetGw).variance;
-      },
-      
-      getCost: (playerId: number) => {
-        const player = players[playerId];
-        return player ? Math.round(player.price * 10) : 0;
-      },
-
-      getPosition: (playerId: number) => {
-        return players[playerId]?.position || 'MID';
-      },
-
-      getTeam: (playerId: number) => {
-        return (players[playerId]?.teamId || 0).toString();
-      },
-
-      getAllPlayerIds: () => {
-        return Object.keys(players).map(id => parseInt(id));
-      },
-
-      getPriceDelta: () => 0,
-
-      getTop1kEO: (playerId: number) => {
-        return players[playerId]?.eo || 0;
-      }
-    };
-  }
 }
 
+export class HistoricalOracle implements XPOracle {
+  private engine: ProjectionEngine;
+  private snapshot: DeadlineSnapshot;
+
+  constructor(snapshot: DeadlineSnapshot, engine: ProjectionEngine) {
+    this.snapshot = snapshot;
+    this.engine = engine;
+  }
+
+  private getProjectionInput(playerId: number): ProjectionInput {
+    return {
+      playerId,
+      source: 'EYE_TEST', // Historical backtests construct features like EYE_TEST
+      features: this.snapshot.players[playerId]
+    };
+  }
+
+  getXP(playerId: number, gameweek: number): number {
+    return this.engine.predict(this.getProjectionInput(playerId), gameweek).expected;
+  }
+
+  getVariance(playerId: number, gameweek: number): number {
+    return this.engine.predict(this.getProjectionInput(playerId), gameweek).variance;
+  }
+
+  getCost(playerId: number): number {
+    const player = this.snapshot.players[playerId];
+    return player ? Math.round(player.price * 10) : 0;
+  }
+
+  getPosition(playerId: number): string {
+    return this.snapshot.players[playerId]?.position || 'MID';
+  }
+
+  getTeam(playerId: number): string {
+    return (this.snapshot.players[playerId]?.teamId || 0).toString();
+  }
+
+  getAllPlayerIds(): number[] {
+    return Object.keys(this.snapshot.players).map(id => parseInt(id));
+  }
+
+  getPriceDelta(playerId: number): number {
+    return 0;
+  }
+
+  getTop1kEO(playerId: number): number {
+    return this.snapshot.players[playerId]?.eo || 0;
+  }
+}

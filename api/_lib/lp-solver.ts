@@ -1,6 +1,8 @@
+import { loadWeights } from './weights-loader.js';
+const DEFAULT_PARAMETERS = loadWeights('baseline');
 import { XPOracle } from "./ingestion.js";
 import { calculateUtility } from "./utility.js";
-import { UtilityParameters, DEFAULT_PARAMETERS } from "./projection.js";
+import { UtilityParameters, } from './projection.js';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const solver = require("javascript-lp-solver");

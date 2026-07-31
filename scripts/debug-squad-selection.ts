@@ -1,8 +1,10 @@
+import { loadWeights } from '../api/_lib/weights-loader.js';
+const DEFAULT_PARAMETERS = loadWeights('baseline');
 import fs from 'fs';
 import path from 'path';
 import Papa from 'papaparse';
 import { VaastavProvider } from '../api/_lib/providers/vaastav.js';
-import { ProjectionEngine, DEFAULT_PARAMETERS } from '../api/_lib/projection.js';
+import {  ProjectionEngine, HistoricalOracle } from '../api/_lib/projection.js';
 
 const OPTIMIZED_PARAMETERS = { ...DEFAULT_PARAMETERS };
 import { solveOptimalSquad } from '../api/_lib/lp-solver.js';
@@ -16,8 +18,8 @@ async function debugSquadSelection() {
   
   const gw = 1;
   const snapshot = provider.getDeadlineSnapshot(gw, 1000, 0, { 'WC': 2, 'FH': 1, 'BB': 1, 'TC': 1 });
-  const engine = new ProjectionEngine(snapshot, OPTIMIZED_PARAMETERS);
-  const oracle = engine.getOracle();
+  const engine = new ProjectionEngine(OPTIMIZED_PARAMETERS);
+  const oracle = new HistoricalOracle(snapshot, engine);
   
   console.log('Solving initial squad...');
   const initialSquad = solveOptimalSquad(oracle, gw, 1000, 8, OPTIMIZED_PARAMETERS);

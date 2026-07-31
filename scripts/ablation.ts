@@ -1,6 +1,6 @@
 import { evaluateModel } from './evaluate-model.js';
 import { loadWeights } from '../api/_lib/weights-loader.js';
-import { UtilityParameters, DEFAULT_PARAMETERS } from '../api/_lib/projection.js';
+import { UtilityParameters, } from '../api/_lib/projection.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';

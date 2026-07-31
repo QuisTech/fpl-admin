@@ -2,9 +2,10 @@ import fs from 'fs';
 import path from 'path';
 import { VaastavProvider } from '../api/_lib/providers/vaastav.js';
 import { Simulator, SquadState, Action, applyAction, getSellingPrice } from '../api/_lib/simulator.js';
-import { ProjectionEngine, UtilityParameters, DEFAULT_PARAMETERS } from '../api/_lib/projection.js';
+import {  ProjectionEngine, UtilityParameters, HistoricalOracle } from '../api/_lib/projection.js';
 import { solveOptimalSquad, solveStartingXI, solveCaptain } from '../api/_lib/lp-solver.js';
 import { loadWeights } from '../api/_lib/weights-loader.js';
+const DEFAULT_PARAMETERS = loadWeights('baseline');
 
 // Setup argument parsing
 const args = process.argv.slice(2);
@@ -85,8 +86,8 @@ async function runBacktest() {
     const chips = currentState ? currentState.chipState : { 'WC': 2, 'FH': 1, 'BB': 1, 'TC': 1 };
     
     const snapshot = provider.getDeadlineSnapshot(gw, currentBank, currentFTs, chips);
-    const engine = new ProjectionEngine(snapshot, OPTIMIZED_PARAMETERS);
-    const oracle = engine.getOracle();
+    const engine = new ProjectionEngine(OPTIMIZED_PARAMETERS);
+    const oracle = new HistoricalOracle(snapshot, engine);
 
     let gwAction = 'ROLL';
 
@@ -248,8 +249,7 @@ async function runBacktest() {
       captain: {
         id: captain,
         expectedXP: oracle.getXP(captain, gw),
-        actualPoints: captainActual,
-      },
+        actualPoints: captainActual },
       viceCaptain: {
         id: viceCaptain,
         actualPoints: provider.getActualPoints(viceCaptain, gw)

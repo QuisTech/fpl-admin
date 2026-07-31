@@ -1,5 +1,5 @@
 import { VaastavProvider } from '../api/_lib/providers/vaastav.js';
-import { ProjectionEngine } from '../api/_lib/projection.js';
+import {  ProjectionEngine , HistoricalOracle } from '../api/_lib/projection.js';
 import { loadWeights } from '../api/_lib/weights-loader.js';
 
 function calculateNDCG(predictedScores: number[], actualScores: number[], k: number): number {
@@ -54,8 +54,8 @@ export async function evaluateModel(weightName: string, season: string) {
   
   for (let gw = startGw; gw <= endGw; gw++) {
     const snapshot = provider.getDeadlineSnapshot(gw, 1000, 0, {});
-    const engine = new ProjectionEngine(snapshot, params);
-    const oracle = engine.getOracle();
+    const engine = new ProjectionEngine(params);
+    const oracle = new HistoricalOracle(snapshot, engine);
     
     const allIds = oracle.getAllPlayerIds();
     const validPlayers = allIds.filter(id => oracle.getCost(id) > 0);

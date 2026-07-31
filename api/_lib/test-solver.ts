@@ -1,3 +1,5 @@
+import { loadWeights } from './weights-loader.js';
+const DEFAULT_PARAMETERS = loadWeights('baseline');
 import { solveOptimalSquad } from './lp-solver.js';
 
 // Mock Oracle for testing

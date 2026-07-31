@@ -9,6 +9,8 @@ import {
 } from './_lib/types.js';
 import { CSVOracle } from './_lib/ingestion.js';
 import { getParamsForRiskMode } from './_lib/projection.js';
+import { loadWeights } from './_lib/weights-loader.js';
+const baseWeights = loadWeights('baseline');
 import { Simulator } from './_lib/simulator.js';
 import { solveOptimalSquad } from './_lib/lp-solver.js';
 import { getUserTier, mergeUserTiers, getFirestore } from '../lib/firestore.js';
@@ -153,7 +155,7 @@ export class FPLService {
       try {
         const availableIds = new Set<number>(available.map(p => p.id));
         
-        const params = getParamsForRiskMode(riskMode);
+        const params = getParamsForRiskMode(riskMode, baseWeights);
         const optimalIds = solveOptimalSquad(oracle, nextEventId, budget, 8, params, availableIds);
         if (!optimalIds || optimalIds.length === 0) {
           throw new Error("LP Solver returned empty or infeasible solution.");
@@ -262,7 +264,7 @@ export class FPLService {
   static generateTransfers(squad: ScoredPlayer[], candidates: ScoredPlayer[], oracle: CSVOracle, riskMode: string, gameweek: number): TransferRecommendation[] {
     const transfers: TransferRecommendation[] = [];
     const squadIds = new Set(squad.map(p => p.id));
-    const params = getParamsForRiskMode(riskMode);
+    const params = getParamsForRiskMode(riskMode, baseWeights);
 
     squad.forEach(outPlayer => {
       const betterOptions = candidates.filter(p => 
@@ -270,7 +272,7 @@ export class FPLService {
         !squadIds.has(p.id) && 
         p.now_cost <= outPlayer.now_cost &&
         (p.score || 0) > (outPlayer.score || 0) + 0.5
-      ).sort((a, b) => (b.score || 0) - (a.score || 0));
+      , baseWeights).sort((a, b) => (b.score || 0) - (a.score || 0));
 
       if (betterOptions.length > 0) {
         const inPlayer = betterOptions[0];
@@ -387,7 +389,7 @@ export class FPLService {
     
     if (tier === 'grandCru' || tier === 'aiAgent' || tier === 'betaPilot' || tier === 'admin') {
       console.log(`[V3 Engine] Executing Beam Search for Team ${teamId}...`);
-      const params = getParamsForRiskMode(riskMode);
+      const params = getParamsForRiskMode(riskMode, baseWeights);
       bestFutures = simulator.simulateHorizon(initialState, oracle, params);
       if (bestFutures.length > 0) {
         optimalFirstMove = bestFutures[0].firstAction || 'ROLL';
@@ -409,7 +411,7 @@ export class FPLService {
       if (optimalFirstMove === 'TRANSFER' && bestFutures.length > 0 && bestFutures[0].firstTransfersIn && bestFutures[0].firstTransfersOut) {
         const ins = bestFutures[0].firstTransfersIn;
         const outs = bestFutures[0].firstTransfersOut;
-        const params = getParamsForRiskMode(riskMode);
+        const params = getParamsForRiskMode(riskMode, baseWeights);
         for (let i = 0; i < ins.length; i++) {
           const inPlayer = baseData.players.find(p => p.id === ins[i]);
           const outPlayer = myPicks.find(p => p.id === outs[i]);

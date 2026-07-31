@@ -1,3 +1,5 @@
+import { loadWeights } from './weights-loader.js';
+const DEFAULT_PARAMETERS = loadWeights('baseline');
 import { describe, it, expect } from 'vitest';
 import fs from 'fs';
 import path from 'path';
@@ -5,7 +7,7 @@ import { FPLService } from '../index';
 import { FPLPlayer, FPLFixture } from './types';
 import { CSVOracle, XPOracle } from './ingestion';
 import { Simulator, SquadState } from './simulator';
-import { DEFAULT_PARAMETERS } from './projection';
+
 
 // -------------------------------------------------------------
 // 1. Mock Oracle implementation for isolated simulator tests
@@ -180,8 +182,7 @@ describe('Simulator - Matchday points calculations', () => {
     freeTransfers: 1,
     chipState: { 'WC': 1, 'FH': 1, 'BB': 1, 'TC': 1 },
     gameweek: 1,
-    accumulatedScore: 0
-  };
+    accumulatedScore: 0, purchasePrices: {} };
 
   it('should sum expected points for standard starting XI and double captain', () => {
     // Starting XI should be top 11 players. Top 11 sum:
@@ -248,8 +249,7 @@ describe('Simulator - generateValidActions transfer logic', () => {
     freeTransfers: 1,
     chipState: { 'WC': 0, 'FH': 0, 'BB': 0, 'TC': 0 },
     gameweek: 1,
-    accumulatedScore: 0
-  };
+    accumulatedScore: 0, purchasePrices: {} };
 
   it('should recommend valid swaps that improve points and fit financial budget constraints', () => {
     const actions = simulator.generateValidActions(state, oracle, 1);
@@ -306,8 +306,7 @@ describe('Simulator - Multi-horizon beam search and state transitions', () => {
     freeTransfers: 1,
     chipState: { 'WC': 0, 'FH': 0, 'BB': 0, 'TC': 0 },
     gameweek: 1,
-    accumulatedScore: 0
-  };
+    accumulatedScore: 0, purchasePrices: {} };
 
   it('should successfully execute simulateHorizon beam search and suggest transfer actions', () => {
     const results = simulator.simulateHorizon(state, oracle);
@@ -358,8 +357,7 @@ describe('Simulator - FH, BB, and TC Chip Logic', () => {
     freeTransfers: 1,
     chipState: { 'WC': 1, 'FH': 1, 'BB': 1, 'TC': 1 },
     gameweek: 1,
-    accumulatedScore: 0
-  };
+    accumulatedScore: 0, purchasePrices: {} };
 
   it('should generate FH, BB, and TC actions when chips are available', () => {
     const actions = simulator.generateValidActions(state, oracle, 1);
@@ -521,11 +519,10 @@ describe('Simulator - Multi-Transfer Action Space', () => {
     freeTransfers: 2, // 2 free transfers available
     chipState: { 'WC': 0, 'FH': 0, 'BB': 0, 'TC': 0 },
     gameweek: 1,
-    accumulatedScore: 0
-  };
+    accumulatedScore: 0, purchasePrices: {} };
 
   it('should solve optimal multi-transfers correctly', () => {
-    const result = solveOptimalTransfers(oracle, 1, state.squad, state.bank, 2);
+    const result = solveOptimalTransfers(oracle, 1, state, 2);
     expect(result).not.toBeNull();
     
     // The result should suggest transferring in 16 and 17
@@ -670,8 +667,7 @@ describe('Simulator - Probabilistic Player Model & Expected Utility', () => {
       freeTransfers: 1,
       chipState: { 'WC': 0, 'FH': 0, 'BB': 0, 'TC': 0 },
       gameweek: 1,
-      accumulatedScore: 0
-    };
+      accumulatedScore: 0, purchasePrices: {} };
 
     // 1. Standard Captaincy: Captain variance (12) is multiplied by 4 = 48
     // Rest of starters variance: 6*1.5 + 5*1.5 + 4*1.5 + 4*1.5 + 3*1.5 + 3*1.5 + 3*1.5 + 2*1.5 + 2*1.5 + 2*1.5 = 9 + 7.5 + 6 + 6 + 4.5 + 4.5 + 4.5 + 3 + 3 + 3 = 51.0
@@ -711,12 +707,10 @@ describe('Simulator - Probabilistic Player Model & Expected Utility', () => {
     
     const stateSalah: SquadState = {
       squad: [300, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
-      bank: 0, freeTransfers: 1, chipState: {}, gameweek: 1, accumulatedScore: 0
-    };
+      bank: 0, freeTransfers: 1, chipState: {}, gameweek: 1, accumulatedScore: 0, purchasePrices: {} };
     const stateHaaland: SquadState = {
       squad: [450, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
-      bank: 0, freeTransfers: 1, chipState: {}, gameweek: 1, accumulatedScore: 0
-    };
+      bank: 0, freeTransfers: 1, chipState: {}, gameweek: 1, accumulatedScore: 0, purchasePrices: {} };
 
     // Safe mode horizon run
     const paramsSafe = { ...DEFAULT_PARAMETERS, betaVariance: 0.15, betaEO: 0.5 };

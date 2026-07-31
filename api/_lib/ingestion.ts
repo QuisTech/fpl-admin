@@ -1,5 +1,8 @@
 import fs from 'fs';
 import path from 'path';
+import { ProjectionEngine, ProjectionInput } from './projection.js';
+import { loadWeights } from './weights-loader.js';
+import { HistoricalPlayerFeatures, HistoricalFixture } from './providers/historical.js';
 
 const SHORT_REST_ROTATION_PENALTY = 0.90;
 const DGW_ROTATION_PENALTY = 0.85;
@@ -21,7 +24,6 @@ export interface XPOracle {
  */
 export class CSVOracle implements XPOracle {
   private xpMatrix: Record<number, Record<number, number>> = {};
-  private varianceMatrix: Record<number, Record<number, number>> = {};
   public playerNames: Record<number, string> = {}; // Helper for debugging output
   private playerPositions: Record<number, string> = {};
   private playerCosts: Record<number, number> = {};
@@ -29,6 +31,9 @@ export class CSVOracle implements XPOracle {
   private allIds: number[] = [];
   private top1kData: Record<number, { ownership: number; started: number; eo: number; captain: number; tripleCaptain: number }> = {};
   private fuel: string = 'fplform';
+  
+  private featuresMatrix: Record<number, HistoricalPlayerFeatures> = {};
+  private projectionEngine: ProjectionEngine;
 
   constructor(
     filePath: string, 
@@ -40,6 +45,8 @@ export class CSVOracle implements XPOracle {
     fuel: string = 'fplform'
   ) {
     this.fuel = fuel;
+    const weights = loadWeights('baseline');
+    this.projectionEngine = new ProjectionEngine(weights);
     this.loadTop1kData(players);
     this.loadData(filePath, players, fixtures, teams, nextEventId, riskMode, fuel);
   }
@@ -181,34 +188,6 @@ export class CSVOracle implements XPOracle {
         
         const teamId = parsedTeamId || realTeamId || 0;
 
-        // Eye-test: override CSV merit with live FPL API data (form, xG, xA, PPM)
-        // This ensures eye-test scores flow through the full LP Solver pipeline
-        let adjustedMerit = meritScore;
-        if (fuel === 'eye-test' && matchedPlayer) {
-          // Add minimum 3-game (270 mins) threshold to prevent small sample size bias 
-          // where players with 10 mins and 1 shot get massive artificially inflated per-90 stats
-          const gamesPlayed = Math.max(3.0, (matchedPlayer.minutes || 0) / 90);
-          const ppg = parseFloat(matchedPlayer.points_per_game || "0");
-          const form = parseFloat(matchedPlayer.form || "0");
-          const xG90 = parseFloat(matchedPlayer.expected_goals || "0") / gamesPlayed;
-          const xA90 = parseFloat(matchedPlayer.expected_assists || "0") / gamesPlayed;
-          
-          // Construct a true per-game merit score (similar scale to normal xP, usually 2.0 to 10.0)
-          // Calibrated offline: a 1:1 ratio between xG90 and xA90 provides the highest seasonal return.
-          const liveMerit = (ppg * 0.3) + (form * 0.4) + (xG90 * 2.5) + (xA90 * 2.5);
-          
-          // If the season hasn't started yet (all live stats are 0), fallback to the baseline CSV merit
-          if (liveMerit > 0) {
-            adjustedMerit = liveMerit;
-          }
-        }
-
-        this.playerNames[fplId] = playerName;
-        this.playerPositions[fplId] = pos;
-        this.playerCosts[fplId] = cost;
-        this.playerTeams[fplId] = team;
-        this.allIds.push(fplId);
-        
         let probPlay = parseFloat(cols[8]);
         if (isNaN(probPlay)) {
           let chance = 100;
@@ -227,129 +206,92 @@ export class CSVOracle implements XPOracle {
         }
         probPlay = Math.max(0, Math.min(1.0, probPlay));
 
-        // Base Probabilities
-        let baseP90 = 0;
-        let baseP60 = 0;
-        if (probPlay >= 0.8) {
-          baseP90 = probPlay * 0.85;
-          baseP60 = probPlay * 0.15;
-        } else {
-          baseP90 = probPlay * 0.5;
-          baseP60 = probPlay * 0.5;
-        }
-
-        this.xpMatrix[fplId] = {};
-        this.varianceMatrix[fplId] = {};
-
+        const gamesPlayed = matchedPlayer ? Math.max(3.0, (matchedPlayer.minutes || 0) / 90) : 0;
+        const form = matchedPlayer ? parseFloat(matchedPlayer.form || "0") : 0;
+        const xG90 = matchedPlayer && gamesPlayed > 0 ? (parseFloat(matchedPlayer.expected_goals || "0") / gamesPlayed) : 0;
+        const xA90 = matchedPlayer && gamesPlayed > 0 ? (parseFloat(matchedPlayer.expected_assists || "0") / gamesPlayed) : 0;
+        
+        // Build Fixtures
+        const fixturesByGw: Record<number, HistoricalFixture[]> = {};
         for (let step = 0; step < 15; step++) {
           const gw = nextEventId + step;
-          
           if (fixtures && fixtures.length > 0 && teamId > 0 && teams && teams.length > 0) {
             const teamFixtures = fixtures.filter(f => f.event === gw && (f.team_h === teamId || f.team_a === teamId));
-            
-            if (teamFixtures.length > 0) {
-              let p90 = baseP90;
-              let p60 = baseP60;
-
-              // Apply dynamic congestion penalty conditionally based on rotation risk
-              if (teamFixtures.length > 1) {
-                p90 *= 1 - ((1 - probPlay) * DGW_ROTATION_PENALTY);
-                p60 *= 1 - ((1 - probPlay) * DGW_ROTATION_PENALTY);
-              }
-
-              const eApp = p60 + 2 * p90;
-              const eApp2 = p60 + 4 * p90;
-              const varApp = Math.max(0, eApp2 - eApp * eApp);
-
-              let gwXP = 0;
-              let gwVarReturns = 0;
-              const decayFactor = Math.pow(0.9, step);
-
-              teamFixtures.forEach(f => {
-                let diffMultiplier = 1.0;
-                
-                const isHome = f.team_h === teamId;
-                const opponentId = isHome ? f.team_a : f.team_h;
-                
-                const teamData = teams.find(t => t.id === teamId);
-                const opponentData = teams.find(t => t.id === opponentId);
-
-                const hasValidStrengths = teamData && opponentData && 
-                                          opponentData.strength_attack_away > 0 && 
-                                          opponentData.strength_attack_home > 0 &&
-                                          opponentData.strength_defence_away > 0 &&
-                                          opponentData.strength_defence_home > 0;
-
-                if (hasValidStrengths) {
-                    let ratio = 1.0;
-                    if (pos === 'GKP' || pos === 'DEF') {
-                        if (isHome) {
-                            ratio = teamData.strength_defence_home / opponentData.strength_attack_away;
-                        } else {
-                            ratio = teamData.strength_defence_away / opponentData.strength_attack_home;
-                        }
-                    } else { // MID or FWD
-                        if (isHome) {
-                            ratio = teamData.strength_attack_home / opponentData.strength_defence_away;
-                        } else {
-                            ratio = teamData.strength_attack_away / opponentData.strength_defence_home;
-                        }
-                    }
-                    
-                    // Eye-test uses full FDR (100%) with wider clamp to be fixture-aggressive
-                    // FPLFORM/NATIVE use 50% dampening to avoid double-counting their built-in fixture signal
-                    const dampenFactor = fuel === 'eye-test' ? 1.0 : 0.5;
-                    let dampened = 1 + ((ratio - 1) * dampenFactor);
-                    const clampLow = fuel === 'eye-test' ? 0.70 : 0.85;
-                    const clampHigh = fuel === 'eye-test' ? 1.40 : 1.20;
-                    diffMultiplier = Math.max(clampLow, Math.min(clampHigh, dampened));
-                } else {
-                    const fdr = f.team_h === teamId ? f.team_h_difficulty : f.team_a_difficulty;
-                    diffMultiplier = 1 + (3 - fdr) * 0.1;
-                }
-
-                const fixtureXP = adjustedMerit * diffMultiplier * decayFactor;
-                // Calculate returns beyond basic appearance points
-                const expectedReturns = Math.max(0, fixtureXP - eApp);
-                let fixtureVarReturns = 1.5 * expectedReturns;
-
-                // Scale variance by sqrt of the multiplier to maintain utility curve consistency
-                fixtureVarReturns *= Math.sqrt(diffMultiplier);
-
-                gwXP += Math.max(0, eApp + expectedReturns);
-                gwVarReturns += fixtureVarReturns;
-              });
-
-              // The total appearance variance across multiple games
-              const totalVarApp = varApp * teamFixtures.length;
-
-              this.xpMatrix[fplId][gw] = gwXP;
-              this.varianceMatrix[fplId][gw] = totalVarApp + gwVarReturns;
-            } else {
-              // Blank Gameweek
-              this.xpMatrix[fplId][gw] = 0;
-              this.varianceMatrix[fplId][gw] = 0;
-            }
+            fixturesByGw[gw] = teamFixtures.map(f => {
+               const isHome = f.team_h === teamId;
+               return {
+                  opponentTeamId: isHome ? f.team_a : f.team_h,
+                  isHome,
+                  difficulty: isHome ? f.team_h_difficulty : f.team_a_difficulty,
+                  // FPL API doesn't have opponentStrengthDefense easily accessible inside f fixture.
+                  // Default fallback for historical engine. 
+                  opponentStrengthDefense: isHome ? f.team_a_difficulty : f.team_h_difficulty, 
+                  opponentStrengthAttack: isHome ? f.team_a_difficulty : f.team_h_difficulty
+               };
+            });
           } else {
-            // Fallback for tests/isolated execution
-            const eApp = baseP60 + 2 * baseP90;
-            const eApp2 = baseP60 + 4 * baseP90;
-            const varApp = Math.max(0, eApp2 - eApp * eApp);
-
-            const gwXP = adjustedMerit * Math.pow(0.9, step);
-            const expectedReturns = Math.max(0, gwXP - eApp);
-            const varReturns = 1.5 * expectedReturns;
-            this.xpMatrix[fplId][gw] = Math.max(0, eApp + expectedReturns);
-            this.varianceMatrix[fplId][gw] = varApp + varReturns;
+             fixturesByGw[gw] = [];
           }
+        }
+
+        this.featuresMatrix[fplId] = {
+          id: fplId,
+          name: playerName,
+          position: pos === 'GK' ? 'GKP' : pos,
+          teamId,
+          price: cost / 10,
+          minutesLast4: probPlay * 90 * 4,
+          startsLast4: probPlay * 4,
+          xGLast4: xG90 * 4,
+          xALast4: xA90 * 4,
+          shotsLast4: 0,
+          keyPassesLast4: 0,
+          xG90,
+          xA90,
+          xGI3: (xG90 + xA90) * 3,
+          xGI5: (xG90 + xA90) * 5,
+          minutesTrend: 0,
+          shots90: 0,
+          keyPasses90: 0,
+          fixturesByGw,
+          predictedMinutes: probPlay * 90,
+          injuryStatus: probPlay < 1.0 ? 'Injured/Doubtful' : null,
+          eo: this.top1kData[fplId]?.eo || 0
+        };
+
+        this.playerNames[fplId] = playerName;
+        this.playerPositions[fplId] = pos;
+        this.playerCosts[fplId] = cost;
+        this.playerTeams[fplId] = team;
+        this.allIds.push(fplId);
+
+        // Store external xp from CSV directly
+        this.xpMatrix[fplId] = {};
+        for (let step = 0; step < 15; step++) {
+          const gw = nextEventId + step;
+          const decayFactor = Math.pow(0.9, step);
+          this.xpMatrix[fplId][gw] = meritScore * decayFactor;
         }
       }
     }
     console.log(`[CSVOracle] Ingested expected points and metadata for ${Object.keys(this.xpMatrix).length} players.`);
   }
 
-  getXP(playerId: number, gameweek: number): number { return this.xpMatrix[playerId]?.[gameweek] || 0; }
-  getVariance(playerId: number, gameweek: number): number { return this.varianceMatrix[playerId]?.[gameweek] || 0; }
+  private getProjectionInput(playerId: number, gameweek: number): ProjectionInput {
+    return {
+      playerId,
+      source: this.fuel === 'native' ? 'NATIVE' : (this.fuel === 'eye-test' ? 'EYE_TEST' : 'FPLFORM'),
+      features: this.featuresMatrix[playerId],
+      externalXP: this.xpMatrix[playerId]?.[gameweek] || 0
+    };
+  }
+
+  getXP(playerId: number, gameweek: number): number { 
+    return this.projectionEngine.predict(this.getProjectionInput(playerId, gameweek), gameweek).expected;
+  }
+  getVariance(playerId: number, gameweek: number): number { 
+    return this.projectionEngine.predict(this.getProjectionInput(playerId, gameweek), gameweek).variance;
+  }
   getPriceDelta(playerId: number): number { return 0; }
   getPosition(playerId: number): string {
     const pos = this.playerPositions[playerId];

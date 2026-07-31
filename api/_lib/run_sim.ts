@@ -13,8 +13,7 @@ const initialState: SquadState = {
   freeTransfers: 1,
   chipState: { 'WC': 1, 'BB': 1, 'TC': 1 }, // Inject chips to test Phase 2
   gameweek: 1, // Start simulating from GW1
-  accumulatedScore: 0
-};
+  accumulatedScore: 0, purchasePrices: {} };
 
 // 2. Initialize the Simulator (Vercel Mode = true for fast testing)
 const simulator = new Simulator(true);

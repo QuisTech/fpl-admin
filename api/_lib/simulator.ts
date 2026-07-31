@@ -1,7 +1,9 @@
+import { loadWeights } from './weights-loader.js';
+const DEFAULT_PARAMETERS = loadWeights('baseline');
 import { XPOracle } from './ingestion.js';
 import { solveOptimalSquad, solveStartingXI, solveCaptain, solveOptimalTransfers } from './lp-solver.js';
 import { calculateUtility } from './utility.js';
-import { UtilityParameters, DEFAULT_PARAMETERS } from './projection.js';
+import { UtilityParameters, } from './projection.js';
 
 export interface SquadState {
   squad: number[]; // Array of 15 player IDs

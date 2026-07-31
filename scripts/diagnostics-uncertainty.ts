@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { VaastavProvider } from '../api/_lib/providers/vaastav.js';
-import { ProjectionEngine } from '../api/_lib/projection.js';
+import {  ProjectionEngine , HistoricalOracle } from '../api/_lib/projection.js';
 import { loadWeights } from '../api/_lib/weights-loader.js';
 
 async function runUncertainty() {
@@ -20,8 +20,8 @@ async function runUncertainty() {
 
   for (let gw = startGw; gw <= endGw; gw++) {
     const snapshot = provider.getDeadlineSnapshot(gw, 1000, 0, {});
-    const engine = new ProjectionEngine(snapshot, params);
-    const oracle = engine.getOracle();
+    const engine = new ProjectionEngine(params);
+    const oracle = new HistoricalOracle(snapshot, engine);
 
     const validPlayers = oracle.getAllPlayerIds().filter(id => oracle.getCost(id) > 0);
 
@@ -31,7 +31,7 @@ async function runUncertainty() {
       if (xp < 1.0) continue;
 
       const actual = provider.getActualPoints(id, gw);
-      const dist = oracle.getDistribution(id, gw);
+      const dist = engine.predict({playerId: id, source: 'EYE_TEST', features: snapshot.players[id]}, gw);
       const stdDev = Math.sqrt(dist.variance);
       
       sumIntervalWidth += (2 * stdDev);

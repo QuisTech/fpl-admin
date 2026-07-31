@@ -1,5 +1,7 @@
+import { loadWeights } from '../api/_lib/weights-loader.js';
+const DEFAULT_PARAMETERS = loadWeights('baseline');
 import { VaastavProvider } from '../api/_lib/providers/vaastav.js';
-import { ProjectionEngine, UtilityParameters, DEFAULT_PARAMETERS } from '../api/_lib/projection.js';
+import {  ProjectionEngine, UtilityParameters, HistoricalOracle } from '../api/_lib/projection.js';
 
 function calculateNDCG(predictedScores: number[], actualScores: number[], k: number): number {
   const paired = predictedScores.map((pred, i) => ({ pred, actual: actualScores[i] }));
@@ -29,8 +31,8 @@ async function runESCalibration(season: string, seed: number) {
 
     for (let gw = startGw; gw <= endGw; gw++) {
       const snapshot = provider.getDeadlineSnapshot(gw, 1000, 0, {});
-      const engine = new ProjectionEngine(snapshot, params);
-      const oracle = engine.getOracle();
+      const engine = new ProjectionEngine(params);
+      const oracle = new HistoricalOracle(snapshot, engine);
       
       const allIds = oracle.getAllPlayerIds();
       const validPlayers = allIds.filter(id => oracle.getCost(id) > 0);

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { UtilityParameters, DEFAULT_PARAMETERS } from './projection.js';
+import { UtilityParameters } from './projection.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,7 +16,7 @@ export function loadWeights(name: string): UtilityParameters {
   const data = JSON.parse(content);
   
   if (data.weights) {
-    return { ...DEFAULT_PARAMETERS, ...data.weights };
+    return data.weights as UtilityParameters;
   }
   
   throw new Error(`Invalid weights format in ${name}.json`);
