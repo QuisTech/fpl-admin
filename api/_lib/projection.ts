@@ -34,6 +34,7 @@ export interface UtilityParameters {
   // Constraints
   minEoTotal?: number;
   minElitePlayers?: number;
+  maxBudgetOverride?: number;
 }
 
 export const DEFAULT_PARAMETERS: UtilityParameters = {
@@ -66,17 +67,17 @@ export const DEFAULT_PARAMETERS: UtilityParameters = {
 export function getParamsForRiskMode(riskMode: string): UtilityParameters {
   const params = { ...DEFAULT_PARAMETERS };
   if (riskMode === 'aggressive') {
-    params.betaVariance = 0.02;
-    params.betaEO = -0.5;
+    params.betaVariance = 0.5; // Favor high variance (differentials)
+    params.betaEO = -2.0; // Heavily penalize high EO players (-2 points for 100% EO)
   } else if (riskMode === 'safe') {
-    params.betaVariance = 0.15;
-    params.betaEO = 0.5;
+    params.betaVariance = -0.1; // Slight penalty to variance
+    params.betaEO = 2.0; // Heavily reward high EO players
     params.minEoTotal = 150;
     params.minElitePlayers = 1;
   } else if (riskMode === 'value') {
-    params.betaVariance = 0.05;
+    params.betaVariance = 0.0;
     params.betaEO = 0.0;
-    // Value mode constraints? Maybe none, just different beta
+    params.maxBudgetOverride = 850; // Force a strict budget (85.0m) to maximize ROI
   } else {
     params.betaVariance = 0.05;
     params.betaEO = 0.0;

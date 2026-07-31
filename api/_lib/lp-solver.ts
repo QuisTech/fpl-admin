@@ -34,11 +34,13 @@ export function solveOptimalSquad(
 ): number[] {
   const allIds = oracle.getAllPlayerIds();
   
+  const actualBudget = params.maxBudgetOverride ? Math.min(budget, params.maxBudgetOverride) : budget;
+  
   const model: LPSolverModel = {
     optimize: "score",
     opType: "max",
     constraints: { 
-      cost: { max: budget }, 
+      cost: { max: actualBudget }, 
       total: { equal: 15 }, 
       gkp: { equal: 2 }, 
       def: { equal: 5 }, 
