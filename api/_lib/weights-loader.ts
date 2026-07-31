@@ -19,6 +19,10 @@ export function loadWeights(name: string): UtilityParameters {
     return data.weights as UtilityParameters;
   }
   
+  if (data.betaMinutesBase !== undefined) {
+    return data as UtilityParameters;
+  }
+  
   throw new Error(`Invalid weights format in ${name}.json`);
 }
 

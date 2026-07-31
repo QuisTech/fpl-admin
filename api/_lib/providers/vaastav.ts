@@ -19,7 +19,7 @@ export class VaastavProvider implements HistoricalDataProvider {
   private mergedGw: any[] = [];
   
   // Quick lookups
-  private gwDataByPlayer: Record<number, Record<number, any>> = {}; // playerId -> gw -> data
+  public gwDataByPlayer: Record<number, Record<number, any>> = {}; // playerId -> gw -> data
   private fixturesByGw: Record<number, any[]> = {}; // gw -> fixtures
 
   async loadSeason(season: string): Promise<void> {
@@ -395,6 +395,59 @@ export class VaastavProvider implements HistoricalDataProvider {
     let total = 0;
     records.forEach(r => {
       total += parseInt(r.total_points) || 0;
+    });
+    return total;
+  }
+
+  getActualAttackPoints(playerId: number, gameweek: number): number {
+    const records = this.gwDataByPlayer[playerId]?.[gameweek] || [];
+    let total = 0;
+    records.forEach(r => {
+      const position = r.position; // "GKP", "DEF", "MID", "FWD"
+      const goals = parseInt(r.goals_scored) || 0;
+      const assists = parseInt(r.assists) || 0;
+      
+      let goalPts = 0;
+      if (position === 'FWD') goalPts = 4;
+      else if (position === 'MID') goalPts = 5;
+      else goalPts = 6; // DEF or GKP
+
+      total += (goals * goalPts) + (assists * 3);
+    });
+    return total;
+  }
+
+  getActualCleanSheetPoints(playerId: number, gameweek: number): number {
+    const records = this.gwDataByPlayer[playerId]?.[gameweek] || [];
+    let total = 0;
+    records.forEach(r => {
+      const position = r.position;
+      const cs = parseInt(r.clean_sheets) || 0;
+      
+      let csPts = 0;
+      if (position === 'MID') csPts = 1;
+      else if (position === 'DEF' || position === 'GKP') csPts = 4;
+      
+      total += cs * csPts;
+    });
+    return total;
+  }
+
+  getCleanSheetIndicator(playerId: number, gameweek: number): number {
+    const records = this.gwDataByPlayer[playerId]?.[gameweek] || [];
+    let indicator = 0;
+    records.forEach(r => {
+      const cs = parseInt(r.clean_sheets) || 0;
+      if (cs > 0) indicator = 1;
+    });
+    return indicator;
+  }
+
+  getActualBonusPoints(playerId: number, gameweek: number): number {
+    const records = this.gwDataByPlayer[playerId]?.[gameweek] || [];
+    let total = 0;
+    records.forEach(r => {
+      total += parseInt(r.bonus) || 0;
     });
     return total;
   }
