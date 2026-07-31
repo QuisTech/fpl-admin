@@ -34,7 +34,7 @@ export interface UtilityParameters {
   // Constraints
   minEoTotal?: number;
   minElitePlayers?: number;
-  maxBudgetOverride?: number;
+  budgetMultiplier?: number;
 }
 
 export const DEFAULT_PARAMETERS: UtilityParameters = {
@@ -77,7 +77,7 @@ export function getParamsForRiskMode(riskMode: string): UtilityParameters {
   } else if (riskMode === 'value') {
     params.betaVariance = 0.0;
     params.betaEO = 0.0;
-    params.maxBudgetOverride = 850; // Force a strict budget (85.0m) to maximize ROI
+    params.budgetMultiplier = 0.85; // Force a strict 85% budget to maximize ROI
   } else {
     params.betaVariance = 0.05;
     params.betaEO = 0.0;

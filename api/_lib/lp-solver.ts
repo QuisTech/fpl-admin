@@ -34,7 +34,7 @@ export function solveOptimalSquad(
 ): number[] {
   const allIds = oracle.getAllPlayerIds();
   
-  const actualBudget = params.maxBudgetOverride ? Math.min(budget, params.maxBudgetOverride) : budget;
+  const actualBudget = params.budgetMultiplier ? Math.floor(budget * params.budgetMultiplier) : budget;
   
   const model: LPSolverModel = {
     optimize: "score",
