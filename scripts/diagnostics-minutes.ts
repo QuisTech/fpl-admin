@@ -6,7 +6,8 @@ async function runMinutesDiagnostics() {
   const season = '2023-24';
   const provider = new VaastavProvider();
   await provider.loadSeason(season);
-  const params = loadWeights('es-v001');
+  const params = loadWeights('baseline');
+  console.log("Loaded params:", params);
 
   const startGw = 1;
   const endGw = 34;
@@ -33,8 +34,15 @@ async function runMinutesDiagnostics() {
     const validPlayers = oracle.getAllPlayerIds().filter(id => oracle.getCost(id) > 0);
 
     for (const id of validPlayers) {
-      // Only track active players (where the model bothered giving them > 5% chance of playing)
+      // Predict XP to populate expectedMinutes
+      oracle.getXP(id, gw);
+
       const expMins = snapshot.players[id].predictedMinutes;
+      if (isNaN(expMins)) {
+        console.log("Found NaN expectedMinutes for player:", id);
+        console.log("Features:", snapshot.players[id]);
+        process.exit(1);
+      }
       if (expMins < 5) continue; 
 
       const gwMatches = (provider as any).gwDataByPlayer[id]?.[gw] || [];

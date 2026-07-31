@@ -4,6 +4,7 @@ export interface HistoricalFixture {
   difficulty: number;
   opponentStrengthDefense: number;
   opponentStrengthAttack: number;
+  kickoff_time?: string;
 }
 
 export interface HistoricalPlayerFeatures {
@@ -35,8 +36,25 @@ export interface HistoricalPlayerFeatures {
   // Fixture(s) in this gameweek (handles Blanks and Doubles)
   fixturesByGw: Record<number, HistoricalFixture[]>;
   
+  // Expected Minutes Model Features
+  minutesLast1: number;
+  minutesLast3: number;
+  minutesLast5: number;
+  minutesEWMA: number;
+  startsLast5: number;
+  seasonMinutesPercent: number;
+  restHours: number;
+  fixturesLast7Days: number;
+  fixturesLast14Days: number;
+  minutesVolatility: number;
+  chanceOfPlayingThisRound?: number;
+  selectionMomentum: number;
+  consecutiveStarts: number;
+  
+  // Projected Output
+  predictedMinutes: number;
+  
   // Inferred or provided availability
-  predictedMinutes: number; 
   injuryStatus: string | null;
   eo: number; // If we can reconstruct it
 }

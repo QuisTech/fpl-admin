@@ -2,10 +2,6 @@ import { DeadlineSnapshot } from './providers/historical.js';
 import { XPOracle } from './ingestion.js';
 
 export interface UtilityParameters {
-  // Minutes Model
-  betaMinutesBase: number;
-  betaMinutesTrend: number;
-
   // Attacking Model
   betaAttackBase: number;
   betaXG: number;
@@ -16,7 +12,7 @@ export interface UtilityParameters {
   betaTeamAttack: number;
   betaOppDefense: number;
   betaAttHome: number;
-
+  
   // Clean Sheet Model
   betaCsBase: number;
   betaTeamDefense: number;
@@ -26,11 +22,27 @@ export interface UtilityParameters {
   
   // Bonus Model
   betaBonusBase: number;
-  betaBpsBaseline: number; // Derived from xG/xA
-
+  betaBpsBaseline: number;
+  
   // Variance
   betaVariance: number;
   betaEO: number;
+
+  // Minutes Model
+  betaMinutesBase: number;
+  betaMinutesLast1: number;
+  betaMinutesLast3: number;
+  betaMinutesLast5: number;
+  betaMinutesEWMA: number;
+  betaStartsLast5: number;
+  betaSeasonMins: number;
+  betaRestHours: number;
+  betaFix7Days: number;
+  betaFix14Days: number;
+  betaMinVolatility: number;
+  betaChanceOfPlaying: number;
+  betaSelectionMomentum: number;
+  betaConsecutiveStarts: number;
   // Constraints
   minEoTotal?: number;
   minElitePlayers?: number;
@@ -91,8 +103,20 @@ export class ProjectionEngine {
     
     // Stage 1: Minutes Model
     const expectedMinutes = Math.max(0, Math.min(90, 
-      this.params.betaMinutesBase * (player.minutesLast4 / 4) +
-      this.params.betaMinutesTrend * player.minutesTrend
+      this.params.betaMinutesBase +
+      this.params.betaMinutesLast1 * (player.minutesLast1 || 0) +
+      this.params.betaMinutesLast3 * (player.minutesLast3 || 0) +
+      this.params.betaMinutesLast5 * (player.minutesLast5 || 0) +
+      this.params.betaMinutesEWMA * (player.minutesEWMA || 0) +
+      this.params.betaStartsLast5 * (player.startsLast5 || 0) +
+      this.params.betaSeasonMins * (player.seasonMinutesPercent || 0) +
+      this.params.betaRestHours * (player.restHours || 168) +
+      this.params.betaFix7Days * (player.fixturesLast7Days || 0) +
+      this.params.betaFix14Days * (player.fixturesLast14Days || 0) +
+      this.params.betaMinVolatility * (player.minutesVolatility || 0) +
+      this.params.betaChanceOfPlaying * (player.chanceOfPlayingThisRound !== undefined ? player.chanceOfPlayingThisRound : 100) +
+      this.params.betaSelectionMomentum * (player.selectionMomentum || 0) +
+      this.params.betaConsecutiveStarts * (player.consecutiveStarts || 0)
     ));
     // Save to player so oracle can expose it if needed
     player.predictedMinutes = expectedMinutes;

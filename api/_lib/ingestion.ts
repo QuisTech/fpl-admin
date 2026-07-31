@@ -254,6 +254,21 @@ export class CSVOracle implements XPOracle {
           shots90: 0,
           keyPasses90: 0,
           fixturesByGw,
+          
+          minutesLast1: probPlay * 90,
+          minutesLast3: probPlay * 90 * 3,
+          minutesLast5: probPlay * 90 * 5,
+          minutesEWMA: probPlay * 90,
+          startsLast5: probPlay * 5,
+          seasonMinutesPercent: probPlay,
+          restHours: 168,
+          fixturesLast7Days: 1,
+          fixturesLast14Days: 2,
+          minutesVolatility: 0,
+          chanceOfPlayingThisRound: probPlay * 100,
+          selectionMomentum: 0,
+          consecutiveStarts: 0,
+
           predictedMinutes: probPlay * 90,
           injuryStatus: probPlay < 1.0 ? 'Injured/Doubtful' : null,
           eo: this.top1kData[fplId]?.eo || 0

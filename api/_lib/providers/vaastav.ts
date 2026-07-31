@@ -116,62 +116,159 @@ export class VaastavProvider implements HistoricalDataProvider {
       }
 
       // Calculate Last 4 GW features (Look-back) and new metrics
+      // Gather all chronological previous matches up to gameweek - 1
+      const allPrevMatches = [];
+      for (let prevGw = 1; prevGw < gameweek; prevGw++) {
+        const matches = this.gwDataByPlayer[playerId]?.[prevGw] || [];
+        matches.forEach(m => allPrevMatches.push(m));
+      }
+
+      // Existing rolling stats
       let minutesLast4 = 0;
       let startsLast4 = 0;
       let xGLast4 = 0;
       let xALast4 = 0;
       let shotsLast4 = 0;
       let keyPassesLast4 = 0;
-      
       let xGI3 = 0;
       let xGI5 = 0;
-      let minsLast3 = [];
+
+      // New Expected Minutes features
+      let minutesLast1 = 0;
+      let minutesLast3 = 0;
+      let minutesLast5 = 0;
+      let startsLast5 = 0;
+      let minutesEWMA = 0;
+      let minutesVolatility = 0;
+      let consecutiveStarts = 0;
+      let consecutiveStartsBroken = false;
+
+      const nMatches = allPrevMatches.length;
       
-      let matchesCounted = 0;
-      for (let prevGw = gameweek - 1; prevGw >= Math.max(1, gameweek - 5); prevGw--) {
-        const matches = this.gwDataByPlayer[playerId]?.[prevGw] || [];
-        matches.forEach(match => {
-          const mins = parseInt(match.minutes) || 0;
-          const xG = parseFloat(match.expected_goals) || 0;
-          const xA = parseFloat(match.expected_assists) || 0;
+      // Calculate EWMA, Volatility and rolling mins
+      if (nMatches > 0) {
+        const ewmaWeights = [0.50, 0.25, 0.15, 0.07, 0.03];
+        const last5Mins = [];
+        
+        for (let i = 0; i < 5 && i < nMatches; i++) {
+          const m = allPrevMatches[nMatches - 1 - i];
+          const mGw = parseInt(m.GW || m.round);
+          const mins = parseInt(m.minutes) || 0;
+          const xG = parseFloat(m.expected_goals) || 0;
+          const xA = parseFloat(m.expected_assists) || 0;
+
+          // Rolling features
+          if (i === 0) minutesLast1 += mins;
+          if (i < 3) minutesLast3 += mins;
+          if (i < 5) minutesLast5 += mins;
+          if (i < 5 && mins >= 60) startsLast5 += 1;
           
-          if (gameweek - prevGw <= 4) {
+          if (!consecutiveStartsBroken) {
+            if (mins >= 60) {
+              consecutiveStarts++;
+            } else if (m.minutes !== undefined) { 
+              consecutiveStartsBroken = true;
+            }
+          }
+          
+          if (gameweek - mGw <= 3) xGI3 += (xG + xA);
+          if (gameweek - mGw <= 5) xGI5 += (xG + xA);
+          
+          // Legacy Last 4
+          if (gameweek - mGw <= 4) {
             minutesLast4 += mins;
-            if (mins >= 60) startsLast4 += 1; 
+            if (mins >= 60) startsLast4 += 1;
             xGLast4 += xG;
             xALast4 += xA;
-            matchesCounted++;
           }
           
-          if (gameweek - prevGw <= 3) {
-            xGI3 += (xG + xA);
-            minsLast3.push(mins);
-          }
-          
-          if (gameweek - prevGw <= 5) {
-            xGI5 += (xG + xA);
-          }
-        });
-      }
-
-      // Calculate minutes trend (e.g., average change between consecutive games)
-      let minutesTrend = 0;
-      if (minsLast3.length >= 2) {
-        // Reverse because we pushed from newest to oldest
-        minsLast3.reverse(); 
-        const changes = [];
-        for (let i = 1; i < minsLast3.length; i++) {
-          changes.push(minsLast3[i] - minsLast3[i-1]);
+          minutesEWMA += mins * ewmaWeights[i];
+          last5Mins.push(mins);
         }
-        minutesTrend = changes.reduce((a, b) => a + b, 0) / changes.length;
+        
+        // Compute Volatility (Stdev of last up to 5 matches)
+        if (last5Mins.length > 0) {
+          const mean = last5Mins.reduce((a, b) => a + b, 0) / last5Mins.length;
+          const variance = last5Mins.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / last5Mins.length;
+          minutesVolatility = Math.sqrt(variance);
+        }
       }
 
-      // Calculate /90 rolling stats
+      // Calculate minutes trend
+      let minutesTrend = 0;
+
+      // Calculate /90 rolling stats (Legacy)
       const gamesPlayed90 = minutesLast4 / 90;
       const xG90 = gamesPlayed90 > 0 ? (xGLast4 / gamesPlayed90) : 0;
       const xA90 = gamesPlayed90 > 0 ? (xALast4 / gamesPlayed90) : 0;
       const shots90 = gamesPlayed90 > 0 ? (shotsLast4 / gamesPlayed90) : 0;
       const keyPasses90 = gamesPlayed90 > 0 ? (keyPassesLast4 / gamesPlayed90) : 0;
+
+      // Parse chance of playing
+      let chanceOfPlayingThisRound = parseFloat(raw.chance_of_playing_this_round);
+      if (isNaN(chanceOfPlayingThisRound)) {
+         chanceOfPlayingThisRound = 100; // Default to 100% if missing/null
+      }
+      
+      // Calculate Season Minutes Percent
+      let totalSeasonMins = 0;
+      allPrevMatches.forEach(m => totalSeasonMins += (parseInt(m.minutes) || 0));
+      let teamMatchesSoFar = 0;
+      const teamIdStr = raw.team;
+      for (let prevGw = 1; prevGw < gameweek; prevGw++) {
+        const gwFixs = this.fixturesByGw[prevGw] || [];
+        gwFixs.forEach(fix => {
+          if (fix.team_h == teamIdStr || fix.team_a == teamIdStr) {
+             teamMatchesSoFar++;
+          }
+        });
+      }
+      const seasonMinutesPercent = teamMatchesSoFar > 0 ? (totalSeasonMins / (teamMatchesSoFar * 90)) : 1.0;
+      
+      // Calculate Rest Hours and Fixture Congestion
+      let restHours = 168; // Default to 7 days
+      let fixturesLast7Days = 0;
+      let fixturesLast14Days = 0;
+      
+      // We need the kickoff time of the upcoming fixture in this gameweek
+      const upcomingGwFixs = this.fixturesByGw[gameweek] || [];
+      let upcomingKickoff = null;
+      upcomingGwFixs.forEach(fix => {
+        if (fix.team_h == teamIdStr || fix.team_a == teamIdStr) {
+           if (!upcomingKickoff && fix.kickoff_time) {
+             upcomingKickoff = new Date(fix.kickoff_time);
+           }
+        }
+      });
+      
+      if (upcomingKickoff) {
+         const t0 = upcomingKickoff.getTime();
+         // Check recent matches
+         const recentMatches = [];
+         for (let prevGw = 1; prevGw < gameweek; prevGw++) {
+           const gwFixs = this.fixturesByGw[prevGw] || [];
+           gwFixs.forEach(fix => {
+             if ((fix.team_h == teamIdStr || fix.team_a == teamIdStr) && fix.kickoff_time) {
+                const tPrev = new Date(fix.kickoff_time).getTime();
+                if (tPrev < t0) {
+                   recentMatches.push(tPrev);
+                }
+             }
+           });
+         }
+         
+         recentMatches.sort((a,b) => b - a); // descending
+         if (recentMatches.length > 0) {
+            const lastMatchTime = recentMatches[0];
+            restHours = (t0 - lastMatchTime) / (1000 * 60 * 60);
+         }
+         
+         recentMatches.forEach(tPrev => {
+            const hoursDiff = (t0 - tPrev) / (1000 * 60 * 60);
+            if (hoursDiff <= 7 * 24) fixturesLast7Days++;
+            if (hoursDiff <= 14 * 24) fixturesLast14Days++;
+         });
+      }
 
       // Determine upcoming fixtures for 8-week horizon
       const teamId = parseInt(raw.team);
@@ -236,12 +333,15 @@ export class VaastavProvider implements HistoricalDataProvider {
               isHome,
               difficulty: isHome ? parseInt(fix.team_h_difficulty) : parseInt(fix.team_a_difficulty),
               opponentStrengthDefense: oppStrengthDefense, 
-              opponentStrengthAttack: oppStrengthAttack
+              opponentStrengthAttack: oppStrengthAttack,
+              kickoff_time: fix.kickoff_time
             });
           }
         });
       }
 
+      const selectionMomentum = minutesEWMA - (seasonMinutesPercent * 90);
+      
       const position = raw.element_type === '1' ? 'GKP' : 
                        raw.element_type === '2' ? 'DEF' : 
                        raw.element_type === '3' ? 'MID' : 'FWD';
@@ -266,6 +366,21 @@ export class VaastavProvider implements HistoricalDataProvider {
         shots90,
         keyPasses90,
         fixturesByGw,
+        
+        minutesLast1,
+        minutesLast3,
+        minutesLast5,
+        minutesEWMA,
+        startsLast5,
+        seasonMinutesPercent,
+        restHours,
+        fixturesLast7Days,
+        fixturesLast14Days,
+        minutesVolatility,
+        chanceOfPlayingThisRound,
+        selectionMomentum,
+        consecutiveStarts,
+        
         predictedMinutes: 0, // Computed later by Projection Layer
         injuryStatus: null,
         eo: 0 
