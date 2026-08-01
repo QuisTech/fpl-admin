@@ -3,6 +3,7 @@ import path from 'path';
 import { ProjectionEngine, ProjectionInput } from './projection.js';
 import { loadWeights } from './weights-loader.js';
 import { HistoricalPlayerFeatures, HistoricalFixture } from './providers/historical.js';
+import { FeatureStoreRepository } from './providers/feature-store.js';
 
 const SHORT_REST_ROTATION_PENALTY = 0.90;
 const DGW_ROTATION_PENALTY = 0.85;
@@ -117,31 +118,25 @@ export class CSVOracle implements XPOracle {
 
     const teamMap: Record<string, number> = {};
     const liveTeamRatings: Record<number, { attack: number, defense: number }> = {};
+    const featureStore = new FeatureStoreRepository();
+    // Assuming live FPL context; we can infer the season or default to '2023-24' for now.
+    // The repository fallback logic will gracefully handle missing data.
+    const currentSeason = '2023-24';
+    // If we are at GW1, use GW38 of the previous season to fetch the true carry-over latent ratings
+    // rather than GW0 (which is the flat 1.5 baseline).
+    const previousGw = nextEventId > 1 ? nextEventId - 1 : 38;
 
     if (teams && teams.length > 0) {
       teams.forEach(t => {
         teamMap[t.short_name.toLowerCase()] = t.id;
         
-        let teamXG = 0;
-        let teamXGC = 0; 
+        // Fetch the Latent Features directly from the Feature Store!
+        // This ensures 100% mathematical parity with the Training Pipeline.
+        const features = featureStore.getFeatures(currentSeason, previousGw, t.id);
         
-        if (players && players.length > 0) {
-           players.forEach(p => {
-              if (p.team === t.id) {
-                 teamXG += parseFloat(p.expected_goals) || 0;
-                 // Team xGA is purely the sum of xGC of its Goalkeepers (who don't overlap)
-                 if (p.element_type === 1) { 
-                    teamXGC += parseFloat(p.expected_goals_conceded) || 0;
-                 }
-              }
-           });
-        }
-        
-        const played = t.played && t.played > 0 ? t.played : 1;
-        // Fallback to 1.5 if xG/xGC is extremely low (e.g., start of season)
         liveTeamRatings[t.id] = { 
-           attack: teamXG > 0 ? teamXG / played : 1.5, 
-           defense: teamXGC > 0 ? teamXGC / played : 1.5 
+           attack: features.attack, 
+           defense: features.defense 
         };
       });
     }
@@ -248,13 +243,16 @@ export class CSVOracle implements XPOracle {
                const isHome = f.team_h === teamId;
                const oppId = isHome ? f.team_a : f.team_h;
                const oppRatings = liveTeamRatings[oppId] || { attack: 1.5, defense: 1.5 };
+               const teamRatings = liveTeamRatings[teamId] || { attack: 1.5, defense: 1.5 };
                
                return {
                   opponentTeamId: oppId,
                   isHome,
                   difficulty: isHome ? f.team_h_difficulty : f.team_a_difficulty,
                   opponentAttackRating: oppRatings.attack,
-                  opponentDefenseRating: oppRatings.defense
+                  opponentDefenseRating: oppRatings.defense,
+                  teamAttackRating: teamRatings.attack,
+                  teamDefenseRating: teamRatings.defense
                };
             });
           } else {

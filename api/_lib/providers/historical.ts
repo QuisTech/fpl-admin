@@ -67,6 +67,7 @@ export interface DeadlineSnapshot {
   bank: number;
   freeTransfers: number;
   chipAvailability: Record<string, number>;
+  teamRatings?: Record<number, { attack: number, defense: number }>;
 }
 
 export interface HistoricalDataProvider {

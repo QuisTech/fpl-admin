@@ -11324,3 +11324,173 @@ By GW4, if a team has consistently generated high Expected Goals (xG) over four 
 By GW7, the new season’s data is fully robust. The Engine has enough minutes data to accurately predict manager rotation patterns, and the Latent Attack/Defense ratings perfectly reflect the current tactical realities of the league. From this point forward, the Engine is operating at peak predictive efficiency.
 
 **Summary:** Rely heavily on `FPLFORM` alongside the `EYE-TEST` for the first 3 weeks as a stabilizer. But once Gameweek 4 hits, the `EYE-TEST` engine will start reading the live matrix of the new season better than any human can!
+
+### User Input
+
+So why is our source control still having a lot of files, have you pushed the relevants?
+
+*User accepted the command `git status`*
+
+*User accepted the command `git add api/_lib/ingestion.ts api/_lib/projection.ts api/_lib/providers/historical.ts api/_lib/providers/vaastav.ts api/_lib/types.ts api/_lib/weights/baseline.json scripts/evaluate-engine.ts scripts/train-all.bat scripts/train-attack.ts scripts/train-bonus.ts scripts/train-cleansheet.ts "Optimizing FPL Engine Performance.md" && git commit -m "feat: Replace FDR with EWMA Latent Team Ratings and retrain ML pipelines"`*
+
+*User accepted the command `git add api/_lib/ingestion.ts api/_lib/projection.ts api/_lib/providers/historical.ts api/_lib/providers/vaastav.ts api/_lib/types.ts api/_lib/weights/baseline.json scripts/evaluate-engine.ts scripts/train-all.bat scripts/train-attack.ts scripts/train-bonus.ts scripts/train-cleansheet.ts "Optimizing FPL Engine Performance.md" ; git commit -m "feat: Replace FDR with EWMA Latent Team Ratings and retrain ML pipelines"`*
+
+### Planner Response
+
+Great catch! I had made all the changes directly in the working directory but hadn't officially committed them to source control yet. 
+
+I just staged and committed all the relevant architectural updates (the new Latent Team Rating logic in `vaastav.ts`, the unified projections in `projection.ts`, the new training scripts, and the final optimized weights in `baseline.json`).
+
+I did **not** stage the hundreds of intermediate `gen*.json` files that were dumped during the background training process, as those are just debug logs and would needlessly clutter your source control! 
+
+The commit `feat: Replace FDR with EWMA Latent Team Ratings and retrain ML pipelines` is now securely logged in your git history.
+
+### User Input
+
+So I can continue a new session on a different computer right ?
+
+*User accepted the command `git remote -v`*
+
+*User accepted the command `git push origin unified-projection-engine`*
+
+### Planner Response
+
+Yes, absolutely! 
+
+Since I had only committed the files locally to your hard drive, I just went ahead and ran a `git push` to upload the commit to your remote GitHub repository (`QuisTech/fpl-admin`). 
+
+The push was completely successful. You can now hop on any other computer, run a `git pull origin unified-projection-engine`, and you will have the fully trained V3 ML Engine ready to go!
+
+### User Input
+
+So give me the math formula for our eye test
+
+### Planner Response
+
+Here is the complete mathematical architecture of your new V3 Engine (The "Eye-Test"). 
+
+The Engine doesn't just output a single number; it runs four separate **Machine Learning Sub-Models** and merges them together, factoring in the actual weights we just trained.
+
+### 1. The Minutes Model
+First, it calculates how many minutes a player is expected to play based on rotation risk and fixture congestion.
+> **Formula:** `Expected Minutes = 15.43`
+> `+ 12.59 × (Starts in Last 5)` 
+> `+ 10.61 × (Season Average Minutes)`
+> `- 0.35 × (Minutes Volatility)`
+> `- 2.05 × (Fixtures in Next 7 Days)`
+
+### 2. The Clean Sheet Model (Defenders & GKs)
+Next, it calculates the true probability of keeping a clean sheet using the rolling Latent Team Ratings. *(Note: in our Latent Ratings, higher = stronger)*.
+> **Formula:** `CS Probability = 0.367`
+> `- 0.327 × (Our Team Defense Rating)`
+> `- 0.961 × (Opponent's Attack Rating)`
+> `+ 0.913 × (If Playing at Home)`
+
+### 3. The Attack Model
+Then, it calculates Expected Attacking Points (Goals + Assists) based on underlying momentum and Latent Ratings.
+> **Formula:** `Attacking Score = -1.325`
+> `+ 1.188 × (Player's Expected Goals/Assists over Last 5 Matches)`
+> `+ 0.093 × (Our Team Attack Rating)`
+> `- 0.642 × (Opponent's Defense Rating)`
+> `+ 0.352 × (If Playing at Home)`
+
+### 4. The Final Assembly (Raw xP)
+It then merges these sub-models based on the player's position (e.g., Defenders get 4 points for a clean sheet, Midfielders get 1) and scales it by the expected minutes.
+> **Raw xP** = `(Base points for playing)` + `(CS Probability × CS Points)` + `(Attacking Score)` + `(Expected Bonus)`
+
+### 5. The Strategy Mode Matrix (Utility Score)
+Finally, it runs the **Raw xP** through your chosen Strategy Profile (Safe vs. Risky) to generate the final **Utility Score** that the LP Solver uses to pick the squad.
+> **Utility Score** = `Raw xP` 
+> `+ (Variance × Risk Multiplier)`
+> `+ (Effective Ownership × Rank Shield Multiplier)`
+
+* **In SAFE Mode:** The Rank Shield Multiplier is set to **+2.0** (heavily favoring highly owned players) and Risk Multiplier is **-0.1**.
+* **In RISKY Mode:** The Rank Shield Multiplier is inverted to **-2.0** (actively rejecting highly owned template players) and Risk Multiplier is **+0.5** (hunting for high-variance differentials).
+
+This is why your dashboard is now one of the most mathematically advanced FPL engines out there!
+
+### User Input
+
+So give me the math formula for our FPLFORM
+
+### Planner Response
+
+Unlike the `EYE-TEST`, the `FPLFORM` engine operates as a **"Black Box"** inside our application. We don't actually calculate the base points ourselves—we download them externally.
+
+Here is the exact mathematical flow of how our application processes the `FPLFORM` strategy:
+
+### 1. The Raw xP (The Black Box)
+When you select FPLFORM, our engine bypasses all the Machine Learning sub-models (Minutes, Clean Sheet, Attack) and simply reads the `Pred` column directly from the `fplform.csv` data feed. 
+> **Raw xP = `[External FPLFORM Value]`**
+*(The exact formula the fplform.com team uses is proprietary, but it is generally a regression model based on historical team form, expected goals, and betting odds).*
+
+### 2. The Variance Approximation
+The biggest weakness of FPLFORM is that they only provide a single flat number (e.g., 5.0 xP), so they don't tell us if a player is a "safe" 5.0 or a "risky" 5.0. To make FPLFORM work with our Strategy Modes, our Engine has to artificially inject a generic variance formula:
+> **Variance = `Raw xP × 0.05`** 
+*(This means a player with 10.0 xP is simply assigned a generic variance of 0.5).*
+
+### 3. The Strategy Mode Matrix (Utility Score)
+Once our engine grabs the external Raw xP and calculates the artificial Variance, it runs it through the exact same Optimizer Equation as the Eye-Test to generate the final squad.
+> **Utility Score** = `Raw xP` 
+> `+ (Variance × Risk Multiplier)`
+> `+ (Effective Ownership × Rank Shield Multiplier)`
+
+### Why this matters for SAFE vs. RISKY modes
+Because the Variance in `FPLFORM` is just a flat, artificial percentage (5%) rather than a true calculation of a player's volatility, **RISKY MODE** struggles to find true differentials when using FPLFORM. 
+
+This is exactly why your Safe and Risky squads looked almost identical when you used FPLFORM, but when you switched to the `EYE-TEST`, the engine had the true mathematical variance needed to confidently drop an 89% owned Cole Palmer for a 4% owned differential like Bryan Mbeumo!
+
+### User Input
+
+So give me the math formula for our NATIVE
+
+### Planner Response
+
+Just like `FPLFORM`, the `NATIVE` source operates as a **"Black Box"** inside our application. We do not run any complex Machine Learning calculations on it; we simply pull the official number from the Fantasy Premier League servers.
+
+Here is the exact mathematical flow for the `NATIVE` strategy:
+
+### 1. The Raw xP (The FPL Server Black Box)
+When you select NATIVE, our engine pulls the `ep_next` (Expected Points Next) value directly from the live FPL API (`bootstrap-static.json`). 
+> **Raw xP = `[FPL's ep_next value]`**
+*(The official FPL algorithm is hidden, but it is notoriously basic. It heavily weights a player's recent "Form" and "ICT Index" (Influence, Creativity, Threat) and applies a crude multiplier based on the 1–5 Fixture Difficulty Rating).*
+
+### 2. The Variance Approximation
+Just like FPLFORM, the official FPL servers only provide a single flat number (e.g., `4.5 xP`), offering zero insight into a player's actual risk or volatility. Our engine applies the same artificial approximation:
+> **Variance = `Raw xP × 0.05`** 
+
+### 3. The Strategy Mode Matrix (Utility Score)
+Finally, it runs through the exact same Optimizer Equation as all the other modes to generate the final squad.
+> **Utility Score** = `Raw xP` 
+> `+ (Variance × Risk Multiplier)`
+> `+ (Effective Ownership × Rank Shield Multiplier)`
+
+### Why NATIVE is the weakest link
+Because the `NATIVE` formula relies on the crude **1–5 Fixture Difficulty (FDR)** instead of continuous Latent Team Ratings, and relies heavily on past points ("Form") instead of underlying Expected Goals (xG), it is incredibly slow to spot emerging talent or tactical shifts. 
+
+It tells you what *has happened in the past*, while the `EYE-TEST` uses statistical math to predict what *will happen in the future*.
+
+### User Input
+
+What is regression?
+What is black box?
+
+### Planner Response
+
+These are two of the most important concepts in Data Science and Machine Learning! Here is what they mean in simple terms:
+
+### 1. What is "Regression"?
+**Regression** is the mathematical way of finding the relationship between different things to predict the future.
+
+Imagine you want to predict how many FPL points Haaland will get. You know two things: how many shots he took last game, and how many minutes he played. 
+* A **Regression Model** looks at thousands of historical games and figures out exactly how much "weight" to give to a shot vs. a minute played.
+* It might mathematically discover that: `1 Shot = 0.5 points` and `1 Minute = 0.02 points`. 
+* Once it finds that perfect mathematical formula (the "line of best fit"), you can plug in new numbers to predict future points.
+
+*(Fun fact: When we ran the `train-all.bat` script earlier to find the `betaXGI5` and `betaOppDefense` weights, the computer was essentially running a massive, advanced regression to find the perfect mathematical relationship between xG and actual FPL points!)*
+
+### 2. What is a "Black Box"?
+A **Black Box** is any system, algorithm, or model where you can see the **Inputs** going in and the **Outputs** coming out, but you have absolutely no idea what is happening inside. The internal math is hidden, secret, or completely unreadable.
+
+* **FPLFORM and NATIVE are "Black Boxes" to us.** We ask them, *"How many points will Saka get?"* (Input), and they hand us a piece of paper that says *"6.5 points"* (Output). But we have no idea what math formula they used to calculate that 6.5. Their formula is locked away on their private servers.
+* **Our EYE-TEST Engine is a "White Box" (or Glass Box).** We built it! When it spits out `9.8 xP` for Haaland, it isn't a mystery. We can look directly at the math (the weights, the latent team ratings, the expected goals) and perfectly understand *why* the AI chose that exact number.

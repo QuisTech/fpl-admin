@@ -7,6 +7,7 @@ import {
   HistoricalPlayerFeatures, 
   HistoricalFixture 
 } from './historical.js';
+import { TeamRatingService } from './team-ratings.js';
 
 export class VaastavProvider implements HistoricalDataProvider {
   public supportsHistoricalAnnouncements = false;
@@ -21,6 +22,12 @@ export class VaastavProvider implements HistoricalDataProvider {
   // Quick lookups
   public gwDataByPlayer: Record<number, Record<number, any>> = {}; // playerId -> gw -> data
   private fixturesByGw: Record<number, any[]> = {}; // gw -> fixtures
+  
+  private teamRatingService: TeamRatingService;
+
+  constructor() {
+    this.teamRatingService = new TeamRatingService();
+  }
 
   async loadSeason(season: string): Promise<void> {
     this.season = season;
@@ -33,6 +40,10 @@ export class VaastavProvider implements HistoricalDataProvider {
     this.mergedGw = this.loadCsv('merged_gw.csv');
 
     this.buildLookups();
+    
+    this.teamRatingService.buildRatings(season, this.playersRaw, this.mergedGw, this.fixturesByGw);
+    this.teamRatingService.save();
+    
     console.log(`[VaastavProvider] Successfully loaded ${this.playersRaw.length} players, ${this.fixtures.length} fixtures, ${this.mergedGw.length} GW records.`);
   }
 
@@ -93,63 +104,15 @@ export class VaastavProvider implements HistoricalDataProvider {
     // To ensure ZERO look-ahead bias, we only look at GW N for price/fixtures, 
     // and GW 1 to (N-1) for observable features (minutes played, xG, xA).
 
-    // --- NEW: Compute Latent Team Ratings using EWMA ---
-    const teamRatings: Record<number, { attack: number, defense: number }> = {};
-    const playerToTeam: Record<number, number> = {};
-    
-    // Initialize all teams to 1.5
+    // --- NEW: Fetch Latent Team Ratings using TeamRatingService ---
+    const teamRatings: Record<number, { attack: number, defense: number, confidence?: number }> = {};
+    const previousGw = gameweek - 1;
     this.playersRaw.forEach(p => {
        const tid = parseInt(p.team);
-       const pid = parseInt(p.id);
        if (!isNaN(tid)) {
-           if (!teamRatings[tid]) teamRatings[tid] = { attack: 1.5, defense: 1.5 };
-           playerToTeam[pid] = tid;
+           teamRatings[tid] = this.teamRatingService.getRating(this.season, previousGw, tid);
        }
     });
-
-    // Pre-calculate Team xG per Gameweek
-    const gwTeamXg: Record<number, Record<number, number>> = {}; // gw -> teamId -> xG
-    for (let gw = 1; gw < gameweek; gw++) {
-        gwTeamXg[gw] = {};
-    }
-    
-    // Fast O(N) iteration
-    this.mergedGw.forEach(row => {
-        const gw = parseInt(row.GW || row.round);
-        if (gw > 0 && gw < gameweek) {
-            const pid = parseInt(row.element || row.id);
-            const tid = playerToTeam[pid];
-            if (tid) {
-                let xg = parseFloat(row.expected_goals || row.xG);
-                if (isNaN(xg)) {
-                   xg = (row.position === 'FWD' || row.position === 'MID' || row.position === 'DEF') ? (parseFloat(row.goals_scored || "0") * 0.8) : 0;
-                }
-                gwTeamXg[gw][tid] = (gwTeamXg[gw][tid] || 0) + xg;
-            }
-        }
-    });
-
-    // Chronologically process gameweeks 1 to (gameweek - 1)
-    for (let gw = 1; gw < gameweek; gw++) {
-      const alpha = gw < 10 ? 0.20 : 0.10; // Adaptive EWMA
-      const gwFixs = this.fixturesByGw[gw] || [];
-      gwFixs.forEach(fix => {
-          const homeId = parseInt(fix.team_h);
-          const awayId = parseInt(fix.team_a);
-          
-          if (teamRatings[homeId] && teamRatings[awayId]) {
-              const homeXg = gwTeamXg[gw][homeId] || 0;
-              const awayXg = gwTeamXg[gw][awayId] || 0;
-
-              // Team attack is updated by their xG. Team defense is updated by their opponent's xG (xGA).
-              teamRatings[homeId].attack = (1 - alpha) * teamRatings[homeId].attack + alpha * homeXg;
-              teamRatings[homeId].defense = (1 - alpha) * teamRatings[homeId].defense + alpha * awayXg;
-
-              teamRatings[awayId].attack = (1 - alpha) * teamRatings[awayId].attack + alpha * awayXg;
-              teamRatings[awayId].defense = (1 - alpha) * teamRatings[awayId].defense + alpha * homeXg;
-          }
-      });
-    }
 
     this.playersRaw.forEach(raw => {
       const playerId = parseInt(raw.id);
@@ -404,6 +367,7 @@ export class VaastavProvider implements HistoricalDataProvider {
       };
     });
 
+    snapshot.teamRatings = teamRatings;
     return snapshot;
   }
 
