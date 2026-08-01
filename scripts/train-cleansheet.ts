@@ -19,7 +19,6 @@ const CS_BETAS = [
   'betaCsBase',
   'betaTeamDefense',
   'betaOppAttack',
-  'betaCsFixture',
   'betaCsHome'
 ];
 
@@ -27,8 +26,7 @@ const MUTATION_SCALES: Record<string, number> = {
   'betaCsBase': 0.1,
   'betaTeamDefense': 0.1,
   'betaOppAttack': 0.1,
-  'betaCsFixture': 0.1,
-  'betaCsHome': 0.1
+  'betaCsHome': 0.05
 };
 
 async function loadDatasets(seasons: string[]): Promise<VaastavProvider[]> {
@@ -111,13 +109,10 @@ function evaluateCleanSheet(params: UtilityParameters, providers: VaastavProvide
         
         fixtures.forEach(fix => {
           const isHome = fix.isHome ? 1 : 0;
-          const fixtureDiff = fix.difficulty;
-          const oppAttack = fix.opponentStrengthAttack;
           
           let expectedCsProb = params.betaCsBase
-            + params.betaTeamDefense * 1.5 
-            + params.betaOppAttack * oppAttack
-            + params.betaCsFixture * fixtureDiff
+            + params.betaTeamDefense * (fix.teamDefenseRating || 1.5) 
+            + params.betaOppAttack * (fix.opponentAttackRating || 1.5)
             + params.betaCsHome * isHome;
 
           expectedCsProb = Math.max(0, Math.min(1, expectedCsProb)) * minuteFraction;
@@ -216,22 +211,30 @@ async function runTraining() {
        console.log(`  ${key}: ${(generationBest.params as any)[key].toFixed(4)}`);
     }
 
+    // 1. Update mutation base using training loss
     if (generationBest.metrics.loss < bestTrain.loss) {
       bestTrain = generationBest.metrics;
       bestParams = generationBest.params;
+    }
+
+    // 2. Evaluate validation loss
+    const valMetrics = evaluateCleanSheet(generationBest.params, valProviders);
+    const minDelta = 1e-4;
+
+    if (valMetrics.loss < bestVal.loss - minDelta) {
+      bestVal = valMetrics;
       generationsWithoutImprovement = 0;
       
-      const valMetrics = evaluateCleanSheet(bestParams, valProviders);
       console.log(`🔥 NEW BEST! Validation Loss: ${valMetrics.loss.toFixed(4)} (Spearman: ${valMetrics.spearman.toFixed(3)})`);
       
       const genFile = path.join(weightsDir, `cs_gen${gen.toString().padStart(3, '0')}.json`);
-      fs.writeFileSync(genFile, JSON.stringify({ weights: bestParams }, null, 2));
+      fs.writeFileSync(genFile, JSON.stringify({ weights: generationBest.params }, null, 2));
       
       const baselineFile = path.join(weightsDir, 'baseline.json');
-      fs.writeFileSync(baselineFile, JSON.stringify({ weights: bestParams }, null, 2));
+      fs.writeFileSync(baselineFile, JSON.stringify({ weights: generationBest.params }, null, 2));
     } else {
       generationsWithoutImprovement++;
-      console.log(`No improvement. Patience: ${generationsWithoutImprovement}/${PATIENCE}`);
+      console.log(`No improvement in Validation Loss. Patience: ${generationsWithoutImprovement}/${PATIENCE}`);
     }
 
     if (generationsWithoutImprovement >= PATIENCE) {

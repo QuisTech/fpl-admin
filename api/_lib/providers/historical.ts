@@ -2,8 +2,10 @@ export interface HistoricalFixture {
   opponentTeamId: number;
   isHome: boolean;
   difficulty: number;
-  opponentStrengthDefense: number;
-  opponentStrengthAttack: number;
+  opponentAttackRating: number;
+  opponentDefenseRating: number;
+  teamAttackRating: number;
+  teamDefenseRating: number;
   kickoff_time?: string;
 }
 

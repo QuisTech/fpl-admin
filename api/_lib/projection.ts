@@ -8,7 +8,6 @@ export interface UtilityParameters {
   betaXA: number;
   betaXGI3: number;
   betaXGI5: number;
-  betaAttFixture: number;
   betaTeamAttack: number;
   betaOppDefense: number;
   betaAttHome: number;
@@ -17,7 +16,6 @@ export interface UtilityParameters {
   betaCsBase: number;
   betaTeamDefense: number;
   betaOppAttack: number;
-  betaCsFixture: number;
   betaCsHome: number;
   
   // Bonus Model
@@ -126,10 +124,11 @@ export class ProjectionEngine {
     
     fixtures.forEach(fix => {
       const isHome = fix.isHome ? 1 : 0;
-      const fixtureDiff = fix.difficulty;
       
-      const oppDefense = fix.opponentStrengthDefense; 
-      const oppAttack = fix.opponentStrengthAttack;
+      const oppDefense = fix.opponentDefenseRating || 1.5; 
+      const oppAttack = fix.opponentAttackRating || 1.5;
+      const teamAttack = fix.teamAttackRating || 1.5;
+      const teamDefense = fix.teamDefenseRating || 1.5;
       
       // Sub-model 1: Attacking Returns
       let expectedAttack = this.params.betaAttackBase 
@@ -137,8 +136,7 @@ export class ProjectionEngine {
         + this.params.betaXA * player.xA90
         + this.params.betaXGI3 * player.xGI3
         + this.params.betaXGI5 * player.xGI5
-        + this.params.betaAttFixture * fixtureDiff
-        + this.params.betaTeamAttack * 1.5 // Simplified team attack metric
+        + this.params.betaTeamAttack * teamAttack
         + this.params.betaOppDefense * oppDefense
         + this.params.betaAttHome * isHome;
         
@@ -148,9 +146,8 @@ export class ProjectionEngine {
       // Only Defenders and GKs get full CS points (4). Mids get (1). Fwds get 0.
       let csMultiplier = player.position === 'DEF' || player.position === 'GKP' ? 4 : (player.position === 'MID' ? 1 : 0);
       let expectedCsProb = this.params.betaCsBase
-        + this.params.betaTeamDefense * 1.5 
+        + this.params.betaTeamDefense * teamDefense 
         + this.params.betaOppAttack * oppAttack
-        + this.params.betaCsFixture * fixtureDiff
         + this.params.betaCsHome * isHome;
 
       expectedCsProb = Math.max(0, Math.min(1, expectedCsProb)) * minuteFraction;

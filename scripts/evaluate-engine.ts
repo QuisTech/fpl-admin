@@ -186,9 +186,10 @@ async function runEvaluation() {
             
             fixtures.forEach(fix => {
               const isHome = fix.isHome ? 1 : 0;
-              const fixtureDiff = fix.difficulty;
-              const oppDefense = fix.opponentStrengthDefense; 
-              const oppAttack = fix.opponentStrengthAttack;
+              const oppDefense = fix.opponentDefenseRating || 1.5; 
+              const oppAttack = fix.opponentAttackRating || 1.5;
+              const teamAttack = fix.teamAttackRating || 1.5;
+              const teamDefense = fix.teamDefenseRating || 1.5;
               
               if (season === valSeason) {
                 featureVals.betaAttackBase.push(1);
@@ -196,15 +197,13 @@ async function runEvaluation() {
                 featureVals.betaXA.push(player.xA90 || 0);
                 featureVals.betaXGI3.push(player.xGI3 || 0);
                 featureVals.betaXGI5.push(player.xGI5 || 0);
-                featureVals.betaAttFixture.push(fixtureDiff);
-                featureVals.betaTeamAttack.push(1.5);
+                featureVals.betaTeamAttack.push(teamAttack);
                 featureVals.betaOppDefense.push(oppDefense);
                 featureVals.betaAttHome.push(isHome);
                 
                 featureVals.betaCsBase.push(1);
-                featureVals.betaTeamDefense.push(1.5);
+                featureVals.betaTeamDefense.push(teamDefense);
                 featureVals.betaOppAttack.push(oppAttack);
-                featureVals.betaCsFixture.push(fixtureDiff);
                 featureVals.betaCsHome.push(isHome);
                 
                 featureVals.betaBonusBase.push(1);
@@ -215,16 +214,14 @@ async function runEvaluation() {
                 + params.betaXA * (player.xA90 || 0)
                 + params.betaXGI3 * (player.xGI3 || 0)
                 + params.betaXGI5 * (player.xGI5 || 0)
-                + params.betaAttFixture * fixtureDiff
-                + params.betaTeamAttack * 1.5 
+                + params.betaTeamAttack * teamAttack 
                 + params.betaOppDefense * oppDefense
                 + params.betaAttHome * isHome;
               expectedAttackSum += Math.max(0, expectedAttack) * minuteFraction;
               
               let expectedCsProb = params.betaCsBase
-                + params.betaTeamDefense * 1.5 
+                + params.betaTeamDefense * teamDefense 
                 + params.betaOppAttack * oppAttack
-                + params.betaCsFixture * fixtureDiff
                 + params.betaCsHome * isHome;
               expectedCsProb = Math.max(0, Math.min(1, expectedCsProb));
               expectedCsProbSum += expectedCsProb; // Raw probability!

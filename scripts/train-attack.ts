@@ -16,15 +16,8 @@ const MAX_GENERATIONS = 30;
 const PATIENCE = 5;
 
 const ATTACK_BETAS = [
-  'betaAttackBase',
-  'betaXG',
-  'betaXA',
-  'betaXGI3',
-  'betaXGI5',
-  'betaAttFixture',
-  'betaTeamAttack',
-  'betaOppDefense',
-  'betaAttHome'
+  'betaAttackBase', 'betaXG', 'betaXA', 'betaXGI3', 'betaXGI5', 
+  'betaTeamAttack', 'betaOppDefense', 'betaAttHome'
 ];
 
 const MUTATION_SCALES: Record<string, number> = {
@@ -33,10 +26,9 @@ const MUTATION_SCALES: Record<string, number> = {
   'betaXA': 0.5,
   'betaXGI3': 0.2,
   'betaXGI5': 0.1,
-  'betaAttFixture': 0.1,
   'betaTeamAttack': 0.1,
   'betaOppDefense': 0.1,
-  'betaAttHome': 0.1
+  'betaAttHome': 0.05
 };
 
 async function loadDatasets(seasons: string[]): Promise<VaastavProvider[]> {
@@ -136,18 +128,14 @@ function evaluateAttack(params: UtilityParameters, providers: VaastavProvider[])
           
           fixtures.forEach(fix => {
             const isHome = fix.isHome ? 1 : 0;
-            const fixtureDiff = fix.difficulty;
-            const oppDefense = fix.opponentStrengthDefense; 
-            const oppAttack = fix.opponentStrengthAttack;
             
             let expectedAttack = params.betaAttackBase 
               + params.betaXG * (player.xG90 || 0)
               + params.betaXA * (player.xA90 || 0)
               + params.betaXGI3 * (player.xGI3 || 0)
               + params.betaXGI5 * (player.xGI5 || 0)
-              + params.betaAttFixture * fixtureDiff
-              + params.betaTeamAttack * 1.5 
-              + params.betaOppDefense * oppDefense
+              + params.betaTeamAttack * (fix.teamAttackRating || 1.5) 
+              + params.betaOppDefense * (fix.opponentDefenseRating || 1.5)
               + params.betaAttHome * isHome;
               
             expectedAttackSum += Math.max(0, expectedAttack) * minuteFraction;

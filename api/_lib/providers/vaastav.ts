@@ -93,6 +93,64 @@ export class VaastavProvider implements HistoricalDataProvider {
     // To ensure ZERO look-ahead bias, we only look at GW N for price/fixtures, 
     // and GW 1 to (N-1) for observable features (minutes played, xG, xA).
 
+    // --- NEW: Compute Latent Team Ratings using EWMA ---
+    const teamRatings: Record<number, { attack: number, defense: number }> = {};
+    const playerToTeam: Record<number, number> = {};
+    
+    // Initialize all teams to 1.5
+    this.playersRaw.forEach(p => {
+       const tid = parseInt(p.team);
+       const pid = parseInt(p.id);
+       if (!isNaN(tid)) {
+           if (!teamRatings[tid]) teamRatings[tid] = { attack: 1.5, defense: 1.5 };
+           playerToTeam[pid] = tid;
+       }
+    });
+
+    // Pre-calculate Team xG per Gameweek
+    const gwTeamXg: Record<number, Record<number, number>> = {}; // gw -> teamId -> xG
+    for (let gw = 1; gw < gameweek; gw++) {
+        gwTeamXg[gw] = {};
+    }
+    
+    // Fast O(N) iteration
+    this.mergedGw.forEach(row => {
+        const gw = parseInt(row.GW || row.round);
+        if (gw > 0 && gw < gameweek) {
+            const pid = parseInt(row.element || row.id);
+            const tid = playerToTeam[pid];
+            if (tid) {
+                let xg = parseFloat(row.expected_goals || row.xG);
+                if (isNaN(xg)) {
+                   xg = (row.position === 'FWD' || row.position === 'MID' || row.position === 'DEF') ? (parseFloat(row.goals_scored || "0") * 0.8) : 0;
+                }
+                gwTeamXg[gw][tid] = (gwTeamXg[gw][tid] || 0) + xg;
+            }
+        }
+    });
+
+    // Chronologically process gameweeks 1 to (gameweek - 1)
+    for (let gw = 1; gw < gameweek; gw++) {
+      const alpha = gw < 10 ? 0.20 : 0.10; // Adaptive EWMA
+      const gwFixs = this.fixturesByGw[gw] || [];
+      gwFixs.forEach(fix => {
+          const homeId = parseInt(fix.team_h);
+          const awayId = parseInt(fix.team_a);
+          
+          if (teamRatings[homeId] && teamRatings[awayId]) {
+              const homeXg = gwTeamXg[gw][homeId] || 0;
+              const awayXg = gwTeamXg[gw][awayId] || 0;
+
+              // Team attack is updated by their xG. Team defense is updated by their opponent's xG (xGA).
+              teamRatings[homeId].attack = (1 - alpha) * teamRatings[homeId].attack + alpha * homeXg;
+              teamRatings[homeId].defense = (1 - alpha) * teamRatings[homeId].defense + alpha * awayXg;
+
+              teamRatings[awayId].attack = (1 - alpha) * teamRatings[awayId].attack + alpha * awayXg;
+              teamRatings[awayId].defense = (1 - alpha) * teamRatings[awayId].defense + alpha * homeXg;
+          }
+      });
+    }
+
     this.playersRaw.forEach(raw => {
       const playerId = parseInt(raw.id);
       if (isNaN(playerId)) return;
@@ -274,28 +332,6 @@ export class VaastavProvider implements HistoricalDataProvider {
       const teamId = parseInt(raw.team);
       const fixturesByGw: Record<number, HistoricalFixture[]> = {};
       
-      // Compute team strengths based on historical matches before this GW
-      // We will look at all matches up to gameweek - 1 to compute xG, xGC
-      let teamG = 0, teamxG = 0, teamGA = 0, teamxGA = 0, teamMatches = 0;
-      for (let prevGw = 1; prevGw < gameweek; prevGw++) {
-        const gwFixs = this.fixturesByGw[prevGw] || [];
-        gwFixs.forEach(fix => {
-          if (parseInt(fix.team_h) === teamId || parseInt(fix.team_a) === teamId) {
-            teamMatches++;
-            if (parseInt(fix.team_h) === teamId) {
-              teamG += parseInt(fix.team_h_score) || 0;
-              teamGA += parseInt(fix.team_a_score) || 0;
-            } else {
-              teamG += parseInt(fix.team_a_score) || 0;
-              teamGA += parseInt(fix.team_h_score) || 0;
-            }
-          }
-        });
-      }
-      
-      const teamStrengthAttack = teamMatches > 0 ? (teamG / teamMatches) : 1.5;
-      const teamStrengthDefense = teamMatches > 0 ? (teamGA / teamMatches) : 1.5;
-
       for (let horizonGw = gameweek; horizonGw < gameweek + 8; horizonGw++) {
         fixturesByGw[horizonGw] = [];
         const gwFixtures = this.fixturesByGw[horizonGw] || [];
@@ -305,35 +341,16 @@ export class VaastavProvider implements HistoricalDataProvider {
           const awayId = parseInt(fix.team_a);
           if (homeId === teamId || awayId === teamId) {
             const isHome = homeId === teamId;
-            
-            // For opponents, calculate their rolling GA to act as our attack multiplier
             const oppId = isHome ? awayId : homeId;
-            let oppG = 0, oppGA = 0, oppMatches = 0;
-            for (let prevGw = 1; prevGw < gameweek; prevGw++) {
-              const oppGwFixs = this.fixturesByGw[prevGw] || [];
-              oppGwFixs.forEach(ofix => {
-                if (parseInt(ofix.team_h) === oppId || parseInt(ofix.team_a) === oppId) {
-                  oppMatches++;
-                  if (parseInt(ofix.team_h) === oppId) {
-                    oppG += parseInt(ofix.team_h_score) || 0;
-                    oppGA += parseInt(ofix.team_a_score) || 0;
-                  } else {
-                    oppG += parseInt(ofix.team_a_score) || 0;
-                    oppGA += parseInt(ofix.team_h_score) || 0;
-                  }
-                }
-              });
-            }
-            
-            const oppStrengthAttack = oppMatches > 0 ? (oppG / oppMatches) : 1.5;
-            const oppStrengthDefense = oppMatches > 0 ? (oppGA / oppMatches) : 1.5;
             
             fixturesByGw[horizonGw].push({
               opponentTeamId: oppId,
               isHome,
               difficulty: isHome ? parseInt(fix.team_h_difficulty) : parseInt(fix.team_a_difficulty),
-              opponentStrengthDefense: oppStrengthDefense, 
-              opponentStrengthAttack: oppStrengthAttack,
+              opponentAttackRating: teamRatings[oppId]?.attack || 1.5,
+              opponentDefenseRating: teamRatings[oppId]?.defense || 1.5,
+              teamAttackRating: teamRatings[teamId]?.attack || 1.5,
+              teamDefenseRating: teamRatings[teamId]?.defense || 1.5,
               kickoff_time: fix.kickoff_time
             });
           }

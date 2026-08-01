@@ -116,9 +116,33 @@ export class CSVOracle implements XPOracle {
     let syntheticId = 100000; // Increased to 100000 to prevent collisions with future FPL API IDs
 
     const teamMap: Record<string, number> = {};
+    const liveTeamRatings: Record<number, { attack: number, defense: number }> = {};
+
     if (teams && teams.length > 0) {
       teams.forEach(t => {
         teamMap[t.short_name.toLowerCase()] = t.id;
+        
+        let teamXG = 0;
+        let teamXGC = 0; 
+        
+        if (players && players.length > 0) {
+           players.forEach(p => {
+              if (p.team === t.id) {
+                 teamXG += parseFloat(p.expected_goals) || 0;
+                 // Team xGA is purely the sum of xGC of its Goalkeepers (who don't overlap)
+                 if (p.element_type === 1) { 
+                    teamXGC += parseFloat(p.expected_goals_conceded) || 0;
+                 }
+              }
+           });
+        }
+        
+        const played = t.played && t.played > 0 ? t.played : 1;
+        // Fallback to 1.5 if xG/xGC is extremely low (e.g., start of season)
+        liveTeamRatings[t.id] = { 
+           attack: teamXG > 0 ? teamXG / played : 1.5, 
+           defense: teamXGC > 0 ? teamXGC / played : 1.5 
+        };
       });
     }
 
@@ -207,9 +231,12 @@ export class CSVOracle implements XPOracle {
         probPlay = Math.max(0, Math.min(1.0, probPlay));
 
         const gamesPlayed = matchedPlayer ? Math.max(3.0, (matchedPlayer.minutes || 0) / 90) : 0;
-        const form = matchedPlayer ? parseFloat(matchedPlayer.form || "0") : 0;
-        const xG90 = matchedPlayer && gamesPlayed > 0 ? (parseFloat(matchedPlayer.expected_goals || "0") / gamesPlayed) : 0;
-        const xA90 = matchedPlayer && gamesPlayed > 0 ? (parseFloat(matchedPlayer.expected_assists || "0") / gamesPlayed) : 0;
+        let xG90 = matchedPlayer && gamesPlayed > 0 ? (parseFloat(matchedPlayer.expected_goals || "0") / gamesPlayed) : 0;
+        let xA90 = matchedPlayer && gamesPlayed > 0 ? (parseFloat(matchedPlayer.expected_assists || "0") / gamesPlayed) : 0;
+        
+        // Cap absurdly high xG90/xA90 caused by low minutes / small sample sizes in the live FPL API
+        xG90 = Math.min(1.0, xG90);
+        xA90 = Math.min(0.7, xA90);
         
         // Build Fixtures
         const fixturesByGw: Record<number, HistoricalFixture[]> = {};
@@ -219,14 +246,15 @@ export class CSVOracle implements XPOracle {
             const teamFixtures = fixtures.filter(f => f.event === gw && (f.team_h === teamId || f.team_a === teamId));
             fixturesByGw[gw] = teamFixtures.map(f => {
                const isHome = f.team_h === teamId;
+               const oppId = isHome ? f.team_a : f.team_h;
+               const oppRatings = liveTeamRatings[oppId] || { attack: 1.5, defense: 1.5 };
+               
                return {
-                  opponentTeamId: isHome ? f.team_a : f.team_h,
+                  opponentTeamId: oppId,
                   isHome,
                   difficulty: isHome ? f.team_h_difficulty : f.team_a_difficulty,
-                  // FPL API doesn't have opponentStrengthDefense easily accessible inside f fixture.
-                  // Default fallback for historical engine. 
-                  opponentStrengthDefense: isHome ? f.team_a_difficulty : f.team_h_difficulty, 
-                  opponentStrengthAttack: isHome ? f.team_a_difficulty : f.team_h_difficulty
+                  opponentAttackRating: oppRatings.attack,
+                  opponentDefenseRating: oppRatings.defense
                };
             });
           } else {
