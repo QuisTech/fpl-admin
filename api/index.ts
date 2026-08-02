@@ -145,7 +145,23 @@ export class FPLService {
     // Dynamically load the fuel source (fplform scraped vs native FPL API)
     // Eye-test merit + FDR is now computed inside the oracle so all fuel sources
     // flow through the same LP Solver pipeline with full utility deformation
-    const csvFileName = fuel === 'native' ? 'fpl_native.csv' : 'fplform.csv';
+    let csvFileName = fuel === 'native' ? 'fpl_native.csv' : 'fplform.csv';
+    
+    // Fallback: if FPLFORM file is corrupted/empty, use NATIVE as backup temporarily
+    if (fuel !== 'native' && fuel !== 'eye-test') {
+      const fs = require('fs');
+      const path = require('path');
+      const fplformPath = path.resolve(process.cwd(), 'data', 'fplform.csv');
+      if (fs.existsSync(fplformPath)) {
+        const content = fs.readFileSync(fplformPath, 'utf8');
+        // Check if file is corrupted (has team names instead of player data)
+        if (content.includes('Arsenal, ARS') || content.split('\n').length < 100) {
+          console.warn('[FPLService] FPLFORM data appears corrupted, temporarily using NATIVE fallback');
+          csvFileName = 'fpl_native.csv';
+        }
+      }
+    }
+    
     const oracle = new CSVOracle(`data/${csvFileName}`, players, riskMode, fixtures, teams, nextEventId, fuel);
 
     const available = players.filter(p => p.status === 'a' || p.chance_of_playing_next_round === 100);
