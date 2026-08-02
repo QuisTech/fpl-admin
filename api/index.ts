@@ -72,32 +72,45 @@ export class FPLService {
       return this.cache.data;
     }
 
-    const [staticRes, fixturesRes] = await Promise.all([
-      this.fetchWithRetry(`${FPL_BASE_URL}/bootstrap-static/`),
-      this.fetchWithRetry(`${FPL_BASE_URL}/fixtures/`)
-    ]);
+    try {
+      const [staticRes, fixturesRes] = await Promise.all([
+        this.fetchWithRetry(`${FPL_BASE_URL}/bootstrap-static/`),
+        this.fetchWithRetry(`${FPL_BASE_URL}/fixtures/`)
+      ]);
 
-    const players: FPLPlayer[] = [];
-    staticRes.data.elements.forEach((p: any) => {
-      const result = FPLPlayerSchema.safeParse(p);
-      if (result.success) players.push(result.data);
-    });
+      const players: FPLPlayer[] = [];
+      staticRes.data.elements.forEach((p: any) => {
+        const result = FPLPlayerSchema.safeParse(p);
+        if (result.success) players.push(result.data);
+      });
 
-    const teams: FPLTeam[] = [];
-    staticRes.data.teams.forEach((t: any) => {
-      const result = FPLTeamSchema.safeParse(t);
-      if (result.success) teams.push(result.data);
-    });
+      const teams: FPLTeam[] = [];
+      staticRes.data.teams.forEach((t: any) => {
+        const result = FPLTeamSchema.safeParse(t);
+        if (result.success) teams.push(result.data);
+      });
 
-    const fixtures = z.array(FPLFixtureSchema).parse(fixturesRes.data);
-    const currentEvent = staticRes.data.events.find((e: any) => e.is_current) || 
-                         staticRes.data.events.find((e: any) => e.is_previous) || 
-                         { id: 1 };
-    const nextEvent = staticRes.data.events.find((e: any) => new Date(e.deadline_time) > new Date()) || { id: 1 };
-    
-    const result = { players, teams, fixtures, nextEventId: nextEvent.id, currentEventId: currentEvent.id };
-    this.cache = { data: result, timestamp: Date.now() };
-    return result;
+      const fixtures = z.array(FPLFixtureSchema).parse(fixturesRes.data);
+      const currentEvent = staticRes.data.events.find((e: any) => e.is_current) || 
+                           staticRes.data.events.find((e: any) => e.is_previous) || 
+                           { id: 1 };
+      const nextEvent = staticRes.data.events.find((e: any) => new Date(e.deadline_time) > new Date()) || { id: 1 };
+      
+      const result = { players, teams, fixtures, nextEventId: nextEvent.id, currentEventId: currentEvent.id };
+      this.cache = { data: result, timestamp: Date.now() };
+      return result;
+    } catch (err: any) {
+      console.error('[FPLService] Failed to fetch live FPL data:', err.message);
+      
+      // If we have cached data, return it even if expired
+      if (this.cache) {
+        console.warn('[FPLService] Using expired cached data as fallback');
+        return this.cache.data;
+      }
+      
+      // If no cache at all, throw the error
+      throw new Error('FPL API unavailable and no cached data available');
+    }
   }
 
   static calculatePlayerScore(baseXp: number, player: FPLPlayer, riskMode: string, fuel: string = 'fplform', fixtures?: FPLFixture[], nextEventId?: number): number {
