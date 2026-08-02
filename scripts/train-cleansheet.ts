@@ -23,10 +23,10 @@ const CS_BETAS = [
 ];
 
 const MUTATION_SCALES: Record<string, number> = {
-  'betaCsBase': 0.1,
-  'betaTeamDefense': 0.1,
-  'betaOppAttack': 0.1,
-  'betaCsHome': 0.05
+  'betaCsBase': 0.2,
+  'betaTeamDefense': 0.15,
+  'betaOppAttack': 0.15,
+  'betaCsHome': 0.1
 };
 
 async function loadDatasets(seasons: string[]): Promise<VaastavProvider[]> {
@@ -152,12 +152,11 @@ function mutate(baseParams: UtilityParameters): UtilityParameters {
   const newParams = { ...baseParams };
   for (const key of CS_BETAS) {
     const scale = MUTATION_SCALES[key] || 0.1;
-    const u1 = Math.random();
-    const u2 = Math.random();
-    let z0 = 0;
-    if (u1 > 0) {
-      z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
-    }
+    let u1 = Math.random();
+    let u2 = Math.random();
+    // Avoid log(0) by ensuring u1 is in (0,1]
+    while (u1 <= 0) u1 = Math.random();
+    const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
     const noise = z0 * scale;
     (newParams as any)[key] += noise;
   }

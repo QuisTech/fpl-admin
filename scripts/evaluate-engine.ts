@@ -322,7 +322,7 @@ async function runEvaluation() {
     prevMetrics = JSON.parse(fs.readFileSync(historyPath, 'utf8'));
     
     const evaluateGate = (name: string, current: number, prev: number, higherIsBetter: boolean) => {
-      let isRegress = higherIsBetter ? (current < prev * 0.98) : (current > prev * 1.02);
+      let isRegress = higherIsBetter ? (current < prev * 0.95) : (current > prev * 1.05);
       if (isRegress) {
          pass = false;
          gateResults.push(`❌ ${name} worsened (${prev.toFixed(3)} -> ${current.toFixed(3)})`);

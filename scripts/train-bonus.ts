@@ -152,12 +152,11 @@ function mutate(baseParams: UtilityParameters): UtilityParameters {
   const newParams = { ...baseParams };
   for (const key of BONUS_BETAS) {
     const scale = MUTATION_SCALES[key] || 0.1;
-    const u1 = Math.random();
-    const u2 = Math.random();
-    let z0 = 0;
-    if (u1 > 0) {
-      z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
-    }
+    let u1 = Math.random();
+    let u2 = Math.random();
+    // Avoid log(0) by ensuring u1 is in (0,1]
+    while (u1 <= 0) u1 = Math.random();
+    const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
     const noise = z0 * scale;
     (newParams as any)[key] += noise;
   }
