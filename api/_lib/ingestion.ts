@@ -43,13 +43,14 @@ export class CSVOracle implements XPOracle {
     fixtures: any[] = [], 
     teams: any[] = [], 
     nextEventId: number = 1,
-    fuel: string = 'fplform'
+    fuel: string = 'fplform',
+    fixturesFilePath?: string
   ) {
     this.fuel = fuel;
     const weights = loadWeights('baseline');
     this.projectionEngine = new ProjectionEngine(weights);
     this.loadTop1kData(players);
-    this.loadData(filePath, players, fixtures, teams, nextEventId, riskMode, fuel);
+    this.loadData(filePath, players, fixtures, teams, nextEventId, riskMode, fuel, fixturesFilePath);
   }
 
   private loadTop1kData(players: any[] = []) {
@@ -103,8 +104,25 @@ export class CSVOracle implements XPOracle {
     teams: any[], 
     nextEventId: number, 
     riskMode: string,
-    fuel: string = 'fplform'
+    fuel: string = 'fplform',
+    fixturesFilePath?: string
   ) {
+    // For eye-test fuel, load fixtures from the provided JSON file
+    if (fuel === 'eye-test' && fixturesFilePath) {
+      const fixturesFullPath = path.resolve(process.cwd(), fixturesFilePath);
+      if (fs.existsSync(fixturesFullPath)) {
+        try {
+          const fixturesContent = fs.readFileSync(fixturesFullPath, 'utf-8');
+          fixtures = JSON.parse(fixturesContent);
+          console.log(`[CSVOracle] Loaded ${fixtures.length} fixtures from ${fixturesFilePath}`);
+        } catch (err: any) {
+          console.warn(`[CSVOracle] Failed to load fixtures from ${fixturesFilePath}: ${err.message}`);
+        }
+      } else {
+        console.warn(`[CSVOracle] Fixtures file not found at ${fixturesFullPath}`);
+      }
+    }
+
     const fullPath = path.resolve(process.cwd(), filePath);
     if (!fs.existsSync(fullPath)) {
       console.warn(`[CSVOracle] Data file not found at ${fullPath}`);
@@ -119,19 +137,35 @@ export class CSVOracle implements XPOracle {
     const teamMap: Record<string, number> = {};
     const liveTeamRatings: Record<number, { attack: number, defense: number }> = {};
     const featureStore = new FeatureStoreRepository();
-    // Assuming live FPL context; we can infer the season or default to '2023-24' for now.
-    // The repository fallback logic will gracefully handle missing data.
-    const currentSeason = '2023-24';
-    // If we are at GW1, use GW38 of the previous season to fetch the true carry-over latent ratings
-    // rather than GW0 (which is the flat 1.5 baseline).
-    const previousGw = nextEventId > 1 ? nextEventId - 1 : 38;
+    
+    // For eye-test mode with no live teams, build team map from fixtures
+    if (fuel === 'eye-test' && (!teams || teams.length === 0) && fixtures.length > 0) {
+      // Extract unique teams from fixtures and assign synthetic IDs
+      const uniqueTeams = new Set<number>();
+      fixtures.forEach(f => {
+        uniqueTeams.add(f.team_h);
+        uniqueTeams.add(f.team_a);
+      });
+      
+      // Use 2026-27 season for future fixture data
+      const futureSeason = '2026-27';
+      uniqueTeams.forEach(teamId => {
+        teamMap[teamId.toString()] = teamId; // Use actual team IDs from fixtures
+        // Get projected ratings from Feature Store for 2026-27
+        const features = featureStore.getFeatures(futureSeason, 1, teamId);
+        liveTeamRatings[teamId] = { 
+           attack: features.attack, 
+           defense: features.defense 
+        };
+      });
+      console.log(`[CSVOracle] Built team map from ${uniqueTeams.size} teams in fixtures using ${futureSeason} ratings`);
+    } else if (teams && teams.length > 0) {
+      const currentSeason = '2023-24';
+      const previousGw = nextEventId > 1 ? nextEventId - 1 : 38;
 
-    if (teams && teams.length > 0) {
       teams.forEach(t => {
         teamMap[t.short_name.toLowerCase()] = t.id;
         
-        // Fetch the Latent Features directly from the Feature Store!
-        // This ensures 100% mathematical parity with the Training Pipeline.
         const features = featureStore.getFeatures(currentSeason, previousGw, t.id);
         
         liveTeamRatings[t.id] = { 
@@ -165,14 +199,25 @@ export class CSVOracle implements XPOracle {
         throw err;
       }
       
-      if (cols.length >= 9 && cols[3] && cols[3].length === 3) {
+      if (cols.length >= 9 && cols[3]) {
         const playerName = cols[1];
         const team = cols[3];
         const pos = cols[4] === 'GK' ? 'GKP' : cols[4];
         let cost = parseFloat(cols[5]) * 10; 
         const meritScore = parseFloat(cols[6]) || 0; 
         
-        const parsedTeamId = teamMap[team.toLowerCase()] || 0;
+        // Handle both short name (3 chars) and numeric team ID from fixtures
+        let parsedTeamId = 0;
+        if (team.length === 3) {
+          parsedTeamId = teamMap[team.toLowerCase()] || 0;
+        } else {
+          // Try to parse as numeric team ID directly
+          parsedTeamId = parseInt(team) || 0;
+          if (parsedTeamId > 0 && !liveTeamRatings[parsedTeamId]) {
+            liveTeamRatings[parsedTeamId] = { attack: 1.5, defense: 1.5 };
+          }
+        }
+        
         const expectedElementType = pos === 'GKP' ? 1 : pos === 'DEF' ? 2 : pos === 'MID' ? 3 : pos === 'FWD' ? 4 : 0;
 
         let fplId = syntheticId++; 

@@ -11938,5 +11938,109 @@
         "confidence": 0.95
       }
     }
+  },
+  "2026-27": {
+    "1": {
+      "1": {
+        "attack": 2.49,
+        "defense": 1.05,
+        "confidence": 0.5
+      },
+      "2": {
+        "attack": 1.54,
+        "defense": 2.17,
+        "confidence": 0.5
+      },
+      "3": {
+        "attack": 1.97,
+        "defense": 1.56,
+        "confidence": 0.5
+      },
+      "4": {
+        "attack": 1.45,
+        "defense": 1.64,
+        "confidence": 0.5
+      },
+      "5": {
+        "attack": 1.55,
+        "defense": 1.83,
+        "confidence": 0.5
+      },
+      "6": {
+        "attack": 1.25,
+        "defense": 2.21,
+        "confidence": 0.5
+      },
+      "7": {
+        "attack": 2.46,
+        "defense": 2.05,
+        "confidence": 0.5
+      },
+      "8": {
+        "attack": 1.73,
+        "defense": 1.36,
+        "confidence": 0.5
+      },
+      "9": {
+        "attack": 1.37,
+        "defense": 1.64,
+        "confidence": 0.5
+      },
+      "10": {
+        "attack": 1.38,
+        "defense": 1.94,
+        "confidence": 0.5
+      },
+      "11": {
+        "attack": 3.01,
+        "defense": 1.35,
+        "confidence": 0.5
+      },
+      "12": {
+        "attack": 1.27,
+        "defense": 2.30,
+        "confidence": 0.5
+      },
+      "13": {
+        "attack": 1.62,
+        "defense": 1.89,
+        "confidence": 0.5
+      },
+      "14": {
+        "attack": 1.62,
+        "defense": 2.38,
+        "confidence": 0.5
+      },
+      "15": {
+        "attack": 2.58,
+        "defense": 1.91,
+        "confidence": 0.5
+      },
+      "16": {
+        "attack": 1.44,
+        "defense": 1.60,
+        "confidence": 0.5
+      },
+      "17": {
+        "attack": 1.45,
+        "defense": 2.06,
+        "confidence": 0.5
+      },
+      "18": {
+        "attack": 2.38,
+        "defense": 2.25,
+        "confidence": 0.5
+      },
+      "19": {
+        "attack": 1.45,
+        "defense": 2.09,
+        "confidence": 0.5
+      },
+      "20": {
+        "attack": 1.15,
+        "defense": 2.13,
+        "confidence": 0.5
+      }
+    }
   }
 }

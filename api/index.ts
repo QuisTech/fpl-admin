@@ -175,7 +175,13 @@ export class FPLService {
       }
     }
     
-    const oracle = new CSVOracle(`data/${csvFileName}`, players, riskMode, fixtures, teams, nextEventId, fuel);
+    // For eye-test mode with future seasons, don't pass live players/teams/fixtures
+    // Use CSV data as-is with synthetic IDs to avoid matching failures
+    const fixturesFilePath = fuel === 'eye-test' ? 'data/fixtures-2026-27.json' : undefined;
+    const oraclePlayers = fuel === 'eye-test' ? [] : players;
+    const oracleTeams = fuel === 'eye-test' ? [] : teams;
+    const oracleFixtures = fuel === 'eye-test' ? [] : fixtures;
+    const oracle = new CSVOracle(`data/${csvFileName}`, oraclePlayers, riskMode, oracleFixtures, oracleTeams, nextEventId, fuel, fixturesFilePath);
 
     const available = players.filter(p => p.status === 'a' || p.chance_of_playing_next_round === 100);
     const scored = available.map(p => {
