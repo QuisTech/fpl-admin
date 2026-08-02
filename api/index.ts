@@ -34,26 +34,36 @@ export class FPLService {
 
   private static getHeaders() {
     return {
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
-      "Accept": "application/json"
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
+      "Accept-Encoding": "gzip, deflate, br",
+      "Referer": "https://fantasy.premierleague.com/",
+      "Origin": "https://fantasy.premierleague.com",
+      "Connection": "keep-alive",
+      "Sec-Fetch-Dest": "empty",
+      "Sec-Fetch-Mode": "cors",
+      "Sec-Fetch-Site": "same-site"
     };
   }
 
-  private static async fetchWithRetry(url: string, retries = 1): Promise<any> {
+  private static async fetchWithRetry(url: string, retries = 3): Promise<any> {
     for (let i = 0; i < retries; i++) {
       try {
-        const config = { headers: this.getHeaders(), timeout: 5000 };
+        const config = { headers: this.getHeaders(), timeout: 10000 };
         const res = await axios.get(url, config);
         return res;
       } catch (err: any) {
         console.warn(`[FPL API] Attempt ${i + 1}/${retries} failed for ${url}: ${err.response?.status || err.message}`);
         if (i < retries - 1) {
-          await new Promise(r => setTimeout(r, 500)); 
+          // Exponential backoff: 1s, 2s, 4s
+          await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000)); 
         } else {
           throw err;
         }
       }
     }
+    throw new Error(`Failed to fetch ${url} after ${retries} attempts`);
   }
 
   static async getBaseData() {
