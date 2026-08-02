@@ -12,7 +12,30 @@ async function fetchFPLForm(browser: any) {
     
     // Fallback: Scrape the table directly from the DOM
     const tableData = await page.evaluate(() => {
-      const rows = Array.from(document.querySelectorAll('table tr'));
+      // Try to find the main player table specifically
+      const tables = Array.from(document.querySelectorAll('table'));
+      let targetTable = null;
+      
+      // Look for table with player data (should have columns like Name, Team, Position, etc.)
+      for (const table of tables) {
+        const headers = Array.from(table.querySelectorAll('th')).map(th => th.textContent?.toLowerCase() || '');
+        const hasName = headers.some(h => h.includes('name') || h.includes('player'));
+        const hasTeam = headers.some(h => h.includes('team') || h.includes('club'));
+        if (hasName && hasTeam) {
+          targetTable = table;
+          break;
+        }
+      }
+      
+      // If no specific table found, use the largest table
+      if (!targetTable) {
+        const sortedTables = tables.sort((a, b) => b.rows.length - a.rows.length);
+        targetTable = sortedTables[0];
+      }
+      
+      if (!targetTable) return '';
+      
+      const rows = Array.from(targetTable.querySelectorAll('tr'));
       return rows.map(row => {
         const cells = Array.from(row.querySelectorAll('th, td'));
         return cells.map(cell => '"' + (cell.textContent || '').trim().replace(/"/g, '""') + '"').join(',');
