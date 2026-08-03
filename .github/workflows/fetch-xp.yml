@@ -10,7 +10,6 @@ on:
 jobs:
   fetch-xp:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/unified-projection-engine'
     
     steps:
       - name: Checkout Repository
