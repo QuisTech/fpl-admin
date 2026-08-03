@@ -175,12 +175,12 @@ export class FPLService {
       }
     }
     
-    // For eye-test mode with future seasons, don't pass live players/teams/fixtures
-    // Use CSV data as-is with synthetic IDs to avoid matching failures
+    // For eye-test mode with future seasons, pass live players for ID matching
+    // but use CSV data and 2026-27 fixtures for projections
     const fixturesFilePath = fuel === 'eye-test' ? 'data/fixtures-2026-27.json' : undefined;
-    const oraclePlayers = fuel === 'eye-test' ? [] : players;
-    const oracleTeams = fuel === 'eye-test' ? [] : teams;
-    const oracleFixtures = fuel === 'eye-test' ? [] : fixtures;
+    const oraclePlayers = players; // Pass live players for name matching even in eye-test mode
+    const oracleTeams = fuel === 'eye-test' ? [] : teams; // Don't use live teams in eye-test mode
+    const oracleFixtures = fuel === 'eye-test' ? [] : fixtures; // Don't use live fixtures in eye-test mode
     const oracle = new CSVOracle(`data/${csvFileName}`, oraclePlayers, riskMode, oracleFixtures, oracleTeams, nextEventId, fuel, fixturesFilePath);
 
     const available = players.filter(p => p.status === 'a' || p.chance_of_playing_next_round === 100);

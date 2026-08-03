@@ -241,7 +241,8 @@ export class CSVOracle implements XPOracle {
 
         if (players.length > 0) {
           let match = players.find(p => {
-            if (parsedTeamId > 0 && p.team !== parsedTeamId) return false;
+            // For eye-test mode, be more lenient with team matching since CSV may have different team assignments
+            if (fuel !== 'eye-test' && parsedTeamId > 0 && p.team !== parsedTeamId) return false;
             if (expectedElementType > 0 && p.element_type !== expectedElementType) return false;
 
             const wName = (p.web_name || '').toLowerCase();
@@ -251,20 +252,22 @@ export class CSVOracle implements XPOracle {
             // Require string length > 2 for substring matches to prevent single-letter/empty matches
             const wMatch = wName === pName || (wName.length > 2 && pName.includes(wName));
             const sMatch = sName === pName || (sName.length > 2 && pName.includes(sName));
-              
+
             return wMatch || sMatch;
           });
 
           if (match) {
             fplId = match.id;
             rawOwnership = parseFloat(match.selected_by_percent) || 100.0;
-            realTeamId = match.team;
+            // For eye-test mode, use the team ID from fixtures/CSV, not live FPL API
+            realTeamId = fuel === 'eye-test' ? parsedTeamId : match.team;
             cost = match.now_cost; // OVERWRITE CSV COST WITH LIVE FPL PRICE
             matchedPlayer = match;
           }
         }
         
-        const teamId = parsedTeamId || realTeamId || 0;
+        // For eye-test mode, prioritize the CSV team ID over live FPL API team ID
+        const teamId = fuel === 'eye-test' ? (parsedTeamId || realTeamId || 0) : (realTeamId || parsedTeamId || 0);
 
         let probPlay = parseFloat(cols[8]);
         if (isNaN(probPlay)) {
@@ -296,7 +299,8 @@ export class CSVOracle implements XPOracle {
         const fixturesByGw: Record<number, HistoricalFixture[]> = {};
         for (let step = 0; step < 15; step++) {
           const gw = nextEventId + step;
-          if (fixtures && fixtures.length > 0 && teamId > 0 && teams && teams.length > 0) {
+          // For eye-test mode, use fixtures loaded from JSON file without requiring live teams
+          if (fixtures && fixtures.length > 0 && teamId > 0 && (fuel === 'eye-test' || (teams && teams.length > 0))) {
             const teamFixtures = fixtures.filter(f => f.event === gw && (f.team_h === teamId || f.team_a === teamId));
             fixturesByGw[gw] = teamFixtures.map(f => {
                const isHome = f.team_h === teamId;
