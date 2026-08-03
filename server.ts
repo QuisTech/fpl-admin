@@ -44,6 +44,18 @@ async function startServer() {
     }
   });
 
+  app.get("/api/user", async (req, res) => {
+    try {
+      const userId = req.query.userId as string;
+      // For local dev, hardcode your tier
+      const tier = userId === 'XpmBVLzU0ZOqmofB7RVXHN0HctI3' ? 'ai-agent' : 'free';
+      res.json({ tier });
+    } catch (error: any) {
+      console.error("Local Dev User Error:", error.message);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.get("/api/recommendations", async (req, res) => {
     try {
       const riskMode = (req.query.riskMode as string) || 'safe';
