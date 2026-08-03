@@ -10,7 +10,6 @@ on:
 jobs:
   fetch-xp:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/unified-projection-engine'
     
     steps:
       - name: Checkout Repository
@@ -36,7 +35,4 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add data/fplform.csv data/fpl_native.csv
           git diff --staged --quiet || git commit -m "Update FPL XP data [skip ci]"
-          # Push to unified-projection-engine branch (current branch)
-          git push origin HEAD
-          # Push same data files to main branch to keep synchronized
-          git push origin HEAD:main --force
+          git push
