@@ -138,6 +138,12 @@ export class CSVOracle implements XPOracle {
     const liveTeamRatings: Record<number, { attack: number, defense: number }> = {};
     const featureStore = new FeatureStoreRepository();
     
+    // Hardcoded team short name to ID mapping for 2026-27
+    const shortNameToId: Record<string, number> = {
+      'ars': 1, 'avl': 2, 'bou': 3, 'bre': 4, 'bha': 5, 'che': 6, 'cry': 7, 'eve': 8, 'ful': 9, 'ips': 10,
+      'lei': 11, 'liv': 12, 'mci': 13, 'mun': 14, 'nfo': 15, 'sou': 16, 'tot': 17, 'whu': 18, 'wol': 19, 'new': 20
+    };
+    
     // For eye-test mode with no live teams, build team map from fixtures
     if (fuel === 'eye-test' && (!teams || teams.length === 0) && fixtures.length > 0) {
       // Extract unique teams from fixtures and assign synthetic IDs
@@ -173,6 +179,14 @@ export class CSVOracle implements XPOracle {
            defense: features.defense 
         };
       });
+    }
+    
+    // For eye-test mode with CSV using short names, map to numeric IDs
+    if (fuel === 'eye-test' && (!teams || teams.length === 0)) {
+      Object.keys(shortNameToId).forEach(shortName => {
+        teamMap[shortName] = shortNameToId[shortName];
+      });
+      console.log('[CSVOracle] Added hardcoded team name to ID mapping for eye-test mode');
     }
 
     for (let i = 0; i < lines.length; i++) {
