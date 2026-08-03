@@ -2,6 +2,8 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import axios from 'axios';
 import solver from "javascript-lp-solver";
 import { z } from 'zod';
+import fs from 'fs';
+import path from 'path';
 import { 
   FPLPlayer, FPLTeam, FPLFixture, ScoredPlayer, 
   FPLPlayerSchema, FPLTeamSchema, FPLFixtureSchema,
@@ -162,8 +164,6 @@ export class FPLService {
     
     // Fallback: if FPLFORM file is corrupted/empty, use NATIVE as backup temporarily
     if (fuel !== 'native' && fuel !== 'eye-test') {
-      const fs = require('fs');
-      const path = require('path');
       const fplformPath = path.resolve(process.cwd(), 'data', 'fplform.csv');
       if (fs.existsSync(fplformPath)) {
         const content = fs.readFileSync(fplformPath, 'utf8');
