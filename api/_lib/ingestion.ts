@@ -108,10 +108,8 @@ export class CSVOracle implements XPOracle {
     fixturesFilePath?: string
   ) {
     // For eye-test fuel, load fixtures from the provided JSON file
-    console.log(`[CSVOracle] Fuel: ${fuel}, fixturesFilePath: ${fixturesFilePath}`);
     if (fuel === 'eye-test' && fixturesFilePath) {
       const fixturesFullPath = path.resolve(process.cwd(), fixturesFilePath);
-      console.log(`[CSVOracle] Fixtures full path: ${fixturesFullPath}, exists: ${fs.existsSync(fixturesFullPath)}`);
       if (fs.existsSync(fixturesFullPath)) {
         try {
           const fixturesContent = fs.readFileSync(fixturesFullPath, 'utf-8');
@@ -241,10 +239,11 @@ export class CSVOracle implements XPOracle {
         let realTeamId = parsedTeamId;
         let matchedPlayer: any = null;
 
-        if (players.length > 0) {
+        // For eye-test mode, don't match to live FPL API players - use CSV data entirely
+        // This prevents inheriting incorrect team assignments from placeholder data
+        if (fuel !== 'eye-test' && players.length > 0) {
           let match = players.find(p => {
-            // For eye-test mode, be more lenient with team matching since CSV may have different team assignments
-            if (fuel !== 'eye-test' && parsedTeamId > 0 && p.team !== parsedTeamId) return false;
+            if (parsedTeamId > 0 && p.team !== parsedTeamId) return false;
             if (expectedElementType > 0 && p.element_type !== expectedElementType) return false;
 
             const wName = (p.web_name || '').toLowerCase();
@@ -261,15 +260,13 @@ export class CSVOracle implements XPOracle {
           if (match) {
             fplId = match.id;
             rawOwnership = parseFloat(match.selected_by_percent) || 100.0;
-            // For eye-test mode, use the team ID from fixtures/CSV, not live FPL API
-            realTeamId = fuel === 'eye-test' ? parsedTeamId : match.team;
+            realTeamId = match.team;
             cost = match.now_cost; // OVERWRITE CSV COST WITH LIVE FPL PRICE
             matchedPlayer = match;
           }
         }
         
-        // For eye-test mode, prioritize the CSV team ID over live FPL API team ID
-        const teamId = fuel === 'eye-test' ? (parsedTeamId || realTeamId || 0) : (realTeamId || parsedTeamId || 0);
+        const teamId = fuel === 'eye-test' ? parsedTeamId : (realTeamId || parsedTeamId || 0);
 
         let probPlay = parseFloat(cols[8]);
         if (isNaN(probPlay)) {
