@@ -49,7 +49,13 @@ async function startServer() {
       const riskMode = (req.query.riskMode as string) || 'safe';
       const budget = req.query.budget ? parseInt(req.query.budget as string) : 1000;
       const fuel = (req.query.fuel as string) || 'fplform';
-      const result = await FPLService.getRecommendations(riskMode, budget, 'free', fuel);
+      const userId = (req.query.userId as string) || 'unknown';
+      
+      // For local dev, hardcode your tier since Firebase requires emulator setup
+      // You're on ai-agent tier
+      const tier = userId === 'XpmBVLzU0ZOqmofB7RVXHN0HctI3' ? 'ai-agent' : 'free';
+      
+      const result = await FPLService.getRecommendations(riskMode, budget, tier, fuel);
       res.json(result);
     } catch (error: any) {
       console.error("Local Dev Error:", error.message);
