@@ -7,6 +7,7 @@ import {
   HistoricalPlayerFeatures, 
   HistoricalFixture 
 } from './historical.js';
+import { TeamRatingService } from './team-ratings.js';
 
 export class VaastavProvider implements HistoricalDataProvider {
   public supportsHistoricalAnnouncements = false;
@@ -19,8 +20,14 @@ export class VaastavProvider implements HistoricalDataProvider {
   private mergedGw: any[] = [];
   
   // Quick lookups
-  private gwDataByPlayer: Record<number, Record<number, any>> = {}; // playerId -> gw -> data
+  public gwDataByPlayer: Record<number, Record<number, any>> = {}; // playerId -> gw -> data
   private fixturesByGw: Record<number, any[]> = {}; // gw -> fixtures
+  
+  private teamRatingService: TeamRatingService;
+
+  constructor() {
+    this.teamRatingService = new TeamRatingService();
+  }
 
   async loadSeason(season: string): Promise<void> {
     this.season = season;
@@ -33,6 +40,10 @@ export class VaastavProvider implements HistoricalDataProvider {
     this.mergedGw = this.loadCsv('merged_gw.csv');
 
     this.buildLookups();
+    
+    this.teamRatingService.buildRatings(season, this.playersRaw, this.mergedGw, this.fixturesByGw);
+    this.teamRatingService.save();
+    
     console.log(`[VaastavProvider] Successfully loaded ${this.playersRaw.length} players, ${this.fixtures.length} fixtures, ${this.mergedGw.length} GW records.`);
   }
 
@@ -92,6 +103,16 @@ export class VaastavProvider implements HistoricalDataProvider {
     // Reconstruct the universe for this Gameweek.
     // To ensure ZERO look-ahead bias, we only look at GW N for price/fixtures, 
     // and GW 1 to (N-1) for observable features (minutes played, xG, xA).
+
+    // --- NEW: Fetch Latent Team Ratings using TeamRatingService ---
+    const teamRatings: Record<number, { attack: number, defense: number, confidence?: number }> = {};
+    const previousGw = gameweek - 1;
+    this.playersRaw.forEach(p => {
+       const tid = parseInt(p.team);
+       if (!isNaN(tid)) {
+           teamRatings[tid] = this.teamRatingService.getRating(this.season, previousGw, tid);
+       }
+    });
 
     this.playersRaw.forEach(raw => {
       const playerId = parseInt(raw.id);
@@ -274,28 +295,6 @@ export class VaastavProvider implements HistoricalDataProvider {
       const teamId = parseInt(raw.team);
       const fixturesByGw: Record<number, HistoricalFixture[]> = {};
       
-      // Compute team strengths based on historical matches before this GW
-      // We will look at all matches up to gameweek - 1 to compute xG, xGC
-      let teamG = 0, teamxG = 0, teamGA = 0, teamxGA = 0, teamMatches = 0;
-      for (let prevGw = 1; prevGw < gameweek; prevGw++) {
-        const gwFixs = this.fixturesByGw[prevGw] || [];
-        gwFixs.forEach(fix => {
-          if (parseInt(fix.team_h) === teamId || parseInt(fix.team_a) === teamId) {
-            teamMatches++;
-            if (parseInt(fix.team_h) === teamId) {
-              teamG += parseInt(fix.team_h_score) || 0;
-              teamGA += parseInt(fix.team_a_score) || 0;
-            } else {
-              teamG += parseInt(fix.team_a_score) || 0;
-              teamGA += parseInt(fix.team_h_score) || 0;
-            }
-          }
-        });
-      }
-      
-      const teamStrengthAttack = teamMatches > 0 ? (teamG / teamMatches) : 1.5;
-      const teamStrengthDefense = teamMatches > 0 ? (teamGA / teamMatches) : 1.5;
-
       for (let horizonGw = gameweek; horizonGw < gameweek + 8; horizonGw++) {
         fixturesByGw[horizonGw] = [];
         const gwFixtures = this.fixturesByGw[horizonGw] || [];
@@ -305,35 +304,16 @@ export class VaastavProvider implements HistoricalDataProvider {
           const awayId = parseInt(fix.team_a);
           if (homeId === teamId || awayId === teamId) {
             const isHome = homeId === teamId;
-            
-            // For opponents, calculate their rolling GA to act as our attack multiplier
             const oppId = isHome ? awayId : homeId;
-            let oppG = 0, oppGA = 0, oppMatches = 0;
-            for (let prevGw = 1; prevGw < gameweek; prevGw++) {
-              const oppGwFixs = this.fixturesByGw[prevGw] || [];
-              oppGwFixs.forEach(ofix => {
-                if (parseInt(ofix.team_h) === oppId || parseInt(ofix.team_a) === oppId) {
-                  oppMatches++;
-                  if (parseInt(ofix.team_h) === oppId) {
-                    oppG += parseInt(ofix.team_h_score) || 0;
-                    oppGA += parseInt(ofix.team_a_score) || 0;
-                  } else {
-                    oppG += parseInt(ofix.team_a_score) || 0;
-                    oppGA += parseInt(ofix.team_h_score) || 0;
-                  }
-                }
-              });
-            }
-            
-            const oppStrengthAttack = oppMatches > 0 ? (oppG / oppMatches) : 1.5;
-            const oppStrengthDefense = oppMatches > 0 ? (oppGA / oppMatches) : 1.5;
             
             fixturesByGw[horizonGw].push({
               opponentTeamId: oppId,
               isHome,
               difficulty: isHome ? parseInt(fix.team_h_difficulty) : parseInt(fix.team_a_difficulty),
-              opponentStrengthDefense: oppStrengthDefense, 
-              opponentStrengthAttack: oppStrengthAttack,
+              opponentAttackRating: teamRatings[oppId]?.attack || 1.5,
+              opponentDefenseRating: teamRatings[oppId]?.defense || 1.5,
+              teamAttackRating: teamRatings[teamId]?.attack || 1.5,
+              teamDefenseRating: teamRatings[teamId]?.defense || 1.5,
               kickoff_time: fix.kickoff_time
             });
           }
@@ -387,6 +367,7 @@ export class VaastavProvider implements HistoricalDataProvider {
       };
     });
 
+    snapshot.teamRatings = teamRatings;
     return snapshot;
   }
 
@@ -395,6 +376,59 @@ export class VaastavProvider implements HistoricalDataProvider {
     let total = 0;
     records.forEach(r => {
       total += parseInt(r.total_points) || 0;
+    });
+    return total;
+  }
+
+  getActualAttackPoints(playerId: number, gameweek: number): number {
+    const records = this.gwDataByPlayer[playerId]?.[gameweek] || [];
+    let total = 0;
+    records.forEach(r => {
+      const position = r.position; // "GKP", "DEF", "MID", "FWD"
+      const goals = parseInt(r.goals_scored) || 0;
+      const assists = parseInt(r.assists) || 0;
+      
+      let goalPts = 0;
+      if (position === 'FWD') goalPts = 4;
+      else if (position === 'MID') goalPts = 5;
+      else goalPts = 6; // DEF or GKP
+
+      total += (goals * goalPts) + (assists * 3);
+    });
+    return total;
+  }
+
+  getActualCleanSheetPoints(playerId: number, gameweek: number): number {
+    const records = this.gwDataByPlayer[playerId]?.[gameweek] || [];
+    let total = 0;
+    records.forEach(r => {
+      const position = r.position;
+      const cs = parseInt(r.clean_sheets) || 0;
+      
+      let csPts = 0;
+      if (position === 'MID') csPts = 1;
+      else if (position === 'DEF' || position === 'GKP') csPts = 4;
+      
+      total += cs * csPts;
+    });
+    return total;
+  }
+
+  getCleanSheetIndicator(playerId: number, gameweek: number): number {
+    const records = this.gwDataByPlayer[playerId]?.[gameweek] || [];
+    let indicator = 0;
+    records.forEach(r => {
+      const cs = parseInt(r.clean_sheets) || 0;
+      if (cs > 0) indicator = 1;
+    });
+    return indicator;
+  }
+
+  getActualBonusPoints(playerId: number, gameweek: number): number {
+    const records = this.gwDataByPlayer[playerId]?.[gameweek] || [];
+    let total = 0;
+    records.forEach(r => {
+      total += parseInt(r.bonus) || 0;
     });
     return total;
   }

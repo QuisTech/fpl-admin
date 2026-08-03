@@ -2,8 +2,10 @@ export interface HistoricalFixture {
   opponentTeamId: number;
   isHome: boolean;
   difficulty: number;
-  opponentStrengthDefense: number;
-  opponentStrengthAttack: number;
+  opponentAttackRating: number;
+  opponentDefenseRating: number;
+  teamAttackRating: number;
+  teamDefenseRating: number;
   kickoff_time?: string;
 }
 
@@ -65,6 +67,7 @@ export interface DeadlineSnapshot {
   bank: number;
   freeTransfers: number;
   chipAvailability: Record<string, number>;
+  teamRatings?: Record<number, { attack: number, defense: number }>;
 }
 
 export interface HistoricalDataProvider {

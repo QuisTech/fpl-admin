@@ -2,6 +2,8 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import axios from 'axios';
 import solver from "javascript-lp-solver";
 import { z } from 'zod';
+import fs from 'fs';
+import path from 'path';
 import { 
   FPLPlayer, FPLTeam, FPLFixture, ScoredPlayer, 
   FPLPlayerSchema, FPLTeamSchema, FPLFixtureSchema,
@@ -34,26 +36,36 @@ export class FPLService {
 
   private static getHeaders() {
     return {
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
-      "Accept": "application/json"
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
+      "Accept-Encoding": "gzip, deflate, br",
+      "Referer": "https://fantasy.premierleague.com/",
+      "Origin": "https://fantasy.premierleague.com",
+      "Connection": "keep-alive",
+      "Sec-Fetch-Dest": "empty",
+      "Sec-Fetch-Mode": "cors",
+      "Sec-Fetch-Site": "same-site"
     };
   }
 
-  private static async fetchWithRetry(url: string, retries = 1): Promise<any> {
+  private static async fetchWithRetry(url: string, retries = 3): Promise<any> {
     for (let i = 0; i < retries; i++) {
       try {
-        const config = { headers: this.getHeaders(), timeout: 5000 };
+        const config = { headers: this.getHeaders(), timeout: 10000 };
         const res = await axios.get(url, config);
         return res;
       } catch (err: any) {
         console.warn(`[FPL API] Attempt ${i + 1}/${retries} failed for ${url}: ${err.response?.status || err.message}`);
         if (i < retries - 1) {
-          await new Promise(r => setTimeout(r, 500)); 
+          // Exponential backoff: 1s, 2s, 4s
+          await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000)); 
         } else {
           throw err;
         }
       }
     }
+    throw new Error(`Failed to fetch ${url} after ${retries} attempts`);
   }
 
   static async getBaseData() {
@@ -62,32 +74,45 @@ export class FPLService {
       return this.cache.data;
     }
 
-    const [staticRes, fixturesRes] = await Promise.all([
-      this.fetchWithRetry(`${FPL_BASE_URL}/bootstrap-static/`),
-      this.fetchWithRetry(`${FPL_BASE_URL}/fixtures/`)
-    ]);
+    try {
+      const [staticRes, fixturesRes] = await Promise.all([
+        this.fetchWithRetry(`${FPL_BASE_URL}/bootstrap-static/`),
+        this.fetchWithRetry(`${FPL_BASE_URL}/fixtures/`)
+      ]);
 
-    const players: FPLPlayer[] = [];
-    staticRes.data.elements.forEach((p: any) => {
-      const result = FPLPlayerSchema.safeParse(p);
-      if (result.success) players.push(result.data);
-    });
+      const players: FPLPlayer[] = [];
+      staticRes.data.elements.forEach((p: any) => {
+        const result = FPLPlayerSchema.safeParse(p);
+        if (result.success) players.push(result.data);
+      });
 
-    const teams: FPLTeam[] = [];
-    staticRes.data.teams.forEach((t: any) => {
-      const result = FPLTeamSchema.safeParse(t);
-      if (result.success) teams.push(result.data);
-    });
+      const teams: FPLTeam[] = [];
+      staticRes.data.teams.forEach((t: any) => {
+        const result = FPLTeamSchema.safeParse(t);
+        if (result.success) teams.push(result.data);
+      });
 
-    const fixtures = z.array(FPLFixtureSchema).parse(fixturesRes.data);
-    const currentEvent = staticRes.data.events.find((e: any) => e.is_current) || 
-                         staticRes.data.events.find((e: any) => e.is_previous) || 
-                         { id: 1 };
-    const nextEvent = staticRes.data.events.find((e: any) => new Date(e.deadline_time) > new Date()) || { id: 1 };
-    
-    const result = { players, teams, fixtures, nextEventId: nextEvent.id, currentEventId: currentEvent.id };
-    this.cache = { data: result, timestamp: Date.now() };
-    return result;
+      const fixtures = z.array(FPLFixtureSchema).parse(fixturesRes.data);
+      const currentEvent = staticRes.data.events.find((e: any) => e.is_current) || 
+                           staticRes.data.events.find((e: any) => e.is_previous) || 
+                           { id: 1 };
+      const nextEvent = staticRes.data.events.find((e: any) => new Date(e.deadline_time) > new Date()) || { id: 1 };
+      
+      const result = { players, teams, fixtures, nextEventId: nextEvent.id, currentEventId: currentEvent.id };
+      this.cache = { data: result, timestamp: Date.now() };
+      return result;
+    } catch (err: any) {
+      console.error('[FPLService] Failed to fetch live FPL data:', err.message);
+      
+      // If we have cached data, return it even if expired
+      if (this.cache) {
+        console.warn('[FPLService] Using expired cached data as fallback');
+        return this.cache.data;
+      }
+      
+      // If no cache at all, throw the error
+      throw new Error('FPL API unavailable and no cached data available');
+    }
   }
 
   static calculatePlayerScore(baseXp: number, player: FPLPlayer, riskMode: string, fuel: string = 'fplform', fixtures?: FPLFixture[], nextEventId?: number): number {
@@ -135,8 +160,30 @@ export class FPLService {
     // Dynamically load the fuel source (fplform scraped vs native FPL API)
     // Eye-test merit + FDR is now computed inside the oracle so all fuel sources
     // flow through the same LP Solver pipeline with full utility deformation
-    const csvFileName = fuel === 'native' ? 'fpl_native.csv' : 'fplform.csv';
-    const oracle = new CSVOracle(`data/${csvFileName}`, players, riskMode, fixtures, teams, nextEventId, fuel);
+    let csvFileName = fuel === 'native' ? 'fpl_native.csv' : 'fplform.csv';
+    
+    // Fallback: if FPLFORM file is corrupted/empty, use NATIVE as backup temporarily
+    if (fuel !== 'native' && fuel !== 'eye-test') {
+      const fplformPath = path.resolve(process.cwd(), 'data', 'fplform.csv');
+      if (fs.existsSync(fplformPath)) {
+        const content = fs.readFileSync(fplformPath, 'utf8');
+        // Check if file is corrupted (has team names instead of player data)
+        if (content.includes('Arsenal, ARS') || content.split('\n').length < 100) {
+          console.warn('[FPLService] FPLFORM data appears corrupted, temporarily using NATIVE fallback');
+          csvFileName = 'fpl_native.csv';
+        }
+      }
+    }
+    
+    // For eye-test mode with future seasons, pass live players for ID matching
+    // but use CSV data and 2026-27 fixtures for projections
+    console.log(`[FPLService.getRecommendations] Input fuel: ${fuel}, csvFileName: ${csvFileName}`);
+    const fixturesFilePath = fuel === 'eye-test' ? 'data/fixtures-2026-27.json' : undefined;
+    const oraclePlayers = players; // Pass live players for name matching even in eye-test mode
+    const oracleTeams = fuel === 'eye-test' ? [] : teams; // Don't use live teams in eye-test mode
+    const oracleFixtures = fuel === 'eye-test' ? [] : fixtures; // Don't use live fixtures in eye-test mode
+    console.log(`[FPLService.getRecommendations] Creating CSVOracle with fuel: ${fuel}, fixturesFilePath: ${fixturesFilePath}`);
+    const oracle = new CSVOracle(`data/${csvFileName}`, oraclePlayers, riskMode, oracleFixtures, oracleTeams, nextEventId, fuel, fixturesFilePath);
 
     const available = players.filter(p => p.status === 'a' || p.chance_of_playing_next_round === 100);
     const scored = available.map(p => {

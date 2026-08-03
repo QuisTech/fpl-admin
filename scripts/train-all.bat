@@ -1,0 +1,16 @@
+@echo off
+echo Starting Stage 2 Training Pipeline...
+echo Running Stage 2A: Attack Model...
+call npx.cmd tsx scripts/train-attack.ts
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+echo Running Stage 2B: Clean Sheet Model...
+call npx.cmd tsx scripts/train-cleansheet.ts
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+echo Running Stage 2C: Bonus Model...
+call npx.cmd tsx scripts/train-bonus.ts
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+echo Stage 2 Training Complete. Running Engine Diagnostics...
+call npx.cmd tsx scripts/evaluate-engine.ts

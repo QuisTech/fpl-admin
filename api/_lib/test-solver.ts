@@ -1,6 +1,7 @@
 import { loadWeights } from './weights-loader.js';
-const DEFAULT_PARAMETERS = loadWeights('baseline');
 import { solveOptimalSquad } from './lp-solver.js';
+
+const DEFAULT_PARAMETERS = loadWeights('baseline');
 
 // Mock Oracle for testing
 class MockOracle {
@@ -37,8 +38,6 @@ async function runTests() {
   oracle.getXP = (id: number) => mockCandidates.find(c => c.id === id)?.xP;
   oracle.getVariance = (id: number) => 1.0;
   oracle.getTeam = (id: number) => mockCandidates.find(c => c.id === id)?.team;
-
-  const { DEFAULT_PARAMETERS } = require('./projection.js');
 
   const result1 = solveOptimalSquad(oracle, 1, 850, 1, DEFAULT_PARAMETERS);
   console.log("\n[Test 1] strict budget: 850 (£85.0M)");

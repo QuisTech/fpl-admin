@@ -54,7 +54,7 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
     setLoading(true);
     try {
       const budgetQuery = syncedData ? `&budget=${(syncedData.totalCost || 0) + (syncedData.bank || 0)}` : '';
-      const res = await axios.get(`/api/recommendations?riskMode=${riskMode}&fuel=${fuel}${budgetQuery}&userId=${userId}`);
+      const res = await axios.get(`/api/recommendations?riskMode=${riskMode}&fuel=${fuel}${budgetQuery}&userId=${userId}&tier=${tier}`);
       if (res.data) {
         setData(res.data);
       }
@@ -112,7 +112,7 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
     if (!teamId) return;
     setSyncing(true);
     try {
-      const res = await axios.get(`/api/sync/${teamId}?riskMode=${riskMode}&fuel=${fuel}&userId=${userId}`);
+      const res = await axios.get(`/api/sync/${teamId}?riskMode=${riskMode}&fuel=${fuel}&userId=${userId}&tier=${tier}`);
       setSyncedData(res.data);
       setError(null);
       return true;

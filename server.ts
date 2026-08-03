@@ -44,11 +44,30 @@ async function startServer() {
     }
   });
 
+  app.get("/api/user", async (req, res) => {
+    try {
+      const userId = req.query.userId as string;
+      // For local dev, hardcode your tier
+      const tier = userId === 'XpmBVLzU0ZOqmofB7RVXHN0HctI3' ? 'ai-agent' : 'free';
+      res.json({ tier });
+    } catch (error: any) {
+      console.error("Local Dev User Error:", error.message);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.get("/api/recommendations", async (req, res) => {
     try {
       const riskMode = (req.query.riskMode as string) || 'safe';
       const budget = req.query.budget ? parseInt(req.query.budget as string) : 1000;
-      const result = await FPLService.getRecommendations(riskMode, budget);
+      const fuel = (req.query.fuel as string) || 'fplform';
+      const userId = (req.query.userId as string) || 'unknown';
+      
+      // For local dev, hardcode your tier since Firebase requires emulator setup
+      // You're on ai-agent tier
+      const tier = userId === 'XpmBVLzU0ZOqmofB7RVXHN0HctI3' ? 'ai-agent' : 'free';
+      
+      const result = await FPLService.getRecommendations(riskMode, budget, tier, fuel);
       res.json(result);
     } catch (error: any) {
       console.error("Local Dev Error:", error.message);

@@ -21,6 +21,7 @@ export const FPLPlayerSchema = z.object({
   chance_of_playing_next_round: z.number().nullish().default(100),
   expected_goals: z.string().nullish().default("0.0"),
   expected_assists: z.string().nullish().default("0.0"),
+  expected_goals_conceded: z.string().nullish().default("0.0"),
   ict_index: z.string().nullish().default("0.0"),
 }).passthrough();
 
