@@ -108,8 +108,10 @@ export class CSVOracle implements XPOracle {
     fixturesFilePath?: string
   ) {
     // For eye-test fuel, load fixtures from the provided JSON file
+    console.log(`[CSVOracle] Fuel: ${fuel}, fixturesFilePath: ${fixturesFilePath}`);
     if (fuel === 'eye-test' && fixturesFilePath) {
       const fixturesFullPath = path.resolve(process.cwd(), fixturesFilePath);
+      console.log(`[CSVOracle] Fixtures full path: ${fixturesFullPath}, exists: ${fs.existsSync(fixturesFullPath)}`);
       if (fs.existsSync(fixturesFullPath)) {
         try {
           const fixturesContent = fs.readFileSync(fixturesFullPath, 'utf-8');

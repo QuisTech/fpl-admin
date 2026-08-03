@@ -48,7 +48,8 @@ async function startServer() {
     try {
       const riskMode = (req.query.riskMode as string) || 'safe';
       const budget = req.query.budget ? parseInt(req.query.budget as string) : 1000;
-      const result = await FPLService.getRecommendations(riskMode, budget);
+      const fuel = (req.query.fuel as string) || 'fplform';
+      const result = await FPLService.getRecommendations(riskMode, budget, 'free', fuel);
       res.json(result);
     } catch (error: any) {
       console.error("Local Dev Error:", error.message);
