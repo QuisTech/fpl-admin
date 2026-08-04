@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { ProjectionEngine, ProjectionInput } from './projection.js';
+import { ProjectionEngine, ProjectionInput, getParamsForRiskMode } from './projection.js';
 import { loadWeights } from './weights-loader.js';
 import { HistoricalPlayerFeatures, HistoricalFixture } from './providers/historical.js';
 import { FeatureStoreRepository } from './providers/feature-store.js';
@@ -47,8 +47,9 @@ export class CSVOracle implements XPOracle {
     fixturesFilePath?: string
   ) {
     this.fuel = fuel;
-    const weights = loadWeights('baseline');
-    this.projectionEngine = new ProjectionEngine(weights);
+    const baseWeights = loadWeights('baseline');
+    const riskAdjustedWeights = getParamsForRiskMode(riskMode, baseWeights);
+    this.projectionEngine = new ProjectionEngine(riskAdjustedWeights);
     this.loadTop1kData(players);
     this.loadData(filePath, players, fixtures, teams, nextEventId, riskMode, fuel, fixturesFilePath);
   }
