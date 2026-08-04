@@ -48,7 +48,8 @@ export class CSVOracle implements XPOracle {
   ) {
     this.fuel = fuel;
     const baseWeights = loadWeights('baseline');
-    this.projectionEngine = new ProjectionEngine(baseWeights);
+    const riskAdjustedWeights = getParamsForRiskMode(riskMode, baseWeights);
+    this.projectionEngine = new ProjectionEngine(riskAdjustedWeights);
     this.loadTop1kData(players);
     this.loadData(filePath, players, fixtures, teams, nextEventId, riskMode, fuel, fixturesFilePath);
   }
