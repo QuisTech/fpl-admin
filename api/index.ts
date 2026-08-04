@@ -110,8 +110,15 @@ export class FPLService {
         return this.cache.data;
       }
       
-      // If no cache at all, throw the error
-      throw new Error('FPL API unavailable and no cached data available');
+      // If no cache at all, return minimal data structure to allow eye-test mode to work
+      console.warn('[FPLService] No cache available, returning minimal data for eye-test mode');
+      return {
+        players: [],
+        teams: [],
+        fixtures: [],
+        nextEventId: 1,
+        currentEventId: 1
+      };
     }
   }
 
