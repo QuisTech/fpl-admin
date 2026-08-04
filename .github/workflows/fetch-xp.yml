@@ -1,5 +1,8 @@
 name: FPL XP Data Fetch
 
+permissions:
+  contents: write
+
 on:
   schedule:
     # Runs every 6 hours
@@ -14,6 +17,9 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+        with:
+          persist-credentials: true
+          fetch-depth: 0
         
       - name: Setup Node.js
         uses: actions/setup-node@v3
