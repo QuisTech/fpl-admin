@@ -26,6 +26,14 @@ function getPlayerScore(oracle: XPOracle, gameweek: number, id: number, horizon:
   return calculateUtility(xp, varSum, eo, params, id);
 }
 
+function getRawXP(oracle: XPOracle, gameweek: number, id: number, horizon: number): number {
+  let xp = 0;
+  for (let i = 0; i < horizon; i++) {
+    xp += oracle.getXP(id, gameweek + i);
+  }
+  return xp;
+}
+
 export function solveOptimalSquad(
   oracle: XPOracle, 
   gameweek: number, 
@@ -72,10 +80,12 @@ export function solveOptimalSquad(
     const pos = oracle.getPosition(id).toLowerCase();
     
     const score = getPlayerScore(oracle, gameweek, id, horizon, params);
+    const rawXP = getRawXP(oracle, gameweek, id, horizon);
     const cost = oracle.getCost(id);
 
-    // Only consider players who have a score > 0, OR cheap bench fodder (<= 45 = 4.5m)
-    if (score > 0 || cost <= 45) {
+    // Only consider players who have raw XP > 0, OR cheap bench fodder (<= 45 = 4.5m)
+    // Use raw XP for filtering to avoid negative utility scores excluding valid players
+    if (rawXP > 0 || cost <= 45) {
       model.variables[v] = { 
         score, 
         cost, 
