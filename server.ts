@@ -62,10 +62,12 @@ async function startServer() {
       const budget = req.query.budget ? parseInt(req.query.budget as string) : 1000;
       const fuel = (req.query.fuel as string) || 'fplform';
       const userId = (req.query.userId as string) || 'unknown';
+      const tierParam = (req.query.tier as string) || 'ai-agent';
       
-      // For local dev, hardcode your tier since Firebase requires emulator setup
-      // You're on ai-agent tier
-      const tier = userId === 'XpmBVLzU0ZOqmofB7RVXHN0HctI3' ? 'ai-agent' : 'free';
+      // For local dev, use the tier from query parameter, fallback to ai-agent
+      const tier = tierParam === 'ai-agent' ? 'ai-agent' : 'free';
+      
+      console.log(`[Local Dev] Request: riskMode=${riskMode}, budget=${budget}, fuel=${fuel}, tier=${tier}`);
       
       const result = await FPLService.getRecommendations(riskMode, budget, tier, fuel);
       res.json(result);
