@@ -108,7 +108,7 @@ export class CSVOracle implements XPOracle {
     fuel: string = 'fplform',
     fixturesFilePath?: string
   ) {
-    // For eye-test fuel, load fixtures from the provided JSON file
+    // For eye-test fuel, load fixtures from the provided JSON file and force GW1 start
     console.log(`[CSVOracle] Fuel: ${fuel}, fixturesFilePath: ${fixturesFilePath}`);
     if (fuel === 'eye-test' && fixturesFilePath) {
       const fixturesFullPath = path.resolve(process.cwd(), fixturesFilePath);
@@ -118,6 +118,9 @@ export class CSVOracle implements XPOracle {
           const fixturesContent = fs.readFileSync(fixturesFullPath, 'utf-8');
           fixtures = JSON.parse(fixturesContent);
           console.log(`[CSVOracle] Loaded ${fixtures.length} fixtures from ${fixturesFilePath}`);
+          // Force gameweek 1 for eye-test mode since fixtures are for 2026-27 season
+          nextEventId = 1;
+          console.log(`[CSVOracle] Eye-test mode: forcing nextEventId to 1 for 2026-27 fixtures`);
         } catch (err: any) {
           console.warn(`[CSVOracle] Failed to load fixtures from ${fixturesFilePath}: ${err.message}`);
         }
@@ -146,6 +149,14 @@ export class CSVOracle implements XPOracle {
       'ars': 1, 'avl': 2, 'bou': 3, 'bre': 4, 'bha': 5, 'che': 6, 'cry': 7, 'eve': 8, 'ful': 9, 'ips': 10,
       'lei': 11, 'liv': 12, 'mci': 13, 'mun': 14, 'nfo': 15, 'sou': 16, 'tot': 17, 'whu': 18, 'wol': 19, 'new': 20
     };
+    
+    // For eye-test mode with CSV using short names, always add hardcoded mapping first
+    if (fuel === 'eye-test' && (!teams || teams.length === 0)) {
+      Object.keys(shortNameToId).forEach(shortName => {
+        teamMap[shortName] = shortNameToId[shortName];
+      });
+      console.log('[CSVOracle] Added hardcoded team name to ID mapping for eye-test mode');
+    }
     
     // For eye-test mode with no live teams, build team map from fixtures
     if (fuel === 'eye-test' && (!teams || teams.length === 0) && fixtures.length > 0) {
@@ -182,14 +193,6 @@ export class CSVOracle implements XPOracle {
            defense: features.defense 
         };
       });
-    }
-    
-    // For eye-test mode with CSV using short names, map to numeric IDs
-    if (fuel === 'eye-test' && (!teams || teams.length === 0)) {
-      Object.keys(shortNameToId).forEach(shortName => {
-        teamMap[shortName] = shortNameToId[shortName];
-      });
-      console.log('[CSVOracle] Added hardcoded team name to ID mapping for eye-test mode');
     }
 
     for (let i = 0; i < lines.length; i++) {
