@@ -110,8 +110,15 @@ export class FPLService {
         return this.cache.data;
       }
       
-      // If no cache at all, throw the error
-      throw new Error('FPL API unavailable and no cached data available');
+      // If no cache at all, return minimal data structure to allow eye-test mode to work
+      console.warn('[FPLService] No cache available, returning minimal data for eye-test mode');
+      return {
+        players: [],
+        teams: [],
+        fixtures: [],
+        nextEventId: 1,
+        currentEventId: 1
+      };
     }
   }
 
@@ -155,7 +162,24 @@ export class FPLService {
   }
 
   static async getRecommendations(riskMode: string, budget: number = 1000, tier: string = 'free', fuel: string = 'fplform'): Promise<RecommendationResponse> {
-    const { players, teams, fixtures, nextEventId } = await this.getBaseData();
+    // For eye-test mode, skip FPL API call and use CSV data only
+    let players: any[] = [];
+    let teams: any[] = [];
+    let fixtures: any[] = [];
+    let nextEventId = 1;
+
+    if (fuel !== 'eye-test') {
+      try {
+        const baseData = await this.getBaseData();
+        players = baseData.players;
+        teams = baseData.teams;
+        fixtures = baseData.fixtures;
+        nextEventId = baseData.nextEventId;
+      } catch (err: any) {
+        console.error('[FPLService] Failed to fetch FPL API data:', err.message);
+        throw new Error('FPL API unavailable. Please try again later or use eye-test mode.');
+      }
+    }
 
     // Dynamically load the fuel source (fplform scraped vs native FPL API)
     // Eye-test merit + FDR is now computed inside the oracle so all fuel sources
@@ -175,24 +199,60 @@ export class FPLService {
       }
     }
     
-    // For eye-test mode with future seasons, pass live players for ID matching
-    // but use CSV data and 2026-27 fixtures for projections
+    // For eye-test mode with future seasons, pass empty arrays for live data
+    // CSVOracle will use CSV data and 2026-27 fixtures for projections
     console.log(`[FPLService.getRecommendations] Input fuel: ${fuel}, csvFileName: ${csvFileName}`);
     const fixturesFilePath = fuel === 'eye-test' ? 'data/fixtures-2026-27.json' : undefined;
-    const oraclePlayers = players; // Pass live players for name matching even in eye-test mode
+    const oraclePlayers = players; // Empty array for eye-test mode
     const oracleTeams = fuel === 'eye-test' ? [] : teams; // Don't use live teams in eye-test mode
     const oracleFixtures = fuel === 'eye-test' ? [] : fixtures; // Don't use live fixtures in eye-test mode
     console.log(`[FPLService.getRecommendations] Creating CSVOracle with fuel: ${fuel}, fixturesFilePath: ${fixturesFilePath}`);
     const oracle = new CSVOracle(`data/${csvFileName}`, oraclePlayers, riskMode, oracleFixtures, oracleTeams, nextEventId, fuel, fixturesFilePath);
 
-    const available = players.filter(p => p.status === 'a' || p.chance_of_playing_next_round === 100);
-    const scored = available.map(p => {
-      const baseXp = oracle.getXP(p.id, nextEventId);
-      const mapped = this.mapToScoredPlayer(p, teams, fixtures, nextEventId, riskMode, baseXp, fuel);
-      mapped.eo = oracle.getTop1kEO?.(p.id) ?? 0;
-      mapped.ownership = oracle.getTop1kOwnership?.(p.id) ?? parseFloat(p.selected_by_percent || "0") ?? 0;
-      return mapped;
-    });
+    let scored: ScoredPlayer[] = [];
+    
+    // For eye-test mode, use oracle's internal player IDs from CSV data
+    if (fuel === 'eye-test') {
+      const oraclePlayerIds = oracle.getAllPlayerIds();
+      scored = oraclePlayerIds.map(id => {
+        const baseXp = oracle.getXP(id, nextEventId);
+        const position = oracle.getPosition(id);
+        const cost = oracle.getCost(id);
+        const team = oracle.getTeam(id);
+        const name = (oracle as any).playerNames?.[id] || `Player ${id}`;
+        
+        return {
+          id,
+          web_name: name,
+          element_type: position === 'GKP' ? 1 : position === 'DEF' ? 2 : position === 'MID' ? 3 : 4,
+          now_cost: cost,
+          team: parseInt(team) || 0,
+          position,
+          team_name: `Team ${team}`,
+          team_short_name: team,
+          score: baseXp,
+          xP: baseXp,
+          ppm: cost > 0 ? (baseXp / (cost / 10)) : 0,
+          next_fixtures: [],
+          isCaptain: false,
+          isViceCaptain: false,
+          eo: oracle.getTop1kEO?.(id) ?? 0,
+          ownership: oracle.getTop1kOwnership?.(id) ?? 0,
+          status: 'a',
+          chance_of_playing_next_round: 100
+        } as ScoredPlayer;
+      });
+    } else {
+      // For other modes, use FPL API players
+      const available = players.filter(p => p.status === 'a' || p.chance_of_playing_next_round === 100);
+      scored = available.map(p => {
+        const baseXp = oracle.getXP(p.id, nextEventId);
+        const mapped = this.mapToScoredPlayer(p, teams, fixtures, nextEventId, riskMode, baseXp, fuel);
+        mapped.eo = oracle.getTop1kEO?.(p.id) ?? 0;
+        mapped.ownership = oracle.getTop1kOwnership?.(p.id) ?? parseFloat(p.selected_by_percent || "0") ?? 0;
+        return mapped;
+      });
+    }
 
     let squad: ScoredPlayer[] = [];
     let isHeuristicFallback = false;
@@ -200,7 +260,7 @@ export class FPLService {
 
     if (tier !== 'free') {
       try {
-        const availableIds = new Set<number>(available.map(p => p.id));
+        const availableIds = new Set<number>(scored.map(p => p.id));
         
         const params = getParamsForRiskMode(riskMode, baseWeights);
         const optimalIds = solveOptimalSquad(oracle, nextEventId, budget, 8, params, availableIds);
