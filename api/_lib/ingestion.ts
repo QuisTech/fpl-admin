@@ -391,10 +391,7 @@ export class CSVOracle implements XPOracle {
   private getProjectionInput(playerId: number, gameweek: number): ProjectionInput {
     return {
       playerId,
-      // Eye-test uses CSV merit scores just like FPLFORM — route through FPLFORM
-      // so the projection engine uses externalXP directly.
-      // 'EYE_TEST' source is reserved for HistoricalOracle backtesting with full features.
-      source: this.fuel === 'native' ? 'NATIVE' : 'FPLFORM',
+      source: this.fuel === 'native' ? 'NATIVE' : (this.fuel === 'eye-test' ? 'EYE_TEST' : 'FPLFORM'),
       features: this.featuresMatrix[playerId],
       externalXP: this.xpMatrix[playerId]?.[gameweek] || 0
     };

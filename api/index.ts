@@ -168,16 +168,16 @@ export class FPLService {
     let fixtures: any[] = [];
     let nextEventId = 1;
 
-    if (fuel !== 'eye-test') {
-      try {
-        const baseData = await this.getBaseData();
-        players = baseData.players;
-        teams = baseData.teams;
-        fixtures = baseData.fixtures;
-        nextEventId = baseData.nextEventId;
-      } catch (err: any) {
-        console.error('[FPLService] Failed to fetch FPL API data:', err.message);
-        throw new Error('FPL API unavailable. Please try again later or use eye-test mode.');
+    try {
+      const baseData = await this.getBaseData();
+      players = baseData.players;
+      teams = baseData.teams;
+      fixtures = baseData.fixtures;
+      nextEventId = baseData.nextEventId;
+    } catch (err: any) {
+      console.error('[FPLService] Failed to fetch FPL API data:', err.message);
+      if (!this.cache) {
+        throw new Error('FPL API unavailable. Please try again later.');
       }
     }
 
@@ -202,64 +202,25 @@ export class FPLService {
     // For eye-test mode with future seasons, pass empty arrays for live data
     // CSVOracle will use CSV data and 2026-27 fixtures for projections
     console.log(`[FPLService.getRecommendations] Input fuel: ${fuel}, csvFileName: ${csvFileName}`);
-    const fixturesFilePath = fuel === 'eye-test' ? 'data/fixtures-2026-27.json' : undefined;
-    const oraclePlayers = players; // Empty array for eye-test mode
-    const oracleTeams = fuel === 'eye-test' ? [] : teams; // Don't use live teams in eye-test mode
-    const oracleFixtures = fuel === 'eye-test' ? [] : fixtures; // Don't use live fixtures in eye-test mode
+    const fixturesFilePath = undefined; // Live API now has 2026-27 fixtures, no need for JSON override
+    const oraclePlayers = players; 
+    const oracleTeams = teams; 
+    const oracleFixtures = fixtures; 
     console.log(`[FPLService.getRecommendations] Creating CSVOracle with fuel: ${fuel}, fixturesFilePath: ${fixturesFilePath}`);
     const oracle = new CSVOracle(`data/${csvFileName}`, oraclePlayers, riskMode, oracleFixtures, oracleTeams, nextEventId, fuel, fixturesFilePath);
 
     let scored: ScoredPlayer[] = [];
     
-    // For eye-test mode, use oracle's internal player IDs from CSV data
-    if (fuel === 'eye-test') {
-      const oraclePlayerIds = oracle.getAllPlayerIds();
-      scored = oraclePlayerIds.map(id => {
-        const baseXp = oracle.getXP(id, nextEventId);
-        const position = oracle.getPosition(id);
-        const cost = oracle.getCost(id);
-        const team = oracle.getTeam(id);
-        const name = (oracle as any).playerNames?.[id] || `Player ${id}`;
-        
-        // Build a minimal player-like object so calculatePlayerScore can apply risk mode adjustments
-        const pseudoPlayer = {
-          now_cost: cost,
-          selected_by_percent: '0', // Eye-test players default to low ownership (differential-friendly)
-        } as any;
-        const adjustedScore = this.calculatePlayerScore(baseXp, pseudoPlayer, riskMode, fuel);
-        
-        return {
-          id,
-          web_name: name,
-          element_type: position === 'GKP' ? 1 : position === 'DEF' ? 2 : position === 'MID' ? 3 : 4,
-          now_cost: cost,
-          team: parseInt(team) || 0,
-          position,
-          team_name: team,
-          team_short_name: team,
-          score: adjustedScore,
-          xP: baseXp,
-          ppm: cost > 0 ? (baseXp / (cost / 10)) : 0,
-          next_fixtures: [],
-          isCaptain: false,
-          isViceCaptain: false,
-          eo: oracle.getTop1kEO?.(id) ?? 0,
-          ownership: oracle.getTop1kOwnership?.(id) ?? 0,
-          status: 'a',
-          chance_of_playing_next_round: 100
-        } as ScoredPlayer;
-      });
-    } else {
-      // For other modes, use FPL API players
-      const available = players.filter(p => p.status === 'a' || p.chance_of_playing_next_round === 100);
-      scored = available.map(p => {
-        const baseXp = oracle.getXP(p.id, nextEventId);
-        const mapped = this.mapToScoredPlayer(p, teams, fixtures, nextEventId, riskMode, baseXp, fuel);
-        mapped.eo = oracle.getTop1kEO?.(p.id) ?? 0;
-        mapped.ownership = oracle.getTop1kOwnership?.(p.id) ?? parseFloat(p.selected_by_percent || "0") ?? 0;
-        return mapped;
-      });
-    }
+    // All modes (including eye-test) now use live FPL API players, 
+    // ensuring we get real badges, real team names, and correct risk mode utility scores.
+    const available = players.filter(p => p.status === 'a' || p.chance_of_playing_next_round === 100);
+    scored = available.map(p => {
+      const baseXp = oracle.getXP(p.id, nextEventId);
+      const mapped = this.mapToScoredPlayer(p, teams, fixtures, nextEventId, riskMode, baseXp, fuel);
+      mapped.eo = oracle.getTop1kEO?.(p.id) ?? 0;
+      mapped.ownership = oracle.getTop1kOwnership?.(p.id) ?? parseFloat(p.selected_by_percent || "0") ?? 0;
+      return mapped;
+    });
 
     let squad: ScoredPlayer[] = [];
     let isHeuristicFallback = false;
