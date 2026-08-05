@@ -145,9 +145,10 @@ export class CSVOracle implements XPOracle {
     const featureStore = new FeatureStoreRepository();
     
     // Hardcoded team short name to ID mapping for 2026-27
+    // 2026-27 season team IDs (from FPL API bootstrap-static)
     const shortNameToId: Record<string, number> = {
-      'ars': 1, 'avl': 2, 'bou': 3, 'bre': 4, 'bha': 5, 'che': 6, 'cry': 7, 'eve': 8, 'ful': 9, 'ips': 10,
-      'lei': 11, 'liv': 12, 'mci': 13, 'mun': 14, 'nfo': 15, 'sou': 16, 'tot': 17, 'whu': 18, 'wol': 19, 'new': 20
+      'ars': 1, 'avl': 2, 'bou': 3, 'bre': 4, 'bha': 5, 'che': 6, 'cov': 7, 'cry': 8, 'eve': 9, 'ful': 10,
+      'hul': 11, 'ips': 12, 'lee': 13, 'liv': 14, 'mci': 15, 'mun': 16, 'new': 17, 'nfo': 18, 'tot': 19, 'sun': 20
     };
     
     // For eye-test mode with CSV using short names, always add hardcoded mapping first
