@@ -5,9 +5,9 @@ import { loadWeights } from './weights-loader.js';
 import { HistoricalPlayerFeatures, HistoricalFixture } from './providers/historical.js';
 import { FeatureStoreRepository } from './providers/feature-store.js';
 
-const SHORT_REST_ROTATION_PENALTY = 0.90;
-const DGW_ROTATION_PENALTY = 0.85;
-
+// ─────────────────────────────────────────────────────────────────────────────
+// XPOracle Interface
+// ─────────────────────────────────────────────────────────────────────────────
 export interface XPOracle {
   getXP(playerId: number, gameweek: number): number;
   getVariance(playerId: number, gameweek: number): number;
@@ -18,40 +18,34 @@ export interface XPOracle {
   getAllPlayerIds(): number[];
   getTop1kEO?(playerId: number): number;
   getTop1kOwnership?(playerId: number): number;
+  playerNames: Record<number, string>;
 }
 
-/**
- * Real Oracle that reads the expected points matrix from the scraped FPLForm CSV.
- */
-export class CSVOracle implements XPOracle {
-  private xpMatrix: Record<number, Record<number, number>> = {};
-  public playerNames: Record<number, string> = {}; // Helper for debugging output
-  private playerPositions: Record<number, string> = {};
-  private playerCosts: Record<number, number> = {};
-  private playerTeams: Record<number, string> = {};
-  private allIds: number[] = [];
-  private top1kData: Record<number, { ownership: number; started: number; eo: number; captain: number; tripleCaptain: number }> = {};
-  private fuel: string = 'fplform';
+// ─────────────────────────────────────────────────────────────────────────────
+// BaseOracle — Shared metadata, Sentiment, and Feature mappings from FPL API.
+// ─────────────────────────────────────────────────────────────────────────────
+export abstract class BaseOracle implements XPOracle {
+  protected xpMatrix: Record<number, Record<number, number>> = {};
+  public playerNames: Record<number, string> = {};
+  protected playerPositions: Record<number, string> = {};
+  protected playerCosts: Record<number, number> = {};
+  protected playerTeams: Record<number, string> = {};
+  protected allIds: number[] = [];
+  protected top1kData: Record<number, { ownership: number; started: number; eo: number; captain: number; tripleCaptain: number }> = {};
   
-  private featuresMatrix: Record<number, HistoricalPlayerFeatures> = {};
-  private projectionEngine: ProjectionEngine;
+  protected featuresMatrix: Record<number, HistoricalPlayerFeatures> = {};
+  protected projectionEngine: ProjectionEngine;
+  protected nextEventId: number;
+  protected hasFixtures: boolean = false;
 
-  constructor(
-    filePath: string, 
-    players: any[] = [], 
-    riskMode: string = 'safe',
-    fixtures: any[] = [], 
-    teams: any[] = [], 
-    nextEventId: number = 1,
-    fuel: string = 'fplform',
-    fixturesFilePath?: string
-  ) {
-    this.fuel = fuel;
+  protected abstract get fuelSource(): 'NATIVE' | 'EYE_TEST' | 'FPLFORM';
+
+  constructor(players: any[] = [], nextEventId: number = 1, riskMode: string = 'safe') {
+    this.nextEventId = nextEventId;
     const baseWeights = loadWeights('baseline');
     const riskAdjustedWeights = getParamsForRiskMode(riskMode, baseWeights);
     this.projectionEngine = new ProjectionEngine(riskAdjustedWeights);
     this.loadTop1kData(players);
-    this.loadData(filePath, players, fixtures, teams, nextEventId, riskMode, fuel, fixturesFilePath);
   }
 
   private loadTop1kData(players: any[] = []) {
@@ -80,13 +74,10 @@ export class CSVOracle implements XPOracle {
             }
             this.top1kData[fplId] = data;
           });
-          console.log(`[CSVOracle] Loaded Top 1,000 sentiment data for ${Object.keys(this.top1kData).length} players.`);
         }
       } catch (err: any) {
-        console.warn(`[CSVOracle] Failed to parse Top 1,000 EO data: ${err.message}`);
+        console.warn(`[${this.fuelSource}Oracle] Failed to parse Top 1,000 EO data: ${err.message}`);
       }
-    } else {
-      console.log('[CSVOracle] No Top 1,000 EO data found. Defaulting to standard metadata.');
     }
   }
 
@@ -98,97 +89,24 @@ export class CSVOracle implements XPOracle {
     return this.top1kData[playerId]?.ownership ?? 0;
   }
 
-  private loadData(
-    filePath: string, 
-    players: any[], 
-    fixtures: any[], 
-    teams: any[], 
-    nextEventId: number, 
-    riskMode: string,
-    fuel: string = 'fplform',
-    fixturesFilePath?: string
+  protected populateMetadataAndFeatures(
+    players: any[],
+    fixtures: any[],
+    teams: any[],
+    nextEventId: number
   ) {
-    // For eye-test fuel, load fixtures from the provided JSON file and force GW1 start
-    console.log(`[CSVOracle] Fuel: ${fuel}, fixturesFilePath: ${fixturesFilePath}`);
-    if (fuel === 'eye-test' && fixturesFilePath) {
-      const fixturesFullPath = path.resolve(process.cwd(), fixturesFilePath);
-      console.log(`[CSVOracle] Fixtures full path: ${fixturesFullPath}, exists: ${fs.existsSync(fixturesFullPath)}`);
-      if (fs.existsSync(fixturesFullPath)) {
-        try {
-          const fixturesContent = fs.readFileSync(fixturesFullPath, 'utf-8');
-          fixtures = JSON.parse(fixturesContent);
-          console.log(`[CSVOracle] Loaded ${fixtures.length} fixtures from ${fixturesFilePath}`);
-          // Force gameweek 1 for eye-test mode since fixtures are for 2026-27 season
-          nextEventId = 1;
-          console.log(`[CSVOracle] Eye-test mode: forcing nextEventId to 1 for 2026-27 fixtures`);
-        } catch (err: any) {
-          console.warn(`[CSVOracle] Failed to load fixtures from ${fixturesFilePath}: ${err.message}`);
-        }
-      } else {
-        console.warn(`[CSVOracle] Fixtures file not found at ${fixturesFullPath}`);
-      }
-    }
-
-    const fullPath = path.resolve(process.cwd(), filePath);
-    if (!fs.existsSync(fullPath)) {
-      console.warn(`[CSVOracle] Data file not found at ${fullPath}`);
-      return;
-    }
-
-    const fileContent = fs.readFileSync(fullPath, 'utf-8');
-    const lines = fileContent.split('\n');
-
-    let syntheticId = 100000; // Increased to 100000 to prevent collisions with future FPL API IDs
-
-    const teamMap: Record<string, number> = {};
-    const liveTeamRatings: Record<number, { attack: number, defense: number }> = {};
+    this.hasFixtures = fixtures && fixtures.length > 0;
     const featureStore = new FeatureStoreRepository();
-    
-    // Hardcoded team short name to ID mapping for 2026-27
-    // 2026-27 season team IDs (from FPL API bootstrap-static)
-    const shortNameToId: Record<string, number> = {
-      'ars': 1, 'avl': 2, 'bou': 3, 'bre': 4, 'bha': 5, 'che': 6, 'cov': 7, 'cry': 8, 'eve': 9, 'ful': 10,
-      'hul': 11, 'ips': 12, 'lee': 13, 'liv': 14, 'mci': 15, 'mun': 16, 'new': 17, 'nfo': 18, 'tot': 19, 'sun': 20
-    };
-    
-    // For eye-test mode with CSV using short names, always add hardcoded mapping first
-    if (fuel === 'eye-test' && (!teams || teams.length === 0)) {
-      Object.keys(shortNameToId).forEach(shortName => {
-        teamMap[shortName] = shortNameToId[shortName];
-      });
-      console.log('[CSVOracle] Added hardcoded team name to ID mapping for eye-test mode');
-    }
-    
-    // For eye-test mode with no live teams, build team map from fixtures
-    if (fuel === 'eye-test' && (!teams || teams.length === 0) && fixtures.length > 0) {
-      // Extract unique teams from fixtures and assign synthetic IDs
-      const uniqueTeams = new Set<number>();
-      fixtures.forEach(f => {
-        uniqueTeams.add(f.team_h);
-        uniqueTeams.add(f.team_a);
-      });
-      
-      // Use 2026-27 season for future fixture data
-      const futureSeason = '2026-27';
-      uniqueTeams.forEach(teamId => {
-        teamMap[teamId.toString()] = teamId; // Use actual team IDs from fixtures
-        // Get projected ratings from Feature Store for 2026-27
-        const features = featureStore.getFeatures(futureSeason, 1, teamId);
-        liveTeamRatings[teamId] = { 
-           attack: features.attack, 
-           defense: features.defense 
-        };
-      });
-      console.log(`[CSVOracle] Built team map from ${uniqueTeams.size} teams in fixtures using ${futureSeason} ratings`);
-    } else if (teams && teams.length > 0) {
+    const liveTeamRatings: Record<number, { attack: number, defense: number }> = {};
+    const teamNameMap: Record<number, string> = {};
+
+    // 1. Build live team ratings and team short name map
+    if (teams && teams.length > 0) {
       const currentSeason = '2023-24';
       const previousGw = nextEventId > 1 ? nextEventId - 1 : 38;
-
       teams.forEach(t => {
-        teamMap[t.short_name.toLowerCase()] = t.id;
-        
+        teamNameMap[t.id] = t.short_name;
         const features = featureStore.getFeatures(currentSeason, previousGw, t.id);
-        
         liveTeamRatings[t.id] = { 
            attack: features.attack, 
            defense: features.defense 
@@ -196,8 +114,173 @@ export class CSVOracle implements XPOracle {
       });
     }
 
+    // 2. Loop over every player from the official FPL API
+    players.forEach(p => {
+      const fplId = p.id;
+      const playerName = p.web_name || p.second_name || 'Unknown';
+      const teamId = p.team;
+      const teamShort = teamNameMap[teamId] || `TEAM_${teamId}`;
+      
+      const expectedElementType = p.element_type;
+      const pos = expectedElementType === 1 ? 'GKP' : 
+                  expectedElementType === 2 ? 'DEF' : 
+                  expectedElementType === 3 ? 'MID' : 'FWD';
+      
+      const cost = p.now_cost || 50; // default 5.0m if missing
+
+      this.playerNames[fplId] = playerName;
+      this.playerPositions[fplId] = pos;
+      this.playerCosts[fplId] = cost;
+      this.playerTeams[fplId] = teamShort;
+      this.allIds.push(fplId);
+
+      // Build fixtures by GW
+      const fixturesByGw: Record<number, HistoricalFixture[]> = {};
+      for (let step = 0; step < 15; step++) {
+        const gw = nextEventId + step;
+        if (fixtures && fixtures.length > 0) {
+          const teamFixtures = fixtures.filter(f => f.event === gw && (f.team_h === teamId || f.team_a === teamId));
+          fixturesByGw[gw] = teamFixtures.map(f => {
+            const isHome = f.team_h === teamId;
+            const oppId = isHome ? f.team_a : f.team_h;
+            const oppRatings = liveTeamRatings[oppId] || { attack: 1.5, defense: 1.5 };
+            const teamRatings = liveTeamRatings[teamId] || { attack: 1.5, defense: 1.5 };
+            return {
+              opponentTeamId: oppId,
+              isHome,
+              difficulty: isHome ? f.team_h_difficulty : f.team_a_difficulty,
+              opponentAttackRating: oppRatings.attack,
+              opponentDefenseRating: oppRatings.defense,
+              teamAttackRating: teamRatings.attack,
+              teamDefenseRating: teamRatings.defense
+            };
+          });
+        } else {
+          fixturesByGw[gw] = [];
+        }
+      }
+
+      let probPlay = p.chance_of_playing_next_round;
+      if (probPlay === null || probPlay === undefined) probPlay = 100;
+      probPlay = Math.max(0, Math.min(100, probPlay)) / 100;
+
+      const gamesPlayed = Math.max(3.0, (p.minutes || 0) / 90);
+      let xG90 = Math.min(1.0, (parseFloat(p.expected_goals || "0") / gamesPlayed));
+      let xA90 = Math.min(0.7, (parseFloat(p.expected_assists || "0") / gamesPlayed));
+
+      this.featuresMatrix[fplId] = {
+        id: fplId,
+        name: playerName,
+        position: pos,
+        teamId,
+        price: cost / 10,
+        minutesLast4: probPlay * 90 * 4,
+        startsLast4: probPlay * 4,
+        xGLast4: xG90 * 4,
+        xALast4: xA90 * 4,
+        shotsLast4: 0,
+        keyPassesLast4: 0,
+        xG90,
+        xA90,
+        xGI3: (xG90 + xA90) * 3,
+        xGI5: (xG90 + xA90) * 5,
+        minutesTrend: 0,
+        shots90: 0,
+        keyPasses90: 0,
+        fixturesByGw,
+        
+        minutesLast1: probPlay * 90,
+        minutesLast3: probPlay * 90 * 3,
+        minutesLast5: probPlay * 90 * 5,
+        minutesEWMA: probPlay * 90,
+        startsLast5: probPlay * 5,
+        seasonMinutesPercent: probPlay,
+        restHours: 168,
+        fixturesLast7Days: 1,
+        fixturesLast14Days: 2,
+        minutesVolatility: 0,
+        chanceOfPlayingThisRound: probPlay * 100,
+        selectionMomentum: 0,
+        consecutiveStarts: 0,
+
+        predictedMinutes: probPlay * 90,
+        injuryStatus: probPlay < 1.0 ? 'Injured/Doubtful' : null,
+        eo: this.top1kData[fplId]?.eo || 0
+      };
+    });
+  }
+
+  private getProjectionInput(playerId: number, gameweek: number): ProjectionInput {
+    return {
+      playerId,
+      source: this.fuelSource,
+      features: this.featuresMatrix[playerId],
+      externalXP: this.xpMatrix[playerId]?.[gameweek] || 0
+    };
+  }
+
+  getXP(playerId: number, gameweek: number): number { 
+    if (gameweek < this.nextEventId || gameweek >= this.nextEventId + 8) {
+      return 0;
+    }
+    const features = this.featuresMatrix[playerId];
+    if (this.hasFixtures && features && (!features.fixturesByGw?.[gameweek] || features.fixturesByGw[gameweek].length === 0)) {
+      return 0;
+    }
+    return this.projectionEngine.predict(this.getProjectionInput(playerId, gameweek), gameweek).expected;
+  }
+  getVariance(playerId: number, gameweek: number): number { 
+    return this.projectionEngine.predict(this.getProjectionInput(playerId, gameweek), gameweek).variance;
+  }
+  getPriceDelta(playerId: number): number { return 0; }
+  getPosition(playerId: number): string {
+    const pos = this.playerPositions[playerId];
+    return pos === 'GK' ? 'GKP' : pos;
+  }
+  getCost(playerId: number): number { return this.playerCosts[playerId]; }
+  getTeam(playerId: number): string { return this.playerTeams[playerId]; }
+  getAllPlayerIds(): number[] { return this.allIds; }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FplformOracle — Reads crowdsourced CSV file and maps names to FPL IDs
+// ─────────────────────────────────────────────────────────────────────────────
+export class FplformOracle extends BaseOracle {
+  protected get fuelSource() { return 'FPLFORM' as const; }
+
+  constructor(
+    filePath: string,
+    players: any[] = [],
+    riskMode: string = 'safe',
+    fixtures: any[] = [],
+    teams: any[] = [],
+    nextEventId: number = 1
+  ) {
+    super(players, nextEventId, riskMode);
+    
+    // 1. Populate metadata and features from API
+    this.populateMetadataAndFeatures(players, fixtures, teams, nextEventId);
+
+    // 2. Load and parse the FPLForm CSV file to override expected points (xpMatrix)
+    const fullPath = path.resolve(process.cwd(), filePath);
+    if (!fs.existsSync(fullPath)) {
+      console.warn(`[FplformOracle] Data file not found at ${fullPath}`);
+      return;
+    }
+
+    const fileContent = fs.readFileSync(fullPath, 'utf-8');
+    const lines = fileContent.split('\n');
+
+    const teamShortMap: Record<string, number> = {};
+    if (teams && teams.length > 0) {
+      teams.forEach(t => teamShortMap[t.short_name.toLowerCase()] = t.id);
+    }
+
+    let parsedCount = 0;
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
+      if (!line) continue;
+      
       let cols: string[] = [];
       try {
         let inQuotes = false;
@@ -215,200 +298,184 @@ export class CSVOracle implements XPOracle {
         }
         cols.push(current);
         cols = cols.map(c => c.trim().replace(/^"|"$/g, ''));
-      } catch (err: any) {
-        console.error(`[CSVOracle] Parsing failed at line ${i}: "${line}"`);
-        throw err;
+      } catch (err) {
+        continue;
       }
-      
-      if (cols.length >= 9 && cols[3]) {
+
+      if (cols.length >= 7 && cols[3]) {
         const playerName = cols[1];
-        const team = cols[3];
+        const teamName = cols[3].toLowerCase();
         const pos = cols[4] === 'GK' ? 'GKP' : cols[4];
-        let cost = parseFloat(cols[5]) * 10; 
-        const meritScore = parseFloat(cols[6]) || 0; 
-        
-        // Handle both short name (3 chars) and numeric team ID from fixtures
-        let parsedTeamId = 0;
-        if (team.length === 3) {
-          parsedTeamId = teamMap[team.toLowerCase()] || 0;
-        } else {
-          // Try to parse as numeric team ID directly
-          parsedTeamId = parseInt(team) || 0;
-          if (parsedTeamId > 0 && !liveTeamRatings[parsedTeamId]) {
-            liveTeamRatings[parsedTeamId] = { attack: 1.5, defense: 1.5 };
+        const expectedElementType = pos === 'GKP' ? 1 : pos === 'DEF' ? 2 : pos === 'MID' ? 3 : 4;
+        const csvCost = parseFloat(cols[5]) * 10;
+        const meritScore = parseFloat(cols[6]) || 0;
+
+        // Try to match CSV row to FPL API player
+        const csvTeamId = teamShortMap[teamName] || 0;
+        const matchedPlayer = players.find(p => {
+          if (csvTeamId > 0 && p.team !== undefined && p.team !== csvTeamId) return false;
+          if (p.element_type !== undefined && p.element_type !== expectedElementType) return false;
+
+          const wName = (p.web_name || '').toLowerCase();
+          const sName = (p.second_name || '').toLowerCase();
+          const pName = playerName.toLowerCase();
+
+          return wName === pName || (wName.length > 2 && pName.includes(wName)) || 
+                 sName === pName || (sName.length > 2 && pName.includes(sName));
+        });
+
+        if (matchedPlayer) {
+          const fplId = matchedPlayer.id;
+          
+          // Populate multi-gw expected points from CSV columns
+          this.xpMatrix[fplId] = {};
+          for (let step = 0; step < 15; step++) {
+            const gw = nextEventId + step;
+            const colVal = parseFloat(cols[6 + step]);
+            this.xpMatrix[fplId][gw] = !isNaN(colVal) && colVal > 0 ? colVal : meritScore * Math.pow(0.9, step);
           }
-        }
-        
-        const expectedElementType = pos === 'GKP' ? 1 : pos === 'DEF' ? 2 : pos === 'MID' ? 3 : pos === 'FWD' ? 4 : 0;
+          
+          // Override position and team from CSV if they were defaults
+          this.playerPositions[fplId] = pos;
+          this.playerTeams[fplId] = teamName.toUpperCase();
+          this.playerCosts[fplId] = matchedPlayer.now_cost ?? csvCost;
 
-        let fplId = syntheticId++; 
-        let rawOwnership = 100.0;
-        let realTeamId = parsedTeamId;
-        let matchedPlayer: any = null;
+          // Override probability-dependent features from CSV if available
+          let probPlay = parseFloat(cols[8]);
+          if (!isNaN(probPlay)) {
+            // CSV might hold probability as percentage (e.g. 95) or fraction (e.g. 0.95)
+            if (probPlay > 1.0) {
+              probPlay = probPlay / 100;
+            }
+            probPlay = Math.max(0, Math.min(1.0, probPlay));
 
-        if (players.length > 0) {
-          let match = players.find(p => {
-            // For eye-test mode, be more lenient with team matching since CSV may have different team assignments
-            if (fuel !== 'eye-test' && parsedTeamId > 0 && p.team !== parsedTeamId) return false;
-            if (expectedElementType > 0 && p.element_type !== expectedElementType) return false;
-
-            const wName = (p.web_name || '').toLowerCase();
-            const sName = (p.second_name || '').toLowerCase();
-            const pName = playerName.toLowerCase();
-
-            // Require string length > 2 for substring matches to prevent single-letter/empty matches
-            const wMatch = wName === pName || (wName.length > 2 && pName.includes(wName));
-            const sMatch = sName === pName || (sName.length > 2 && pName.includes(sName));
-
-            return wMatch || sMatch;
-          });
-
-          if (match) {
-            fplId = match.id;
-            rawOwnership = parseFloat(match.selected_by_percent) || 100.0;
-            // For eye-test mode, use the team ID from fixtures/CSV, not live FPL API
-            realTeamId = fuel === 'eye-test' ? parsedTeamId : match.team;
-            cost = match.now_cost; // OVERWRITE CSV COST WITH LIVE FPL PRICE
-            matchedPlayer = match;
-          }
-        }
-        
-        // For eye-test mode, prioritize the CSV team ID over live FPL API team ID
-        const teamId = fuel === 'eye-test' ? (parsedTeamId || realTeamId || 0) : (realTeamId || parsedTeamId || 0);
-
-        let probPlay = parseFloat(cols[8]);
-        if (isNaN(probPlay)) {
-          let chance = 100;
-          if (players.length > 0) {
-            const match = players.find(p => 
-              p.web_name?.toLowerCase() === playerName.toLowerCase() ||
-              p.second_name?.toLowerCase().includes(playerName.toLowerCase()) ||
-              playerName.toLowerCase().includes(p.second_name?.toLowerCase()) ||
-              playerName.toLowerCase().includes(p.web_name?.toLowerCase())
-            );
-            if (match) {
-              chance = match.chance_of_playing_next_round ?? 100;
+            const features = this.featuresMatrix[fplId];
+            if (features) {
+              features.chanceOfPlayingThisRound = probPlay * 100;
+              features.predictedMinutes = probPlay * 90;
+              features.minutesLast4 = probPlay * 90 * 4;
+              features.startsLast4 = probPlay * 4;
+              features.minutesLast1 = probPlay * 90;
+              features.minutesLast3 = probPlay * 90 * 3;
+              features.minutesLast5 = probPlay * 90 * 5;
+              features.minutesEWMA = probPlay * 90;
+              features.startsLast5 = probPlay * 5;
+              features.seasonMinutesPercent = probPlay;
+              features.injuryStatus = probPlay < 1.0 ? 'Injured/Doubtful' : null;
             }
           }
-          probPlay = chance / 100;
-        }
-        probPlay = Math.max(0, Math.min(1.0, probPlay));
-
-        const gamesPlayed = matchedPlayer ? Math.max(3.0, (matchedPlayer.minutes || 0) / 90) : 0;
-        let xG90 = matchedPlayer && gamesPlayed > 0 ? (parseFloat(matchedPlayer.expected_goals || "0") / gamesPlayed) : 0;
-        let xA90 = matchedPlayer && gamesPlayed > 0 ? (parseFloat(matchedPlayer.expected_assists || "0") / gamesPlayed) : 0;
-        
-        // Cap absurdly high xG90/xA90 caused by low minutes / small sample sizes in the live FPL API
-        xG90 = Math.min(1.0, xG90);
-        xA90 = Math.min(0.7, xA90);
-        
-        // Build Fixtures
-        const fixturesByGw: Record<number, HistoricalFixture[]> = {};
-        for (let step = 0; step < 15; step++) {
-          const gw = nextEventId + step;
-          // For eye-test mode, use fixtures loaded from JSON file without requiring live teams
-          if (fixtures && fixtures.length > 0 && teamId > 0 && (fuel === 'eye-test' || (teams && teams.length > 0))) {
-            const teamFixtures = fixtures.filter(f => f.event === gw && (f.team_h === teamId || f.team_a === teamId));
-            fixturesByGw[gw] = teamFixtures.map(f => {
-               const isHome = f.team_h === teamId;
-               const oppId = isHome ? f.team_a : f.team_h;
-               const oppRatings = liveTeamRatings[oppId] || { attack: 1.5, defense: 1.5 };
-               const teamRatings = liveTeamRatings[teamId] || { attack: 1.5, defense: 1.5 };
-               
-               return {
-                  opponentTeamId: oppId,
-                  isHome,
-                  difficulty: isHome ? f.team_h_difficulty : f.team_a_difficulty,
-                  opponentAttackRating: oppRatings.attack,
-                  opponentDefenseRating: oppRatings.defense,
-                  teamAttackRating: teamRatings.attack,
-                  teamDefenseRating: teamRatings.defense
-               };
-            });
-          } else {
-             fixturesByGw[gw] = [];
-          }
-        }
-
-        this.featuresMatrix[fplId] = {
-          id: fplId,
-          name: playerName,
-          position: pos === 'GK' ? 'GKP' : pos,
-          teamId,
-          price: cost / 10,
-          minutesLast4: probPlay * 90 * 4,
-          startsLast4: probPlay * 4,
-          xGLast4: xG90 * 4,
-          xALast4: xA90 * 4,
-          shotsLast4: 0,
-          keyPassesLast4: 0,
-          xG90,
-          xA90,
-          xGI3: (xG90 + xA90) * 3,
-          xGI5: (xG90 + xA90) * 5,
-          minutesTrend: 0,
-          shots90: 0,
-          keyPasses90: 0,
-          fixturesByGw,
-          
-          minutesLast1: probPlay * 90,
-          minutesLast3: probPlay * 90 * 3,
-          minutesLast5: probPlay * 90 * 5,
-          minutesEWMA: probPlay * 90,
-          startsLast5: probPlay * 5,
-          seasonMinutesPercent: probPlay,
-          restHours: 168,
-          fixturesLast7Days: 1,
-          fixturesLast14Days: 2,
-          minutesVolatility: 0,
-          chanceOfPlayingThisRound: probPlay * 100,
-          selectionMomentum: 0,
-          consecutiveStarts: 0,
-
-          predictedMinutes: probPlay * 90,
-          injuryStatus: probPlay < 1.0 ? 'Injured/Doubtful' : null,
-          eo: this.top1kData[fplId]?.eo || 0
-        };
-
-        this.playerNames[fplId] = playerName;
-        this.playerPositions[fplId] = pos;
-        this.playerCosts[fplId] = cost;
-        this.playerTeams[fplId] = team;
-        this.allIds.push(fplId);
-
-        // Store external xp from CSV directly
-        this.xpMatrix[fplId] = {};
-        for (let step = 0; step < 15; step++) {
-          const gw = nextEventId + step;
-          const decayFactor = Math.pow(0.9, step);
-          this.xpMatrix[fplId][gw] = meritScore * decayFactor;
+          parsedCount++;
         }
       }
     }
-    console.log(`[CSVOracle] Ingested expected points and metadata for ${Object.keys(this.xpMatrix).length} players.`);
+    console.log(`[FplformOracle] Successfully loaded FPLForm projections for ${parsedCount} matched players.`);
   }
-
-  private getProjectionInput(playerId: number, gameweek: number): ProjectionInput {
-    return {
-      playerId,
-      source: this.fuel === 'native' ? 'NATIVE' : (this.fuel === 'eye-test' ? 'EYE_TEST' : 'FPLFORM'),
-      features: this.featuresMatrix[playerId],
-      externalXP: this.xpMatrix[playerId]?.[gameweek] || 0
-    };
-  }
-
-  getXP(playerId: number, gameweek: number): number { 
-    return this.projectionEngine.predict(this.getProjectionInput(playerId, gameweek), gameweek).expected;
-  }
-  getVariance(playerId: number, gameweek: number): number { 
-    return this.projectionEngine.predict(this.getProjectionInput(playerId, gameweek), gameweek).variance;
-  }
-  getPriceDelta(playerId: number): number { return 0; }
-  getPosition(playerId: number): string {
-    const pos = this.playerPositions[playerId];
-    return pos === 'GK' ? 'GKP' : pos;
-  }
-  getCost(playerId: number): number { return this.playerCosts[playerId]; }
-  getTeam(playerId: number): string { return this.playerTeams[playerId]; }
-  getAllPlayerIds(): number[] { return this.allIds; }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NativeOracle — Communicates ONLY with FPL API data. No CSV file is read.
+// ─────────────────────────────────────────────────────────────────────────────
+export class NativeOracle extends BaseOracle {
+  protected get fuelSource() { return 'NATIVE' as const; }
+
+  constructor(
+    _filePath: string, // ignored
+    players: any[] = [],
+    riskMode: string = 'safe',
+    fixtures: any[] = [],
+    teams: any[] = [],
+    nextEventId: number = 1
+  ) {
+    super(players, nextEventId, riskMode);
+    
+    // Populate metadata and features from live API
+    this.populateMetadataAndFeatures(players, fixtures, teams, nextEventId);
+
+    // Populate xpMatrix directly from official API's ep_next, with decay for future weeks
+    players.forEach(p => {
+      const fplId = p.id;
+      const meritScore = parseFloat(p.ep_next) || 0;
+      
+      this.xpMatrix[fplId] = {};
+      for (let step = 0; step < 15; step++) {
+        const gw = nextEventId + step;
+        const decayFactor = Math.pow(0.9, step);
+        this.xpMatrix[fplId][gw] = meritScore * decayFactor;
+      }
+    });
+
+    console.log(`[NativeOracle] Successfully loaded native API projections for ${players.length} players.`);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EyeTestOracle — Skips CSVs completely. Feeds the Machine Learning engine.
+// ─────────────────────────────────────────────────────────────────────────────
+export class EyeTestOracle extends BaseOracle {
+  protected get fuelSource() { return 'EYE_TEST' as const; }
+
+  constructor(
+    _filePath: string, // ignored
+    players: any[] = [],
+    riskMode: string = 'safe',
+    fixtures: any[] = [],
+    teams: any[] = [],
+    nextEventId: number = 1,
+    fixturesFilePath?: string
+  ) {
+    super(players, nextEventId, riskMode);
+    
+    // For EyeTest 2026-27 fixtures override if custom path provided
+    if (fixturesFilePath) {
+      const fixturesFullPath = path.resolve(process.cwd(), fixturesFilePath);
+      if (fs.existsSync(fixturesFullPath)) {
+        try {
+          const fixturesContent = fs.readFileSync(fixturesFullPath, 'utf-8');
+          fixtures = JSON.parse(fixturesContent);
+          nextEventId = 1;
+          this.nextEventId = 1;
+        } catch (err: any) {
+          console.warn(`[EyeTestOracle] Failed to load custom fixtures: ${err.message}`);
+        }
+      }
+    }
+
+    // Populate metadata and features from live API
+    this.populateMetadataAndFeatures(players, fixtures, teams, nextEventId);
+
+    // Leave xpMatrix empty: ProjectionEngine ML model predictions will run entirely on features
+    players.forEach(p => {
+      this.xpMatrix[p.id] = {};
+    });
+
+    console.log(`[EyeTestOracle] Loaded ML features for ${players.length} players.`);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// OracleFactory — Clean router mapping user fuel parameter to strategy classes
+// ─────────────────────────────────────────────────────────────────────────────
+export class OracleFactory {
+  static create(
+    csvFilePath: string, 
+    players: any[], 
+    fuel: string, 
+    fixtures: any[] = [], 
+    teams: any[] = [], 
+    nextEventId: number = 1,
+    riskMode: string = 'safe',
+    fixturesFilePath?: string
+  ): XPOracle {
+    console.log(`[OracleFactory] Creating ${fuel} oracle...`);
+    if (fuel === 'native') {
+      return new NativeOracle(csvFilePath, players, riskMode, fixtures, teams, nextEventId);
+    }
+    if (fuel === 'eye-test') {
+      return new EyeTestOracle(csvFilePath, players, riskMode, fixtures, teams, nextEventId, fixturesFilePath);
+    }
+    return new FplformOracle(csvFilePath, players, riskMode, fixtures, teams, nextEventId);
+  }
+}
+
+// Backward Compatibility Alias
+export class CSVOracle extends FplformOracle {}

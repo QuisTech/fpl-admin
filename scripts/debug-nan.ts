@@ -1,5 +1,6 @@
 import { VaastavProvider } from '../api/_lib/providers/vaastav.js';
-import { ProjectionEngine } from '../api/_lib/projection.js';
+import { ProjectionEngine, ProjectionInput } from '../api/_lib/projection.js';
+import { loadWeights } from '../api/_lib/weights-loader.js';
 
 async function main() {
     const p = new VaastavProvider();
@@ -7,11 +8,15 @@ async function main() {
     const snap = p.getDeadlineSnapshot(10, 100, 1, {});
     const pId = Object.keys(snap.players)[0];
     const player = snap.players[parseInt(pId)];
-    const engine = new ProjectionEngine();
+    const engine = new ProjectionEngine(loadWeights('baseline'));
     
-    // We want to force historical mode to test the exact logic that returns NaN in train-cleansheet
-    // Wait, the projection engine automatically picks up historical mode if it's not NATIVE/FPLFORM.
-    const result = engine.predict(player, 'EYE_TEST', { gameweek: 10 } as any);
+    // Force historical mode to test the exact logic that returns NaN in train-cleansheet
+    const input: ProjectionInput = {
+      playerId: parseInt(pId),
+      source: 'EYE_TEST',
+      features: player
+    };
+    const result = engine.predict(input, 10);
     
     console.log("Player:", player.name);
     console.log("Fixtures GW10:", JSON.stringify(player.fixturesByGw[10], null, 2));

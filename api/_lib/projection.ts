@@ -91,7 +91,26 @@ export class ProjectionEngine {
    */
   public predict(input: ProjectionInput, targetGw: number): { expected: number, variance: number } {
     if (input.source === 'NATIVE' || input.source === 'FPLFORM') {
-      return { expected: input.externalXP || 0, variance: (input.externalXP || 0) * this.params.betaVariance };
+      const xp = input.externalXP || 0;
+      const pApp = input.features ? (input.features.chanceOfPlayingThisRound / 100) : 1.0;
+      
+      let p90 = 0, p60 = 0, pSub = 0;
+      if (pApp >= 0.8) {
+        p90 = pApp * 0.85;
+        p60 = pApp * 0.15;
+      } else {
+        p90 = pApp * 0.5;
+        p60 = pApp * 0.3;
+        pSub = pApp * 0.2;
+      }
+      const eApp = pSub * 1 + p60 * 1 + p90 * 2;
+      const eApp2 = pSub * 1 + p60 * 1 + p90 * 4;
+      const varApp = eApp2 - (eApp * eApp);
+      
+      const expectedReturns = Math.max(0, xp - eApp);
+      const varReturns = 1.5 * expectedReturns;
+      
+      return { expected: xp, variance: varApp + varReturns };
     }
 
     if (!input.features) return { expected: 0, variance: 0 };
@@ -202,6 +221,7 @@ export class ProjectionEngine {
 }
 
 export class HistoricalOracle implements XPOracle {
+  public playerNames: Record<number, string> = {};
   private engine: ProjectionEngine;
   private snapshot: DeadlineSnapshot;
 

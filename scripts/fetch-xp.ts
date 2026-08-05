@@ -36,9 +36,9 @@ async function fetchFPLForm(browser: any) {
       if (!targetTable) return '';
       
       const rows = Array.from(targetTable.querySelectorAll('tr'));
-      return rows.map(row => {
+      return rows.map((row: any) => {
         const cells = Array.from(row.querySelectorAll('th, td'));
-        return cells.map(cell => '"' + (cell.textContent || '').trim().replace(/"/g, '""') + '"').join(',');
+        return cells.map((cell: any) => '"' + (cell.textContent || '').trim().replace(/"/g, '""') + '"').join(',');
       }).join('\n');
     });
 
@@ -105,9 +105,9 @@ async function fetchFPLReview(browser: any) {
       // Try to find the massive data table and scrape it
       const tableData = await page.evaluate(() => {
         const rows = Array.from(document.querySelectorAll('table tr'));
-        return rows.map(row => {
+        return rows.map((row: any) => {
           const cells = Array.from(row.querySelectorAll('th, td'));
-          return cells.map(cell => '"' + (cell.textContent || '').trim().replace(/"/g, '""') + '"').join(',');
+          return cells.map((cell: any) => '"' + (cell.textContent || '').trim().replace(/"/g, '""') + '"').join(',');
         }).join('\n');
       });
 

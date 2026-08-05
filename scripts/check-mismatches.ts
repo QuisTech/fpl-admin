@@ -10,8 +10,7 @@ async function run() {
     'safe',
     baseData.fixtures,
     baseData.teams,
-    baseData.nextEventId,
-    'fplform'
+    baseData.nextEventId
   );
   
   for (const id of oracle.getAllPlayerIds()) {

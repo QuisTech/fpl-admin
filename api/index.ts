@@ -9,12 +9,12 @@ import {
   FPLPlayerSchema, FPLTeamSchema, FPLFixtureSchema,
   RecommendationResponse, TeamSyncResponse, TransferRecommendation, ChipAdvice
 } from './_lib/types.js';
-import { CSVOracle } from './_lib/ingestion.js';
+import { OracleFactory, XPOracle, CSVOracle } from './_lib/ingestion.js';
 import { getParamsForRiskMode } from './_lib/projection.js';
 import { loadWeights } from './_lib/weights-loader.js';
 const baseWeights = loadWeights('baseline');
 import { Simulator } from './_lib/simulator.js';
-import { solveOptimalSquad } from './_lib/lp-solver.js';
+import { solveOptimalSquad, solveCaptain } from './_lib/lp-solver.js';
 import { getUserTier, mergeUserTiers, getFirestore } from '../lib/firestore.js';
 import { getLLMTransferDecision, getLLMChipAdvice, generateSocialThread } from './_lib/llm-agent.js';
 import { getNewsContextFromCache } from './_lib/news-service.js';
@@ -206,8 +206,8 @@ export class FPLService {
     const oraclePlayers = players; 
     const oracleTeams = teams; 
     const oracleFixtures = fixtures; 
-    console.log(`[FPLService.getRecommendations] Creating CSVOracle with fuel: ${fuel}, fixturesFilePath: ${fixturesFilePath}`);
-    const oracle = new CSVOracle(`data/${csvFileName}`, oraclePlayers, riskMode, oracleFixtures, oracleTeams, nextEventId, fuel, fixturesFilePath);
+    console.log(`[FPLService.getRecommendations] Creating Oracle with fuel: ${fuel}, fixturesFilePath: ${fixturesFilePath}`);
+    const oracle = OracleFactory.create(`data/${csvFileName}`, oraclePlayers, fuel, oracleFixtures, oracleTeams, nextEventId, riskMode, fixturesFilePath);
 
     let scored: ScoredPlayer[] = [];
     
@@ -287,21 +287,21 @@ export class FPLService {
     });
       const sortByUtility = (a: ScoredPlayer, b: ScoredPlayer) => (b.score || 0) - (a.score || 0);
       
-      // Captaincy Strategy: Heavily favor Attackers (MID/FWD) over DEF/GKP due to higher point ceilings
-      const captaincyCandidates = [...startingXI].sort((a, b) => {
-        const aWeight = (a.position === 'MID' || a.position === 'FWD') ? 1.5 : 1.0;
-        const bWeight = (b.position === 'MID' || b.position === 'FWD') ? 1.5 : 1.0;
-        return ((b.xP || 0) * bWeight) - ((a.xP || 0) * aWeight);
-      });
-  
-      const captain = captaincyCandidates[0] || null;
-      const viceCaptain = captaincyCandidates[1] || null;
+      const startingIdsArr = Array.from(startingIds);
+      const { captain: captainId, viceCaptain: vcId } = solveCaptain(
+        oracle, 
+        nextEventId, 
+        startingIdsArr, 
+        getParamsForRiskMode(riskMode, baseWeights)
+      );
+
+      const captain = startingXI.find(p => p.id === captainId) || startingXI[0] || null;
+      const viceCaptain = startingXI.find(p => p.id === vcId && p.id !== captainId) || startingXI[1] || null;
   
       if (captain) {
         const squadPlayer = squad.find(p => p.id === captain.id);
         if (squadPlayer) squadPlayer.isCaptain = true;
       }
-      
       if (viceCaptain) {
         const squadPlayer = squad.find(p => p.id === viceCaptain.id);
         if (squadPlayer) squadPlayer.isViceCaptain = true;
@@ -336,7 +336,7 @@ export class FPLService {
     };
   }
 
-  static generateTransfers(squad: ScoredPlayer[], candidates: ScoredPlayer[], oracle: CSVOracle, riskMode: string, gameweek: number): TransferRecommendation[] {
+  static generateTransfers(squad: ScoredPlayer[], candidates: ScoredPlayer[], oracle: XPOracle, riskMode: string, gameweek: number): TransferRecommendation[] {
     const transfers: TransferRecommendation[] = [];
     const squadIds = new Set(squad.map(p => p.id));
     const params = getParamsForRiskMode(riskMode, baseWeights);
@@ -410,7 +410,7 @@ export class FPLService {
     
     // 1. Initialize the V3 Engine Oracle first based on selected fuel
     const csvFileName = fuel === 'native' ? 'fpl_native.csv' : 'fplform.csv';
-    const oracle = new CSVOracle(`data/${csvFileName}`, baseData.players, riskMode, baseData.fixtures, baseData.teams, baseData.nextEventId);
+    const oracle = OracleFactory.create(`data/${csvFileName}`, baseData.players, fuel, baseData.fixtures, baseData.teams, baseData.nextEventId, riskMode);
 
     // 2. Fetch live user team
     let teamRes;
