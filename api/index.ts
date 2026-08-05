@@ -7,7 +7,7 @@ import path from 'path';
 import { 
   FPLPlayer, FPLTeam, FPLFixture, ScoredPlayer, 
   FPLPlayerSchema, FPLTeamSchema, FPLFixtureSchema,
-  RecommendationResponse, TeamSyncResponse, TransferRecommendation, ChipAdvice
+  RecommendationResponse, TeamSyncResponse, TransferRecommendation, ChipAdvice, PlayerDistribution
 } from './_lib/types.js';
 import { OracleFactory, XPOracle, CSVOracle } from './_lib/ingestion.js';
 import { getParamsForRiskMode } from './_lib/projection.js';

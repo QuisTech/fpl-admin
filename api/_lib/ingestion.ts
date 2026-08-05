@@ -4,6 +4,7 @@ import { ProjectionEngine, ProjectionInput, getParamsForRiskMode } from './proje
 import { loadWeights } from './weights-loader.js';
 import { HistoricalPlayerFeatures, HistoricalFixture } from './providers/historical.js';
 import { FeatureStoreRepository } from './providers/feature-store.js';
+import { PlayerDistribution } from './types.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // XPOracle Interface
@@ -11,6 +12,7 @@ import { FeatureStoreRepository } from './providers/feature-store.js';
 export interface XPOracle {
   getXP(playerId: number, gameweek: number): number;
   getVariance(playerId: number, gameweek: number): number;
+  getDistribution(playerId: number, gameweek: number): PlayerDistribution;
   getPriceDelta(playerId: number): number;
   getPosition(playerId: number): string;
   getCost(playerId: number): number;
@@ -26,6 +28,7 @@ export interface XPOracle {
 // ─────────────────────────────────────────────────────────────────────────────
 export abstract class BaseOracle implements XPOracle {
   protected xpMatrix: Record<number, Record<number, number>> = {};
+  protected distributionMatrix: Record<number, Record<number, PlayerDistribution>> = {};
   public playerNames: Record<number, string> = {};
   protected playerPositions: Record<number, string> = {};
   protected playerCosts: Record<number, number> = {};
@@ -231,6 +234,13 @@ export abstract class BaseOracle implements XPOracle {
   }
   getVariance(playerId: number, gameweek: number): number { 
     return this.projectionEngine.predict(this.getProjectionInput(playerId, gameweek), gameweek).variance;
+  }
+  getDistribution(playerId: number, gameweek: number): PlayerDistribution {
+    if (!this.distributionMatrix[playerId]) this.distributionMatrix[playerId] = {};
+    if (!this.distributionMatrix[playerId][gameweek]) {
+      this.distributionMatrix[playerId][gameweek] = this.projectionEngine.simulatePlayerDistribution(this.getProjectionInput(playerId, gameweek), gameweek);
+    }
+    return this.distributionMatrix[playerId][gameweek];
   }
   getPriceDelta(playerId: number): number { return 0; }
   getPosition(playerId: number): string {

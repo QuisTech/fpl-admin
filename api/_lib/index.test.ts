@@ -4,7 +4,7 @@ import { describe, it, expect } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import { FPLService } from '../index';
-import { FPLPlayer, FPLFixture } from './types';
+import { FPLPlayer, FPLFixture, PlayerDistribution } from './types';
 import { CSVOracle, XPOracle } from './ingestion';
 import { Simulator, SquadState } from './simulator';
 
@@ -14,18 +14,14 @@ import { Simulator, SquadState } from './simulator';
 // -------------------------------------------------------------
 class MockOracle implements XPOracle {
   public playerNames: Record<number, string> = {};
+  private players: { id: number; xp: number[]; pos: string; cost: number; team: string }[];
   private xpMatrix: Record<number, Record<number, number>> = {};
-  private playerPositions: Record<number, string> = {};
-  private playerCosts: Record<number, number> = {};
-  private playerTeams: Record<number, string> = {};
   private allIds: number[] = [];
 
   constructor(players: { id: number; xp: number[]; pos: string; cost: number; team: string }[]) {
+    this.players = players;
     players.forEach(p => {
       this.allIds.push(p.id);
-      this.playerPositions[p.id] = p.pos;
-      this.playerCosts[p.id] = p.cost;
-      this.playerTeams[p.id] = p.team;
       this.xpMatrix[p.id] = {};
       p.xp.forEach((val, idx) => {
         this.xpMatrix[p.id][idx + 1] = val;
@@ -42,10 +38,27 @@ class MockOracle implements XPOracle {
   }
   getPriceDelta(playerId: number): number { return 0; }
   getFixtures(gameweek: number): any[] { return []; }
-  getPosition(playerId: number): string { return this.playerPositions[playerId]; }
-  getCost(playerId: number): number { return this.playerCosts[playerId]; }
-  getTeam(playerId: number): string { return this.playerTeams[playerId]; }
-  getAllPlayerIds(): number[] { return this.allIds; }
+  getPosition(playerId: number): string { return this.players.find(p => p.id === playerId)?.pos || 'MID'; }
+  getCost(playerId: number): number { return this.players.find(p => p.id === playerId)?.cost || 50; }
+  getTeam(playerId: number): string { return this.players.find(p => p.id === playerId)?.team || 'MCI'; }
+  getAllPlayerIds(): number[] { return this.players.map(p => p.id); }
+  getTop1kEO(playerId: number): number { return 0; }
+  
+  getDistribution(playerId: number, gameweek: number): PlayerDistribution {
+    const xp = this.getXP(playerId, gameweek);
+    const v = this.getVariance(playerId, gameweek);
+    return {
+      mean: xp,
+      variance: v,
+      skewness: 0,
+      p50: xp,
+      p75: xp,
+      p90: xp,
+      p95: xp,
+      tails: { 8: 0, 12: 0, 15: 0, 20: 0 },
+      histogram: {}
+    };
+  }
 }
 
 // -------------------------------------------------------------
@@ -702,6 +715,22 @@ describe('Simulator - Probabilistic Player Model & Expected Utility', () => {
       getCost(): number { return 100; }
       getTeam(): string { return 'LIV'; }
       getAllPlayerIds(): number[] { return []; }
+      
+      getDistribution(playerId: number, gameweek: number): PlayerDistribution {
+        const xp = this.getXP(playerId);
+        const v = this.getVariance(playerId);
+        return {
+          mean: xp,
+          variance: v,
+          skewness: 0,
+          p50: xp,
+          p75: xp,
+          p90: xp,
+          p95: xp,
+          tails: { 15: playerId === 450 ? 0.3 : 0.05, 8: 0, 12: 0, 20: 0 },
+          histogram: {}
+        };
+      }
     }
 
     const testOracle = new RiskTestOracle();

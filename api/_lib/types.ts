@@ -110,6 +110,18 @@ export interface ChipAdvice {
   reason: string;
 }
 
+export interface PlayerDistribution {
+  mean: number;
+  variance: number;
+  skewness: number;
+  p50: number;
+  p75: number;
+  p90: number;
+  p95: number;
+  tails: Record<number, number>;
+  histogram: Record<number, number>;
+}
+
 export interface TeamSyncResponse {
   squad: ScoredPlayer[];
   transfers: TransferRecommendation[];

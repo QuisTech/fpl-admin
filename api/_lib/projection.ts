@@ -1,5 +1,6 @@
 import { DeadlineSnapshot } from './providers/historical.js';
 import { XPOracle } from './ingestion.js';
+import { PlayerDistribution } from './types.js';
 
 export interface UtilityParameters {
   // Attacking Model
@@ -218,6 +219,175 @@ export class ProjectionEngine {
 
     return { expected: totalXp, variance: totalVar };
   }
+
+  // Error function approximation for Normal CDF
+  private erf(x: number): number {
+    const sign = (x >= 0) ? 1 : -1;
+    x = Math.abs(x);
+    const a1 =  0.254829592;
+    const a2 = -0.284496736;
+    const a3 =  1.421413741;
+    const a4 = -1.453152027;
+    const a5 =  1.061405429;
+    const p  =  0.3275911;
+    const t = 1.0 / (1.0 + p * x);
+    const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+    return sign * y;
+  }
+
+  private normalCDF(x: number, mean: number, variance: number): number {
+    if (variance <= 0) return x >= mean ? 1 : 0;
+    const sd = Math.sqrt(variance);
+    return 0.5 * (1 + this.erf((x - mean) / (sd * Math.sqrt(2))));
+  }
+
+  private approximateDistribution(mean: number, variance: number): PlayerDistribution {
+    const tails: Record<number, number> = {
+      8: 1 - this.normalCDF(8, mean, variance),
+      12: 1 - this.normalCDF(12, mean, variance),
+      15: 1 - this.normalCDF(15, mean, variance),
+      20: 1 - this.normalCDF(20, mean, variance)
+    };
+    
+    // Discretized histogram approximation for Normal CDF
+    const histogram: Record<number, number> = {};
+    for (let i = 0; i <= 25; i++) {
+       const lower = this.normalCDF(i - 0.5, mean, variance);
+       const upper = this.normalCDF(i + 0.5, mean, variance);
+       histogram[i] = Math.max(0, upper - lower);
+    }
+
+    return {
+      mean,
+      variance,
+      skewness: 0, // Normal distribution has 0 skewness
+      p50: mean, // In a normal distribution, mean == median
+      p75: mean + 0.674 * Math.sqrt(variance),
+      p90: mean + 1.282 * Math.sqrt(variance),
+      p95: mean + 1.645 * Math.sqrt(variance),
+      tails,
+      histogram
+    };
+  }
+
+  simulatePlayerDistribution(input: ProjectionInput, gameweek: number): PlayerDistribution {
+    const { expected: mean, variance } = this.predict(input, gameweek);
+    
+    // For Native/FPLForm, we lack latent variables, so we use Normal approximation
+    if (input.source !== 'EYE_TEST') {
+      return this.approximateDistribution(mean, variance);
+    }
+    
+    // For EyeTest, we can run a Monte Carlo simulation
+    const player = input.features;
+    if (!player || !player.fixturesByGw || !player.fixturesByGw[gameweek]) {
+      return this.approximateDistribution(mean, variance);
+    }
+
+    const fixtures = player.fixturesByGw[gameweek];
+    const iterations = 5000;
+    const scores: number[] = new Array(iterations).fill(0);
+    
+    // We calculate the latent expectations per fixture once, then simulate 5000 times
+    const fixProbs = fixtures.map(fix => {
+      const isHome = fix.isHome ? 1 : 0;
+      const oppDefense = fix.opponentDefenseRating || 1.5; 
+      const oppAttack = fix.opponentAttackRating || 1.5;
+      const teamAttack = fix.teamAttackRating || 1.5;
+      const teamDefense = fix.teamDefenseRating || 1.5;
+      
+      let expectedAttack = (this.params.betaAttackBase || 0) 
+        + (this.params.betaXG || 0) * player.xG90
+        + (this.params.betaXA || 0) * player.xA90
+        + (this.params.betaXGI3 || 0) * player.xGI3
+        + (this.params.betaXGI5 || 0) * player.xGI5
+        + (this.params.betaTeamAttack || 0) * teamAttack
+        + (this.params.betaOppDefense || 0) * oppDefense
+        + (this.params.betaAttFixture || 0) * (fix.difficulty || 3)
+        + (this.params.betaAttHome || 0) * isHome;
+      expectedAttack = Math.max(0, expectedAttack);
+
+      let csMultiplier = player.position === 'DEF' || player.position === 'GKP' ? 4 : (player.position === 'MID' ? 1 : 0);
+      let expectedCsProb = (this.params.betaCsBase || 0)
+        + (this.params.betaTeamDefense || 0) * teamDefense 
+        + (this.params.betaOppAttack || 0) * oppAttack
+        + (this.params.betaCsFixture || 0) * (fix.difficulty || 3)
+        + (this.params.betaCsHome || 0) * isHome;
+      expectedCsProb = Math.max(0, Math.min(1, expectedCsProb));
+      
+      const expectedBonus = Math.max(0, (this.params.betaBonusBase || 0) + (this.params.betaBpsBaseline || 0) * (expectedAttack + (expectedCsProb > 0 ? 0.5 : 0)));
+      
+      return { expectedAttack, expectedCsProb, csMultiplier, expectedBonus };
+    });
+
+    const expectedMinutes = Math.min(90 * fixtures.length, Math.max(0, (player.minutes || 0) * (fixtures.length)));
+    const pApp = Math.min(1, Math.max(0, expectedMinutes / 90));
+
+    // Helper to sample Poisson
+    const samplePoisson = (lambda: number) => {
+      let L = Math.exp(-lambda), k = 0, p = 1;
+      do { k++; p *= Math.random(); } while (p > L);
+      return k - 1;
+    };
+
+    let sum3 = 0;
+    const histogram: Record<number, number> = {};
+
+    for (let i = 0; i < iterations; i++) {
+      let gwScore = 0;
+      
+      fixProbs.forEach(fp => {
+         // Did they appear?
+         if (Math.random() <= pApp) {
+           // Appearance points
+           gwScore += (Math.random() < 0.6) ? 2 : 1; // Rough assumption for >60 mins
+           
+           // Attack points (simulate roughly 4 pts per return)
+           const returns = samplePoisson(fp.expectedAttack / 4);
+           gwScore += returns * 4;
+           
+           // Clean sheet
+           if (Math.random() <= fp.expectedCsProb) {
+             gwScore += fp.csMultiplier;
+           }
+           
+           // Bonus
+           const b = samplePoisson(fp.expectedBonus);
+           gwScore += b;
+         }
+      });
+      scores[i] = gwScore;
+      histogram[gwScore] = (histogram[gwScore] || 0) + 1;
+      sum3 += Math.pow(gwScore - mean, 3);
+    }
+
+    scores.sort((a, b) => a - b);
+    
+    // Convert histogram counts to probabilities
+    Object.keys(histogram).forEach(k => {
+      histogram[Number(k)] = histogram[Number(k)] / iterations;
+    });
+
+    const stdDev = Math.sqrt(variance);
+    const skewness = (stdDev > 0) ? (sum3 / iterations) / Math.pow(stdDev, 3) : 0;
+    
+    return {
+      mean,
+      variance,
+      skewness,
+      p50: scores[Math.floor(iterations * 0.5)],
+      p75: scores[Math.floor(iterations * 0.75)],
+      p90: scores[Math.floor(iterations * 0.9)],
+      p95: scores[Math.floor(iterations * 0.95)],
+      tails: {
+        8: scores.filter(s => s >= 8).length / iterations,
+        12: scores.filter(s => s >= 12).length / iterations,
+        15: scores.filter(s => s >= 15).length / iterations,
+        20: scores.filter(s => s >= 20).length / iterations
+      },
+      histogram
+    };
+  }
 }
 
 export class HistoricalOracle implements XPOracle {
@@ -244,6 +414,15 @@ export class HistoricalOracle implements XPOracle {
 
   getVariance(playerId: number, gameweek: number): number {
     return this.engine.predict(this.getProjectionInput(playerId), gameweek).variance;
+  }
+  
+  private distributionMatrix: Record<number, Record<number, PlayerDistribution>> = {};
+  getDistribution(playerId: number, gameweek: number): PlayerDistribution {
+    if (!this.distributionMatrix[playerId]) this.distributionMatrix[playerId] = {};
+    if (!this.distributionMatrix[playerId][gameweek]) {
+      this.distributionMatrix[playerId][gameweek] = this.engine.simulatePlayerDistribution(this.getProjectionInput(playerId), gameweek);
+    }
+    return this.distributionMatrix[playerId][gameweek];
   }
 
   getCost(playerId: number): number {

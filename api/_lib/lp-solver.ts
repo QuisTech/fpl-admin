@@ -183,6 +183,24 @@ export function solveStartingXI(
   return xiIds;
 }
 
+function getCorrelation(oracle: XPOracle, p1: number, p2: number): number {
+  if (p1 === p2) return 1.0;
+  
+  const team1 = oracle.getTeam(p1);
+  const team2 = oracle.getTeam(p2);
+  const pos1 = oracle.getPosition(p1);
+  const pos2 = oracle.getPosition(p2);
+
+  if (team1 === team2) {
+    if ((pos1 === 'GKP' && pos2 === 'DEF') || (pos1 === 'DEF' && pos2 === 'GKP')) return 0.75;
+    if ((pos1 === 'MID' && pos2 === 'FWD') || (pos1 === 'FWD' && pos2 === 'MID')) return 0.55;
+    if (pos1 === 'DEF' && pos2 === 'DEF') return 0.60;
+    return 0.30;
+  }
+  
+  return 0.02;
+}
+
 export function solveCaptain(
   oracle: XPOracle,
   gameweek: number,
@@ -191,18 +209,52 @@ export function solveCaptain(
 ): { captain: number; viceCaptain: number } {
   if (xiIds.length === 0) return { captain: 0, viceCaptain: 0 };
   
-  // Sort players by their 1-GW utility
+  const getCaptainScore = (id: number) => {
+    const dist = oracle.getDistribution(id, gameweek);
+    const eo = oracle.getTop1kEO?.(id) ?? 0;
+    
+    const targetTail = params.betaVariance > 0 ? (dist.tails[15] || 0) : (dist.tails[8] || 0);
+    const tailWeight = Math.abs(params.betaVariance) * 10; 
+    const skewReward = params.betaVariance > 0 ? ((dist.skewness || 0) * 0.5) : 0;
+
+    return dist.mean + (tailWeight * targetTail) + skewReward + (params.betaEO * eo / 100);
+  };
+
   const playersWithScores = xiIds.map(id => ({
     id,
-    score: getPlayerScore(oracle, gameweek, id, 1, params)
+    score: getCaptainScore(id)
   }));
   
   playersWithScores.sort((a, b) => b.score - a.score);
+  const captain = playersWithScores[0];
   
-  return {
-    captain: playersWithScores[0].id,
-    viceCaptain: playersWithScores.length > 1 ? playersWithScores[1].id : playersWithScores[0].id
+  const vcParams = { ...params };
+  if (vcParams.betaEO < 0) {
+    vcParams.betaEO = Math.abs(vcParams.betaEO);
+  }
+  
+  const getVCScore = (id: number) => {
+    const dist = oracle.getDistribution(id, gameweek);
+    const eo = oracle.getTop1kEO?.(id) ?? 0;
+    
+    const targetTail = vcParams.betaVariance > 0 ? (dist.tails[15] || 0) : (dist.tails[8] || 0);
+    const tailWeight = Math.abs(vcParams.betaVariance) * 10; 
+    
+    const baseScore = dist.mean + (tailWeight * targetTail) + (vcParams.betaEO * eo / 100);
+    const lambda = 5.0;
+    const correlation = getCorrelation(oracle, captain.id, id);
+    
+    return baseScore - (lambda * correlation);
   };
+
+  const vcCandidates = xiIds
+    .filter(id => id !== captain.id)
+    .map(id => ({ id, score: getVCScore(id) }));
+
+  vcCandidates.sort((a, b) => b.score - a.score);
+  const viceCaptain = vcCandidates[0] ? vcCandidates[0].id : captain.id;
+
+  return { captain: captain.id, viceCaptain };
 }
 
 import { SquadState, getSellingPrice } from './simulator.js';
