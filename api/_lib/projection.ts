@@ -12,11 +12,14 @@ export interface UtilityParameters {
   betaOppDefense: number;
   betaAttHome: number;
   
+  betaAttFixture?: number;
+  
   // Clean Sheet Model
   betaCsBase: number;
   betaTeamDefense: number;
   betaOppAttack: number;
   betaCsHome: number;
+  betaCsFixture?: number;
   
   // Bonus Model
   betaBonusBase: number;
@@ -28,6 +31,7 @@ export interface UtilityParameters {
 
   // Minutes Model
   betaMinutesBase: number;
+  betaMinutesTrend?: number;
   betaMinutesLast1: number;
   betaMinutesLast3: number;
   betaMinutesLast5: number;
@@ -100,22 +104,30 @@ export class ProjectionEngine {
     let totalVar = 0;
     
     // Stage 1: Minutes Model
-    const expectedMinutes = Math.max(0, Math.min(90, 
-      this.params.betaMinutesBase +
-      this.params.betaMinutesLast1 * (player.minutesLast1 || 0) +
-      this.params.betaMinutesLast3 * (player.minutesLast3 || 0) +
-      this.params.betaMinutesLast5 * (player.minutesLast5 || 0) +
-      this.params.betaMinutesEWMA * (player.minutesEWMA || 0) +
-      this.params.betaStartsLast5 * (player.startsLast5 || 0) +
-      this.params.betaSeasonMins * (player.seasonMinutesPercent || 0) +
-      this.params.betaRestHours * (player.restHours || 168) +
-      this.params.betaFix7Days * (player.fixturesLast7Days || 0) +
-      this.params.betaFix14Days * (player.fixturesLast14Days || 0) +
-      this.params.betaMinVolatility * (player.minutesVolatility || 0) +
-      this.params.betaChanceOfPlaying * (player.chanceOfPlayingThisRound !== undefined ? player.chanceOfPlayingThisRound : 100) +
-      this.params.betaSelectionMomentum * (player.selectionMomentum || 0) +
-      this.params.betaConsecutiveStarts * (player.consecutiveStarts || 0)
+    // Fallback to player.predictedMinutes (chance_of_playing * 90) if model lacks complex minutes weights
+    let expectedMinutes = Math.max(0, Math.min(90, 
+      (this.params.betaMinutesBase || 0) +
+      (this.params.betaMinutesLast1 || 0) * (player.minutesLast1 || 0) +
+      (this.params.betaMinutesLast3 || 0) * (player.minutesLast3 || 0) +
+      (this.params.betaMinutesLast5 || 0) * (player.minutesLast5 || 0) +
+      (this.params.betaMinutesEWMA || 0) * (player.minutesEWMA || 0) +
+      (this.params.betaStartsLast5 || 0) * (player.startsLast5 || 0) +
+      (this.params.betaSeasonMins || 0) * (player.seasonMinutesPercent || 0) +
+      (this.params.betaRestHours || 0) * (player.restHours || 168) +
+      (this.params.betaFix7Days || 0) * (player.fixturesLast7Days || 0) +
+      (this.params.betaFix14Days || 0) * (player.fixturesLast14Days || 0) +
+      (this.params.betaMinVolatility || 0) * (player.minutesVolatility || 0) +
+      (this.params.betaChanceOfPlaying || 0) * (player.chanceOfPlayingThisRound !== undefined ? player.chanceOfPlayingThisRound : 100) +
+      (this.params.betaSelectionMomentum || 0) * (player.selectionMomentum || 0) +
+      (this.params.betaConsecutiveStarts || 0) * (player.consecutiveStarts || 0) +
+      (this.params.betaMinutesTrend || 0) * (player.minutesTrend || 0)
     ));
+    
+    // If the ML model didn't provide enough weights to predict > 20 mins, but the player is fit, 
+    // fall back to their basic predicted probability of playing to prevent zeroing out xP.
+    if (expectedMinutes < 20 && player.predictedMinutes > 20) {
+        expectedMinutes = player.predictedMinutes;
+    }
     // Save to player so oracle can expose it if needed
     player.predictedMinutes = expectedMinutes;
     
@@ -131,30 +143,32 @@ export class ProjectionEngine {
       const teamDefense = fix.teamDefenseRating || 1.5;
       
       // Sub-model 1: Attacking Returns
-      let expectedAttack = this.params.betaAttackBase 
-        + this.params.betaXG * player.xG90
-        + this.params.betaXA * player.xA90
-        + this.params.betaXGI3 * player.xGI3
-        + this.params.betaXGI5 * player.xGI5
-        + this.params.betaTeamAttack * teamAttack
-        + this.params.betaOppDefense * oppDefense
-        + this.params.betaAttHome * isHome;
+      let expectedAttack = (this.params.betaAttackBase || 0) 
+        + (this.params.betaXG || 0) * player.xG90
+        + (this.params.betaXA || 0) * player.xA90
+        + (this.params.betaXGI3 || 0) * player.xGI3
+        + (this.params.betaXGI5 || 0) * player.xGI5
+        + (this.params.betaTeamAttack || 0) * teamAttack
+        + (this.params.betaOppDefense || 0) * oppDefense
+        + (this.params.betaAttFixture || 0) * (fix.difficulty || 3)
+        + (this.params.betaAttHome || 0) * isHome;
         
       expectedAttack = Math.max(0, expectedAttack) * minuteFraction;
 
       // Sub-model 2: Clean Sheet Probability
       // Only Defenders and GKs get full CS points (4). Mids get (1). Fwds get 0.
       let csMultiplier = player.position === 'DEF' || player.position === 'GKP' ? 4 : (player.position === 'MID' ? 1 : 0);
-      let expectedCsProb = this.params.betaCsBase
-        + this.params.betaTeamDefense * teamDefense 
-        + this.params.betaOppAttack * oppAttack
-        + this.params.betaCsHome * isHome;
+      let expectedCsProb = (this.params.betaCsBase || 0)
+        + (this.params.betaTeamDefense || 0) * teamDefense 
+        + (this.params.betaOppAttack || 0) * oppAttack
+        + (this.params.betaCsFixture || 0) * (fix.difficulty || 3)
+        + (this.params.betaCsHome || 0) * isHome;
 
       expectedCsProb = Math.max(0, Math.min(1, expectedCsProb)) * minuteFraction;
       const expectedCS = expectedCsProb * csMultiplier;
 
       // Sub-model 3: Bonus
-      const expectedBonus = Math.max(0, this.params.betaBonusBase + this.params.betaBpsBaseline * (expectedAttack / 3));
+      let expectedBonus = Math.max(0, (this.params.betaBonusBase || 0) + (this.params.betaBpsBaseline || 0) * (expectedAttack + (expectedCS > 0 ? 0.5 : 0)));
 
       // Sub-model 4: Appearance
       // Roughly 2 points if > 60 mins, 1 pt if < 60 mins
