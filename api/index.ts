@@ -221,6 +221,13 @@ export class FPLService {
         const team = oracle.getTeam(id);
         const name = (oracle as any).playerNames?.[id] || `Player ${id}`;
         
+        // Build a minimal player-like object so calculatePlayerScore can apply risk mode adjustments
+        const pseudoPlayer = {
+          now_cost: cost,
+          selected_by_percent: '0', // Eye-test players default to low ownership (differential-friendly)
+        } as any;
+        const adjustedScore = this.calculatePlayerScore(baseXp, pseudoPlayer, riskMode, fuel);
+        
         return {
           id,
           web_name: name,
@@ -228,9 +235,9 @@ export class FPLService {
           now_cost: cost,
           team: parseInt(team) || 0,
           position,
-          team_name: `Team ${team}`,
+          team_name: team,
           team_short_name: team,
-          score: baseXp,
+          score: adjustedScore,
           xP: baseXp,
           ppm: cost > 0 ? (baseXp / (cost / 10)) : 0,
           next_fixtures: [],
