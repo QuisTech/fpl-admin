@@ -376,9 +376,46 @@ maximize: EV / Cost
       <p>Winning FPL is not simply an optimization problem—it is a <strong>Positioning and Variance Capture System</strong>. The V3 Engine gives you the exact mathematical framework to execute both flawlessly.</p>
     </section>
 
-    <!-- SECTION 5: PLATFORM SHOWCASE -->
+    <!-- SECTION 5: MULTI-FUEL ENGINE ARCHITECTURE -->
     <section>
-      <h2>Take Action: Access the V3 Engine</h2>
+      <h2>5. The 3-Fuel Engine Architecture</h2>
+      <p>Data quality is the foundation of any quantitative model. The V3 Engine introduces a tri-source modular fuel architecture, allowing managers to dynamically select their underlying projection engine based on the phase of the season.</p>
+
+      <div class="grid">
+        <div class="card">
+          <div class="card-title">1. FPLFORM (Crowdsourced Consensus)</div>
+          <p>Scrapes real-time expected points from trusted community projection engines. Pre-bakes fixture difficulty and set-piece roles. Ideal for early-season gameweeks (GW1–GW4) before single-season sample sizes mature.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">2. EYE-TEST (Proprietary ML)</div>
+          <p>Powered by Evolutionary Strategies (ES-v001). Trains custom weights on underlying metrics (xG, xA, xGI3, xGI5, home/away splits, opponent defense) stored in the internal feature store. Dominates from GW5 onwards as underlying stats stabilize.</p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 1rem;">
+        <div class="card-title">3. NATIVE (Official Baseline)</div>
+        <p>Direct REST integration with the official Premier League API. Serves as a conservative baseline and automated fallback pipeline during cloud or scraping disruptions.</p>
+      </div>
+    </section>
+
+    <!-- SECTION 6: PROBABILISTIC DISTRIBUTIONS & COVARIANCE HEDGING -->
+    <section>
+      <h2>6. Probabilistic Distributions & Portfolio Covariance</h2>
+      <p>Standard FPL tools treat player points as independent random variables. In reality, football points are highly correlated: a goal by Haaland is often accompanied by a De Bruyne assist, while a clean sheet wipeout hurts every defender on the team simultaneously.</p>
+
+      <div class="formula-box">
+        <div class="formula-title">Captaincy Utility & Covariance Hedging</div>
+        CaptainScore = xP + &alpha;&middot;P(X &ge; 15) + Skewness - &beta;&middot;EO<br/>
+        ViceCaptainScore = CaptainScore - &lambda;&middot;Cov(Captain, Candidate)
+      </div>
+
+      <p style="margin-top: 1rem;"><strong>1. Tail Probability P(X &ge; 15):</strong> Every player is modeled as a <code>PlayerDistribution</code> using Normal/Monte Carlo approximations. In <strong>RISKY MODE</strong>, the solver explicitly optimizes for the right-tail probability of a 15+ point haul, favoring explosive attackers over low-ceiling assets.</p>
+      <p style="margin-top: 0.75rem;"><strong>2. Vice-Captain Covariance Hedging:</strong> To eliminate correlated downside, the Vice-Captain selection explicitly penalizes shared team covariance. If your Captain is an Arsenal attacker, the engine mathematically forces your Vice-Captain to be an independent asset from another team (e.g. Liverpool or Chelsea), guaranteeing true portfolio diversification.</p>
+    </section>
+
+    <!-- SECTION 7: PLATFORM SHOWCASE -->
+    <section>
+      <h2>7. Take Action: Access the V3 Engine</h2>
       <p>This whitepaper outlines the mathematical framework for constrained portfolio optimization, but executing it manually via spreadsheets is a major grind. The <strong>FPL Horizon V3 Engine</strong> automates this entire process: it syncs with your team data instantly, runs high-dimensional solvers, and builds your mathematically perfect squad path with one click.</p>
 
       <div class="screenshot-container">
