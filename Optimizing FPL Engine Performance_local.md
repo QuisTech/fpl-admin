@@ -210,7 +210,7 @@ Your bigger issue is that your whole system may be optimising slightly different
 
 Useful, but I would not do this before the season.
 
-Monte Carlo sounds attractive, but with Vercel Hobby it may become expensive.
+Monte Carlo sounds attractive, but with Vercel serverless execution it may become expensive.
 
 You can get most of the benefit with:
 
@@ -609,7 +609,7 @@ Please review the proposed lambda constants (`0.15` for Safe, `0.02` for Aggress
 
 ### User Input
 
-Hope my vercel hobby tier plan will carry it?
+Hope my Vercel serverless deployment will carry it?
 
 *Edited relevant file*
 
@@ -625,7 +625,7 @@ Hope my vercel hobby tier plan will carry it?
 
 ### Planner Response
 
-Yes, absolutely! **Your Vercel Hobby tier will handle this without breaking a sweat.** 
+Yes, absolutely! **Your Vercel serverless deployment will handle this without breaking a sweat.** 
 
 We didn't add any loops, API calls, or heavy processing. All we did was take the math that was already happening (addition, subtraction, multiplication) and move it into a single, shared `utility.ts` file so that both the LP Solver and the Simulator are using the exact same formulas. The performance (Big-O complexity) remains completely identical, so your Vercel execution times won't increase at all.
 
@@ -2077,7 +2077,7 @@ Our next major engineering effort is writing the logic inside the `VaastavProvid
 
 ### User Input
 
-I hope all of these will still work with our vercel hobby tier plan?
+I hope all of these will still work with our Vercel deployment?
 
 
 This is a very solid scaffold. More importantly, you've separated **architecture** from **implementation**, which will make the next few weeks much easier.
@@ -2513,7 +2513,7 @@ At this stage, I'd resist adding any more optimization heuristics. The architect
 
 ### Planner Response
 
-To answer your biggest concern right off the bat: **Yes, this will absolutely work with your Vercel Hobby tier!** 
+To answer your biggest concern right off the bat: **Yes, this will absolutely work with your Vercel serverless deployment!** 
 
 Here is why: **The backtesting engine will never touch Vercel.** 
 
@@ -3101,7 +3101,7 @@ The Optimization Platform is officially alive and learning. I am standing by for
 
 So this testing, is it a form of machine learning or how exactly does this work to making making me win ?
 
-Also, you said something about running simulation offline without vercel so it won't affect our vercel hobby tier, what if I want to get my weekly prediction from my phone, how does this all work, I'm lost
+Also, you said something about running simulation offline without vercel so it won't affect our serverless limits, what if I want to get my weekly prediction from my phone, how does this all work, I'm lost
 
 ### Planner Response
 
@@ -3132,7 +3132,7 @@ When you open the web app on your phone on a Friday night:
 3. It runs the lightweight LP Solver (which takes about 1 second and uses almost no memory).
 4. **It instantly shows you the mathematically perfect transfers to make on your phone's screen.**
 
-Because all the heavy "learning" was done offline on your laptop weeks ago, the live app running on Vercel is incredibly fast, extremely cheap, and will easily stay well within your free Hobby tier limits!
+Because all the heavy "learning" was done offline on your laptop weeks ago, the live app running on Vercel is incredibly fast, extremely cheap, and will easily stay well within your serverless deployment limits!
 
 ### User Input
 
