@@ -54,6 +54,7 @@ export type FPLFixture = z.infer<typeof FPLFixtureSchema>;
 export interface ScoredPlayer extends FPLPlayer {
   score: number;
   xP: number;
+  horizonXP?: number;
   ppm: number;
   team_name: string;
   team_short_name: string;
@@ -85,6 +86,10 @@ export interface RecommendationResponse {
     activeConstraints: {
       minEoTotal?: number;
       minElitePlayers?: number;
+    };
+    metrics?: {
+      averageXiEo: number;
+      horizonTotalXp: number;
     };
   };
   topPicks: {

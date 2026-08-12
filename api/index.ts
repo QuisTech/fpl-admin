@@ -216,7 +216,12 @@ export class FPLService {
     const available = players.filter(p => p.status === 'a' || p.chance_of_playing_next_round === 100);
     scored = available.map(p => {
       const baseXp = oracle.getXP(p.id, nextEventId);
+      let horizonXP = 0;
+      for (let step = 0; step < 8; step++) {
+        horizonXP += oracle.getXP(p.id, nextEventId + step);
+      }
       const mapped = this.mapToScoredPlayer(p, teams, fixtures, nextEventId, riskMode, baseXp, fuel);
+      mapped.horizonXP = horizonXP;
       mapped.eo = oracle.getTop1kEO?.(p.id) ?? 0;
       mapped.ownership = oracle.getTop1kOwnership?.(p.id) ?? parseFloat(p.selected_by_percent || "0") ?? 0;
       return mapped;
@@ -307,6 +312,11 @@ export class FPLService {
         if (squadPlayer) squadPlayer.isViceCaptain = true;
       }
   
+      const averageXiEo = startingXI.length > 0 
+        ? startingXI.reduce((sum, p) => sum + (p.eo || 0), 0) / startingXI.length 
+        : 0;
+      const horizonTotalXp = startingXI.reduce((sum, p) => sum + (p.horizonXP || p.xP * 8 || 0), 0);
+
       return { 
       squad, startingXI, 
       bench,
@@ -321,8 +331,12 @@ export class FPLService {
         riskMode: riskMode,
         solverStatus: isHeuristicFallback ? 'heuristic_fallback' : 'optimal',
         activeConstraints: {
-          minEoTotal: riskMode === 'safe' ? 150 : 0,
+          minEoTotal: riskMode === 'safe' ? 200 : 0,
           minElitePlayers: riskMode === 'safe' ? 1 : 0
+        },
+        metrics: {
+          averageXiEo: Math.round(averageXiEo * 10) / 10,
+          horizonTotalXp: Math.round(horizonTotalXp * 10) / 10
         }
       },
       topPicks: {
