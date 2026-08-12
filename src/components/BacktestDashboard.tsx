@@ -181,11 +181,11 @@ export const BacktestDashboard = () => {
             >
               <Icon className={`w-4 h-4 ${m.color} mx-auto mb-1.5`} />
               <div className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-1">{m.label}</div>
-              <div className={`text-lg font-black font-mono ${m.color}`}>{totals.totalPoints}</div>
+              <div className={`text-lg font-black font-mono ${m.color}`}>{Number(totals.totalPoints).toFixed(1)}</div>
               <div className="text-[9px] text-slate-500 mb-1">Total Points</div>
               <div className={`text-[10px] font-black font-mono flex items-center justify-center gap-0.5 ${isPositiveAlpha ? 'text-emerald-400' : 'text-rose-400'}`}>
                 {isPositiveAlpha ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                {isPositiveAlpha ? '+' : ''}{totals.alphaVsTemplate} vs Template
+                {isPositiveAlpha ? '+' : ''}{Number(totals.alphaVsTemplate).toFixed(1)} vs Template
               </div>
             </motion.div>
           );
@@ -198,7 +198,7 @@ export const BacktestDashboard = () => {
           <BarChart3 className="w-4 h-4 text-slate-400" />
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Top-1k Template Baseline</span>
         </div>
-        <span className="text-sm font-black font-mono text-white">{data.totals.template.totalPoints} pts</span>
+        <span className="text-sm font-black font-mono text-white">{Number(data.totals.template.totalPoints).toFixed(1)} pts</span>
       </div>
 
       {/* Gameweek Breakdown */}
