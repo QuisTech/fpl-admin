@@ -91,6 +91,19 @@ export interface RecommendationResponse {
       minEoTotal?: number;
       minElitePlayers?: number;
     };
+    metrics?: {
+      horizonTotalXp?: number;
+      averageXiEo?: number;
+      swapAnalysis?: {
+        swapCount: number;
+        differentialQuality: string;
+        withinThresholdPct: number;
+        divergenceTier: string;
+        avgSwapCostPerGw: number;
+        totalXpSacrificed8GW: number;
+        avgEoReduction: number;
+      };
+    };
   };
   topPicks: {
     gkp: ScoredPlayer[];
