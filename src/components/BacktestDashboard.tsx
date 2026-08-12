@@ -121,7 +121,7 @@ export const BacktestDashboard = () => {
               Run the backtest CLI locally to generate results:
             </p>
             <code className="block mt-2 text-[9px] text-fpl-green bg-slate-950 p-2 rounded-lg font-mono text-left overflow-x-auto whitespace-nowrap">
-              node --import tsx scripts/{activeTab === 'eye-test' ? 'run-backtest.ts' : 'run_backtest.ts'} --start-gw 1 --end-gw 1 --fuel {activeTab}
+              node --import tsx scripts/run_backtest.ts --start-gw 1 --end-gw 1 --fuel {activeTab}
               <br/>
               cp data/{activeTab === 'eye-test' ? 'backtest_results_eyetest.json' : 'backtest_results.json'} public/data/{activeTab === 'native' ? 'backtest_results_native.json' : activeTab === 'eye-test' ? 'backtest_results_eyetest.json' : 'backtest_results.json'}
             </code>
