@@ -49,7 +49,7 @@ interface BacktestData {
 }
 
 export const BacktestDashboard = () => {
-  const [activeTab, setActiveTab] = useState<'fplform' | 'native'>('fplform');
+  const [activeTab, setActiveTab] = useState<'fplform' | 'native' | 'eye-test'>('fplform');
   const [data, setData] = useState<BacktestData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -58,7 +58,9 @@ export const BacktestDashboard = () => {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    const fileName = activeTab === 'native' ? 'backtest_results_native.json' : 'backtest_results.json';
+    let fileName = 'backtest_results.json';
+    if (activeTab === 'native') fileName = 'backtest_results_native.json';
+    if (activeTab === 'eye-test') fileName = 'backtest_results_eyetest.json';
     
     fetch(`/data/${fileName}`)
       .then(res => {
@@ -103,6 +105,12 @@ export const BacktestDashboard = () => {
           >
             NATIVE
           </button>
+          <button
+            onClick={() => setActiveTab('eye-test')}
+            className={`px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-md transition-colors ${activeTab === 'eye-test' ? 'bg-cyan-500 text-slate-950' : 'text-slate-500 hover:text-slate-300'}`}
+          >
+            EYE-TEST
+          </button>
         </div>
 
         <div className="flex items-center justify-center h-64">
@@ -113,9 +121,9 @@ export const BacktestDashboard = () => {
               Run the backtest CLI locally to generate results:
             </p>
             <code className="block mt-2 text-[9px] text-fpl-green bg-slate-950 p-2 rounded-lg font-mono text-left overflow-x-auto whitespace-nowrap">
-              node --import tsx scripts/run_backtest.ts --start-gw 1 --end-gw 1 --fuel {activeTab}
+              node --import tsx scripts/{activeTab === 'eye-test' ? 'run-backtest.ts' : 'run_backtest.ts'} --start-gw 1 --end-gw 1 --fuel {activeTab}
               <br/>
-              cp data/backtest_results.json public/data/{activeTab === 'native' ? 'backtest_results_native.json' : 'backtest_results.json'}
+              cp data/{activeTab === 'eye-test' ? 'backtest_results_eyetest.json' : 'backtest_results.json'} public/data/{activeTab === 'native' ? 'backtest_results_native.json' : activeTab === 'eye-test' ? 'backtest_results_eyetest.json' : 'backtest_results.json'}
             </code>
             <p className="text-[10px] text-slate-500 mt-2">Then push to deploy the results.</p>
           </div>
@@ -153,6 +161,12 @@ export const BacktestDashboard = () => {
               className={`px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-md transition-colors ${activeTab === 'native' ? 'bg-fpl-purple text-white' : 'text-slate-500 hover:text-slate-300'}`}
             >
               NATIVE
+            </button>
+            <button
+              onClick={() => setActiveTab('eye-test')}
+              className={`px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-md transition-colors ${activeTab === 'eye-test' ? 'bg-cyan-500 text-slate-950' : 'text-slate-500 hover:text-slate-300'}`}
+            >
+              EYE-TEST
             </button>
           </div>
           <p className="text-[9px] text-slate-500 mt-0.5">
