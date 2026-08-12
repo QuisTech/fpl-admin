@@ -161,6 +161,71 @@ export class FPLService {
     };
   }
 
+  static computeSwapAnalysis(safeXI: ScoredPlayer[], riskyXI: ScoredPlayer[]) {
+    const safeIds = new Set(safeXI.map(p => p.id));
+    const riskyIds = new Set(riskyXI.map(p => p.id));
+
+    const replacedOut = safeXI.filter(p => !riskyIds.has(p.id));
+    const broughtIn = riskyXI.filter(p => !safeIds.has(p.id));
+
+    const swaps: Array<{
+      outPlayer: string;
+      inPlayer: string;
+      position: string;
+      xpSacrifice8GW: number;
+      xpSacrificePerGw: number;
+      eoReduction: number;
+    }> = [];
+
+    const unusedIn = [...broughtIn];
+    for (const outP of replacedOut) {
+      const inIdx = unusedIn.findIndex(p => p.position === outP.position);
+      const inP = inIdx >= 0 ? unusedIn.splice(inIdx, 1)[0] : unusedIn.shift();
+      if (!inP) continue;
+
+      const outXp8 = outP.horizonXP || (outP.xP * 8);
+      const inXp8 = inP.horizonXP || (inP.xP * 8);
+      const xpSacrifice8GW = Math.round((outXp8 - inXp8) * 10) / 10;
+      const xpSacrificePerGw = Math.round((xpSacrifice8GW / 8) * 100) / 100;
+      const eoReduction = Math.round(((outP.eo || 0) - (inP.eo || 0)) * 10) / 10;
+
+      swaps.push({
+        outPlayer: `${outP.web_name} (${outP.team_short_name})`,
+        inPlayer: `${inP.web_name} (${inP.team_short_name})`,
+        position: outP.position,
+        xpSacrifice8GW,
+        xpSacrificePerGw,
+        eoReduction
+      });
+    }
+
+    const swapCount = swaps.length;
+    const totalXpSacrificed8GW = Math.round(swaps.reduce((sum, s) => sum + s.xpSacrifice8GW, 0) * 10) / 10;
+    const avgSwapCostPerGw = swapCount > 0 ? Math.round((totalXpSacrificed8GW / swapCount / 8) * 100) / 100 : 0;
+    const avgEoReduction = swapCount > 0 ? Math.round((swaps.reduce((sum, s) => sum + s.eoReduction, 0) / swapCount) * 10) / 10 : 0;
+
+    const withinThresholdCount = swaps.filter(s => s.xpSacrificePerGw <= 0.35).length;
+    const withinThresholdPct = swapCount > 0 ? Math.round((withinThresholdCount / swapCount) * 100) : 100;
+
+    let divergenceTier: 'LOW_DIVERGENCE_WARNING' | 'HEALTHY_DIFFERENTIAL' | 'HIGH_DIVERGENCE_WARNING' = 'HEALTHY_DIFFERENTIAL';
+    if (swapCount <= 1) divergenceTier = 'LOW_DIVERGENCE_WARNING';
+    else if (swapCount > 6) divergenceTier = 'HIGH_DIVERGENCE_WARNING';
+
+    const differentialQuality: 'PASS' | 'WARNING' = withinThresholdPct >= 75 ? 'PASS' : 'WARNING';
+
+    return {
+      swapCount,
+      divergenceTier,
+      totalXpSacrificed8GW,
+      avgSwapCostPerGw,
+      avgEoReduction,
+      withinThresholdCount,
+      withinThresholdPct,
+      differentialQuality,
+      swaps
+    };
+  }
+
   static async getRecommendations(riskMode: string, budget: number = 1000, tier: string = 'free', fuel: string = 'fplform'): Promise<RecommendationResponse> {
     // For eye-test mode, skip FPL API call and use CSV data only
     let players: any[] = [];
@@ -317,6 +382,29 @@ export class FPLService {
         : 0;
       const horizonTotalXp = startingXI.reduce((sum, p) => sum + (p.horizonXP || p.xP * 8 || 0), 0);
 
+      let swapAnalysisResult = undefined;
+      if ((riskMode === 'aggressive' || riskMode === 'risky' || riskMode === 'value') && tier !== 'free') {
+        try {
+          const availableIds = new Set<number>(scored.map(p => p.id));
+          const safeParams = getParamsForRiskMode('safe', baseWeights);
+          const safeOptimalIds = solveOptimalSquad(oracle, nextEventId, budget, 8, safeParams, availableIds);
+          if (safeOptimalIds && safeOptimalIds.length > 0) {
+            const safeSquad = scored.filter(p => safeOptimalIds.includes(p.id));
+            const safeGkps = safeSquad.filter(p => p.position === "GKP").sort(sortByScore);
+            const safeDefs = safeSquad.filter(p => p.position === "DEF").sort(sortByScore);
+            const safeMids = safeSquad.filter(p => p.position === "MID").sort(sortByScore);
+            const safeFwds = safeSquad.filter(p => p.position === "FWD").sort(sortByScore);
+            const safeMandatory = [safeGkps[0], ...safeDefs.slice(0, 3), ...safeMids.slice(0, 2), ...safeFwds.slice(0, 1)].filter(Boolean) as ScoredPlayer[];
+            const safeAvailableOutfielders = [...safeDefs.slice(3), ...safeMids.slice(2), ...safeFwds.slice(1)].sort(sortByScore);
+            const safeXI = [...safeMandatory, ...safeAvailableOutfielders.slice(0, 4)].filter(Boolean) as ScoredPlayer[];
+            
+            swapAnalysisResult = this.computeSwapAnalysis(safeXI, startingXI);
+          }
+        } catch (err) {
+          // ignore baseline safe solve errors
+        }
+      }
+
       return { 
       squad, startingXI, 
       bench,
@@ -336,7 +424,8 @@ export class FPLService {
         },
         metrics: {
           averageXiEo: Math.round(averageXiEo * 10) / 10,
-          horizonTotalXp: Math.round(horizonTotalXp * 10) / 10
+          horizonTotalXp: Math.round(horizonTotalXp * 10) / 10,
+          swapAnalysis: swapAnalysisResult
         }
       },
       topPicks: {

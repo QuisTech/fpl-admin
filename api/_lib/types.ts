@@ -90,6 +90,24 @@ export interface RecommendationResponse {
     metrics?: {
       averageXiEo: number;
       horizonTotalXp: number;
+      swapAnalysis?: {
+        swapCount: number;
+        divergenceTier: 'LOW_DIVERGENCE_WARNING' | 'HEALTHY_DIFFERENTIAL' | 'HIGH_DIVERGENCE_WARNING';
+        totalXpSacrificed8GW: number;
+        avgSwapCostPerGw: number;
+        avgEoReduction: number;
+        withinThresholdCount: number;
+        withinThresholdPct: number;
+        differentialQuality: 'PASS' | 'WARNING';
+        swaps: Array<{
+          outPlayer: string;
+          inPlayer: string;
+          position: string;
+          xpSacrifice8GW: number;
+          xpSacrificePerGw: number;
+          eoReduction: number;
+        }>;
+      };
     };
   };
   topPicks: {

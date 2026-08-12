@@ -9,8 +9,9 @@ interface EngineDiagnosticsProps {
 export const EngineDiagnostics = ({ data }: EngineDiagnosticsProps) => {
   if (!data?.engineDiagnostics) return null;
 
-  const { budgetUsed, budgetLimit, solverStatus, riskMode, activeConstraints } = data.engineDiagnostics;
+  const { budgetUsed, budgetLimit, solverStatus, riskMode, activeConstraints, metrics } = data.engineDiagnostics;
   const isOptimal = solverStatus === 'optimal';
+  const swapAnalysis = metrics?.swapAnalysis;
 
   return (
     <motion.div
@@ -32,7 +33,7 @@ export const EngineDiagnostics = ({ data }: EngineDiagnosticsProps) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 relative z-10">
+      <div className="grid grid-cols-2 gap-2 relative z-10 mb-3">
         <div className="bg-slate-900/50 p-2 rounded-xl border border-slate-800">
           <p className="text-[9px] text-slate-500 uppercase font-bold mb-1 truncate">Constraint: Budget</p>
           <div className="flex items-end gap-1">
@@ -49,19 +50,48 @@ export const EngineDiagnostics = ({ data }: EngineDiagnosticsProps) => {
         </div>
 
         <div className="bg-slate-900/50 p-2 rounded-xl border border-slate-800">
-          <p className="text-[9px] text-slate-500 uppercase font-bold mb-1 truncate">Rank Shield</p>
-          <p className={`text-[11px] font-black truncate ${riskMode === 'safe' ? 'text-emerald-400' : 'text-slate-400'}`}>
-            {riskMode === 'safe' ? `EO > ${activeConstraints.minEoTotal}%` : 'Disabled'}
+          <p className="text-[9px] text-slate-500 uppercase font-bold mb-1 truncate">8-GW XI Projected xP</p>
+          <p className="text-[11px] font-black font-mono text-emerald-400 truncate">
+            {metrics?.horizonTotalXp ? `${metrics.horizonTotalXp} pts` : 'N/A'}
           </p>
         </div>
 
         <div className="bg-slate-900/50 p-2 rounded-xl border border-slate-800">
-          <p className="text-[9px] text-slate-500 uppercase font-bold mb-1 truncate">Premium Core</p>
-          <p className={`text-[11px] font-black truncate ${riskMode === 'safe' ? 'text-emerald-400' : 'text-slate-400'}`}>
-            {riskMode === 'safe' ? `Min ${activeConstraints.minElitePlayers} Elite` : 'Flexible'}
+          <p className="text-[9px] text-slate-500 uppercase font-bold mb-1 truncate">Average XI EO</p>
+          <p className="text-[11px] font-black font-mono text-cyan-400 truncate">
+            {metrics?.averageXiEo !== undefined ? `${metrics.averageXiEo}%` : 'N/A'}
           </p>
         </div>
       </div>
+
+      {swapAnalysis && (
+        <div className="relative z-10 mt-3 pt-3 border-t border-slate-800/80">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">RISKY vs SAFE Divergence</span>
+            <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${swapAnalysis.differentialQuality === 'PASS' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'}`}>
+              Quality: {swapAnalysis.differentialQuality} ({swapAnalysis.withinThresholdPct}% ≤0.35 xP/GW)
+            </span>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-800">
+              <div className="text-[8px] text-slate-500 font-bold uppercase">Swaps</div>
+              <div className="text-xs font-mono font-black text-white">{swapAnalysis.swapCount}</div>
+              <div className="text-[8px] text-emerald-400 font-semibold truncate">{swapAnalysis.divergenceTier.replace('_', ' ')}</div>
+            </div>
+            <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-800">
+              <div className="text-[8px] text-slate-500 font-bold uppercase">Avg Cost / GW</div>
+              <div className="text-xs font-mono font-black text-amber-400">-{swapAnalysis.avgSwapCostPerGw} xP</div>
+              <div className="text-[8px] text-slate-500 truncate">Total: -{swapAnalysis.totalXpSacrificed8GW} pts</div>
+            </div>
+            <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-800">
+              <div className="text-[8px] text-slate-500 font-bold uppercase">EO Drop</div>
+              <div className="text-xs font-mono font-black text-cyan-400">-{swapAnalysis.avgEoReduction}%</div>
+              <div className="text-[8px] text-slate-500 truncate">per swap</div>
+            </div>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 };
