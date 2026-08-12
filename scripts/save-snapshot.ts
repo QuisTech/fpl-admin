@@ -5,7 +5,7 @@
  * Called automatically by the Sniper GitHub Action ~2 hours before each GW deadline.
  * 
  * Reads the current gameweek from top_1000_eo.json or the FPL API bootstrap,
- * then copies fplform.csv + top_1000_eo.json into data/snapshots/gw_{X}/
+ * then copies fplform.csv, fpl_native.csv, and top_1000_eo.json into data/snapshots/gw_{X}/
  */
 import fs from 'fs';
 import path from 'path';
