@@ -1,98 +1,98 @@
 {
-  "generatedAt": "2026-08-12T15:48:13.182Z",
-  "fuel": "fplform",
+  "generatedAt": "2026-08-12T18:07:48.704Z",
+  "fuel": "native",
   "startGw": 1,
   "endGw": 1,
   "hasLivePoints": true,
   "totals": {
     "safe": {
-      "totalPoints": 56.2,
-      "alphaVsTemplate": 8.9
+      "totalPoints": 36,
+      "alphaVsTemplate": 4.8
     },
     "risky": {
-      "totalPoints": 54,
-      "alphaVsTemplate": 6.7
+      "totalPoints": 36.3,
+      "alphaVsTemplate": 5.1
     },
     "value": {
-      "totalPoints": 49.6,
-      "alphaVsTemplate": 2.3
+      "totalPoints": 31.5,
+      "alphaVsTemplate": 0.3
     },
     "template": {
-      "totalPoints": 47.3
+      "totalPoints": 31.2
     }
   },
   "gameweeks": [
     {
       "gameweek": 1,
-      "templateScore": 47.3,
+      "templateScore": 31.2,
       "safe": {
         "mode": "SAFE",
         "startingXI": [
           "Raya (ARS)",
+          "Gabriel (ARS)",
           "Virgil (LIV)",
-          "Senesi (TOT)",
-          "Truffert (BOU)",
+          "O'Reilly (MCI)",
           "B.Fernandes (MUN)",
-          "Szoboszlai (LIV)",
-          "Thiago (BRE)",
-          "Anderson (MCI)",
-          "Tavernier (BOU)",
-          "Watkins (AVL)",
-          "E.Le Fée (SUN)"
+          "Palmer (CHE)",
+          "Strand Larsen (CRY)",
+          "Wirtz (LIV)",
+          "Pedro Porro (TOT)",
+          "Van de Ven (TOT)",
+          "Reijnders (MCI)"
         ],
-        "captain": "B.Fernandes (C)",
-        "projectedGwXp": 49.8,
-        "projected8GwXp": 283.5,
-        "actualPoints": 56.2,
-        "averageXiEo": 10.8,
-        "alphaVsTemplate": 8.9
+        "captain": "Palmer (C)",
+        "projectedGwXp": 32.8,
+        "projected8GwXp": 186.8,
+        "actualPoints": 36,
+        "averageXiEo": 32.9,
+        "alphaVsTemplate": 4.8
       },
       "risky": {
         "mode": "RISKY",
         "startingXI": [
           "Raya (ARS)",
+          "Gabriel (ARS)",
           "O'Reilly (MCI)",
+          "Lacroix (CHE)",
+          "Cunha (MUN)",
+          "Gibbs-White (NFO)",
+          "N.Jackson (CHE)",
+          "Matheus N. (MCI)",
           "Senesi (TOT)",
-          "Truffert (BOU)",
-          "B.Fernandes (MUN)",
-          "Szoboszlai (LIV)",
-          "Thiago (BRE)",
-          "Enzo (CHE)",
-          "Anderson (MCI)",
-          "Tavernier (BOU)",
-          "Lacroix (CHE)"
+          "Doku (MCI)",
+          "Bruno G. (ARS)"
         ],
-        "captain": "Szoboszlai (C)",
-        "projectedGwXp": 49.3,
-        "projected8GwXp": 281.1,
-        "actualPoints": 54,
-        "averageXiEo": 5.5,
-        "alphaVsTemplate": 6.7
+        "captain": "Raya (C)",
+        "projectedGwXp": 32.3,
+        "projected8GwXp": 184,
+        "actualPoints": 36.3,
+        "averageXiEo": 1.9,
+        "alphaVsTemplate": 5.1
       },
       "value": {
         "mode": "VALUE",
         "startingXI": [
-          "Leno (FUL)",
-          "Truffert (BOU)",
-          "Pedro Porro (TOT)",
-          "Thiaw (NEW)",
-          "Szoboszlai (LIV)",
-          "Enzo (CHE)",
-          "Calvert-Lewin (LEE)",
-          "Anderson (MCI)",
-          "Tavernier (BOU)",
-          "E.Le Fée (SUN)",
-          "Van Hecke (TOT)"
+          "Raya (ARS)",
+          "O'Reilly (MCI)",
+          "Matheus N. (MCI)",
+          "Senesi (TOT)",
+          "Sangaré (BRE)",
+          "Barco (CHE)",
+          "Awoniyi (NFO)",
+          "Araujo (LIV)",
+          "Diomande (NFO)",
+          "Mudryk (CHE)",
+          "Palacios (FUL)"
         ],
-        "captain": "Szoboszlai (C)",
-        "projectedGwXp": 44.9,
-        "projected8GwXp": 255.7,
-        "actualPoints": 49.6,
-        "averageXiEo": 5,
-        "alphaVsTemplate": 2.3
+        "captain": "Raya (C)",
+        "projectedGwXp": 27.5,
+        "projected8GwXp": 156.6,
+        "actualPoints": 31.5,
+        "averageXiEo": 0.6,
+        "alphaVsTemplate": 0.3
       },
-      "riskySwapCount": 3,
-      "riskyAvgSwapCost": 0.1,
+      "riskySwapCount": 8,
+      "riskyAvgSwapCost": 0.04,
       "riskyQuality": "PASS"
     }
   ]
