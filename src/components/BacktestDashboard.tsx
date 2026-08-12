@@ -123,7 +123,7 @@ export const BacktestDashboard = () => {
             <code className="block mt-2 text-[9px] text-fpl-green bg-slate-950 p-2 rounded-lg font-mono text-left overflow-x-auto whitespace-nowrap">
               node --import tsx scripts/run_backtest.ts --start-gw 1 --end-gw 1 --fuel {activeTab}
               <br/>
-              cp data/{activeTab === 'eye-test' ? 'backtest_results_eyetest.json' : 'backtest_results.json'} public/data/{activeTab === 'native' ? 'backtest_results_native.json' : activeTab === 'eye-test' ? 'backtest_results_eyetest.json' : 'backtest_results.json'}
+              cp data/backtest_results.json public/data/{activeTab === 'native' ? 'backtest_results_native.json' : activeTab === 'eye-test' ? 'backtest_results_eyetest.json' : 'backtest_results.json'}
             </code>
             <p className="text-[10px] text-slate-500 mt-2">Then push to deploy the results.</p>
           </div>
