@@ -74,10 +74,16 @@ export const EngineDiagnostics = ({ data }: EngineDiagnosticsProps) => {
           </div>
 
           <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-800">
-              <div className="text-[8px] text-slate-500 font-bold uppercase">Swaps</div>
-              <div className="text-xs font-mono font-black text-white">{swapAnalysis.swapCount}</div>
-              <div className="text-[8px] text-emerald-400 font-semibold truncate">{swapAnalysis.divergenceTier.replace('_', ' ')}</div>
+            <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-800 flex flex-col justify-between">
+              <div>
+                <div className="text-[8px] text-slate-500 font-bold uppercase">Swaps</div>
+                <div className="text-xs font-mono font-black text-white">{swapAnalysis.swapCount}</div>
+              </div>
+              <div className={`text-[8px] leading-tight font-bold uppercase tracking-tight whitespace-normal mt-0.5 ${
+                swapAnalysis.divergenceTier === 'HEALTHY_DIFFERENTIAL' ? 'text-emerald-400' : 'text-amber-400'
+              }`}>
+                {swapAnalysis.divergenceTier === 'HEALTHY_DIFFERENTIAL' ? 'HEALTHY DIFFERENTIAL' : swapAnalysis.divergenceTier.replace(/_/g, ' ')}
+              </div>
             </div>
             <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-800">
               <div className="text-[8px] text-slate-500 font-bold uppercase">Avg Cost / GW</div>
