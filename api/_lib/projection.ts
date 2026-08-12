@@ -50,6 +50,7 @@ export interface UtilityParameters {
   minEoTotal?: number;
   minElitePlayers?: number;
   budgetMultiplier?: number;
+  betaDifferential?: number;
 }
 
 export interface ProjectionInput {
@@ -62,12 +63,13 @@ export interface ProjectionInput {
 export function getParamsForRiskMode(riskMode: string, baseWeights: UtilityParameters): UtilityParameters {
   const params = { ...baseWeights };
   if (riskMode === 'aggressive') {
-    params.betaVariance = 0.5; // Favor high variance (differentials)
-    params.betaEO = -2.0; // Heavily penalize high EO players (-2 points for 100% EO)
+    params.betaVariance = 0.8; // Favor high variance (differentials)
+    params.betaEO = -5.0; // Strongly penalize high EO template players
+    params.betaDifferential = 5.0; // Directly reward low-ownership differential gems (< 15% EO)
   } else if (riskMode === 'safe') {
     params.betaVariance = -0.1; // Slight penalty to variance
-    params.betaEO = 2.0; // Heavily reward high EO players
-    params.minEoTotal = 150;
+    params.betaEO = 3.5; // Strongly reward high EO template players
+    params.minEoTotal = 200; // Force solid template coverage
     params.minElitePlayers = 1;
   } else if (riskMode === 'value') {
     params.betaVariance = 0.0;
