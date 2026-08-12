@@ -67,7 +67,7 @@ export const EngineDiagnostics = ({ data }: EngineDiagnosticsProps) => {
       {swapAnalysis && (
         <div className="relative z-10 mt-3 pt-3 border-t border-slate-800/80">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">RISKY vs SAFE Divergence</span>
+            <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">{riskMode.toUpperCase()} vs SAFE Divergence</span>
             <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${swapAnalysis.differentialQuality === 'PASS' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'}`}>
               Quality: {swapAnalysis.differentialQuality} ({swapAnalysis.withinThresholdPct}% ≤0.35 xP/GW)
             </span>
