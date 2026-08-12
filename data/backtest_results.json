@@ -1,0 +1,99 @@
+{
+  "generatedAt": "2026-08-12T15:06:09.723Z",
+  "fuel": "fplform",
+  "startGw": 1,
+  "endGw": 1,
+  "hasLivePoints": true,
+  "totals": {
+    "safe": {
+      "totalPoints": 56.2,
+      "alphaVsTemplate": 8.9
+    },
+    "risky": {
+      "totalPoints": 54,
+      "alphaVsTemplate": 6.7
+    },
+    "value": {
+      "totalPoints": 49.6,
+      "alphaVsTemplate": 2.3
+    },
+    "template": {
+      "totalPoints": 47.3
+    }
+  },
+  "gameweeks": [
+    {
+      "gameweek": 1,
+      "templateScore": 47.3,
+      "safe": {
+        "mode": "SAFE",
+        "startingXI": [
+          "Raya (ARS)",
+          "Virgil (LIV)",
+          "Senesi (TOT)",
+          "Truffert (BOU)",
+          "B.Fernandes (MUN)",
+          "Szoboszlai (LIV)",
+          "Thiago (BRE)",
+          "Anderson (MCI)",
+          "Tavernier (BOU)",
+          "Watkins (AVL)",
+          "E.Le Fée (SUN)"
+        ],
+        "captain": "B.Fernandes (C)",
+        "projectedGwXp": 49.8,
+        "projected8GwXp": 283.5,
+        "actualPoints": 56.2,
+        "averageXiEo": 10.8,
+        "alphaVsTemplate": 8.9
+      },
+      "risky": {
+        "mode": "RISKY",
+        "startingXI": [
+          "Raya (ARS)",
+          "O'Reilly (MCI)",
+          "Senesi (TOT)",
+          "Truffert (BOU)",
+          "B.Fernandes (MUN)",
+          "Szoboszlai (LIV)",
+          "Thiago (BRE)",
+          "Enzo (CHE)",
+          "Anderson (MCI)",
+          "Tavernier (BOU)",
+          "Lacroix (CHE)"
+        ],
+        "captain": "Szoboszlai (C)",
+        "projectedGwXp": 49.3,
+        "projected8GwXp": 281.1,
+        "actualPoints": 54,
+        "averageXiEo": 5.5,
+        "alphaVsTemplate": 6.7
+      },
+      "value": {
+        "mode": "VALUE",
+        "startingXI": [
+          "Leno (FUL)",
+          "Truffert (BOU)",
+          "Pedro Porro (TOT)",
+          "Thiaw (NEW)",
+          "Szoboszlai (LIV)",
+          "Enzo (CHE)",
+          "Calvert-Lewin (LEE)",
+          "Anderson (MCI)",
+          "Tavernier (BOU)",
+          "E.Le Fée (SUN)",
+          "Van Hecke (TOT)"
+        ],
+        "captain": "Szoboszlai (C)",
+        "projectedGwXp": 44.9,
+        "projected8GwXp": 255.7,
+        "actualPoints": 49.6,
+        "averageXiEo": 5,
+        "alphaVsTemplate": 2.3
+      },
+      "riskySwapCount": 3,
+      "riskyAvgSwapCost": 0.1,
+      "riskyQuality": "PASS"
+    }
+  ]
+}

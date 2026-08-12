@@ -213,7 +213,35 @@ async function runBacktest() {
     { Mode: 'VALUE ROI Budget', 'Total Actual Pts': totalValuePts, 'Net Alpha vs Template': `+${(totalValuePts - totalTemplatePts).toFixed(1)} pts` }
   ]);
 
-  console.log(`\n[Backtest Complete] Out-of-sample historical validation frame executed successfully.\n`);
+  // Save results to JSON for GUI consumption
+  const outputData = {
+    generatedAt: new Date().toISOString(),
+    fuel,
+    startGw,
+    endGw,
+    hasLivePoints: gwSummaries.length > 0 && gwSummaries[0].safe.actualPoints !== gwSummaries[0].safe.projectedGwXp,
+    totals: {
+      safe: { totalPoints: totalSafePts, alphaVsTemplate: Math.round((totalSafePts - totalTemplatePts) * 10) / 10 },
+      risky: { totalPoints: totalRiskyPts, alphaVsTemplate: Math.round((totalRiskyPts - totalTemplatePts) * 10) / 10 },
+      value: { totalPoints: totalValuePts, alphaVsTemplate: Math.round((totalValuePts - totalTemplatePts) * 10) / 10 },
+      template: { totalPoints: totalTemplatePts }
+    },
+    gameweeks: gwSummaries.map(g => ({
+      gameweek: g.gameweek,
+      templateScore: g.templateScore,
+      safe: g.safe,
+      risky: g.risky,
+      value: g.value,
+      riskySwapCount: g.riskySwapCount,
+      riskyAvgSwapCost: g.riskyAvgSwapCost,
+      riskyQuality: g.riskyQuality
+    }))
+  };
+
+  const outputPath = path.resolve(process.cwd(), 'data', 'backtest_results.json');
+  fs.writeFileSync(outputPath, JSON.stringify(outputData, null, 2));
+  console.log(`\n[Backtest] Results saved to ${outputPath}`);
+  console.log(`[Backtest Complete] Out-of-sample historical validation frame executed successfully.\n`);
 }
 
 runBacktest().catch(err => {

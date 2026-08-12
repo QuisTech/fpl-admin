@@ -10,6 +10,7 @@ import { DataGrid } from './components/DataGrid';
 import { TransferView } from './components/TransferView';
 import { ChipAdvisor } from './components/ChipAdvisor';
 import { PerformanceView } from './components/PerformanceView';
+import { BacktestDashboard } from './components/BacktestDashboard';
 import { FixtureList } from './components/FixtureList';
 import { OptimizerPositioning } from './components/OptimizerPositioning';
 import { AuthModal } from './components/AuthModal';
@@ -43,7 +44,7 @@ import { FeatureFlagsPage } from './pages/admin/FeatureFlagsPage';
 function FPLApp() {
   const [riskMode, setRiskMode] = useState<'safe' | 'aggressive' | 'value'>('safe');
   const [fuel, setFuel] = useState<'fplform' | 'native' | 'eye-test'>('fplform');
-  const [tab, setTab] = useState<'optimizer' | 'pitch' | 'picks' | 'transfers' | 'chips' | 'performance' | 'agent'>('optimizer');
+  const [tab, setTab] = useState<'optimizer' | 'pitch' | 'picks' | 'transfers' | 'chips' | 'performance' | 'backtest' | 'agent'>('optimizer');
   
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [profileTab, setProfileTab] = useState<string | null>(null);
@@ -136,7 +137,7 @@ function FPLApp() {
           <div className="relative z-10 p-4 sm:p-6 h-full flex flex-col">
             <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between mb-8">
               <div className="flex flex-wrap gap-1 bg-slate-950 p-1 rounded-xl border border-fpl-border w-full md:w-auto justify-center">
-                {(['optimizer', 'pitch', 'picks', 'transfers', 'chips', 'performance', 'agent'] as const).map((t) => (
+                {(['optimizer', 'pitch', 'picks', 'transfers', 'chips', 'performance', 'backtest', 'agent'] as const).map((t) => (
                   <button 
                     key={t}
                     onClick={() => setTab(t)}
@@ -197,6 +198,8 @@ function FPLApp() {
                 <TransferView syncedData={syncedData} tier={tier} setTab={setTab} userId={activeUserId} />
               ) : tab === 'performance' ? (
                 <PerformanceView history={history} fetchLivePoints={fetchLivePoints} />
+              ) : tab === 'backtest' ? (
+                <BacktestDashboard />
               ) : tab === 'chips' ? (
                 <ChipAdvisor syncedData={syncedData} tier={tier} setTab={setTab} userId={activeUserId} />
               ) : (
