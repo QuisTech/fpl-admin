@@ -471,7 +471,7 @@ export class FPLService {
       }
     }
 
-    const recommendations = await this.getRecommendations(riskMode, bank, tier, fuel);
+    const recommendations = await this.getRecommendations(riskMode, 1000, tier, fuel);
     const candidates = [
       ...recommendations.topPicks.gkp,
       ...recommendations.topPicks.def,

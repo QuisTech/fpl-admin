@@ -337,12 +337,13 @@ export class FplformOracle extends BaseOracle {
         if (matchedPlayer) {
           const fplId = matchedPlayer.id;
           
-          // Populate multi-gw expected points from CSV columns
+          // Populate multi-gw expected points using decayed merit score
           this.xpMatrix[fplId] = {};
           for (let step = 0; step < 15; step++) {
             const gw = nextEventId + step;
-            const colVal = parseFloat(cols[6 + step]);
-            this.xpMatrix[fplId][gw] = !isNaN(colVal) && colVal > 0 ? colVal : meritScore * Math.pow(0.9, step);
+            // meritScore decays across future gameweeks
+            const projectedXp = Math.min(25.0, Math.max(0, meritScore * Math.pow(0.9, step)));
+            this.xpMatrix[fplId][gw] = projectedXp;
           }
           
           // Override position and team from CSV if they were defaults
