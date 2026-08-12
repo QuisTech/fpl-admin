@@ -39,12 +39,16 @@ jobs:
         if: steps.sniper.outputs.should_run == 'true'
         run: npx tsx scripts/fetch-top-1k.ts
 
+      - name: Archive Pre-Deadline Snapshot
+        if: steps.sniper.outputs.should_run == 'true'
+        run: npx tsx scripts/save-snapshot.ts
+
       - name: Commit and Push New Data
         if: steps.sniper.outputs.should_run == 'true'
         run: |
           git config --global user.name "FPL Sniper Bot"
           git config --global user.email "bot@quistech.com"
-          git add data/fplform.csv data/top_1000_eo.json data/fpl_native.csv
-          git commit -m "Auto-update: Scraped latest FPLForm predictions and Top 1k EO 2 hours before deadline"
+          git add data/fplform.csv data/top_1000_eo.json data/fpl_native.csv data/snapshots/
+          git commit -m "Auto-update: Scraped latest FPLForm predictions, Top 1k EO & archived snapshot ~2hrs before deadline"
           git push
 
