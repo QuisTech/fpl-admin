@@ -49,15 +49,20 @@ interface BacktestData {
 }
 
 export const BacktestDashboard = () => {
+  const [activeTab, setActiveTab] = useState<'fplform' | 'native'>('fplform');
   const [data, setData] = useState<BacktestData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedGw, setExpandedGw] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch('/data/backtest_results.json')
+    setLoading(true);
+    setError(null);
+    const fileName = activeTab === 'native' ? 'backtest_results_native.json' : 'backtest_results.json';
+    
+    fetch(`/data/${fileName}`)
       .then(res => {
-        if (!res.ok) throw new Error('No backtest results found. Run the backtest CLI first.');
+        if (!res.ok) throw new Error(`No ${activeTab.toUpperCase()} backtest results found. Run the backtest CLI first.`);
         return res.json();
       })
       .then((d: BacktestData) => {
@@ -68,14 +73,14 @@ export const BacktestDashboard = () => {
         setError(err.message);
         setLoading(false);
       });
-  }, []);
+  }, [activeTab]);
 
-  if (loading) {
+  if (loading && !data) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <BarChart3 className="w-8 h-8 text-fpl-green animate-pulse mx-auto mb-3" />
-          <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Loading Backtest Data...</p>
+          <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Loading {activeTab.toUpperCase()} Data...</p>
         </div>
       </div>
     );
@@ -83,17 +88,37 @@ export const BacktestDashboard = () => {
 
   if (error || !data) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center max-w-sm">
-          <AlertTriangle className="w-8 h-8 text-amber-500 mx-auto mb-3" />
-          <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-2">No Backtest Data Available</p>
-          <p className="text-[10px] text-slate-500 leading-relaxed">
-            Run the backtest CLI locally to generate results:
-          </p>
-          <code className="block mt-2 text-[9px] text-fpl-green bg-slate-950 p-2 rounded-lg font-mono">
-            node --import tsx scripts/run_backtest.ts --start-gw 1 --end-gw 1
-          </code>
-          <p className="text-[10px] text-slate-500 mt-2">Then push to deploy the results.</p>
+      <div className="space-y-4">
+        {/* Toggle (even on error so they can switch back) */}
+        <div className="flex bg-slate-900 rounded-lg p-1 w-fit">
+          <button
+            onClick={() => setActiveTab('fplform')}
+            className={`px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-md transition-colors ${activeTab === 'fplform' ? 'bg-fpl-green text-slate-950' : 'text-slate-500 hover:text-slate-300'}`}
+          >
+            FPLFORM
+          </button>
+          <button
+            onClick={() => setActiveTab('native')}
+            className={`px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-md transition-colors ${activeTab === 'native' ? 'bg-fpl-purple text-white' : 'text-slate-500 hover:text-slate-300'}`}
+          >
+            NATIVE
+          </button>
+        </div>
+
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center max-w-sm">
+            <AlertTriangle className="w-8 h-8 text-amber-500 mx-auto mb-3" />
+            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-2">No {activeTab.toUpperCase()} Data Available</p>
+            <p className="text-[10px] text-slate-500 leading-relaxed">
+              Run the backtest CLI locally to generate results:
+            </p>
+            <code className="block mt-2 text-[9px] text-fpl-green bg-slate-950 p-2 rounded-lg font-mono text-left overflow-x-auto whitespace-nowrap">
+              node --import tsx scripts/run_backtest.ts --start-gw 1 --end-gw 1 --fuel {activeTab}
+              <br/>
+              cp data/backtest_results.json public/data/{activeTab === 'native' ? 'backtest_results_native.json' : 'backtest_results.json'}
+            </code>
+            <p className="text-[10px] text-slate-500 mt-2">Then push to deploy the results.</p>
+          </div>
         </div>
       </div>
     );
@@ -111,10 +136,25 @@ export const BacktestDashboard = () => {
       animate={{ opacity: 1 }}
       className="space-y-4"
     >
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      {/* Header and Toggle */}
+      <div className="flex items-start justify-between">
         <div>
           <h2 className="text-sm font-black text-white uppercase tracking-wider">Strategy Backtest</h2>
+          
+          <div className="flex bg-slate-900 rounded-lg p-1 mt-2 w-fit">
+            <button
+              onClick={() => setActiveTab('fplform')}
+              className={`px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-md transition-colors ${activeTab === 'fplform' ? 'bg-fpl-green text-slate-950' : 'text-slate-500 hover:text-slate-300'}`}
+            >
+              FPLFORM
+            </button>
+            <button
+              onClick={() => setActiveTab('native')}
+              className={`px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-md transition-colors ${activeTab === 'native' ? 'bg-fpl-purple text-white' : 'text-slate-500 hover:text-slate-300'}`}
+            >
+              NATIVE
+            </button>
+          </div>
           <p className="text-[9px] text-slate-500 mt-0.5">
             GW{data.startGw}–GW{data.endGw} · {data.fuel.toUpperCase()} · Generated {new Date(data.generatedAt).toLocaleDateString()}
           </p>
