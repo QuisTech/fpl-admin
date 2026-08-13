@@ -52,16 +52,38 @@ async function fetchActualPointsForGw(gameweek: number): Promise<Record<number, 
   return actualPointsMap;
 }
 
+async function detectLatestFinishedGameweek(): Promise<number> {
+  try {
+    const res = await fetch('https://fantasy.premierleague.com/api/bootstrap-static/', {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const finishedEvents = data.events?.filter((e: any) => e.finished && e.data_checked) ?? [];
+      if (finishedEvents.length > 0) {
+        return Math.max(...finishedEvents.map((e: any) => e.id));
+      }
+    }
+  } catch (err: any) {
+    console.warn(`[Backtest] Could not detect latest finished GW: ${err.message}`);
+  }
+  return 1;
+}
+
 async function runBacktest() {
   const args = process.argv.slice(2);
   let startGw = 1;
-  let endGw = 1;
+  let endGw: number | null = null;
   let fuel = 'fplform';
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--start-gw' && args[i + 1]) startGw = parseInt(args[i + 1]);
     if (args[i] === '--end-gw' && args[i + 1]) endGw = parseInt(args[i + 1]);
     if (args[i] === '--fuel' && args[i + 1]) fuel = args[i + 1];
+  }
+
+  if (endGw === null) {
+    endGw = await detectLatestFinishedGameweek();
   }
 
   console.log(`\n===============================================================`);
@@ -238,9 +260,34 @@ async function runBacktest() {
     }))
   };
 
-  const outputPath = path.resolve(process.cwd(), 'data', 'backtest_results.json');
-  fs.writeFileSync(outputPath, JSON.stringify(outputData, null, 2));
-  console.log(`\n[Backtest] Results saved to ${outputPath}`);
+  // Resolve fuel-based output filename
+  const fuelSuffix = fuel === 'eye-test' ? 'eyetest' : fuel;
+  const outputFileName = `backtest_results_${fuelSuffix}.json`;
+  const jsonContent = JSON.stringify(outputData, null, 2);
+
+  // Write to data/ directory
+  const dataOutputPath = path.resolve(process.cwd(), 'data', outputFileName);
+  fs.writeFileSync(dataOutputPath, jsonContent);
+  console.log(`\n[Backtest] Results saved to ${dataOutputPath}`);
+
+  // Write to public/data/ directory for frontend serving
+  const publicDataDir = path.resolve(process.cwd(), 'public', 'data');
+  if (!fs.existsSync(publicDataDir)) {
+    fs.mkdirSync(publicDataDir, { recursive: true });
+  }
+  const publicOutputPath = path.resolve(publicDataDir, outputFileName);
+  fs.writeFileSync(publicOutputPath, jsonContent);
+  console.log(`[Backtest] Results synced to ${publicOutputPath}`);
+
+  // Backward compatibility: fplform also writes to backtest_results.json
+  if (fuelSuffix === 'fplform') {
+    const legacyDataPath = path.resolve(process.cwd(), 'data', 'backtest_results.json');
+    fs.writeFileSync(legacyDataPath, jsonContent);
+    const legacyPublicPath = path.resolve(publicDataDir, 'backtest_results.json');
+    fs.writeFileSync(legacyPublicPath, jsonContent);
+    console.log(`[Backtest] Legacy backtest_results.json synced for backward compatibility.`);
+  }
+
   console.log(`[Backtest Complete] Out-of-sample historical validation frame executed successfully.\n`);
 }
 

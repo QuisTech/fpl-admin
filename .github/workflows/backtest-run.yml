@@ -1,0 +1,94 @@
+name: FPL Backtest Runner
+
+permissions:
+  contents: write
+
+on:
+  schedule:
+    # Runs daily at 3 AM UTC - after most GW fixtures are finalized
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+    # Allows you to trigger it manually from the GitHub UI
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: true
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Check if Backtest Needs Updating
+        id: check
+        run: |
+          # Query FPL API for latest finished gameweek
+          LATEST_FINISHED_GW=$(node -e "
+            fetch('https://fantasy.premierleague.com/api/bootstrap-static/', {
+              headers: { 'User-Agent': 'Mozilla/5.0' }
+            })
+            .then(r => r.json())
+            .then(d => {
+              const finished = d.events.filter(e => e.finished && e.data_checked);
+              console.log(finished.length > 0 ? Math.max(...finished.map(e => e.id)) : 0);
+            })
+            .catch(() => console.log(0));
+          ")
+
+          echo "Latest finished GW from FPL API: $LATEST_FINISHED_GW"
+
+          # Read current endGw from existing backtest results (0 if file missing)
+          CURRENT_END_GW=0
+          if [ -f "data/backtest_results_fplform.json" ]; then
+            CURRENT_END_GW=$(node -e "
+              const d = require('./data/backtest_results_fplform.json');
+              console.log(d.endGw || 0);
+            " 2>/dev/null || echo 0)
+          elif [ -f "data/backtest_results.json" ]; then
+            CURRENT_END_GW=$(node -e "
+              const d = require('./data/backtest_results.json');
+              console.log(d.endGw || 0);
+            " 2>/dev/null || echo 0)
+          fi
+
+          echo "Current backtest endGw: $CURRENT_END_GW"
+
+          if [ "$LATEST_FINISHED_GW" -gt "$CURRENT_END_GW" ] && [ "$LATEST_FINISHED_GW" -gt 0 ]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "latest_gw=$LATEST_FINISHED_GW" >> $GITHUB_OUTPUT
+            echo "✅ New gameweek data available (GW$LATEST_FINISHED_GW > GW$CURRENT_END_GW). Running backtests."
+          else
+            echo "should_run=false" >> $GITHUB_OUTPUT
+            echo "⏳ Backtest is already up to date for GW$CURRENT_END_GW. Skipping."
+          fi
+
+      - name: Run FPLFORM Backtest
+        if: steps.check.outputs.should_run == 'true'
+        run: npx tsx scripts/run_backtest.ts --fuel fplform --start-gw 1 --end-gw ${{ steps.check.outputs.latest_gw }}
+
+      - name: Run NATIVE Backtest
+        if: steps.check.outputs.should_run == 'true'
+        run: npx tsx scripts/run_backtest.ts --fuel native --start-gw 1 --end-gw ${{ steps.check.outputs.latest_gw }}
+
+      - name: Run EYE-TEST Backtest
+        if: steps.check.outputs.should_run == 'true'
+        run: npx tsx scripts/run_backtest.ts --fuel eyetest --start-gw 1 --end-gw ${{ steps.check.outputs.latest_gw }}
+
+      - name: Commit and Push Results
+        if: steps.check.outputs.should_run == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add data/backtest_results*.json public/data/backtest_results*.json
+          git diff --staged --quiet || git commit -m "chore: Update all 3 backtest results for GW${{ steps.check.outputs.latest_gw }} [skip ci]"
+          git push
