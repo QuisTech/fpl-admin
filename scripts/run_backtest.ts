@@ -265,20 +265,10 @@ async function runBacktest() {
   const outputFileName = `backtest_results_${fuelSuffix}.json`;
   const jsonContent = JSON.stringify(outputData, null, 2);
 
-  // Write to data/ directory
+  // Write to data/ directory (served to browser via Express static route)
   const dataOutputPath = path.resolve(process.cwd(), 'data', outputFileName);
   fs.writeFileSync(dataOutputPath, jsonContent);
   console.log(`\n[Backtest] Results saved to ${dataOutputPath}`);
-
-  // Write to public/data/ directory for frontend serving
-  const publicDataDir = path.resolve(process.cwd(), 'public', 'data');
-  if (!fs.existsSync(publicDataDir)) {
-    fs.mkdirSync(publicDataDir, { recursive: true });
-  }
-  const publicOutputPath = path.resolve(publicDataDir, outputFileName);
-  fs.writeFileSync(publicOutputPath, jsonContent);
-  console.log(`[Backtest] Results synced to ${publicOutputPath}`);
-
 
   console.log(`[Backtest Complete] Out-of-sample historical validation frame executed successfully.\n`);
 }

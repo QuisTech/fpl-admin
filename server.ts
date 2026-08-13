@@ -89,6 +89,9 @@ async function startServer() {
     }
   });
 
+  // Serve data/ directory as static /data route (backtest results, CSV, etc.)
+  app.use('/data', express.static('data'));
+
   app.use(vite.middlewares);
 
   app.listen(PORT, "0.0.0.0", () => {
