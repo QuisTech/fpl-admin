@@ -481,7 +481,7 @@ export class OracleFactory {
     if (fuel === 'native') {
       return new NativeOracle(csvFilePath, players, riskMode, fixtures, teams, nextEventId);
     }
-    if (fuel === 'eye-test') {
+    if (fuel === 'eye-test' || fuel === 'eyetest') {
       return new EyeTestOracle(csvFilePath, players, riskMode, fixtures, teams, nextEventId, fixturesFilePath);
     }
     return new FplformOracle(csvFilePath, players, riskMode, fixtures, teams, nextEventId);

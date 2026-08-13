@@ -252,7 +252,7 @@ export class FPLService {
     let csvFileName = fuel === 'native' ? 'fpl_native.csv' : 'fplform.csv';
     
     // Fallback: if FPLFORM file is corrupted/empty, use NATIVE as backup temporarily
-    if (fuel !== 'native' && fuel !== 'eye-test') {
+    if (fuel !== 'native' && fuel !== 'eye-test' && fuel !== 'eyetest') {
       const fplformPath = path.resolve(process.cwd(), 'data', 'fplform.csv');
       if (fs.existsSync(fplformPath)) {
         const content = fs.readFileSync(fplformPath, 'utf8');
