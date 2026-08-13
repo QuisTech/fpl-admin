@@ -64,14 +64,6 @@ export const BacktestDashboard = () => {
     
     fetch(`/data/${fileName}`)
       .then(res => {
-        if (!res.ok && activeTab === 'fplform') {
-          // Backward compatibility fallback for legacy filename
-          return fetch('/data/backtest_results.json');
-        }
-        if (!res.ok) throw new Error(`No ${activeTab.toUpperCase()} backtest results found. Run the backtest CLI first.`);
-        return res;
-      })
-      .then(res => {
         if (!res.ok) throw new Error(`No ${activeTab.toUpperCase()} backtest results found. Run the backtest CLI first.`);
         return res.json();
       })

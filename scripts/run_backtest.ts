@@ -279,14 +279,6 @@ async function runBacktest() {
   fs.writeFileSync(publicOutputPath, jsonContent);
   console.log(`[Backtest] Results synced to ${publicOutputPath}`);
 
-  // Backward compatibility: fplform also writes to backtest_results.json
-  if (fuelSuffix === 'fplform') {
-    const legacyDataPath = path.resolve(process.cwd(), 'data', 'backtest_results.json');
-    fs.writeFileSync(legacyDataPath, jsonContent);
-    const legacyPublicPath = path.resolve(publicDataDir, 'backtest_results.json');
-    fs.writeFileSync(legacyPublicPath, jsonContent);
-    console.log(`[Backtest] Legacy backtest_results.json synced for backward compatibility.`);
-  }
 
   console.log(`[Backtest Complete] Out-of-sample historical validation frame executed successfully.\n`);
 }
