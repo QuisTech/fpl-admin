@@ -671,13 +671,14 @@ export class FPLService {
   }
 }
 
-// --- ENVIRONMENT VALIDATION ---
-if (!process.env.GOOGLE_CLOUD_PROJECT_ID || !process.env.GROQ_API_KEY) {
-  throw new Error("FATAL: Missing critical environment variables.");
-}
-// ------------------------------
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // --- ENVIRONMENT VALIDATION FOR HTTP HANDLER ---
+  if (!process.env.GOOGLE_CLOUD_PROJECT_ID || !process.env.GROQ_API_KEY) {
+    console.error("[Vercel Handler Error] Missing critical environment variables.");
+    return res.status(500).json({ error: "FATAL: Missing critical environment variables." });
+  }
+  // -----------------------------------------------
+
   const url = req.url || "/";
   
   const origin = req.headers.origin || '';

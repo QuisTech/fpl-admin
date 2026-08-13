@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { FPLService } from '../api/index.ts';
 import { SnapshotService } from '../api/_lib/snapshot-service.ts';
 import fs from 'fs';
