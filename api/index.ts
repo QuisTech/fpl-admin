@@ -301,9 +301,9 @@ export class FPLService {
 
     // Identify monster template anchors (Top 1k EO >= 60% or extreme ownership)
     const templateAnchorIds = scored
-      .filter(p => (p.eo && p.eo >= 60) || (p.ownership && p.ownership >= 65))
+      .filter(p => ((p.eo && p.eo >= 60) || (p.ownership && p.ownership >= 65)) && (p.xP || 0) >= 3.5)
       .sort((a, b) => (b.eo || 0) - (a.eo || 0))
-      .slice(0, 2)
+      .slice(0, 5)
       .map(p => p.id);
 
     const activeLockedSet = new Set<number>(lockedSet);
