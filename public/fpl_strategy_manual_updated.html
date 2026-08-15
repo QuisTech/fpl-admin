@@ -522,47 +522,49 @@
     <!-- SECTION 2: THE PLAYBOOKS -->
     <section>
       <h2>Playbook I: Horizon Grand Cru / FPL Optimizer</h2>
-      <p>These apps run the <strong>V3 Grand Cru Engine</strong> paired with an <strong>AI Chat Assistant</strong>. The math solver simulates over 5,000 future paths over an 8-Gameweek horizon, while the LLM agent actively reads press conferences to refine expected points based on qualitative injury news.
-      </p>
+      <p>These apps run the <strong>V3 Grand Cru Engine</strong> paired with an <strong>AI Chat Assistant</strong>. The math solver evaluates multi-horizon Expected Points across an 8-Gameweek horizon, while offering real-time <strong>Quant Optimal vs. Template Shield Scenario comparison</strong>, <strong>Player Locking/Exclusion controls</strong>, and automated chip recommendation advisories.</p>
 
       <div class="timeline">
         <div class="timeline-item">
           <div class="timeline-dot"></div>
-          <div class="timeline-title">Gameweeks 1–6: The Template Shield <span class="timeline-mode mode-safe">SAFE
-              MODE</span></div>
-          <p>The beginning of the season lacks fresh player data. Run the engine in <strong>SAFE Mode</strong> to shield
-            your rank from early volatile swings.</p>
+          <div class="timeline-title">Gameweeks 1–6: Early Shield & Stability <span class="timeline-mode mode-safe">TEMPLATE SHIELD / SAFE</span></div>
+          <p>The beginning of the season lacks fresh player data. Run the engine in <strong>Template Shield Scenario</strong> + <strong>SAFE Mode</strong> to shield your rank from early volatile swings.</p>
           <ul>
-            <li><strong>Strategy:</strong> The engine aligns your picks with high-ownership elite assets. It uses <strong>Premium Captaincy Protection</strong> (a 1.15x objective multiplier for players &gt; £10.0M) to ensure you always have a mathematically reliable captain.</li>
-            <li><strong>Goal:</strong> Preserve your budget, build squad value, and avoid early rank drops before the
-              first international break.</li>
+            <li><strong>Strategy & Scenario:</strong> Select <strong>Template Shield</strong> to force-lock consensus anchor assets (Top 1k EO &ge; 60%) like Haaland or Salah, while setting <strong>SAFE Mode</strong> for low-variance utility weighting.</li>
+            <li><strong>Player Locks:</strong> Use the 🔒 <strong>Lock Button</strong> on player cards for personal non-negotiables.</li>
+            <li><strong>Goal:</strong> Preserve budget, build squad value, and avoid early rank drops before the first international break.</li>
           </ul>
         </div>
 
         <div class="timeline-item">
           <div class="timeline-dot"></div>
-          <div class="timeline-title">Gameweeks 7–25: The Tactical Grind <span class="timeline-mode mode-risky">SAFE /
-              RISKY MODE</span></div>
-          <p>With solid form metrics established, toggle your strategy based on your league position.</p>
+          <div class="timeline-title">Gameweeks 7–25: The Tactical Grind <span class="timeline-mode mode-risky">QUANT OPTIMAL / SAFE or RISKY</span></div>
+          <p>With solid form metrics established, toggle your scenario and risk mode based on your mini-league position.</p>
           <ul>
-            <li><strong>If Leading:</strong> Keep the engine in <strong>SAFE Mode</strong> to match the template and
-              defend your lead.</li>
-            <li><strong>If Chasing:</strong> Switch to <strong>RISKY Mode</strong>. The engine will smoothly adjust the
-              objective function to favor low-ownership differentials (under 5% owned) before they become popular.</li>
+            <li><strong>If Leading / Protecting Rank:</strong> Maintain <strong>Template Shield Scenario</strong> + <strong>SAFE Mode</strong> to match consensus ownership and neutralize rival green arrows.</li>
+            <li><strong>If Middle of Pack:</strong> Switch to <strong>Quant Optimal Scenario</strong> + <strong>SAFE Mode</strong> to unlock pure EV mathematical selection while keeping low-variance utility weights.</li>
+            <li><strong>If Chasing Hard:</strong> Switch to <strong>Quant Optimal Scenario</strong> + <strong>RISKY Mode</strong>. The LP solver will apply differential weighting (&beta;<sub>diff</sub> = +5.0) to target high-upside players (&lt; 15% EO) before they become mainstream.</li>
+            <li><strong>Delta Metrics:</strong> Compare <strong>Delta xP</strong> (points sacrificed) vs <strong>Delta EO</strong> (ownership gained) in the top header bar before making transfers.</li>
           </ul>
         </div>
 
         <div class="timeline-item">
           <div class="timeline-dot"></div>
-          <div class="timeline-title">Gameweeks 26–38: The Double Exploit <span class="timeline-mode mode-value">VALUE
-              MODE</span></div>
+          <div class="timeline-title">Gameweeks 26–34: Blank & Double Gameweek Exploit <span class="timeline-mode mode-value">QUANT OPTIMAL / VALUE</span></div>
           <p>The second half of the season is dominated by Blank and Double Gameweeks (DGWs).</p>
           <ul>
-            <li><strong>Strategy:</strong> Switch to <strong>VALUE Mode</strong>. This completely disables ownership
-              sentiment filters.</li>
-            <li><strong>Goal:</strong> The 8-GW beam search simulator will focus purely on expected points, planning
-              transfers 4–5 weeks in advance to load up on double gameweek players, automatically out-planning reactive
-              managers.</li>
+            <li><strong>Strategy & Scenario:</strong> Switch to <strong>Quant Optimal Scenario</strong> + <strong>VALUE Mode</strong>. This disables popularity sentiment filters and focuses purely on points-per-million and fixture multipliers.</li>
+            <li><strong>Goal:</strong> The 8-GW transfer planner will queue transfers 3–4 weeks in advance to load up on double gameweek players, automatically out-planning reactive managers.</li>
+          </ul>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-title">Gameweeks 35–38: The Endgame Sprint <span class="timeline-mode mode-risky">TARGET LOCKS & EXCLUDES</span></div>
+          <p>Execute custom tactical maneuvers to secure your mini-league title or target overall rank.</p>
+          <ul>
+            <li><strong>Defending Lead:</strong> Lock (🔒) your main rival's key assets to neutralize their upside.</li>
+            <li><strong>Chasing Lead:</strong> Exclude (🚫) your rival's top players, switch to <strong>RISKY Mode</strong>, and let the solver pick explosive differential punts and unique captaincy picks.</li>
           </ul>
         </div>
       </div>
@@ -571,45 +573,35 @@
     <!-- SECTION 3: STRATEGIST PLAYBOOK -->
     <section>
       <h2>Playbook II: FPL Strategist</h2>
-      <p>FPL Strategist runs a <strong>1-GW lookahead Integer Programming solver</strong>. It maximizes immediate points
-        and handles chips via static heuristics. Because it doesn't automate multi-week planning, you must play the long
-        game manually.</p>
+      <p>FPL Strategist runs an <strong>Integer Programming solver</strong>. It maximizes immediate points and handles chips via static heuristics. Because it doesn't automate multi-week planning, you must play the long game manually.</p>
 
       <div class="timeline">
         <div class="timeline-item">
           <div class="timeline-dot"></div>
-          <div class="timeline-title">Gameweeks 1–6: Price & Template Stability <span
-              class="timeline-mode mode-safe">SAFE MODE</span></div>
-          <p>Avoid taking early risks. Keep the solver in <strong>SAFE Mode</strong>.</p>
+          <div class="timeline-title">Gameweeks 1–6: Price & Template Stability <span class="timeline-mode mode-safe">TEMPLATE SHIELD / SAFE</span></div>
+          <p>Avoid taking early unforced risks. Keep the solver in <strong>Template Shield</strong> + <strong>SAFE Mode</strong>.</p>
           <ul>
-            <li><strong>Focus:</strong> Match template ownership, lock in key premium players, and let the solver find
-              cheap value enablers that maintain structure.</li>
+            <li><strong>Focus:</strong> Match template ownership, lock in key premium players, and let the solver find cheap value enablers that maintain squad structure.</li>
           </ul>
         </div>
 
         <div class="timeline-item">
           <div class="timeline-dot"></div>
-          <div class="timeline-title">Gameweeks 7–25: Hunting Differentials <span class="timeline-mode mode-risky">RISKY
-              MODE</span></div>
-          <p>Switch to <strong>RISKY Mode</strong> to hunt for rank climbs.</p>
+          <div class="timeline-title">Gameweeks 7–25: Hunting Differentials <span class="timeline-mode mode-risky">QUANT OPTIMAL / RISKY</span></div>
+          <p>Switch to <strong>Quant Optimal</strong> + <strong>RISKY Mode</strong> to hunt for rank climbs.</p>
           <ul>
-            <li><strong>Mechanism:</strong> The solver automatically applies a <strong>1.25x score multiplier</strong>
-              to low-owned players (&lt; 5% selected by percent).</li>
-            <li><strong>Execution:</strong> This triggers differential transfer options that bypass mainstream template
-              choices, giving you high-leverage opportunities.</li>
+            <li><strong>Mechanism:</strong> The solver automatically rewards low-owned players (&lt; 15% selected by percent) while ignoring template protection constraints.</li>
+            <li><strong>Execution:</strong> This triggers differential transfer options that bypass mainstream choices, giving you high-leverage opportunities.</li>
           </ul>
         </div>
 
         <div class="timeline-item">
           <div class="timeline-dot"></div>
-          <div class="timeline-title">Gameweeks 26–38: Double Gameweek Maximization <span
-              class="timeline-mode mode-value">VALUE MODE</span></div>
-          <p>Switch to <strong>VALUE Mode</strong> during fixtures chaos.</p>
+          <div class="timeline-title">Gameweeks 26–38: Double Gameweek Maximization <span class="timeline-mode mode-value">VALUE MODE</span></div>
+          <p>Switch to <strong>VALUE Mode</strong> during fixture chaos.</p>
           <ul>
-            <li><strong>Mechanism:</strong> Deactivates ownership filters, optimizing solely on expected points and
-              costs.</li>
-            <li><strong>Your Manual Step:</strong> Since the solver only looks 1 week ahead, check the upcoming fixture
-              table and manually prioritize transfers that bring in double gameweek players.</li>
+            <li><strong>Mechanism:</strong> Deactivates ownership filters, optimizing solely on expected points and costs.</li>
+            <li><strong>Your Manual Step:</strong> Check upcoming fixture tables and manually prioritize transfers that bring in double gameweek players.</li>
           </ul>
         </div>
       </div>

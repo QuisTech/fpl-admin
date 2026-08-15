@@ -413,9 +413,45 @@ maximize: EV / Cost
       <p style="margin-top: 0.75rem;"><strong>2. Vice-Captain Covariance Hedging:</strong> To eliminate correlated downside, the Vice-Captain selection explicitly penalizes shared team covariance. If your Captain is an Arsenal attacker, the engine mathematically forces your Vice-Captain to be an independent asset from another team (e.g. Liverpool or Chelsea), guaranteeing true portfolio diversification.</p>
     </section>
 
-    <!-- SECTION 7: PLATFORM SHOWCASE -->
+    <!-- SECTION 7: SCENARIO OPTIMIZATION & CONSTRAINT BOUNDS -->
     <section>
-      <h2>7. Take Action: Access the V3 Engine</h2>
+      <h2>7. Quant Optimum vs. Template Shield Mathematics</h2>
+      <p>The V3 Engine separates utility parameter weighting (Strategy Mode) from structural LP matrix constraints (Scenario Selection), allowing side-by-side scenario comparison and exact delta metrics.</p>
+
+      <div class="grid">
+        <div class="card">
+          <div class="card-title">Quant Optimal Formulation</div>
+          <p>Solves the unconstrained Linear Programming model across all available players $i \in \mathcal{P}$:</p>
+          <div class="formula-box">
+            <div class="formula-title">Pure LP Optimization</div>
+            Maximize &sum; (xP<sub>i</sub> &middot; x<sub>i</sub>)<br/>
+            subject to: Budget &le; £100.0m, Squad = 15, Max 3 per Team
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Template Shield Formulation</div>
+          <p>Identifies Monster Template Anchors $\mathcal{A} = \{i \mid \text{EO}_i \ge 60\%\}$, injecting hard equality bounds into the LP matrix:</p>
+          <div class="formula-box">
+            <div class="formula-title">Anchor-Constrained LP</div>
+            Maximize &sum; (xP<sub>i</sub> &middot; x<sub>i</sub>)<br/>
+            subject to: x<sub>i</sub> = 1  &forall; i &in; &mathcal{A} \setminus \mathcal{E}
+          </div>
+        </div>
+      </div>
+
+      <div class="formula-box" style="margin-top: 1.5rem;">
+        <div class="formula-title">Delta Comparison Metrics & Explicit Bounds</div>
+        &Delta;xP = xP(Template Shield) - xP(Quant Optimum)<br/>
+        &Delta;EO = AverageEO(Template Shield) - AverageEO(Quant Optimum)<br/>
+        User Rules: Lock Bound (x<sub>i</sub> = 1), Exclude Bound (x<sub>i</sub> = 0)
+      </div>
+      <p>By inspecting <strong>&Delta;xP</strong> and <strong>&Delta;EO</strong> in real time, managers evaluate the exact point penalty paid to gain safety before locking in transfer decisions.</p>
+    </section>
+
+    <!-- SECTION 8: PLATFORM SHOWCASE -->
+    <section>
+      <h2>8. Take Action: Access the V3 Engine</h2>
       <p>This whitepaper outlines the mathematical framework for constrained portfolio optimization, but executing it manually via spreadsheets is a major grind. The <strong>FPL Horizon V3 Engine</strong> automates this entire process: it syncs with your team data instantly, runs high-dimensional solvers, and builds your mathematically perfect squad path with one click.</p>
 
       <div class="screenshot-container">
