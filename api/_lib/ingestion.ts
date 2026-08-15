@@ -213,6 +213,8 @@ export abstract class BaseOracle implements XPOracle {
     });
   }
 
+  protected predictionCache: Record<number, Record<number, { expected: number, variance: number }>> = {};
+
   private getProjectionInput(playerId: number, gameweek: number): ProjectionInput {
     return {
       playerId,
@@ -220,6 +222,19 @@ export abstract class BaseOracle implements XPOracle {
       features: this.featuresMatrix[playerId],
       externalXP: this.xpMatrix[playerId]?.[gameweek] || 0
     };
+  }
+
+  private getPrediction(playerId: number, gameweek: number): { expected: number, variance: number } {
+    if (!this.predictionCache[playerId]) {
+      this.predictionCache[playerId] = {};
+    }
+    if (!this.predictionCache[playerId][gameweek]) {
+      this.predictionCache[playerId][gameweek] = this.projectionEngine.predict(
+        this.getProjectionInput(playerId, gameweek), 
+        gameweek
+      );
+    }
+    return this.predictionCache[playerId][gameweek];
   }
 
   getXP(playerId: number, gameweek: number): number { 
@@ -230,10 +245,10 @@ export abstract class BaseOracle implements XPOracle {
     if (this.hasFixtures && features && (!features.fixturesByGw?.[gameweek] || features.fixturesByGw[gameweek].length === 0)) {
       return 0;
     }
-    return this.projectionEngine.predict(this.getProjectionInput(playerId, gameweek), gameweek).expected;
+    return this.getPrediction(playerId, gameweek).expected;
   }
   getVariance(playerId: number, gameweek: number): number { 
-    return this.projectionEngine.predict(this.getProjectionInput(playerId, gameweek), gameweek).variance;
+    return this.getPrediction(playerId, gameweek).variance;
   }
   getDistribution(playerId: number, gameweek: number): PlayerDistribution {
     if (!this.distributionMatrix[playerId]) this.distributionMatrix[playerId] = {};

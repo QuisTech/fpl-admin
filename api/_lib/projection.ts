@@ -62,7 +62,7 @@ export interface ProjectionInput {
 
 export function getParamsForRiskMode(riskMode: string, baseWeights: UtilityParameters): UtilityParameters {
   const params = { ...baseWeights };
-  if (riskMode === 'aggressive') {
+  if (riskMode === 'aggressive' || riskMode === 'risky') {
     params.betaVariance = 0.8; // Favor high variance (differentials)
     params.betaEO = -5.0; // Strongly penalize high EO template players
     params.betaDifferential = 5.0; // Directly reward low-ownership differential gems (< 15% EO)
