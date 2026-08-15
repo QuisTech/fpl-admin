@@ -40,7 +40,9 @@ export function solveOptimalSquad(
   budget: number, 
   horizon: number = 8, 
   params: UtilityParameters = DEFAULT_PARAMETERS,
-  availableIds?: Set<number>
+  availableIds?: Set<number>,
+  lockedIds?: Set<number>,
+  excludedIds?: Set<number>
 ): number[] {
   const allIds = oracle.getAllPlayerIds();
   
@@ -55,7 +57,8 @@ export function solveOptimalSquad(
       gkp: { equal: 2 }, 
       def: { equal: 5 }, 
       mid: { equal: 5 }, 
-      fwd: { equal: 3 } 
+      fwd: { equal: 3 },
+      total_cap: { max: 1 }
     },
     variables: {},
     ints: {}
@@ -70,6 +73,7 @@ export function solveOptimalSquad(
 
   allIds.forEach(id => {
     if (availableIds && !availableIds.has(id)) return;
+    if (excludedIds && excludedIds.has(id)) return;
     
     const team = oracle.getTeam(id);
     if (!model.constraints[`team_${team}`]) {
@@ -77,22 +81,26 @@ export function solveOptimalSquad(
     }
 
     const v = `p_${id}`;
+    const c = `c_${id}`;
     const pos = oracle.getPosition(id).toLowerCase();
     
     const score = getPlayerScore(oracle, gameweek, id, horizon, params);
     const rawXP = getRawXP(oracle, gameweek, id, horizon);
     const cost = oracle.getCost(id);
+    const capScore = getPlayerScore(oracle, gameweek, id, 1, params);
 
-    // Only consider players who have raw XP > 0, OR cheap bench fodder (<= 45 = 4.5m)
-    // Use raw XP for filtering to avoid negative utility scores excluding valid players
-    if (rawXP > 0 || cost <= 45) {
+    const isLocked = lockedIds && lockedIds.has(id);
+
+    // Only consider players who have raw XP > 0, OR cheap bench fodder (<= 45 = 4.5m), OR locked players
+    if (rawXP > 0 || cost <= 45 || isLocked) {
       model.variables[v] = { 
         score, 
         cost, 
         total: 1, 
         [pos]: 1, 
         [`team_${team}`]: 1, 
-        [v]: 1
+        [v]: 1,
+        [`cap_link_${id}`]: -1
       };
 
       if (params.minEoTotal) {
@@ -101,8 +109,21 @@ export function solveOptimalSquad(
       if (params.minElitePlayers) {
         model.variables[v]['elite_total'] = cost >= 100 ? 1 : 0;
       }
-      model.constraints[v] = { max: 1 };
+      model.constraints[v] = isLocked ? { equal: 1 } : { max: 1 };
       model.ints[v] = 1;
+
+      // Captaincy 2x decision variable: adds the extra 1x points for the captain
+      if (capScore > 0) {
+        model.variables[c] = {
+          score: capScore,
+          total_cap: 1,
+          [`cap_link_${id}`]: 1,
+          [c]: 1
+        };
+        model.constraints[c] = { max: 1 };
+        model.ints[c] = 1;
+      }
+      model.constraints[`cap_link_${id}`] = { max: 0 };
     }
   });
 

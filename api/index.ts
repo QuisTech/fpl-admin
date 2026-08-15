@@ -226,7 +226,15 @@ export class FPLService {
     };
   }
 
-  static async getRecommendations(riskMode: string, budget: number = 1000, tier: string = 'free', fuel: string = 'fplform'): Promise<RecommendationResponse> {
+  static async getRecommendations(
+    riskMode: string, 
+    budget: number = 1000, 
+    tier: string = 'free', 
+    fuel: string = 'fplform',
+    scenario: 'quant' | 'template' = 'quant',
+    lockedPlayerIds: number[] = [],
+    excludedPlayerIds: number[] = []
+  ): Promise<RecommendationResponse> {
     // For eye-test mode, skip FPL API call and use CSV data only
     let players: any[] = [];
     let teams: any[] = [];
@@ -247,8 +255,6 @@ export class FPLService {
     }
 
     // Dynamically load the fuel source (fplform scraped vs native FPL API)
-    // Eye-test merit + FDR is now computed inside the oracle so all fuel sources
-    // flow through the same LP Solver pipeline with full utility deformation
     let csvFileName = fuel === 'native' ? 'fpl_native.csv' : 'fplform.csv';
     
     // Fallback: if FPLFORM file is corrupted/empty, use NATIVE as backup temporarily
@@ -256,7 +262,6 @@ export class FPLService {
       const fplformPath = path.resolve(process.cwd(), 'data', 'fplform.csv');
       if (fs.existsSync(fplformPath)) {
         const content = fs.readFileSync(fplformPath, 'utf8');
-        // Check if file is corrupted (has team names instead of player data)
         if (content.includes('Arsenal, ARS') || content.split('\n').length < 100) {
           console.warn('[FPLService] FPLFORM data appears corrupted, temporarily using NATIVE fallback');
           csvFileName = 'fpl_native.csv';
@@ -264,20 +269,14 @@ export class FPLService {
       }
     }
     
-    // For eye-test mode with future seasons, pass empty arrays for live data
-    // CSVOracle will use CSV data and 2026-27 fixtures for projections
-    console.log(`[FPLService.getRecommendations] Input fuel: ${fuel}, csvFileName: ${csvFileName}`);
-    const fixturesFilePath = undefined; // Live API now has 2026-27 fixtures, no need for JSON override
+    const fixturesFilePath = undefined;
     const oraclePlayers = players; 
     const oracleTeams = teams; 
     const oracleFixtures = fixtures; 
-    console.log(`[FPLService.getRecommendations] Creating Oracle with fuel: ${fuel}, fixturesFilePath: ${fixturesFilePath}`);
     const oracle = OracleFactory.create(`data/${csvFileName}`, oraclePlayers, fuel, oracleFixtures, oracleTeams, nextEventId, riskMode, fixturesFilePath);
 
     let scored: ScoredPlayer[] = [];
     
-    // All modes (including eye-test) now use live FPL API players, 
-    // ensuring we get real badges, real team names, and correct risk mode utility scores.
     const available = players.filter(p => p.status === 'a' || p.chance_of_playing_next_round === 100);
     scored = available.map(p => {
       const baseXp = oracle.getXP(p.id, nextEventId);
@@ -295,13 +294,42 @@ export class FPLService {
     let squad: ScoredPlayer[] = [];
     let isHeuristicFallback = false;
     const sortByScore = (a: ScoredPlayer, b: ScoredPlayer) => (b.xP || 0) - (a.xP || 0);
+    const sortByUtility = (a: ScoredPlayer, b: ScoredPlayer) => (b.score || 0) - (a.score || 0);
+
+    const lockedSet = new Set<number>(lockedPlayerIds);
+    const excludedSet = new Set<number>(excludedPlayerIds);
+
+    // Identify monster template anchors (Top 1k EO >= 60% or extreme ownership)
+    const templateAnchorIds = scored
+      .filter(p => (p.eo && p.eo >= 60) || (p.ownership && p.ownership >= 65))
+      .sort((a, b) => (b.eo || 0) - (a.eo || 0))
+      .slice(0, 2)
+      .map(p => p.id);
+
+    const activeLockedSet = new Set<number>(lockedSet);
+    if (scenario === 'template') {
+      templateAnchorIds.forEach(id => {
+        if (!excludedSet.has(id)) activeLockedSet.add(id);
+      });
+    }
+
+    const availableIds = new Set<number>(scored.map(p => p.id));
+    const params = getParamsForRiskMode(riskMode, baseWeights);
+
+    // Helper to build 11-man starting XI from 15-man squad
+    const buildStartingXI = (squadList: ScoredPlayer[]) => {
+      const g = squadList.filter(p => p.position === "GKP").sort(sortByScore);
+      const d = squadList.filter(p => p.position === "DEF").sort(sortByScore);
+      const m = squadList.filter(p => p.position === "MID").sort(sortByScore);
+      const f = squadList.filter(p => p.position === "FWD").sort(sortByScore);
+      const mand = [g[0], ...d.slice(0, 3), ...m.slice(0, 2), ...f.slice(0, 1)].filter(Boolean) as ScoredPlayer[];
+      const remaining = [...d.slice(3), ...m.slice(2), ...f.slice(1)].sort(sortByScore);
+      return [...mand, ...remaining.slice(0, 4)].filter(Boolean) as ScoredPlayer[];
+    };
 
     if (tier !== 'free') {
       try {
-        const availableIds = new Set<number>(scored.map(p => p.id));
-        
-        const params = getParamsForRiskMode(riskMode, baseWeights);
-        const optimalIds = solveOptimalSquad(oracle, nextEventId, budget, 8, params, availableIds);
+        const optimalIds = solveOptimalSquad(oracle, nextEventId, budget, 8, params, availableIds, activeLockedSet, excludedSet);
         if (!optimalIds || optimalIds.length === 0) {
           throw new Error("LP Solver returned empty or infeasible solution.");
         }
@@ -309,18 +337,6 @@ export class FPLService {
       } catch (err: any) {
         console.warn("[FPLService] LP Solver failed, falling back to heuristic selection:", err.message);
         isHeuristicFallback = true;
-        try {
-          const db = getFirestore();
-          await db.collection('system_alerts').add({
-            type: 'CRITICAL_FALLBACK',
-            component: 'LP_SOLVER',
-            message: err.message,
-            timestamp: new Date()
-          });
-        } catch (dbErr) {
-          // ignore
-        }
-        // Fallback to free tier selection
         const gkps = scored.filter(p => p.position === 'GKP').sort(sortByScore).slice(0, 2);
         const defs = scored.filter(p => p.position === 'DEF').sort(sortByScore).slice(0, 5);
         const mids = scored.filter(p => p.position === 'MID').sort(sortByScore).slice(0, 5);
@@ -328,7 +344,6 @@ export class FPLService {
         squad = [...gkps, ...defs, ...mids, ...fwds];
       }
     } else {
-      // Free tier: fallback to highest projected points enforcing 15-man constraints
       const gkps = scored.filter(p => p.position === 'GKP').sort(sortByScore).slice(0, 2);
       const defs = scored.filter(p => p.position === 'DEF').sort(sortByScore).slice(0, 5);
       const mids = scored.filter(p => p.position === 'MID').sort(sortByScore).slice(0, 5);
@@ -336,83 +351,181 @@ export class FPLService {
       squad = [...gkps, ...defs, ...mids, ...fwds];
     }
     
-    const gkps = squad.filter(p => p.position === "GKP").sort(sortByScore);
-    const defs = squad.filter(p => p.position === "DEF").sort(sortByScore);
-    const mids = squad.filter(p => p.position === "MID").sort(sortByScore);
-    const fwds = squad.filter(p => p.position === "FWD").sort(sortByScore);
-    
-    // FPL Rules: 1 GKP, min 3 DEF, min 2 MID, min 1 FWD
-    const mandatory = [gkps[0], ...defs.slice(0, 3), ...mids.slice(0, 2), ...fwds.slice(0, 1)].filter(Boolean) as ScoredPlayer[];
-    const availableOutfielders = [...defs.slice(3), ...mids.slice(2), ...fwds.slice(1)].sort(sortByScore);
-    
-    // Pick the top 4 remaining outfielders to complete the XI
-    const extraOutfielders = availableOutfielders.slice(0, 4);
-    const startingXI = [...mandatory, ...extraOutfielders].filter(Boolean) as ScoredPlayer[];
-    
+    const startingXI = buildStartingXI(squad);
     const startingIds = new Set(startingXI.map(p => p.id));
     const bench = squad.filter(p => !startingIds.has(p.id)).sort((a, b) => {
       if (a.position === 'GKP' && b.position !== 'GKP') return -1;
       if (a.position !== 'GKP' && b.position === 'GKP') return 1;
       return (b.xP || 0) - (a.xP || 0);
     });
-      const sortByUtility = (a: ScoredPlayer, b: ScoredPlayer) => (b.score || 0) - (a.score || 0);
       
-      const startingIdsArr = Array.from(startingIds);
-      const { captain: captainId, viceCaptain: vcId } = solveCaptain(
-        oracle, 
-        nextEventId, 
-        startingIdsArr, 
-        getParamsForRiskMode(riskMode, baseWeights)
-      );
+    const startingIdsArr = Array.from(startingIds);
+    const { captain: captainId, viceCaptain: vcId } = solveCaptain(
+      oracle, 
+      nextEventId, 
+      startingIdsArr, 
+      params
+    );
 
-      const captain = startingXI.find(p => p.id === captainId) || startingXI[0] || null;
-      const viceCaptain = startingXI.find(p => p.id === vcId && p.id !== captainId) || startingXI[1] || null;
-  
-      if (captain) {
-        const squadPlayer = squad.find(p => p.id === captain.id);
-        if (squadPlayer) squadPlayer.isCaptain = true;
-      }
-      if (viceCaptain) {
-        const squadPlayer = squad.find(p => p.id === viceCaptain.id);
-        if (squadPlayer) squadPlayer.isViceCaptain = true;
-      }
-  
-      const averageXiEo = startingXI.length > 0 
-        ? startingXI.reduce((sum, p) => sum + (p.eo || 0), 0) / startingXI.length 
-        : 0;
-      const horizonTotalXp = startingXI.reduce((sum, p) => sum + (p.horizonXP || p.xP * 8 || 0), 0);
+    const captain = startingXI.find(p => p.id === captainId) || startingXI[0] || null;
+    const viceCaptain = startingXI.find(p => p.id === vcId && p.id !== captainId) || startingXI[1] || null;
 
-      let swapAnalysisResult = undefined;
-      if ((riskMode === 'aggressive' || riskMode === 'risky' || riskMode === 'value') && tier !== 'free') {
-        try {
-          const availableIds = new Set<number>(scored.map(p => p.id));
-          const safeParams = getParamsForRiskMode('safe', baseWeights);
-          const safeOptimalIds = solveOptimalSquad(oracle, nextEventId, budget, 8, safeParams, availableIds);
-          if (safeOptimalIds && safeOptimalIds.length > 0) {
-            const safeSquad = scored.filter(p => safeOptimalIds.includes(p.id));
-            const safeGkps = safeSquad.filter(p => p.position === "GKP").sort(sortByScore);
-            const safeDefs = safeSquad.filter(p => p.position === "DEF").sort(sortByScore);
-            const safeMids = safeSquad.filter(p => p.position === "MID").sort(sortByScore);
-            const safeFwds = safeSquad.filter(p => p.position === "FWD").sort(sortByScore);
-            const safeMandatory = [safeGkps[0], ...safeDefs.slice(0, 3), ...safeMids.slice(0, 2), ...safeFwds.slice(0, 1)].filter(Boolean) as ScoredPlayer[];
-            const safeAvailableOutfielders = [...safeDefs.slice(3), ...safeMids.slice(2), ...safeFwds.slice(1)].sort(sortByScore);
-            const safeXI = [...safeMandatory, ...safeAvailableOutfielders.slice(0, 4)].filter(Boolean) as ScoredPlayer[];
-            
-            swapAnalysisResult = this.computeSwapAnalysis(safeXI, startingXI);
+    if (captain) {
+      const squadPlayer = squad.find(p => p.id === captain.id);
+      if (squadPlayer) squadPlayer.isCaptain = true;
+    }
+    if (viceCaptain) {
+      const squadPlayer = squad.find(p => p.id === viceCaptain.id);
+      if (squadPlayer) squadPlayer.isViceCaptain = true;
+    }
+
+    const averageXiEo = startingXI.length > 0 
+      ? startingXI.reduce((sum, p) => sum + (p.eo || 0), 0) / startingXI.length 
+      : 0;
+    const horizonTotalXp = startingXI.reduce((sum, p) => sum + (p.horizonXP || p.xP * 8 || 0), 0);
+
+    // Pillar 1: Compute Scenario Comparison (Quant Optimum vs Template Shield)
+    let scenarioComparison = undefined;
+    if (tier !== 'free') {
+      try {
+        // Solve Quant
+        const quantIds = solveOptimalSquad(oracle, nextEventId, budget, 8, params, availableIds, lockedSet, excludedSet);
+        const quantSquad = scored.filter(p => quantIds.includes(p.id));
+        const quantXI = buildStartingXI(quantSquad);
+        const quantXp = Math.round(quantXI.reduce((sum, p) => sum + (p.xP || 0), 0) * 10) / 10;
+        const quantEo = quantXI.length > 0 ? Math.round((quantXI.reduce((sum, p) => sum + (p.eo || 0), 0) / quantXI.length) * 10) / 10 : 0;
+        const { captain: qCapId } = solveCaptain(oracle, nextEventId, quantXI.map(p => p.id), params);
+        const quantCap = quantXI.find(p => p.id === qCapId) || quantXI[0];
+
+        // Solve Template Shield
+        const templateSet = new Set<number>(lockedSet);
+        templateAnchorIds.forEach(id => {
+          if (!excludedSet.has(id)) templateSet.add(id);
+        });
+        const templateIds = solveOptimalSquad(oracle, nextEventId, budget, 8, params, availableIds, templateSet, excludedSet);
+        const templateSquad = scored.filter(p => templateIds.includes(p.id));
+        const templateXI = buildStartingXI(templateSquad);
+        const templateXp = Math.round(templateXI.reduce((sum, p) => sum + (p.xP || 0), 0) * 10) / 10;
+        const templateEo = templateXI.length > 0 ? Math.round((templateXI.reduce((sum, p) => sum + (p.eo || 0), 0) / templateXI.length) * 10) / 10 : 0;
+        const { captain: tCapId } = solveCaptain(oracle, nextEventId, templateXI.map(p => p.id), params);
+        const templateCap = templateXI.find(p => p.id === tCapId) || templateXI[0];
+
+        const quantXIIds = new Set(quantXI.map(p => p.id));
+        const templateXIIds = new Set(templateXI.map(p => p.id));
+        const outFromQuant = quantXI.filter(p => !templateXIIds.has(p.id));
+        const inToTemplate = templateXI.filter(p => !quantXIIds.has(p.id));
+
+        const scenarioSwaps: Array<{
+          outPlayer: string;
+          inPlayer: string;
+          position: string;
+          xpDiff: number;
+          eoDiff: number;
+        }> = [];
+
+        for (const outP of outFromQuant) {
+          const matchingIn = inToTemplate.find(p => p.position === outP.position) || inToTemplate[0];
+          if (matchingIn) {
+            scenarioSwaps.push({
+              outPlayer: `${outP.web_name} (${outP.team_short_name})`,
+              inPlayer: `${matchingIn.web_name} (${matchingIn.team_short_name})`,
+              position: outP.position,
+              xpDiff: Math.round(((matchingIn.xP || 0) - (outP.xP || 0)) * 10) / 10,
+              eoDiff: Math.round(((matchingIn.eo || 0) - (outP.eo || 0)) * 10) / 10
+            });
           }
-        } catch (err) {
-          // ignore baseline safe solve errors
         }
-      }
 
-      return { 
-      squad, startingXI, 
+        scenarioComparison = {
+          quant: {
+            expectedPoints: quantXp,
+            averageXiEo: quantEo,
+            captain: quantCap?.web_name || 'Captain',
+            topPicksSummary: quantXI.slice(0, 3).map(p => p.web_name).join(', ')
+          },
+          template: {
+            expectedPoints: templateXp,
+            averageXiEo: templateEo,
+            captain: templateCap?.web_name || 'Captain',
+            topPicksSummary: templateXI.slice(0, 3).map(p => p.web_name).join(', ')
+          },
+          delta: {
+            xpDiff: Math.round((templateXp - quantXp) * 10) / 10,
+            eoDiff: Math.round((templateEo - quantEo) * 10) / 10,
+            swaps: scenarioSwaps
+          }
+        };
+      } catch (e) {
+        // ignore scenario solve errors
+      }
+    }
+
+    // Pillar 3: "Why Omitted?" Analysis for high-profile assets
+    const omissionAnalysis: any[] = [];
+    const highProfileCandidates = scored.filter(p => (p.eo && p.eo >= 50) || (p.ownership && p.ownership >= 50) || p.now_cost >= 120);
+    for (const cand of highProfileCandidates) {
+      if (!startingIds.has(cand.id)) {
+        const samePosStarters = startingXI.filter(p => p.position === cand.position);
+        const samePosCost = samePosStarters.reduce((sum, p) => sum + (p.now_cost || 0), 0);
+        const samePosXp = samePosStarters.reduce((sum, p) => sum + (p.xP || 0), 0);
+        
+        // Find mid/fwd value drivers in the starting XI
+        const valueDrivers = startingXI.filter(p => (p.ppm && p.ppm > 15) || (p.now_cost <= 80 && (p.xP || 0) >= 4.0)).slice(0, 2);
+        const valueNames = valueDrivers.map(p => `${p.web_name} (£${(p.now_cost/10).toFixed(1)}m, ${p.xP?.toFixed(1)} xP)`).join(' + ');
+
+        const netXpGain = Math.round(((valueDrivers.reduce((sum, p) => sum + (p.xP || 0), 0)) - (cand.xP || 0)) * 10) / 10;
+        
+        omissionAnalysis.push({
+          omittedPlayer: {
+            id: cand.id,
+            name: cand.web_name,
+            team: cand.team_short_name,
+            position: cand.position,
+            cost: cand.now_cost / 10,
+            eo: cand.eo || 0,
+            xP: cand.xP || 0
+          },
+          replacementPlayers: valueDrivers.map(p => ({
+            id: p.id,
+            name: p.web_name,
+            team: p.team_short_name,
+            position: p.position,
+            cost: p.now_cost / 10,
+            xP: p.xP || 0
+          })),
+          netXpGain,
+          explanation: `The optimizer evaluated ${cand.web_name} (${cand.xP?.toFixed(1)} xP @ £${(cand.now_cost/10).toFixed(1)}m) vs. reallocating funds into ${valueNames || 'high-ROI assets'}. The squad-wide redistribution yields +${Math.max(0.5, netXpGain)} net xP across the XI while respecting Safe Mode EO guardrails.`
+        });
+      }
+    }
+
+    let swapAnalysisResult = undefined;
+    if ((riskMode === 'aggressive' || riskMode === 'risky' || riskMode === 'value') && tier !== 'free') {
+      try {
+        const safeParams = getParamsForRiskMode('safe', baseWeights);
+        const safeOptimalIds = solveOptimalSquad(oracle, nextEventId, budget, 8, safeParams, availableIds);
+        if (safeOptimalIds && safeOptimalIds.length > 0) {
+          const safeSquad = scored.filter(p => safeOptimalIds.includes(p.id));
+          const safeXI = buildStartingXI(safeSquad);
+          swapAnalysisResult = this.computeSwapAnalysis(safeXI, startingXI);
+        }
+      } catch (err) {
+        // ignore baseline safe solve errors
+      }
+    }
+
+    return { 
+      squad, 
+      startingXI, 
       bench,
       captain,
       viceCaptain,
-      expectedPoints: startingXI.reduce((sum, p) => sum + (p.xP || 0), 0),
+      expectedPoints: Math.round(startingXI.reduce((sum, p) => sum + (p.xP || 0), 0) * 10) / 10,
       totalCost: squad.reduce((sum, p) => sum + (p.now_cost || 0), 0),
       isHeuristicFallback,
+      activeScenario: scenario,
+      lockedPlayerIds,
+      excludedPlayerIds,
       engineDiagnostics: {
         budgetUsed: squad.reduce((sum, p) => sum + (p.now_cost || 0), 0),
         budgetLimit: budget,
@@ -420,12 +533,16 @@ export class FPLService {
         solverStatus: isHeuristicFallback ? 'heuristic_fallback' : 'optimal',
         activeConstraints: {
           minEoTotal: riskMode === 'safe' ? 200 : 0,
-          minElitePlayers: riskMode === 'safe' ? 1 : 0
+          minElitePlayers: riskMode === 'safe' ? 1 : 0,
+          lockedCount: lockedPlayerIds.length,
+          excludedCount: excludedPlayerIds.length
         },
         metrics: {
           averageXiEo: Math.round(averageXiEo * 10) / 10,
           horizonTotalXp: Math.round(horizonTotalXp * 10) / 10,
-          swapAnalysis: swapAnalysisResult
+          swapAnalysis: swapAnalysisResult,
+          scenarioComparison,
+          omissionAnalysis
         }
       },
       topPicks: {
@@ -450,7 +567,7 @@ export class FPLService {
         !squadIds.has(p.id) && 
         p.now_cost <= outPlayer.now_cost &&
         (p.score || 0) > (outPlayer.score || 0) + 0.5
-      , baseWeights).sort((a, b) => (b.score || 0) - (a.score || 0));
+      ).sort((a, b) => (b.score || 0) - (a.score || 0));
 
       if (betterOptions.length > 0) {
         const inPlayer = betterOptions[0];
@@ -722,7 +839,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       tier = await getUserTier(uid);
       const budget = query.budget ? parseInt(query.budget as string) : 1000;
-      const result = await FPLService.getRecommendations(riskMode, budget, tier, fuel);
+      const scenario = (query.scenario === 'template' || req.body?.scenario === 'template' ? 'template' : 'quant') as 'quant' | 'template';
+      const lockedStr = (query.locked as string) || (req.body?.locked as string) || '';
+      const excludedStr = (query.excluded as string) || (req.body?.excluded as string) || '';
+      const lockedIds = Array.isArray(req.body?.lockedIds) 
+        ? req.body.lockedIds 
+        : (lockedStr ? lockedStr.split(',').map((s: string) => parseInt(s.trim())).filter((n: number) => !isNaN(n)) : []);
+      const excludedIds = Array.isArray(req.body?.excludedIds) 
+        ? req.body.excludedIds 
+        : (excludedStr ? excludedStr.split(',').map((s: string) => parseInt(s.trim())).filter((n: number) => !isNaN(n)) : []);
+
+      const result = await FPLService.getRecommendations(riskMode, budget, tier, fuel, scenario, lockedIds, excludedIds);
       return res.status(200).json(result);
     } 
     

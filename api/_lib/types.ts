@@ -69,6 +69,54 @@ export interface ScoredPlayer extends FPLPlayer {
 }
 
 
+export interface OmissionAnalysis {
+  omittedPlayer: {
+    id: number;
+    name: string;
+    team: string;
+    position: string;
+    cost: number;
+    eo: number;
+    xP: number;
+  };
+  replacementPlayers: Array<{
+    id: number;
+    name: string;
+    team: string;
+    position: string;
+    cost: number;
+    xP: number;
+  }>;
+  netXpGain: number;
+  explanation: string;
+}
+
+export interface ScenarioComparison {
+  quant: {
+    expectedPoints: number;
+    averageXiEo: number;
+    captain: string;
+    topPicksSummary: string;
+  };
+  template: {
+    expectedPoints: number;
+    averageXiEo: number;
+    captain: string;
+    topPicksSummary: string;
+  };
+  delta: {
+    xpDiff: number;
+    eoDiff: number;
+    swaps: Array<{
+      outPlayer: string;
+      inPlayer: string;
+      position: string;
+      xpDiff: number;
+      eoDiff: number;
+    }>;
+  };
+}
+
 export interface RecommendationResponse {
   squad: ScoredPlayer[];
   startingXI: ScoredPlayer[];
@@ -78,6 +126,9 @@ export interface RecommendationResponse {
   expectedPoints: number;
   totalCost: number;
   isHeuristicFallback?: boolean;
+  activeScenario?: 'quant' | 'template';
+  lockedPlayerIds?: number[];
+  excludedPlayerIds?: number[];
   engineDiagnostics?: {
     budgetUsed: number;
     budgetLimit: number;
@@ -86,6 +137,8 @@ export interface RecommendationResponse {
     activeConstraints: {
       minEoTotal?: number;
       minElitePlayers?: number;
+      lockedCount?: number;
+      excludedCount?: number;
     };
     metrics?: {
       averageXiEo: number;
@@ -108,6 +161,8 @@ export interface RecommendationResponse {
           eoReduction: number;
         }>;
       };
+      scenarioComparison?: ScenarioComparison;
+      omissionAnalysis?: OmissionAnalysis[];
     };
   };
   topPicks: {

@@ -85,7 +85,14 @@ function FPLApp() {
     takeSnapshot,
     fetchLivePoints,
     tier,
-    isTeamIdLocked
+    isTeamIdLocked,
+    activeScenario,
+    setActiveScenario,
+    lockedPlayerIds,
+    excludedPlayerIds,
+    toggleLock,
+    toggleExclude,
+    clearConstraints
   } = useFPLData(riskMode, fuel, activeUserId, authInitialized);
 
   const handleSync = async () => {
@@ -142,22 +149,23 @@ function FPLApp() {
                     key={t}
                     onClick={() => setTab(t)}
                     className={cn(
-                      "px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all",
-                      tab === t ? "bg-slate-800 text-white" : "text-slate-500 hover:text-slate-300"
+                      "px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all",
+                      tab === t 
+                        ? "bg-fpl-green text-slate-950 shadow-[0_0_15px_rgba(0,255,133,0.3)]" 
+                        : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
                     )}
                   >{t}</button>
                 ))}
               </div>
               <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2 w-full md:w-auto">
-                {tab === 'pitch' && data && (
-                  <button 
-                    onClick={handleSnapshot}
-                    className="flex items-center gap-2 bg-slate-900 border border-fpl-border rounded-lg px-3 py-1 text-[9px] font-black uppercase tracking-widest text-white hover:bg-slate-800 transition-all mr-2 sm:mr-4"
-                  >
-                    <Camera className="w-3 h-3 text-fpl-green" />
-                    Snapshot
-                  </button>
-                )}
+                <button 
+                  onClick={handleSnapshot}
+                  className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-1.5 bg-slate-900 border border-fpl-border rounded-xl text-xs font-black uppercase text-slate-300 hover:text-white hover:bg-slate-800 transition-colors shadow-sm"
+                  title="Save current recommendations to track performance after the gameweek"
+                >
+                  <Camera className="w-3.5 h-3.5 text-fpl-green" />
+                  <span>Snapshot</span>
+                </button>
                 <div className="flex items-center gap-2">
                   <input 
                     type="text" 
@@ -191,9 +199,25 @@ function FPLApp() {
               {tab === 'optimizer' ? (
                 <OptimizerPositioning userId={activeUserId} currentTier={tier} />
               ) : tab === 'pitch' ? (
-                <PitchView data={data} formation={formation} />
+                <PitchView 
+                  data={data} 
+                  formation={formation} 
+                  activeScenario={activeScenario}
+                  onSelectScenario={setActiveScenario}
+                  lockedPlayerIds={lockedPlayerIds}
+                  excludedPlayerIds={excludedPlayerIds}
+                  onToggleLock={toggleLock}
+                  onToggleExclude={toggleExclude}
+                  onClearConstraints={clearConstraints}
+                />
               ) : tab === 'picks' ? (
-                <DataGrid data={data} />
+                <DataGrid 
+                  data={data} 
+                  lockedPlayerIds={lockedPlayerIds}
+                  excludedPlayerIds={excludedPlayerIds}
+                  onToggleLock={toggleLock}
+                  onToggleExclude={toggleExclude}
+                />
               ) : tab === 'transfers' ? (
                 <TransferView syncedData={syncedData} tier={tier} setTab={setTab} userId={activeUserId} />
               ) : tab === 'performance' ? (

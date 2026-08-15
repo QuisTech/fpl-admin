@@ -1,10 +1,15 @@
 import { cn } from '../lib/utils';
 import { ScoredPlayer } from '../types';
+import { Lock, Ban } from 'lucide-react';
 
 interface PlayerCardProps {
   player: ScoredPlayer;
   isCaptain?: boolean;
   isViceCaptain?: boolean;
+  isLocked?: boolean;
+  isExcluded?: boolean;
+  onToggleLock?: (id: number) => void;
+  onToggleExclude?: (id: number) => void;
   compact?: boolean;
   key?: number | string;
 }
@@ -12,7 +17,11 @@ interface PlayerCardProps {
 export const PlayerCard = ({ 
   player, 
   isCaptain, 
-  isViceCaptain, 
+  isViceCaptain,
+  isLocked,
+  isExcluded,
+  onToggleLock,
+  onToggleExclude,
   compact = false 
 }: PlayerCardProps) => {
   if (!player) return null;
@@ -20,7 +29,10 @@ export const PlayerCard = ({
   return (
     <div className={cn(
       "group relative flex flex-col p-1 sm:p-2 bg-slate-950 border-2 rounded-lg shadow-lg transition-transform hover:scale-105",
-      isCaptain ? "border-fpl-green shadow-[0_0_15px_rgba(0,255,133,0.2)]" : isViceCaptain ? "border-fpl-pink" : "border-slate-800",
+      isLocked ? "border-amber-400/80 shadow-[0_0_12px_rgba(251,191,36,0.25)]" :
+      isCaptain ? "border-fpl-green shadow-[0_0_15px_rgba(0,255,133,0.2)]" : 
+      isViceCaptain ? "border-fpl-pink" : 
+      isExcluded ? "border-rose-500/50 opacity-40" : "border-slate-800",
       compact 
         ? "w-[54px] h-[72px] sm:w-20 sm:h-28" 
         : "w-[68px] h-[88px] sm:w-28 sm:h-36"
@@ -35,7 +47,48 @@ export const PlayerCard = ({
           VC
         </div>
       )}
+      {isLocked && (
+        <div className="absolute -top-1.5 -left-1.5 sm:-top-2 sm:-left-2 bg-amber-400 text-slate-950 font-black px-1 py-0.25 sm:py-0.5 rounded text-[7px] sm:text-[8px] z-10 flex items-center gap-0.5 shadow-sm">
+          <Lock className="w-2 h-2" />
+        </div>
+      )}
       
+      {/* Quick Lock / Exclude Hover Action Overlay */}
+      {(onToggleLock || onToggleExclude) && !compact && (
+        <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5 z-20">
+          {onToggleLock && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleLock(player.id);
+              }}
+              title={isLocked ? "Unlock Player" : "Lock Player (Force Include)"}
+              className={cn(
+                "p-1 rounded transition-colors shadow-sm",
+                isLocked ? "bg-amber-400 text-slate-950" : "bg-slate-900/90 text-slate-400 hover:text-amber-300 hover:bg-slate-800"
+              )}
+            >
+              <Lock className="w-2.5 h-2.5" />
+            </button>
+          )}
+          {onToggleExclude && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleExclude(player.id);
+              }}
+              title={isExcluded ? "Unban Player" : "Exclude Player (Ban from solve)"}
+              className={cn(
+                "p-1 rounded transition-colors shadow-sm",
+                isExcluded ? "bg-rose-500 text-white" : "bg-slate-900/90 text-slate-400 hover:text-rose-400 hover:bg-slate-800"
+              )}
+            >
+              <Ban className="w-2.5 h-2.5" />
+            </button>
+          )}
+        </div>
+      )}
+
       <div className="flex-1 flex flex-col items-center justify-center space-y-0.5 sm:space-y-1">
         <div className="flex items-center gap-0.5 text-[7px] sm:text-[9px] font-bold text-slate-500 uppercase tracking-tighter">
           <span>{player.team_short_name}</span>
@@ -64,8 +117,11 @@ export const PlayerCard = ({
       </div>
       
       {/* Mathematical Engine Proof Tooltip */}
-      <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity z-50 bg-slate-900/95 backdrop-blur-sm border border-slate-700 text-slate-300 text-[9px] p-2 rounded shadow-2xl w-32 bottom-full mb-2 left-1/2 -translate-x-1/2 pointer-events-none">
-        <div className="font-bold border-b border-slate-800 pb-1 mb-1 text-white">Engine Math</div>
+      <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity z-50 bg-slate-900/95 backdrop-blur-sm border border-slate-700 text-slate-300 text-[9px] p-2 rounded shadow-2xl w-36 bottom-full mb-2 left-1/2 -translate-x-1/2 pointer-events-none">
+        <div className="font-bold border-b border-slate-800 pb-1 mb-1 text-white flex justify-between items-center">
+          <span>Engine Math</span>
+          {isLocked && <span className="text-[8px] text-amber-400 uppercase font-black">Locked</span>}
+        </div>
         <div className="flex justify-between"><span>Raw xP:</span> <span className="text-fpl-green font-mono">{player.xP?.toFixed(2)}</span></div>
         <div className="flex justify-between"><span>Cost:</span> <span className="font-mono">£{(player.now_cost/10).toFixed(1)}M</span></div>
         <div className="flex justify-between font-bold border-t border-slate-800 pt-1 mt-1"><span>ROI:</span> <span className="text-cyan-400 font-mono">{((player.xP || 0) / (player.now_cost / 10)).toFixed(2)}</span></div>

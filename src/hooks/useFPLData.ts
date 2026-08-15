@@ -11,6 +11,9 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
   const [syncing, setSyncing] = useState(false);
   const [tier, setTier] = useState<string>('free');
   const [isTeamIdLocked, setIsTeamIdLocked] = useState(false);
+  const [activeScenario, setActiveScenario] = useState<'quant' | 'template'>('quant');
+  const [lockedPlayerIds, setLockedPlayerIds] = useState<number[]>([]);
+  const [excludedPlayerIds, setExcludedPlayerIds] = useState<number[]>([]);
 
   const [history, setHistory] = useState<any>(() => {
     const saved = localStorage.getItem('fpl_optimizer_history');
@@ -23,7 +26,7 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
 
   useEffect(() => {
     fetchRecommendations();
-  }, [riskMode, fuel, syncedData?.totalCost, syncedData?.bank, userId, authInitialized]);
+  }, [riskMode, fuel, syncedData?.totalCost, syncedData?.bank, userId, authInitialized, activeScenario, lockedPlayerIds, excludedPlayerIds]);
 
   useEffect(() => {
     if (teamId && syncedData) {
@@ -49,12 +52,35 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
     }
   }, [userId, authInitialized]);
 
+  const toggleLock = (playerId: number) => {
+    setExcludedPlayerIds(prev => prev.filter(id => id !== playerId));
+    setLockedPlayerIds(prev => 
+      prev.includes(playerId) ? prev.filter(id => id !== playerId) : [...prev, playerId]
+    );
+  };
+
+  const toggleExclude = (playerId: number) => {
+    setLockedPlayerIds(prev => prev.filter(id => id !== playerId));
+    setExcludedPlayerIds(prev => 
+      prev.includes(playerId) ? prev.filter(id => id !== playerId) : [...prev, playerId]
+    );
+  };
+
+  const clearConstraints = () => {
+    setLockedPlayerIds([]);
+    setExcludedPlayerIds([]);
+  };
+
   const fetchRecommendations = async () => {
     if (!authInitialized || !userId) return;
     setLoading(true);
     try {
       const budgetQuery = syncedData ? `&budget=${(syncedData.totalCost || 0) + (syncedData.bank || 0)}` : '';
-      const res = await axios.get(`/api/recommendations?riskMode=${riskMode}&fuel=${fuel}${budgetQuery}&userId=${userId}&tier=${tier}`);
+      const scenarioQuery = `&scenario=${activeScenario}`;
+      const lockedQuery = lockedPlayerIds.length > 0 ? `&locked=${lockedPlayerIds.join(',')}` : '';
+      const excludedQuery = excludedPlayerIds.length > 0 ? `&excluded=${excludedPlayerIds.join(',')}` : '';
+      
+      const res = await axios.get(`/api/recommendations?riskMode=${riskMode}&fuel=${fuel}${budgetQuery}${scenarioQuery}${lockedQuery}${excludedQuery}&userId=${userId}&tier=${tier}`);
       if (res.data) {
         setData(res.data);
       }
@@ -151,6 +177,13 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
     takeSnapshot,
     fetchLivePoints,
     tier,
-    isTeamIdLocked
+    isTeamIdLocked,
+    activeScenario,
+    setActiveScenario,
+    lockedPlayerIds,
+    excludedPlayerIds,
+    toggleLock,
+    toggleExclude,
+    clearConstraints
   };
 };
