@@ -100,7 +100,14 @@ export const Header = ({ data, riskMode, setRiskMode, fuel, setFuel, onOpenAuth,
         <div className="flex items-center justify-between xl:justify-end gap-4 xl:gap-6 w-full xl:w-auto">
           <div className="flex flex-col text-left xl:text-right">
             <span className="text-[10px] uppercase tracking-widest text-slate-400 font-medium">Expected Points</span>
-            <span className="text-xl font-bold text-fpl-green tabular-nums">+{(data?.expectedPoints || 0).toFixed(1)} xP</span>
+            <div className="flex items-baseline gap-1.5 xl:justify-end">
+              <span className="text-xl font-bold text-fpl-green tabular-nums">+{(data?.expectedPoints || 0).toFixed(1)} xP</span>
+            </div>
+            {data?.captain && (
+              <span className="text-[9px] font-mono text-slate-500 hidden sm:inline" title="11 Starting Players + Captain 2× Multiplier">
+                XI: {((data.expectedPoints || 0) - (data.captain.xP || 0)).toFixed(1)} • C (2×): +{(data.captain.xP || 0).toFixed(1)}
+              </span>
+            )}
           </div>
           
           <div className="h-8 w-px bg-slate-800 hidden xl:block"></div>

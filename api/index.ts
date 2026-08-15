@@ -392,10 +392,10 @@ export class FPLService {
         const quantIds = solveOptimalSquad(oracle, nextEventId, budget, 8, params, availableIds, lockedSet, excludedSet);
         const quantSquad = scored.filter(p => quantIds.includes(p.id));
         const quantXI = buildStartingXI(quantSquad);
-        const quantXp = Math.round(quantXI.reduce((sum, p) => sum + (p.xP || 0), 0) * 10) / 10;
-        const quantEo = quantXI.length > 0 ? Math.round((quantXI.reduce((sum, p) => sum + (p.eo || 0), 0) / quantXI.length) * 10) / 10 : 0;
         const { captain: qCapId } = solveCaptain(oracle, nextEventId, quantXI.map(p => p.id), params);
         const quantCap = quantXI.find(p => p.id === qCapId) || quantXI[0];
+        const quantXp = Math.round((quantXI.reduce((sum, p) => sum + (p.xP || 0), 0) + (quantCap?.xP || 0)) * 10) / 10;
+        const quantEo = quantXI.length > 0 ? Math.round((quantXI.reduce((sum, p) => sum + (p.eo || 0), 0) / quantXI.length) * 10) / 10 : 0;
 
         // Solve Template Shield
         const templateSet = new Set<number>(lockedSet);
@@ -405,10 +405,10 @@ export class FPLService {
         const templateIds = solveOptimalSquad(oracle, nextEventId, budget, 8, params, availableIds, templateSet, excludedSet);
         const templateSquad = scored.filter(p => templateIds.includes(p.id));
         const templateXI = buildStartingXI(templateSquad);
-        const templateXp = Math.round(templateXI.reduce((sum, p) => sum + (p.xP || 0), 0) * 10) / 10;
-        const templateEo = templateXI.length > 0 ? Math.round((templateXI.reduce((sum, p) => sum + (p.eo || 0), 0) / templateXI.length) * 10) / 10 : 0;
         const { captain: tCapId } = solveCaptain(oracle, nextEventId, templateXI.map(p => p.id), params);
         const templateCap = templateXI.find(p => p.id === tCapId) || templateXI[0];
+        const templateXp = Math.round((templateXI.reduce((sum, p) => sum + (p.xP || 0), 0) + (templateCap?.xP || 0)) * 10) / 10;
+        const templateEo = templateXI.length > 0 ? Math.round((templateXI.reduce((sum, p) => sum + (p.eo || 0), 0) / templateXI.length) * 10) / 10 : 0;
 
         const quantXIIds = new Set(quantXI.map(p => p.id));
         const templateXIIds = new Set(templateXI.map(p => p.id));
@@ -438,16 +438,24 @@ export class FPLService {
 
         scenarioComparison = {
           quant: {
-            expectedPoints: quantXp,
-            averageXiEo: quantEo,
-            captain: quantCap?.web_name || 'Captain',
-            topPicksSummary: quantXI.slice(0, 3).map(p => p.web_name).join(', ')
+            name: 'Quant Optimum',
+            totalXp: quantXp,
+            averageEo: quantEo,
+            captain: {
+              name: quantCap.web_name,
+              team: quantCap.team_short_name,
+              xP: quantCap.xP || 0
+            }
           },
           template: {
-            expectedPoints: templateXp,
-            averageXiEo: templateEo,
-            captain: templateCap?.web_name || 'Captain',
-            topPicksSummary: templateXI.slice(0, 3).map(p => p.web_name).join(', ')
+            name: 'Template Shield',
+            totalXp: templateXp,
+            averageEo: templateEo,
+            captain: {
+              name: templateCap.web_name,
+              team: templateCap.team_short_name,
+              xP: templateCap.xP || 0
+            }
           },
           delta: {
             xpDiff: Math.round((templateXp - quantXp) * 10) / 10,
@@ -462,45 +470,49 @@ export class FPLService {
 
     // Pillar 3: "Why Omitted?" Analysis for high-profile assets
     const omissionAnalysis: any[] = [];
-    const highProfileCandidates = scored.filter(p => (p.eo && p.eo >= 50) || (p.ownership && p.ownership >= 50) || p.now_cost >= 120);
-    for (const cand of highProfileCandidates) {
-      if (!startingIds.has(cand.id)) {
-        const samePosStarters = startingXI.filter(p => p.position === cand.position);
-        const samePosCost = samePosStarters.reduce((sum, p) => sum + (p.now_cost || 0), 0);
-        const samePosXp = samePosStarters.reduce((sum, p) => sum + (p.xP || 0), 0);
-        
-        // Find mid/fwd value drivers in the starting XI
-        const valueDrivers = startingXI.filter(p => (p.ppm && p.ppm > 15) || (p.now_cost <= 80 && (p.xP || 0) >= 4.0)).slice(0, 2);
-        const valueNames = valueDrivers.map(p => `${p.web_name} (£${(p.now_cost/10).toFixed(1)}m, ${p.xP?.toFixed(1)} xP)`).join(' + ');
+    try {
+      const startingXIIds = new Set(startingXI.map(p => p.id));
+      const notableOmissions = scored.filter(p => 
+        !startingXIIds.has(p.id) && 
+        ((p.eo && p.eo >= 50) || p.now_cost >= 120)
+      ).sort((a, b) => (b.eo || 0) - (a.eo || 0)).slice(0, 8);
 
-        const netXpGain = Math.round(((valueDrivers.reduce((sum, p) => sum + (p.xP || 0), 0)) - (cand.xP || 0)) * 10) / 10;
+      for (const omitted of notableOmissions) {
+        const costDiff = (omitted.now_cost || 0);
+        const startersInSameOrFunded = startingXI
+          .filter(p => (p.now_cost || 0) <= costDiff && p.id !== omitted.id)
+          .sort((a, b) => ((b.xP || 0) / ((b.now_cost || 10)/10)) - ((a.xP || 0) / ((a.now_cost || 10)/10)))
+          .slice(0, 2);
+
+        const replacementXpSum = startersInSameOrFunded.reduce((sum, p) => sum + (p.xP || 0), 0);
+        const netGain = Math.round((replacementXpSum - (omitted.xP || 0)) * 10) / 10;
         
+        const fundedNames = startersInSameOrFunded.map(p => `${p.web_name} (£${((p.now_cost || 0)/10).toFixed(1)}m, ${p.xP?.toFixed(1)} xP)`).join(' + ');
+
         omissionAnalysis.push({
           omittedPlayer: {
-            id: cand.id,
-            name: cand.web_name,
-            team: cand.team_short_name,
-            position: cand.position,
-            cost: cand.now_cost / 10,
-            eo: cand.eo || 0,
-            xP: cand.xP || 0
+            id: omitted.id,
+            name: omitted.web_name,
+            cost: (omitted.now_cost || 0) / 10,
+            xP: omitted.xP || 0,
+            eo: omitted.eo || 0
           },
-          replacementPlayers: valueDrivers.map(p => ({
+          replacementPlayers: startersInSameOrFunded.map(p => ({
             id: p.id,
             name: p.web_name,
-            team: p.team_short_name,
-            position: p.position,
-            cost: p.now_cost / 10,
+            cost: (p.now_cost || 0) / 10,
             xP: p.xP || 0
           })),
-          netXpGain,
-          explanation: `The optimizer evaluated ${cand.web_name} (${cand.xP?.toFixed(1)} xP @ £${(cand.now_cost/10).toFixed(1)}m) vs. reallocating funds into ${valueNames || 'high-ROI assets'}. The squad-wide redistribution yields +${Math.max(0.5, netXpGain)} net xP across the XI while respecting Safe Mode EO guardrails.`
+          netXpGain: netGain,
+          explanation: `The optimizer evaluated ${omitted.web_name} (${omitted.xP?.toFixed(1)} xP @ £${((omitted.now_cost || 0)/10).toFixed(1)}m) vs. reallocating funds into ${fundedNames}. The squad-wide redistribution yields +${netGain} net xP across the XI while respecting Safe Mode EO guardrails.`
         });
       }
+    } catch (err) {
+      // ignore omission calculation error
     }
 
     let swapAnalysisResult = undefined;
-    if ((riskMode === 'aggressive' || riskMode === 'risky' || riskMode === 'value') && tier !== 'free') {
+    if (riskMode !== 'safe' && tier !== 'free') {
       try {
         const safeParams = getParamsForRiskMode('safe', baseWeights);
         const safeOptimalIds = solveOptimalSquad(oracle, nextEventId, budget, 8, safeParams, availableIds);
@@ -514,13 +526,15 @@ export class FPLService {
       }
     }
 
+    const totalXpWithCaptain = Math.round((startingXI.reduce((sum, p) => sum + (p.xP || 0), 0) + (captain?.xP || 0)) * 10) / 10;
+
     return { 
       squad, 
       startingXI, 
       bench,
       captain,
       viceCaptain,
-      expectedPoints: Math.round(startingXI.reduce((sum, p) => sum + (p.xP || 0), 0) * 10) / 10,
+      expectedPoints: totalXpWithCaptain,
       totalCost: squad.reduce((sum, p) => sum + (p.now_cost || 0), 0),
       isHeuristicFallback,
       activeScenario: scenario,
