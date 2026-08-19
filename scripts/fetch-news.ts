@@ -76,12 +76,21 @@ async function getFPLPlayers(): Promise<FPLPlayer[]> {
 }
 
 (async () => {
-  console.log('[NewsFetcher] Launching Headless Browser to fetch FPL news...');
+  console.log('[NewsFetcher] Fetching official FPL players and news...');
+  const players = await getFPLPlayers();
+  const officialNews = players
+    .filter((p: any) => p.news && p.news.trim() !== '')
+    .map((p: any) => `${p.web_name} (${p.first_name} ${p.second_name}): ${p.news}`)
+    .join('\n');
+
+  console.log('[NewsFetcher] Launching Headless Browser to fetch external FPL news...');
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
   
-  const rawNews = await fetchAllNews(page);
+  const rawNewsFromWeb = await fetchAllNews(page);
   await browser.close();
+
+  const rawNews = `=== OFFICIAL FPL INJURY NEWS ===\n${officialNews}\n\n${rawNewsFromWeb}`;
 
   if (!rawNews || rawNews.trim() === '') {
     console.log('[NewsFetcher] No news fetched, exiting.');
@@ -116,8 +125,6 @@ async function getFPLPlayers(): Promise<FPLPlayer[]> {
     console.error("[NewsFetcher] Failed to parse news JSON", e);
     process.exit(1);
   }
-
-  const players = await getFPLPlayers();
 
   const mapPlayers = (arr: any[]) => {
     return (arr || []).map(item => {
