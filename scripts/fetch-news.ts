@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { chromium } from 'playwright';
 import { callLLMWithFallback } from '../lib/llm-client.js';
 import { getFirestore } from '../lib/firestore.js';

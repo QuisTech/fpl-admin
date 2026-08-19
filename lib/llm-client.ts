@@ -3,6 +3,7 @@ import Groq from "groq-sdk";
 // ─── Model Tiers (priority order: best → most available) ───────────────
 const MODEL_TIERS = [
   "openai/gpt-oss-120b",
+  "qwen/qwen3.6-27b",
   "openai/gpt-oss-20b",
 ] as const;
 
