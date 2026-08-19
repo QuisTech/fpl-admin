@@ -25,7 +25,7 @@ async function fetchAllNews(page: any): Promise<string> {
     console.warn('[NewsFetcher] Failed to fetch reddit', err.message);
   }
 
-  // 2. Fetch from RSS Scout
+  // 2. Fetch from RSS Scout and get full articles
   let scoutTexts = '';
   try {
     const res = await axios.get('https://www.fantasyfootballscout.co.uk/feed/', {
@@ -33,15 +33,28 @@ async function fetchAllNews(page: any): Promise<string> {
       timeout: 5000
     });
     const items = res.data.match(/<item>([\s\S]*?)<\/item>/g) || [];
-    scoutTexts = items.slice(0, 15).map((item: string) => {
+    const topItems = items.slice(0, 5); // Fetch full text for top 5 articles
+    const articleTexts: string[] = [];
+
+    for (const item of topItems) {
       const titleMatch = item.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/) || item.match(/<title>(.*?)<\/title>/);
       const title = titleMatch ? titleMatch[1] : '';
-      const descMatch = item.match(/<content:encoded><!\[CDATA\[([\s\S]*?)\]\]><\/content:encoded>/) || item.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/) || item.match(/<description>([\s\S]*?)<\/description>/);
-      let desc = descMatch ? descMatch[1] : '';
-      desc = desc.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim();
-      return `Title: ${title}\n${desc}`;
-    }).join('\n\n---\n\n');
-    console.log('[NewsFetcher] Successfully fetched from RSS scout');
+      const linkMatch = item.match(/<link>(.*?)<\/link>/);
+      const link = linkMatch ? linkMatch[1] : '';
+
+      if (link) {
+        try {
+          const articleRes = await axios.get(link, { headers: { 'User-Agent': 'Mozilla/5.0' }, timeout: 5000 });
+          const pTags = articleRes.data.match(/<p>([\s\S]*?)<\/p>/g) || [];
+          const text = pTags.map((p: string) => p.replace(/<[^>]+>/g, '').trim()).filter((p: string) => p.length > 50).slice(0, 10).join('\n');
+          articleTexts.push(`Title: ${title}\n${text}`);
+        } catch (e) {
+          console.warn(`[NewsFetcher] Failed to fetch article ${link}`);
+        }
+      }
+    }
+    scoutTexts = articleTexts.join('\n\n---\n\n');
+    console.log('[NewsFetcher] Successfully fetched from RSS scout and parsed articles');
   } catch (e: any) {
     console.error('[NewsFetcher] Failed to fetch RSS', e.message);
   }
@@ -52,8 +65,17 @@ async function fetchAllNews(page: any): Promise<string> {
 
 function safeParseJSON(text: string): any {
   let cleaned = text.trim();
+  // Remove <think> blocks
+  cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+
   if (cleaned.startsWith("```")) {
     cleaned = cleaned.replace(/^```(?:json)?\s*\n?/, "").replace(/\n?```\s*$/, "");
+  }
+  
+  const firstBrace = cleaned.indexOf('{');
+  const lastBrace = cleaned.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace !== -1) {
+    cleaned = cleaned.substring(firstBrace, lastBrace + 1);
   }
   return JSON.parse(cleaned);
 }
@@ -102,16 +124,16 @@ async function getFPLPlayers(): Promise<FPLPlayer[]> {
     Analyze the following recent FPL (Fantasy Premier League) news and press conferences.
     Extract the status of players. 
     
-    Respond in strict JSON matching this structure:
+    Respond in strict JSON matching exactly this format:
     {
-      "injuries": [{ "playerName": "string", "status": "string (e.g. Expected to miss GW5)", "confidence": number (0-100) }],
-      "doubts": [{ "playerName": "string", "status": "string" }],
-      "returns": [{ "playerName": "string", "status": "string" }],
-      "rotationRisks": [{ "playerName": "string", "reason": "string" }],
-      "opportunities": [{ "playerName": "string", "reason": "string" }]
+      "injuries": [{ "playerName": "Bukayo Saka", "status": "Expected to miss GW5", "confidence": 80 }],
+      "doubts": [{ "playerName": "Phil Foden", "status": "Minor knock" }],
+      "returns": [{ "playerName": "Kevin De Bruyne", "status": "Back in training" }],
+      "rotationRisks": [{ "playerName": "Darwin Nunez", "reason": "Played 90 mins midweek" }],
+      "opportunities": [{ "playerName": "Kai Havertz", "reason": "Likely to start up top" }]
     }
     
-    If no data for a category, use empty array. Only extract Premier League players.
+    If no data for a category, use empty array []. Only extract Premier League players.
     
     RAW NEWS:
     ${rawNews.substring(0, 10000)}
@@ -119,7 +141,7 @@ async function getFPLPlayers(): Promise<FPLPlayer[]> {
 
   let parsed: any;
   try {
-    const result = await callLLMWithFallback({ prompt, temperature: 0.1, jsonMode: true });
+    const result = await callLLMWithFallback({ prompt, temperature: 0.1, jsonMode: false });
     parsed = safeParseJSON(result.text);
   } catch(e) {
     console.error("[NewsFetcher] Failed to parse news JSON", e);
