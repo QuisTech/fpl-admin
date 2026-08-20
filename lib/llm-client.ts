@@ -12,16 +12,32 @@ type ModelTier = (typeof MODEL_TIERS)[number];
 // ─── Key Management ────────────────────────────────────────────────────
 function getApiKeys(): string[] {
   const keys: string[] = [];
-  const envKeys = [
-    process.env.GROQ_API_KEY,
-    process.env.GROQ_API_KEY_2,
-    process.env.GROQ_API_KEY_3,
-  ];
-  for (const k of envKeys) {
-    if (k && k.trim()) {
-      keys.push(k.trim());
+  // Scan process.env for any key starting with GROQ_API_KEY or GROQ_API_KEYS
+  const envVarNames = Object.keys(process.env)
+    .filter((k) => k.startsWith("GROQ_API_KEY"))
+    .sort((a, b) => {
+      // Custom sort: GROQ_API_KEY first, then GROQ_API_KEY_2, GROQ_API_KEY_3, etc.
+      if (a === "GROQ_API_KEY") return -1;
+      if (b === "GROQ_API_KEY") return 1;
+      return a.localeCompare(b, undefined, { numeric: true });
+    });
+
+  for (const varName of envVarNames) {
+    const val = process.env[varName];
+    if (val && val.trim()) {
+      // Support comma-separated keys within a single env variable
+      const splitKeys = val
+        .split(",")
+        .map((k) => k.trim())
+        .filter((k) => k.length > 0);
+      for (const k of splitKeys) {
+        if (!keys.includes(k)) {
+          keys.push(k);
+        }
+      }
     }
   }
+
   if (keys.length === 0) {
     throw new Error(
       "[LLMClient] FATAL: No valid GROQ_API_KEY environment variables found."
