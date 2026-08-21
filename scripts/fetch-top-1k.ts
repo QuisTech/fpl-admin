@@ -49,11 +49,12 @@ async function run() {
     // 1. Fetch nextEventId to determine previous completed GW (deadline picks lock bypass)
     console.log('[Top 1K Fetcher] Fetching bootstrap-static...');
     const bootstrap = await fetchWithRetry(`${FPL_BASE_URL}/bootstrap-static/`);
-    const nextEvent = bootstrap.events.find((e: any) => new Date(e.deadline_time) > new Date());
+    const nextEvent = bootstrap.events.find((e: any) => e.is_next) ?? 
+                      bootstrap.events.find((e: any) => new Date(e.deadline_time) > new Date());
     const nextEventId = nextEvent ? nextEvent.id : 1;
     const currentGW = Math.max(1, nextEventId - 1);
     
-    console.log(`[Top 1K Fetcher] Current Completed Gameweek: GW${currentGW} (next is GW${nextEventId})`);
+    console.log(`[Top 1K Fetcher] Target Event: GW${nextEventId} (previous completed reference: GW${currentGW})`);
     
     // 2. Fetch manager IDs from Standings pages
     const managerIds: number[] = [];
@@ -62,23 +63,68 @@ async function run() {
     for (let page = 1; page <= PAGES_TO_SCAN; page++) {
       const standingsUrl = `${FPL_BASE_URL}/leagues-classic/${LEAGUE_ID}/standings/?page_standings=${page}`;
       const standingsData = await fetchWithRetry(standingsUrl);
-      if (standingsData && standingsData.standings && standingsData.standings.results) {
+      if (standingsData && standingsData.standings && Array.isArray(standingsData.standings.results)) {
+        if (standingsData.standings.results.length === 0) {
+          // If page 1 or current page is empty, standings have not been calculated yet (e.g., GW1 pre-season)
+          console.log(`[Top 1K Fetcher] Standings page ${page} returned 0 results.`);
+          break;
+        }
         standingsData.standings.results.forEach((res: any) => {
           if (res.entry) {
             managerIds.push(res.entry);
           }
         });
+      } else {
+        break;
       }
       // Be polite to FPL server
       await sleep(200);
     }
     
     const finalManagerIds = managerIds.slice(0, MANAGERS_TO_SCAN);
-    console.log(`[Top 1K Fetcher] ✅ Successfully gathered ${finalManagerIds.length} manager IDs.`);
+    console.log(`[Top 1K Fetcher] Gathered ${finalManagerIds.length} manager IDs.`);
     
+    // Construct a name lookup map using bootstrap elements
+    const nameMap: Record<number, string> = {};
+    bootstrap.elements.forEach((el: any) => {
+      nameMap[el.id] = el.web_name;
+    });
+
+    // Graceful fallback for Gameweek 1 or when league standings are empty prior to matches
     if (finalManagerIds.length === 0) {
-      console.error('[Top 1K Fetcher] ❌ No manager IDs found. Exiting.');
-      process.exit(1);
+      console.warn(`[Top 1K Fetcher] ⚠️ League ${LEAGUE_ID} standings are unpopulated (GW1 pre-season / before round 1 scoring).`);
+      console.log('[Top 1K Fetcher] ℹ️ Generating baseline EO & sentiment from official global player ownership (selected_by_percent)...');
+
+      const finalPlayers: Record<number, { name: string; ownership: number; started: number; eo: number; captain: number; tripleCaptain: number }> = {};
+      bootstrap.elements.forEach((el: any) => {
+        const ownership = parseFloat(el.selected_by_percent || '0');
+        finalPlayers[el.id] = {
+          name: el.web_name || 'Unknown',
+          ownership: ownership,
+          started: ownership,
+          eo: ownership,
+          captain: 0,
+          tripleCaptain: 0
+        };
+      });
+
+      const outputData = {
+        gameweek: nextEventId,
+        lastUpdated: Date.now(),
+        sampleSize: bootstrap.total_players || 0,
+        isFallback: true,
+        players: finalPlayers
+      };
+
+      const destDir = path.resolve(process.cwd(), 'data');
+      if (!fs.existsSync(destDir)) {
+        fs.mkdirSync(destDir, { recursive: true });
+      }
+      const destPath = path.join(destDir, 'top_1000_eo.json');
+      fs.writeFileSync(destPath, JSON.stringify(outputData, null, 2));
+
+      console.log(`[Top 1K Fetcher] ✅ Successfully saved fallback ownership data to: ${destPath}`);
+      return;
     }
     
     // 3. Scan picks for all managers in batches
@@ -143,13 +189,6 @@ async function run() {
     
     // 4. Calculate final percentages and construct output JSON
     const finalPlayers: Record<number, { name: string; ownership: number; started: number; eo: number; captain: number; tripleCaptain: number }> = {};
-    
-    // Construct a name lookup map using bootstrap elements
-    const nameMap: Record<number, string> = {};
-    bootstrap.elements.forEach((el: any) => {
-      nameMap[el.id] = el.web_name;
-    });
-    
     const sampleSize = effectiveManagers || 1; // Prevent division by zero
     
     Object.keys(playerTallies).forEach((pIdStr) => {
