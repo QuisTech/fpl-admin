@@ -1,14 +1,14 @@
 {
   "gameweek": 1,
-  "lastUpdated": 1787328971127,
-  "sampleSize": 8649645,
+  "lastUpdated": 1787329696125,
+  "sampleSize": 8680468,
   "isFallback": true,
   "players": {
     "1": {
       "name": "Raya",
-      "ownership": 37.4,
-      "started": 37.4,
-      "eo": 37.4,
+      "ownership": 37.5,
+      "started": 37.5,
+      "eo": 37.5,
       "captain": 0,
       "tripleCaptain": 0
     },
@@ -62,9 +62,9 @@
     },
     "8": {
       "name": "Calafiori",
-      "ownership": 38.5,
-      "started": 38.5,
-      "eo": 38.5,
+      "ownership": 38.7,
+      "started": 38.7,
+      "eo": 38.7,
       "captain": 0,
       "tripleCaptain": 0
     },
@@ -78,9 +78,9 @@
     },
     "10": {
       "name": "White",
-      "ownership": 4.2,
-      "started": 4.2,
-      "eo": 4.2,
+      "ownership": 4.3,
+      "started": 4.3,
+      "eo": 4.3,
       "captain": 0,
       "tripleCaptain": 0
     },
@@ -102,9 +102,9 @@
     },
     "13": {
       "name": "Rice",
-      "ownership": 18.2,
-      "started": 18.2,
-      "eo": 18.2,
+      "ownership": 18.1,
+      "started": 18.1,
+      "eo": 18.1,
       "captain": 0,
       "tripleCaptain": 0
     },
@@ -206,9 +206,9 @@
     },
     "26": {
       "name": "Havertz",
-      "ownership": 5.1,
-      "started": 5.1,
-      "eo": 5.1,
+      "ownership": 5.2,
+      "started": 5.2,
+      "eo": 5.2,
       "captain": 0,
       "tripleCaptain": 0
     },
@@ -246,17 +246,17 @@
     },
     "31": {
       "name": "Konsa",
-      "ownership": 14.2,
-      "started": 14.2,
-      "eo": 14.2,
+      "ownership": 14.1,
+      "started": 14.1,
+      "eo": 14.1,
       "captain": 0,
       "tripleCaptain": 0
     },
     "32": {
       "name": "Cash",
-      "ownership": 8.6,
-      "started": 8.6,
-      "eo": 8.6,
+      "ownership": 8.7,
+      "started": 8.7,
+      "eo": 8.7,
       "captain": 0,
       "tripleCaptain": 0
     },
@@ -302,9 +302,9 @@
     },
     "38": {
       "name": "A.García",
-      "ownership": 1.7,
-      "started": 1.7,
-      "eo": 1.7,
+      "ownership": 1.8,
+      "started": 1.8,
+      "eo": 1.8,
       "captain": 0,
       "tripleCaptain": 0
     },
@@ -694,9 +694,9 @@
     },
     "87": {
       "name": "Ajer",
-      "ownership": 3.2,
-      "started": 3.2,
-      "eo": 3.2,
+      "ownership": 3.3,
+      "started": 3.3,
+      "eo": 3.3,
       "captain": 0,
       "tripleCaptain": 0
     },
@@ -846,9 +846,9 @@
     },
     "106": {
       "name": "Thiago",
-      "ownership": 17.1,
-      "started": 17.1,
-      "eo": 17.1,
+      "ownership": 17,
+      "started": 17,
+      "eo": 17,
       "captain": 0,
       "tripleCaptain": 0
     },
@@ -894,9 +894,9 @@
     },
     "112": {
       "name": "Van Hecke",
-      "ownership": 10,
-      "started": 10,
-      "eo": 10,
+      "ownership": 10.1,
+      "started": 10.1,
+      "eo": 10.1,
       "captain": 0,
       "tripleCaptain": 0
     },
@@ -966,9 +966,9 @@
     },
     "121": {
       "name": "Mitoma",
-      "ownership": 0.1,
-      "started": 0.1,
-      "eo": 0.1,
+      "ownership": 0,
+      "started": 0,
+      "eo": 0,
       "captain": 0,
       "tripleCaptain": 0
     },
@@ -1662,9 +1662,9 @@
     },
     "208": {
       "name": "Sarr",
-      "ownership": 4.9,
-      "started": 4.9,
-      "eo": 4.9,
+      "ownership": 4.8,
+      "started": 4.8,
+      "eo": 4.8,
       "captain": 0,
       "tripleCaptain": 0
     },
@@ -1830,9 +1830,9 @@
     },
     "229": {
       "name": "Tarkowski",
-      "ownership": 8.7,
-      "started": 8.7,
-      "eo": 8.7,
+      "ownership": 8.6,
+      "started": 8.6,
+      "eo": 8.6,
       "captain": 0,
       "tripleCaptain": 0
     },
@@ -2766,9 +2766,9 @@
     },
     "346": {
       "name": "Calvert-Lewin",
-      "ownership": 31.3,
-      "started": 31.3,
-      "eo": 31.3,
+      "ownership": 31.4,
+      "started": 31.4,
+      "eo": 31.4,
       "captain": 0,
       "tripleCaptain": 0
     },
@@ -3014,9 +3014,9 @@
     },
     "377": {
       "name": "Munoz",
-      "ownership": 0.6,
-      "started": 0.6,
-      "eo": 0.6,
+      "ownership": 0.5,
+      "started": 0.5,
+      "eo": 0.5,
       "captain": 0,
       "tripleCaptain": 0
     },
@@ -3030,9 +3030,9 @@
     },
     "379": {
       "name": "Isak",
-      "ownership": 16.6,
-      "started": 16.6,
-      "eo": 16.6,
+      "ownership": 16.7,
+      "started": 16.7,
+      "eo": 16.7,
       "captain": 0,
       "tripleCaptain": 0
     },
@@ -3102,9 +3102,9 @@
     },
     "388": {
       "name": "Guéhi",
-      "ownership": 17.3,
-      "started": 17.3,
-      "eo": 17.3,
+      "ownership": 17.2,
+      "started": 17.2,
+      "eo": 17.2,
       "captain": 0,
       "tripleCaptain": 0
     },
@@ -3118,9 +3118,9 @@
     },
     "390": {
       "name": "Rúben",
-      "ownership": 1.6,
-      "started": 1.6,
-      "eo": 1.6,
+      "ownership": 1.7,
+      "started": 1.7,
+      "eo": 1.7,
       "captain": 0,
       "tripleCaptain": 0
     },
@@ -3342,9 +3342,9 @@
     },
     "418": {
       "name": "Maguire",
-      "ownership": 17.9,
-      "started": 17.9,
-      "eo": 17.9,
+      "ownership": 18,
+      "started": 18,
+      "eo": 18,
       "captain": 0,
       "tripleCaptain": 0
     },
@@ -3406,17 +3406,17 @@
     },
     "426": {
       "name": "B.Fernandes",
-      "ownership": 51.8,
-      "started": 51.8,
-      "eo": 51.8,
+      "ownership": 51.9,
+      "started": 51.9,
+      "eo": 51.9,
       "captain": 0,
       "tripleCaptain": 0
     },
     "427": {
       "name": "Mbeumo",
-      "ownership": 38.5,
-      "started": 38.5,
-      "eo": 38.5,
+      "ownership": 38.6,
+      "started": 38.6,
+      "eo": 38.6,
       "captain": 0,
       "tripleCaptain": 0
     },
@@ -3846,9 +3846,9 @@
     },
     "481": {
       "name": "Anderson",
-      "ownership": 8.1,
-      "started": 8.1,
-      "eo": 8.1,
+      "ownership": 8,
+      "started": 8,
+      "eo": 8,
       "captain": 0,
       "tripleCaptain": 0
     },
@@ -3902,9 +3902,9 @@
     },
     "488": {
       "name": "I.Sangaré",
-      "ownership": 1.2,
-      "started": 1.2,
-      "eo": 1.2,
+      "ownership": 1.1,
+      "started": 1.1,
+      "eo": 1.1,
       "captain": 0,
       "tripleCaptain": 0
     },
@@ -3990,9 +3990,9 @@
     },
     "499": {
       "name": "Pedro Porro",
-      "ownership": 20.8,
-      "started": 20.8,
-      "eo": 20.8,
+      "ownership": 20.3,
+      "started": 20.3,
+      "eo": 20.3,
       "captain": 0,
       "tripleCaptain": 0
     },
@@ -4022,9 +4022,9 @@
     },
     "503": {
       "name": "Van de Ven",
-      "ownership": 6.6,
-      "started": 6.6,
-      "eo": 6.6,
+      "ownership": 6.5,
+      "started": 6.5,
+      "eo": 6.5,
       "captain": 0,
       "tripleCaptain": 0
     },
@@ -4038,9 +4038,9 @@
     },
     "505": {
       "name": "Spence",
-      "ownership": 1.2,
-      "started": 1.2,
-      "eo": 1.2,
+      "ownership": 1.1,
+      "started": 1.1,
+      "eo": 1.1,
       "captain": 0,
       "tripleCaptain": 0
     },
@@ -4118,9 +4118,9 @@
     },
     "515": {
       "name": "Maddison",
-      "ownership": 1.4,
-      "started": 1.4,
-      "eo": 1.4,
+      "ownership": 1.3,
+      "started": 1.3,
+      "eo": 1.3,
       "captain": 0,
       "tripleCaptain": 0
     },
@@ -4454,9 +4454,9 @@
     },
     "557": {
       "name": "Tzolis",
-      "ownership": 24.3,
-      "started": 24.3,
-      "eo": 24.3,
+      "ownership": 24.5,
+      "started": 24.5,
+      "eo": 24.5,
       "captain": 0,
       "tripleCaptain": 0
     },
