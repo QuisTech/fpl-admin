@@ -1,5 +1,8 @@
 name: FPL Sniper Data Fetch
 
+permissions:
+  contents: write
+
 on:
   schedule:
     # Runs at the top of every hour
@@ -14,6 +17,9 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+        with:
+          persist-credentials: true
+          fetch-depth: 0
         
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -46,9 +52,11 @@ jobs:
       - name: Commit and Push New Data
         if: steps.sniper.outputs.should_run == 'true'
         run: |
-          git config --global user.name "FPL Sniper Bot"
-          git config --global user.email "bot@quistech.com"
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git add data/fplform.csv data/top_1000_eo.json data/fpl_native.csv data/snapshots/
-          git commit -m "Auto-update: Scraped latest FPLForm predictions, Top 1k EO & archived snapshot ~2hrs before deadline"
+          git diff --staged --quiet || git commit -m "Auto-update: Scraped latest FPLForm predictions, Top 1k EO & archived snapshot ~2hrs before deadline [skip ci]"
+          git pull --rebase origin main
           git push
+
 
