@@ -3,7 +3,8 @@ import fs from 'fs';
 import path from 'path';
 
 const FPL_BASE_URL = 'https://fantasy.premierleague.com/api';
-const LEAGUE_ID = process.env.FPL_LEAGUE_ID || '314'; // Default to Overall League
+const PRIMARY_LEAGUE_ID = process.env.FPL_LEAGUE_ID || '321'; // Default to Elite Top 1% Veteran League
+const FALLBACK_LEAGUE_ID = '314'; // Overall League fallback
 const MANAGERS_TO_SCAN = parseInt(process.env.FPL_TOP_N_MANAGERS || '1000'); // Default to 1000 managers
 const PAGES_TO_SCAN = Math.ceil(MANAGERS_TO_SCAN / 50);
 const BATCH_SIZE = 5;
@@ -42,6 +43,31 @@ async function fetchWithRetry(url: string, retries = 3, delay = 2000): Promise<a
   }
 }
 
+async function fetchLeagueManagers(leagueId: string, pagesToScan: number): Promise<{ managerIds: number[]; leagueName: string }> {
+  const managerIds: number[] = [];
+  let leagueName = '';
+  for (let page = 1; page <= pagesToScan; page++) {
+    const standingsUrl = `${FPL_BASE_URL}/leagues-classic/${leagueId}/standings/?page_standings=${page}`;
+    const standingsData = await fetchWithRetry(standingsUrl);
+    if (standingsData && standingsData.standings && Array.isArray(standingsData.standings.results)) {
+      if (standingsData.league?.name) leagueName = standingsData.league.name;
+      if (standingsData.standings.results.length === 0) {
+        break;
+      }
+      standingsData.standings.results.forEach((res: any) => {
+        if (res.entry) {
+          managerIds.push(res.entry);
+        }
+      });
+    } else {
+      break;
+    }
+    // Be polite to FPL server
+    await sleep(200);
+  }
+  return { managerIds, leagueName };
+}
+
 async function run() {
   console.log('[Top 1K Fetcher] Starting Top 1,000 FPL Manager Scan...');
   
@@ -56,33 +82,23 @@ async function run() {
     
     console.log(`[Top 1K Fetcher] Target Event: GW${nextEventId} (previous completed reference: GW${currentGW})`);
     
-    // 2. Fetch manager IDs from Standings pages
-    const managerIds: number[] = [];
+    // 2. Fetch manager IDs from Standings pages (Primary: Top 1% League 321, Fallback: Overall League 314)
     const targetCount = PAGES_TO_SCAN * 50;
-    console.log(`[Top 1K Fetcher] Retrieving Top ${targetCount} manager IDs from League ${LEAGUE_ID} (pages 1 to ${PAGES_TO_SCAN})...`);
-    for (let page = 1; page <= PAGES_TO_SCAN; page++) {
-      const standingsUrl = `${FPL_BASE_URL}/leagues-classic/${LEAGUE_ID}/standings/?page_standings=${page}`;
-      const standingsData = await fetchWithRetry(standingsUrl);
-      if (standingsData && standingsData.standings && Array.isArray(standingsData.standings.results)) {
-        if (standingsData.standings.results.length === 0) {
-          // If page 1 or current page is empty, standings have not been calculated yet (e.g., GW1 pre-season)
-          console.log(`[Top 1K Fetcher] Standings page ${page} returned 0 results.`);
-          break;
-        }
-        standingsData.standings.results.forEach((res: any) => {
-          if (res.entry) {
-            managerIds.push(res.entry);
-          }
-        });
-      } else {
-        break;
-      }
-      // Be polite to FPL server
-      await sleep(200);
+    let activeLeagueId = PRIMARY_LEAGUE_ID;
+    console.log(`[Top 1K Fetcher] Retrieving Top ${targetCount} manager IDs from Primary League ${activeLeagueId} (Top 1% Elite Veterans)...`);
+    
+    let { managerIds, leagueName } = await fetchLeagueManagers(activeLeagueId, PAGES_TO_SCAN);
+
+    if (managerIds.length === 0 && activeLeagueId !== FALLBACK_LEAGUE_ID) {
+      console.warn(`[Top 1K Fetcher] Primary League ${activeLeagueId} returned 0 results. Falling back to Overall League (${FALLBACK_LEAGUE_ID})...`);
+      activeLeagueId = FALLBACK_LEAGUE_ID;
+      const fallback = await fetchLeagueManagers(activeLeagueId, PAGES_TO_SCAN);
+      managerIds = fallback.managerIds;
+      leagueName = fallback.leagueName || 'Overall';
     }
     
     const finalManagerIds = managerIds.slice(0, MANAGERS_TO_SCAN);
-    console.log(`[Top 1K Fetcher] Gathered ${finalManagerIds.length} manager IDs.`);
+    console.log(`[Top 1K Fetcher] Gathered ${finalManagerIds.length} manager IDs from League ${activeLeagueId} (${leagueName || 'Elite League'}).`);
     
     // Construct a name lookup map using bootstrap elements
     const nameMap: Record<number, string> = {};
@@ -92,7 +108,7 @@ async function run() {
 
     // Graceful fallback for Gameweek 1 or when league standings are empty prior to matches
     if (finalManagerIds.length === 0) {
-      console.warn(`[Top 1K Fetcher] ⚠️ League ${LEAGUE_ID} standings are unpopulated (GW1 pre-season / before round 1 scoring).`);
+      console.warn(`[Top 1K Fetcher] ⚠️ League ${activeLeagueId} standings are unpopulated (GW1 pre-season / before round 1 scoring).`);
       console.log('[Top 1K Fetcher] ℹ️ Generating baseline EO & sentiment from official global player ownership (selected_by_percent)...');
 
       const finalPlayers: Record<number, { name: string; ownership: number; started: number; eo: number; captain: number; tripleCaptain: number }> = {};
@@ -112,6 +128,8 @@ async function run() {
         gameweek: nextEventId,
         lastUpdated: Date.now(),
         sampleSize: bootstrap.total_players || 0,
+        leagueId: activeLeagueId,
+        leagueName: leagueName || 'Top 1% 25/26 League',
         isFallback: true,
         players: finalPlayers
       };
@@ -217,6 +235,8 @@ async function run() {
       gameweek: currentGW,
       lastUpdated: Date.now(),
       sampleSize: effectiveManagers,
+      leagueId: activeLeagueId,
+      leagueName: leagueName || 'Top 1% 25/26 League',
       players: finalPlayers
     };
     
