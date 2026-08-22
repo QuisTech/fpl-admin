@@ -17,20 +17,24 @@ async function fetchAllNews(page: any): Promise<string> {
   try {
     await page.goto('https://www.reddit.com/r/FantasyPL/search.json?q=flair_name%3A%22News%22%20OR%20flair_name%3A%22Press%20Conference%22&restrict_sr=1&sort=new&limit=10', { waitUntil: 'networkidle' });
     const jsonContent = await page.evaluate(() => document.body.innerText);
-    const data = JSON.parse(jsonContent);
-    const posts = data?.data?.children || [];
-    redditTexts = posts.map((p: any) => `Title: ${p.data.title}\n${p.data.selftext}`).join('\n\n---\n\n');
-    console.log('[NewsFetcher] Successfully fetched from Reddit via Playwright');
+    if (jsonContent && jsonContent.trim().startsWith('{')) {
+      const data = JSON.parse(jsonContent);
+      const posts = data?.data?.children || [];
+      redditTexts = posts.map((p: any) => `Title: ${p.data?.title || ''}\n${p.data?.selftext || ''}`).join('\n\n---\n\n');
+      console.log('[NewsFetcher] Successfully fetched from Reddit via Playwright');
+    } else {
+      console.warn('[NewsFetcher] Reddit returned non-JSON response, skipping Reddit feed.');
+    }
   } catch (err: any) {
-    console.warn('[NewsFetcher] Failed to fetch reddit', err.message);
+    console.warn('[NewsFetcher] Failed to fetch reddit:', err.message);
   }
 
   // 2. Fetch from RSS Scout and get full articles
   let scoutTexts = '';
   try {
     const res = await axios.get('https://www.fantasyfootballscout.co.uk/feed/', {
-      headers: { 'User-Agent': 'Mozilla/5.0' },
-      timeout: 5000
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+      timeout: 8000
     });
     const items = res.data.match(/<item>([\s\S]*?)<\/item>/g) || [];
     const topItems = items.slice(0, 5); // Fetch full text for top 5 articles
@@ -56,7 +60,7 @@ async function fetchAllNews(page: any): Promise<string> {
     scoutTexts = articleTexts.join('\n\n---\n\n');
     console.log('[NewsFetcher] Successfully fetched from RSS scout and parsed articles');
   } catch (e: any) {
-    console.error('[NewsFetcher] Failed to fetch RSS', e.message);
+    console.error('[NewsFetcher] Failed to fetch RSS:', e.message);
   }
 
   const combinedTexts = [redditTexts, scoutTexts].filter(t => t.trim() !== '').join('\n\n=== FANTASY FOOTBALL SCOUT RSS ===\n\n');
@@ -64,20 +68,39 @@ async function fetchAllNews(page: any): Promise<string> {
 }
 
 function safeParseJSON(text: string): any {
-  let cleaned = text.trim();
-  // Remove <think> blocks
-  cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+  const fallback = {
+    injuries: [],
+    doubts: [],
+    returns: [],
+    rotationRisks: [],
+    opportunities: []
+  };
 
-  if (cleaned.startsWith("```")) {
-    cleaned = cleaned.replace(/^```(?:json)?\s*\n?/, "").replace(/\n?```\s*$/, "");
-  }
+  if (!text || typeof text !== 'string') return fallback;
+
+  let cleaned = text.trim();
+  // Remove reasoning / thought blocks (including unclosed ones)
+  cleaned = cleaned.replace(/<think>[\s\S]*?(?:<\/think>|$)/gi, '').trim();
+  cleaned = cleaned.replace(/<thought>[\s\S]*?(?:<\/thought>|$)/gi, '').trim();
   
+  // Strip markdown code fences
+  cleaned = cleaned.replace(/```(?:json)?\s*([\s\S]*?)\s*```/gi, '$1').trim();
+  cleaned = cleaned.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+
+  // Find outermost JSON object
   const firstBrace = cleaned.indexOf('{');
   const lastBrace = cleaned.lastIndexOf('}');
-  if (firstBrace !== -1 && lastBrace !== -1) {
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
     cleaned = cleaned.substring(firstBrace, lastBrace + 1);
   }
-  return JSON.parse(cleaned);
+  
+  try {
+    const parsed = JSON.parse(cleaned);
+    return parsed && typeof parsed === 'object' ? parsed : fallback;
+  } catch (err: any) {
+    console.warn(`[NewsFetcher] JSON parse warning: ${err.message}. Using safe fallback.`);
+    return fallback;
+  }
 }
 
 function findBestPlayerMatch(name: string, players: FPLPlayer[]): FPLPlayer | null {
@@ -139,13 +162,19 @@ async function getFPLPlayers(): Promise<FPLPlayer[]> {
     ${rawNews.substring(0, 10000)}
   `;
 
-  let parsed: any;
+  let parsed: any = {
+    injuries: [],
+    doubts: [],
+    returns: [],
+    rotationRisks: [],
+    opportunities: []
+  };
+
   try {
-    const result = await callLLMWithFallback({ prompt, temperature: 0.1, jsonMode: false });
+    const result = await callLLMWithFallback({ prompt, temperature: 0.1, jsonMode: true });
     parsed = safeParseJSON(result.text);
-  } catch(e) {
-    console.error("[NewsFetcher] Failed to parse news JSON", e);
-    process.exit(1);
+  } catch (e: any) {
+    console.warn("[NewsFetcher] LLM processing warning, using default parsed structure:", e.message);
   }
 
   const mapPlayers = (arr: any[]) => {
@@ -164,9 +193,12 @@ async function getFPLPlayers(): Promise<FPLPlayer[]> {
     opportunities: mapPlayers(parsed.opportunities)
   };
 
-  console.log('[NewsFetcher] Saving to Firestore...');
-  const db = getFirestore();
-  await db.collection('system').doc('fpl_news_context').set(fplContext);
-  
-  console.log('[NewsFetcher] ✅ News context updated successfully!');
+  try {
+    console.log('[NewsFetcher] Saving to Firestore...');
+    const db = getFirestore();
+    await db.collection('system').doc('fpl_news_context').set(fplContext);
+    console.log('[NewsFetcher] ✅ News context updated successfully!');
+  } catch (err: any) {
+    console.warn('[NewsFetcher] Firestore write warning:', err.message);
+  }
 })();
