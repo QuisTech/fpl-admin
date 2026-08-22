@@ -45,6 +45,10 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
         .then(res => {
           if (res.data?.fplTeamId) {
             setTeamId(res.data.fplTeamId);
+          }
+          if (res.data?.isAdmin || res.data?.tier === 'admin') {
+            setIsTeamIdLocked(false);
+          } else if (res.data?.fplTeamId) {
             setIsTeamIdLocked(true);
           }
         })

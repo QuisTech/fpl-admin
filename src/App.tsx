@@ -95,8 +95,10 @@ function FPLApp() {
     clearConstraints
   } = useFPLData(riskMode, fuel, activeUserId, authInitialized);
 
+  const isSuperAdmin = (authUser?.email || '').toLowerCase().trim() === 'michquis@gmail.com' || tier === 'admin';
+
   const handleSync = async () => {
-    if (tier !== 'free' && tier !== 'admin' && !isTeamIdLocked) {
+    if (!isSuperAdmin && tier !== 'free' && tier !== 'admin' && !isTeamIdLocked) {
       alert("Premium Account: Please link your FPL Team ID in your Settings profile before running an analysis.");
       if (authUser) setProfileTab('fpl');
       else setIsAuthModalOpen(true);
@@ -169,19 +171,19 @@ function FPLApp() {
                 <div className="flex items-center gap-2">
                   <input 
                     type="text" 
-                    placeholder={tier !== 'free' && tier !== 'admin' && !isTeamIdLocked ? "LINK ID" : "TEAM ID"} 
+                    placeholder={!isSuperAdmin && tier !== 'free' && tier !== 'admin' && !isTeamIdLocked ? "LINK ID" : "TEAM ID"} 
                     value={teamId}
                     onChange={(e) => setTeamId(e.target.value)}
-                    disabled={tier !== 'free' && tier !== 'admin' && isTeamIdLocked}
+                    disabled={!isSuperAdmin && tier !== 'free' && tier !== 'admin' && isTeamIdLocked}
                     onClick={() => {
-                      if (tier !== 'free' && tier !== 'admin' && !isTeamIdLocked) {
+                      if (!isSuperAdmin && tier !== 'free' && tier !== 'admin' && !isTeamIdLocked) {
                         if (authUser) setProfileTab('fpl');
                         else setIsAuthModalOpen(true);
                       }
                     }}
                     className={cn("bg-slate-950 border border-fpl-border rounded-lg px-3 py-1 text-[10px] font-mono text-fpl-green w-24 focus:outline-none focus:border-fpl-green",
-                      tier !== 'free' && tier !== 'admin' && isTeamIdLocked ? "opacity-50 cursor-not-allowed" : "",
-                      tier !== 'free' && tier !== 'admin' && !isTeamIdLocked ? "cursor-pointer hover:bg-slate-900 text-rose-400" : ""
+                      !isSuperAdmin && tier !== 'free' && tier !== 'admin' && isTeamIdLocked ? "opacity-50 cursor-not-allowed" : "",
+                      !isSuperAdmin && tier !== 'free' && tier !== 'admin' && !isTeamIdLocked ? "cursor-pointer hover:bg-slate-900 text-rose-400" : ""
                     )}
                   />
                   <button 

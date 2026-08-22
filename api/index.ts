@@ -15,7 +15,7 @@ import { loadWeights } from './_lib/weights-loader.js';
 const baseWeights = loadWeights('baseline');
 import { Simulator } from './_lib/simulator.js';
 import { solveOptimalSquad, solveCaptain } from './_lib/lp-solver.js';
-import { getUserTier, mergeUserTiers, getFirestore } from '../lib/firestore.js';
+import { getUserTier, mergeUserTiers, getFirestore, isAdminUser } from '../lib/firestore.js';
 import { getLLMTransferDecision, getLLMChipAdvice, generateSocialThread } from './_lib/llm-agent.js';
 import { getNewsContextFromCache } from './_lib/news-service.js';
 import { verifyAuth } from './_lib/auth.js';
@@ -878,8 +878,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const db = getFirestore();
       const profileDoc = await db.collection('user_profiles').doc(uid).get();
       const registeredTeamId = profileDoc.exists ? profileDoc.data()?.fplTeamId : null;
+      const isAdmin = await isAdminUser(uid);
       
-      if (tier !== 'admin' && tier !== 'free') {
+      if (!isAdmin && tier !== 'admin' && tier !== 'free') {
         if (!registeredTeamId) {
           return res.status(403).json({ error: "Premium Account: Please link your FPL Team ID in your Settings profile before running an analysis." });
         }
@@ -925,8 +926,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           const lastCall = data.lastLLMCall?.toMillis?.() || 0;
           let callCount = data.llmCallCount || 0;
 
+          const isAdmin = await isAdminUser(uid);
           if (now - lastCall < oneHour) {
-            if (callCount >= 20 && userTier !== 'admin') {
+            if (callCount >= 20 && userTier !== 'admin' && !isAdmin) {
               throw new Error("RATE_LIMIT_EXCEEDED");
             }
             callCount++;
@@ -1021,8 +1023,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           const lastCall = data.lastLLMCall?.toMillis?.() || 0;
           let callCount = data.llmCallCount || 0;
 
+          const isAdmin = await isAdminUser(uid);
           if (now - lastCall < oneHour) {
-            if (callCount >= 20 && userTier !== 'admin') {
+            if (callCount >= 20 && userTier !== 'admin' && !isAdmin) {
               throw new Error("RATE_LIMIT_EXCEEDED");
             }
             callCount++;

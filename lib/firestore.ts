@@ -89,6 +89,27 @@ export async function getAIDecisions(userId: string, limit = 50): Promise<AIDeci
   } as any));
 }
 
+export const SUPER_ADMIN_EMAILS = ['michquis@gmail.com'];
+
+export async function isAdminUser(userId: string): Promise<boolean> {
+  if (!userId) return false;
+  const db = getFirestore();
+  try {
+    const [userDoc, profileDoc] = await Promise.all([
+      db.collection('users').doc(userId).get(),
+      db.collection('user_profiles').doc(userId).get()
+    ]);
+    const uData = userDoc.data() || {};
+    const pData = profileDoc.data() || {};
+    const email = (uData.email || pData.email || '').toLowerCase().trim();
+    if (SUPER_ADMIN_EMAILS.includes(email)) return true;
+    if (uData.role === 'admin' || uData.tier === 'admin' || pData.role === 'admin' || pData.tier === 'admin') return true;
+  } catch (err) {
+    console.error("[Firestore] Error checking admin status:", err);
+  }
+  return false;
+}
+
 export async function getUserTier(userId: string): Promise<string> {
   if (!userId) return 'free';
   const db = getFirestore();

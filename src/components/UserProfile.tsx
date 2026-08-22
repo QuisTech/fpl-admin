@@ -14,16 +14,22 @@ export const UserProfile = ({ user, onClose, onSignOut, onTeamIdChange, initialT
   const [isLocked, setIsLocked] = useState(!!user?.fplTeamId);
   const [savingId, setSavingId] = useState(false);
 
+  const isSuperAdmin = (user?.email || '').toLowerCase().trim() === 'michquis@gmail.com' || user?.role === 'admin' || user?.tier === 'admin';
+
   useEffect(() => {
     if (user?.uid) {
       axios.get(`/api/user-profile?userId=${user.uid}`).then(res => {
         if (res.data?.fplTeamId) {
           setFplTeamId(res.data.fplTeamId);
+        }
+        if (res.data?.isAdmin || isSuperAdmin) {
+          setIsLocked(false);
+        } else if (res.data?.fplTeamId) {
           setIsLocked(true);
         }
       }).catch(() => { });
     }
-  }, [user?.uid]);
+  }, [user?.uid, isSuperAdmin]);
 
   const tabs = [
     { id: 'account', label: 'Account', icon: User },
@@ -151,7 +157,49 @@ export const UserProfile = ({ user, onClose, onSignOut, onTeamIdChange, initialT
                           </p>
                         )}
                       </div>
-                      {isLocked ? (
+                      {isSuperAdmin ? (
+                        <div className="flex flex-col items-end gap-2">
+                          <span className="text-[10px] text-fpl-green font-bold bg-fpl-green/10 border border-fpl-green/30 px-2 py-0.5 rounded">
+                            👑 Super Admin (Any Team ID Permitted)
+                          </span>
+                          {!editingFplId ? (
+                            <button
+                              onClick={() => setEditingFplId(true)}
+                              className="text-xs text-slate-400 hover:text-white underline flex items-center gap-1"
+                            >
+                              <Edit2 className="w-3 h-3" /> Change ID
+                            </button>
+                          ) : (
+                            <div className="flex gap-2">
+                              <button
+                                onClick={async () => {
+                                  if (!user?.uid) return;
+                                  setSavingId(true);
+                                  try {
+                                    await axios.put(`/api/user-profile?userId=${user.uid}`, { fplTeamId });
+                                    if (onTeamIdChange) onTeamIdChange(fplTeamId);
+                                    setEditingFplId(false);
+                                  } catch (e: any) {
+                                    alert(e.response?.data?.error || "Failed to save FPL Team ID");
+                                  } finally {
+                                    setSavingId(false);
+                                  }
+                                }}
+                                disabled={savingId}
+                                className="text-xs bg-fpl-green text-slate-950 px-3 py-1 rounded font-bold disabled:opacity-50"
+                              >
+                                {savingId ? 'Saving...' : 'Save'}
+                              </button>
+                              <button
+                                onClick={() => setEditingFplId(false)}
+                                className="text-xs text-slate-400 hover:text-white px-2"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      ) : isLocked ? (
                         <div className="flex flex-col items-end gap-2">
                           <div className="flex items-center gap-1 text-xs text-slate-500 font-bold bg-slate-900 px-3 py-1 rounded">
                             <Lock className="w-3 h-3" /> Locked
@@ -200,7 +248,7 @@ export const UserProfile = ({ user, onClose, onSignOut, onTeamIdChange, initialT
                           </button>
                           <button
                             onClick={() => setEditingFplId(false)}
-                            className="text-xs bg-slate-800 px-3 py-1 rounded text-white"
+                            className="text-xs text-slate-400 hover:text-white px-2"
                           >
                             Cancel
                           </button>
@@ -208,9 +256,9 @@ export const UserProfile = ({ user, onClose, onSignOut, onTeamIdChange, initialT
                       ) : (
                         <button
                           onClick={() => setEditingFplId(true)}
-                          className="text-xs text-fpl-green font-bold flex items-center gap-1"
+                          className="text-xs text-fpl-green hover:underline font-bold"
                         >
-                          <Edit2 className="w-3 h-3" /> Edit
+                          {fplTeamId ? 'Edit' : 'Add Team ID'}
                         </button>
                       )}
                     </div>

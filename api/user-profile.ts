@@ -1,4 +1,4 @@
-import { getFirestore } from "../lib/firestore.js";
+import { getFirestore, isAdminUser } from "../lib/firestore.js";
 import { verifyAuth } from "./_lib/auth.js";
 import type { Request, Response } from "express";
 
@@ -16,6 +16,7 @@ export default async function handler(req: Request, res: Response) {
   const userId = uid;
 
   const db = getFirestore();
+  const isAdmin = await isAdminUser(userId);
 
   try {
     if (req.method === 'GET') {
@@ -30,6 +31,7 @@ export default async function handler(req: Request, res: Response) {
           username: 'guest_' + userId.substring(0, 5),
           fplVerified: false,
           tier: 'free',
+          isAdmin,
           preferences: {
             defaultRiskMode: 'safe',
             emailNotifications: false,
@@ -38,7 +40,10 @@ export default async function handler(req: Request, res: Response) {
           }
         });
       }
-      return res.json(profile.data());
+      return res.json({
+        ...profile.data(),
+        isAdmin
+      });
     }
 
     if (req.method === 'PUT') {
@@ -48,18 +53,18 @@ export default async function handler(req: Request, res: Response) {
       if (updates.action === 'request_reset') {
         const existingDoc = await db.collection('user_profiles').doc(userId).get();
         const data = existingDoc.data() || {};
-        if ((data.fplResetCount || 0) >= 1) {
+        if (!isAdmin && (data.fplResetCount || 0) >= 1) {
           return res.status(403).json({ error: "You have already used your 1 free reset this season." });
         }
         await db.collection('user_profiles').doc(userId).set({
           fplTeamId: null,
-          fplResetCount: (data.fplResetCount || 0) + 1
+          fplResetCount: isAdmin ? 0 : (data.fplResetCount || 0) + 1
         }, { merge: true });
         return res.json({ success: true, message: "Team ID reset successfully." });
       }
 
-      // If trying to set fplTeamId, check if one already exists
-      if (updates.fplTeamId) {
+      // If trying to set fplTeamId, check if one already exists (bypass for admin)
+      if (updates.fplTeamId && !isAdmin) {
         const existingDoc = await db.collection('user_profiles').doc(userId).get();
         if (existingDoc.exists && existingDoc.data()?.fplTeamId) {
           return res.status(403).json({ error: "FPL Team ID is permanently locked to your account and cannot be changed." });
