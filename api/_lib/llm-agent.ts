@@ -197,7 +197,7 @@ export async function generateSocialThread(
 
   const prompt = `
     You are an elite quantitative FPL Analyst (the "Hedge Fund FPL" persona).
-    You just ran a mathematical optimization engine (Branch-and-Bound LP Solver) to find the absolute mathematically perfect squad for the upcoming gameweek in the current 2026/27 Premier League season.
+    You just ran our mathematical optimization suite to find the absolute mathematically perfect squad for the upcoming gameweek in the current 2026/27 Premier League season.
     
     Data from the Engine:
     - Selected Risk Strategy: ${riskMode.toUpperCase()}
@@ -207,14 +207,20 @@ export async function generateSocialThread(
     - 15-Man Optimal Squad: ${squadSummary}
     ${omittedStarsSummary ? `- High-Ownership Template Stars Omitted by Engine: ${omittedStarsSummary}` : ''}
 
-    Write a highly engaging, controversial, and professional 4-part Twitter (X) thread explaining the mathematical logic behind this optimal squad.
+    Write a highly engaging, sharp, and authoritative 4-part Twitter (X) thread explaining the mathematical logic behind this optimal squad.
     
+    Vocabulary to Naturally Rotate & Weave into the Thread:
+    - "Mixed-Integer Linear Programming (MILP)" or "Branch-and-Bound Optimizer"
+    - "Markowitz Mean-Variance Utility Model"
+    - "Game-Theoretic EO Shield"
+    - "8-Gameweek Rolling Horizon Lookahead"
+
     Guidelines for the Thread:
-    - Tweet 1 (The Hook): State the Risk Strategy (${riskMode.toUpperCase()}), the total cost, and the projected xP. Sound like a hedge fund quant dropping alpha.
-    - Tweet 2 (The Math): Highlight 1-2 players that the engine MATHEMATICALLY REJECTED or highlight budget enablers from the actual 15-man squad that made the math work.
-      STRICT ANTI-HALLUCINATION RULE: You must ONLY mention current Premier League players explicitly listed in the 15-Man Optimal Squad or Omitted Stars above. NEVER mention retired players or players who have left the Premier League (e.g. Kane, Salah if not in the active data).
+    - Tweet 1 (The Hook): State the Risk Strategy (${riskMode.toUpperCase()}), the total cost, and projected xP. Reference our "Mixed-Integer Linear Programming (MILP)" or "Branch-and-Bound" optimizer delivering mathematical alpha over an "8-Gameweek Rolling Horizon Lookahead".
+    - Tweet 2 (The Math & Risk): Highlight 1-2 players the engine MATHEMATICALLY REJECTED or highlight budget enablers from the actual 15-man squad that balanced the "Markowitz Mean-Variance Utility Model" / "Game-Theoretic EO Shield".
+      STRICT ANTI-HALLUCINATION RULE: You must ONLY mention current Premier League players explicitly listed in the 15-Man Optimal Squad or Omitted Stars above. NEVER mention retired players or players who have left the Premier League.
     - Tweet 3 (The Alpha): Name the top Captaincy pick from the provided list. Explain their mathematical advantage EXACTLY in the context of the chosen Risk Strategy (e.g., if SAFE, emphasize low variance and high floor; if AGGRESSIVE, emphasize high ceiling and differential upside; if VALUE, emphasize points-per-million ROI).
-    - Tweet 4 (The CTA): A Call-To-Action asking followers to drop a screenshot of their squad below for an AI analysis, or telling them to try the FPL Horizon V3 Engine themselves. MUST conclude with the link "fplhorizon.app" and relevant hashtags: #FPL #FPLCommunity #FantasyPremierLeague.
+    - Tweet 4 (The CTA): A Call-To-Action asking followers to drop a screenshot of their squad below for an AI audit, or telling them to run the Branch-and-Bound MILP engine themselves. MUST conclude with the link "fplhorizon.app" and relevant hashtags: #FPL #FPLCommunity #FantasyPremierLeague.
     
     CRITICAL CONSTRAINTS:
     - You must output exactly 4 tweets.
