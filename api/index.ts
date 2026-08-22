@@ -997,7 +997,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (url.includes('/api/agent/thread') && req.method === 'POST') {
-      const { squad, riskMode = 'safe', topPicks = [], totalCost = 0, expectedPoints = 0 } = req.body || {};
+      const { squad, riskMode = 'safe', topPicks = [], totalCost = 0, expectedPoints = 0, omittedStars = [] } = req.body || {};
       if (!squad) return res.status(400).json({ error: "Missing squad payload" });
       
       const uid = await verifyAuth(req, res);
@@ -1043,7 +1043,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
       // -------------------------------------
 
-      const tweets = await generateSocialThread(squad, riskMode, topPicks, totalCost, expectedPoints);
+      const tweets = await generateSocialThread(squad, riskMode, topPicks, totalCost, expectedPoints, omittedStars);
       return res.status(200).json({ tweets });
     }
 

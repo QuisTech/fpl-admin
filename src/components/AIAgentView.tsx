@@ -205,13 +205,22 @@ export const AIAgentView = ({ syncedData, optimalData, tier, userId, riskMode, f
                 setGeneratingThread(true);
                 setThreadError(null);
                 try {
+                  const omittedStars = optimalData.engineDiagnostics?.metrics?.omissionAnalysis?.map(oa => oa.omittedPlayer) || [];
+                  const allTopPicks = [
+                    ...(optimalData.topPicks?.fwd || []),
+                    ...(optimalData.topPicks?.mid || []),
+                    ...(optimalData.topPicks?.def || []),
+                    ...(optimalData.topPicks?.gkp || [])
+                  ];
+
                   // Pass optimal squad info
                   const res = await axios.post('/api/agent/thread', {
                     squad: optimalData.squad,
                     riskMode,
                     totalCost: optimalData.totalCost,
                     expectedPoints: optimalData.expectedPoints,
-                    topPicks: optimalData.topPicks?.mid || []
+                    topPicks: allTopPicks.length > 0 ? allTopPicks : (optimalData.squad || []),
+                    omittedStars
                   });
                   setGeneratedThread(res.data.tweets);
                 } catch (err: any) {

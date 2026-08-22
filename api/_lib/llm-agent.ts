@@ -183,37 +183,44 @@ export async function generateSocialThread(
   riskMode: string,
   topPicks: any[],
   totalCost: number,
-  expectedPoints: number
+  expectedPoints: number,
+  omittedStars: any[] = []
 ): Promise<string[]> {
   const squadSummary = squad.map(p => 
-    `${p.name || p.web_name || 'Unknown'} (${p.position}) £${((p.cost || p.now_cost || 0)/10).toFixed(1)}M`
+    `${p.name || p.web_name || 'Unknown'} (${p.position || 'MID'}) £${((p.cost || p.now_cost || 0)/10).toFixed(1)}M`
   ).join(', ');
 
   const topPicksSummary = topPicks.map(p => p.web_name || p.name).join(', ');
+  const omittedStarsSummary = (omittedStars || []).map(p => 
+    `${p.name || p.web_name || 'Unknown'} (£${((p.cost || p.now_cost || 0)/10).toFixed(1)}M)`
+  ).join(', ');
 
   const prompt = `
     You are an elite quantitative FPL Analyst (the "Hedge Fund FPL" persona).
-    You just ran a mathematical optimization engine (Branch-and-Bound LP Solver) to find the absolute mathematically perfect squad for the upcoming gameweek.
+    You just ran a mathematical optimization engine (Branch-and-Bound LP Solver) to find the absolute mathematically perfect squad for the upcoming gameweek in the current 2026/27 Premier League season.
     
     Data from the Engine:
     - Selected Risk Strategy: ${riskMode.toUpperCase()}
     - Total Squad Cost: £${(totalCost/10).toFixed(1)}M (Must strictly be under £100.0M)
     - Projected Points: ${expectedPoints.toFixed(1)} xP
-    - Engine Top Picks: ${topPicksSummary}
+    - Engine Top Picks: ${topPicksSummary || 'See optimal squad'}
     - 15-Man Optimal Squad: ${squadSummary}
+    ${omittedStarsSummary ? `- High-Ownership Template Stars Omitted by Engine: ${omittedStarsSummary}` : ''}
 
     Write a highly engaging, controversial, and professional 4-part Twitter (X) thread explaining the mathematical logic behind this optimal squad.
     
     Guidelines for the Thread:
     - Tweet 1 (The Hook): State the Risk Strategy (${riskMode.toUpperCase()}), the total cost, and the projected xP. Sound like a hedge fund quant dropping alpha.
-    - Tweet 2 (The Math): Highlight 1-2 highly-owned "popular" players that the engine MATHEMTICALLY REJECTED or highlight budget enablers that made the math work. Be unapologetic about trusting the algorithm over human emotion.
-    - Tweet 3 (The Alpha): Name the top Captaincy pick from the "Engine Top Picks" list. Explain their mathematical advantage EXACTLY in the context of the chosen Risk Strategy (e.g., if SAFE, emphasize their low variance and high floor; if AGGRESSIVE, emphasize their high ceiling and explosive upside; if VALUE, emphasize their high points-per-million efficiency).
+    - Tweet 2 (The Math): Highlight 1-2 players that the engine MATHEMATICALLY REJECTED or highlight budget enablers from the actual 15-man squad that made the math work.
+      STRICT ANTI-HALLUCINATION RULE: You must ONLY mention current Premier League players explicitly listed in the 15-Man Optimal Squad or Omitted Stars above. NEVER mention retired players or players who have left the Premier League (e.g. Kane, Salah if not in the active data).
+    - Tweet 3 (The Alpha): Name the top Captaincy pick from the provided list. Explain their mathematical advantage EXACTLY in the context of the chosen Risk Strategy (e.g., if SAFE, emphasize low variance and high floor; if AGGRESSIVE, emphasize high ceiling and differential upside; if VALUE, emphasize points-per-million ROI).
     - Tweet 4 (The CTA): A Call-To-Action asking followers to drop a screenshot of their squad below for an AI analysis, or telling them to try the FPL Horizon V3 Engine themselves. MUST conclude with the link "fplhorizon.app" and relevant hashtags: #FPL #FPLCommunity #FantasyPremierLeague.
     
     CRITICAL CONSTRAINTS:
     - You must output exactly 4 tweets.
     - Start tweets with "1/4", "2/4", "3/4", "4/4".
     - EVERY SINGLE TWEET MUST BE STRICTLY UNDER 250 CHARACTERS to comfortably fit Twitter's 280 limit. Do NOT use overly long words.
+    - STRICTLY ACCURATE PLAYERS ONLY: Zero hallucinated names outside the provided engine payload.
     - Use numbers and stats to sound authoritative.
 
     Respond with a STRICT VALID JSON OBJECT matching this exact structure:
@@ -224,7 +231,7 @@ export async function generateSocialThread(
 
   const result = await callLLMWithFallback({
     prompt,
-    temperature: 0.7, // slightly more creative for social media
+    temperature: 0.5,
     jsonMode: true,
   });
 
