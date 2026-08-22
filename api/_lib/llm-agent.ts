@@ -186,14 +186,22 @@ export async function generateSocialThread(
   expectedPoints: number,
   omittedStars: any[] = []
 ): Promise<string[]> {
+  const formatPlayerPrice = (val: any) => {
+    const num = Number(val) || 0;
+    const inMillions = num > 30 ? num / 10 : num;
+    return `£${inMillions.toFixed(1)}M`;
+  };
+
   const squadSummary = squad.map(p => 
-    `${p.name || p.web_name || 'Unknown'} (${p.position || 'MID'}) £${((p.cost || p.now_cost || 0)/10).toFixed(1)}M`
+    `${p.name || p.web_name || 'Unknown'} (${p.position || 'MID'}) ${formatPlayerPrice(p.now_cost ?? p.cost)}`
   ).join(', ');
 
   const topPicksSummary = topPicks.map(p => p.web_name || p.name).join(', ');
   const omittedStarsSummary = (omittedStars || []).map(p => 
-    `${p.name || p.web_name || 'Unknown'} (£${((p.cost || p.now_cost || 0)/10).toFixed(1)}M)`
+    `${p.name || p.web_name || 'Unknown'} (${formatPlayerPrice(p.cost ?? p.now_cost)})`
   ).join(', ');
+
+  const formattedTotalCost = (totalCost > 300 ? totalCost / 10 : totalCost).toFixed(1);
 
   const prompt = `
     You are an elite quantitative FPL Analyst (the "Hedge Fund FPL" persona).
@@ -201,7 +209,7 @@ export async function generateSocialThread(
     
     Data from the Engine:
     - Selected Risk Strategy: ${riskMode.toUpperCase()}
-    - Total Squad Cost: £${(totalCost/10).toFixed(1)}M (Must strictly be under £100.0M)
+    - Total Squad Cost: £${formattedTotalCost}M (Must strictly be under £100.0M)
     - Projected Points: ${expectedPoints.toFixed(1)} xP
     - Engine Top Picks: ${topPicksSummary || 'See optimal squad'}
     - 15-Man Optimal Squad: ${squadSummary}
