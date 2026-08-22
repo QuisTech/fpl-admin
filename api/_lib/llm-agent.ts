@@ -184,7 +184,9 @@ export async function generateSocialThread(
   topPicks: any[],
   totalCost: number,
   expectedPoints: number,
-  omittedStars: any[] = []
+  omittedStars: any[] = [],
+  captain?: any,
+  viceCaptain?: any
 ): Promise<string[]> {
   const formatPlayerPrice = (val: any) => {
     const num = Number(val) || 0;
@@ -196,7 +198,10 @@ export async function generateSocialThread(
     `${p.name || p.web_name || 'Unknown'} (${p.position || 'MID'}) ${formatPlayerPrice(p.now_cost ?? p.cost)}`
   ).join(', ');
 
-  const topPicksSummary = topPicks.map(p => p.web_name || p.name).join(', ');
+  const captainSummary = captain 
+    ? `${captain.name || captain.web_name || 'Unknown'} (${captain.position || 'MID'}) ${formatPlayerPrice(captain.now_cost ?? captain.cost)}`
+    : (squad[0] ? `${squad[0].name || squad[0].web_name} (${squad[0].position || 'MID'}) ${formatPlayerPrice(squad[0].now_cost ?? squad[0].cost)}` : 'Squad Anchor');
+
   const omittedStarsSummary = (omittedStars || []).map(p => 
     `${p.name || p.web_name || 'Unknown'} (${formatPlayerPrice(p.cost ?? p.now_cost)})`
   ).join(', ');
@@ -211,8 +216,8 @@ export async function generateSocialThread(
     - Selected Risk Strategy: ${riskMode.toUpperCase()}
     - Total Squad Cost: £${formattedTotalCost}M (Must strictly be under £100.0M)
     - Projected Points: ${expectedPoints.toFixed(1)} xP
-    - Engine Top Picks: ${topPicksSummary || 'See optimal squad'}
     - 15-Man Optimal Squad: ${squadSummary}
+    - Designated Optimal Captain Pick: ${captainSummary}
     ${omittedStarsSummary ? `- High-Ownership Template Stars Omitted by Engine: ${omittedStarsSummary}` : ''}
 
     Write a highly engaging, sharp, and authoritative 4-part Twitter (X) thread explaining the mathematical logic behind this optimal squad.
@@ -225,15 +230,17 @@ export async function generateSocialThread(
 
     Guidelines for the Thread:
     - Tweet 1 (The Hook): State the Risk Strategy (${riskMode.toUpperCase()}), the total cost, and projected xP. Reference our "Mixed-Integer Linear Programming (MILP)" or "Branch-and-Bound" optimizer delivering mathematical alpha over an "8-Gameweek Rolling Horizon Lookahead".
-    - Tweet 2 (The Math & Risk): Highlight 1-2 players the engine MATHEMATICALLY REJECTED or highlight budget enablers from the actual 15-man squad that balanced the "Markowitz Mean-Variance Utility Model" / "Game-Theoretic EO Shield".
+    - Tweet 2 (The Math & Risk): Highlight 1-2 players the engine MATHEMATICALLY REJECTED (from the Omitted Stars list) or highlight budget enablers from the actual 15-man squad that balanced the "Markowitz Mean-Variance Utility Model" / "Game-Theoretic EO Shield".
       STRICT ANTI-HALLUCINATION RULE: You must ONLY mention current Premier League players explicitly listed in the 15-Man Optimal Squad or Omitted Stars above. NEVER mention retired players or players who have left the Premier League.
-    - Tweet 3 (The Alpha): Name the top Captaincy pick from the provided list. Explain their mathematical advantage EXACTLY in the context of the chosen Risk Strategy (e.g., if SAFE, emphasize low variance and high floor; if AGGRESSIVE, emphasize high ceiling and differential upside; if VALUE, emphasize points-per-million ROI).
+    - Tweet 3 (The Alpha - Captain Pick): Name the Designated Optimal Captain Pick (${captainSummary.split(' ')[0]}). Explain their mathematical advantage EXACTLY in the context of the chosen Risk Strategy (e.g., if SAFE, emphasize low variance and high floor; if AGGRESSIVE, emphasize high ceiling and differential upside; if VALUE, emphasize points-per-million ROI).
+      CRITICAL LOGICAL RULE: The Captain MUST be the Designated Optimal Captain Pick (${captainSummary.split(' ')[0]}). NEVER name an omitted/rejected player as the captain pick!
     - Tweet 4 (The CTA): A Call-To-Action asking followers to drop a screenshot of their squad below for an AI audit, or telling them to run the Branch-and-Bound MILP engine themselves. MUST conclude with the link "fplhorizon.app" and relevant hashtags: #FPL #FPLCommunity #FantasyPremierLeague.
     
     CRITICAL CONSTRAINTS:
     - You must output exactly 4 tweets.
     - Start tweets with "1/4", "2/4", "3/4", "4/4".
     - EVERY SINGLE TWEET MUST BE STRICTLY UNDER 250 CHARACTERS to comfortably fit Twitter's 280 limit. Do NOT use overly long words.
+    - ZERO CONTRADICTIONS: If a player was rejected in Tweet 2, NEVER name them as captain in Tweet 3.
     - STRICTLY ACCURATE PLAYERS ONLY: Zero hallucinated names outside the provided engine payload.
     - Use numbers and stats to sound authoritative.
 

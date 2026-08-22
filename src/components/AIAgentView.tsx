@@ -220,7 +220,9 @@ export const AIAgentView = ({ syncedData, optimalData, tier, userId, riskMode, f
                     totalCost: optimalData.totalCost,
                     expectedPoints: optimalData.expectedPoints,
                     topPicks: allTopPicks.length > 0 ? allTopPicks : (optimalData.squad || []),
-                    omittedStars
+                    omittedStars,
+                    captain: optimalData.captain,
+                    viceCaptain: optimalData.viceCaptain
                   });
                   setGeneratedThread(res.data.tweets);
                 } catch (err: any) {
