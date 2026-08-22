@@ -40,6 +40,7 @@ import { UsersPage } from './pages/admin/UsersPage';
 import { BetaPage } from './pages/admin/BetaPage';
 import { AnalyticsPage } from './pages/admin/AnalyticsPage';
 import { FeatureFlagsPage } from './pages/admin/FeatureFlagsPage';
+import { FPLTrackerPage } from './pages/admin/FPLTrackerPage';
 
 function FPLApp() {
   const [riskMode, setRiskMode] = useState<'safe' | 'aggressive' | 'value'>('safe');
@@ -276,6 +277,7 @@ export default function App() {
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Navigate to="analytics" replace />} />
           <Route path="users" element={<UsersPage />} />
+          <Route path="fpl-tracker" element={<FPLTrackerPage />} />
           <Route path="beta" element={<BetaPage />} />
           <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="features" element={<FeatureFlagsPage />} />

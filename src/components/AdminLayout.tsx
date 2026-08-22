@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Users, ShieldAlert, Activity, LayoutDashboard, Settings } from 'lucide-react';
+import { Users, ShieldAlert, Activity, LayoutDashboard, Settings, Trophy } from 'lucide-react';
 import { auth, onAuthStateChanged } from '../lib/firebase';
 import { cn } from '../lib/utils';
 
@@ -63,6 +63,7 @@ export function AdminLayout() {
 
   const navItems = [
     { path: '/admin/users', label: 'Users', icon: Users },
+    { path: '/admin/fpl-tracker', label: 'FPL Account Tracker', icon: Trophy },
     { path: '/admin/beta', label: 'Beta Program', icon: ShieldAlert },
     { path: '/admin/analytics', label: 'Analytics', icon: Activity },
     { path: '/admin/features', label: 'Features', icon: Settings },

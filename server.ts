@@ -44,6 +44,16 @@ async function startServer() {
     }
   });
 
+  app.all("/api/admin*", async (req, res) => {
+    try {
+      const adminHandler = (await import("./api/admin")).default;
+      await adminHandler(req as any, res as any);
+    } catch (error: any) {
+      console.error("Local Dev Admin Error:", error.message);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.get("/api/user", async (req, res) => {
     try {
       const userId = req.query.userId as string;

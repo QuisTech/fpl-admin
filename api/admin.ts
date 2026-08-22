@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import axios from 'axios';
 import { getFirestore } from '../lib/firestore.js';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 
@@ -304,6 +305,82 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       const portalSession = await dodo.customers.customerPortal.create(customerId);
       return res.json({ url: portalSession.link });
+    }
+
+    if (url.includes('/api/admin/fpl-tracker') && req.method === 'GET') {
+      const trackedAccounts = [
+        { email: 'michquis@gmail.com', teamId: 532002, mode: 'fplform-s-mode', label: 'FPLForm (Safe Mode)', group: 'FPLForm' },
+        { email: 'quismich@gmail.com', teamId: 1884833, mode: 'fplform-risky-mode', label: 'FPLForm (Risky Mode)', group: 'FPLForm' },
+        { email: 'smichqui@gmail.com', teamId: 3097103, mode: 'fplform-value-mode', label: 'FPLForm (Value Mode)', group: 'FPLForm' },
+
+        { email: 'michael.marquis05@gmail.com', teamId: 902458, mode: 'eye-test-risky-mode', label: 'Eye-Test (Risky Mode)', group: 'Eye-Test' },
+        { email: 'michaelmabbing8@gmail.com', teamId: 904491, mode: 'eye-test-value-mode', label: 'Eye-Test (Value Mode)', group: 'Eye-Test' },
+        { email: 'abimbolamarquis@gmail.com', teamId: 601847, mode: 'eye-test-safe-mode', label: 'Eye-Test (Safe Mode)', group: 'Eye-Test' },
+
+        { email: 'michaelmabbing@gmail.com', teamId: 906422, mode: 'native-risky-mode', label: 'Native FPL (Risky Mode)', group: 'Native FPL' },
+        { email: 'michaelmabbing@yahoo.com', teamId: 1921923, mode: 'native-safe-mode', label: 'Native FPL (Safe Mode)', group: 'Native FPL' },
+        { email: 'michealmabbing@gmail.com', teamId: 1924837, mode: 'native-value-mode', label: 'Native FPL (Value Mode)', group: 'Native FPL' },
+
+        { email: 'brucelans@gmail.com', teamId: 600311, mode: 'fpl-strategist-s-m', label: 'FPL Strategist (Safe Mode)', group: 'Strategist' },
+
+        { email: 'hydroquisc@gmail.com', teamId: 3274378, mode: 'fpl-optimizer-s-m', label: 'FPL Optimizer (Safe Mode)', group: 'Optimizer' },
+        { email: 'cwfacwfa@gmail.com', teamId: 9291073, mode: 'fpl-optimizer-r-m', label: 'FPL Optimizer (Risky Mode)', group: 'Optimizer' },
+
+        { email: 'inspirenovaent@gmail.com', teamId: 903137, mode: 'fpl-horizon-s-m', label: 'FPL Horizon (Safe Mode)', group: 'Horizon Flagship' },
+        { email: 'inspirenovaenterprises@gmail.com', teamId: 903827, mode: 'fpl-horizon-r-m', label: 'FPL Horizon (Risky Mode)', group: 'Horizon Flagship' },
+      ];
+
+      const results = await Promise.allSettled(
+        trackedAccounts.map(async (acc) => {
+          try {
+            const fplRes = await axios.get(`https://fantasy.premierleague.com/api/entry/${acc.teamId}/`, {
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+              },
+              timeout: 6000
+            });
+            const data = fplRes.data;
+            return {
+              ...acc,
+              teamName: data.name || 'Unknown Squad',
+              managerName: `${data.player_first_name || ''} ${data.player_last_name || ''}`.trim(),
+              overallPoints: data.summary_overall_points ?? 0,
+              overallRank: data.summary_overall_rank ?? null,
+              gwPoints: data.summary_event_points ?? 0,
+              gwRank: data.summary_event_rank ?? null,
+              lastGw: data.current_event ?? null,
+              status: 'active'
+            };
+          } catch (err: any) {
+            return {
+              ...acc,
+              teamName: 'Unavailable',
+              managerName: 'Unknown',
+              overallPoints: 0,
+              overallRank: null,
+              gwPoints: 0,
+              gwRank: null,
+              lastGw: null,
+              status: 'error',
+              error: err.message
+            };
+          }
+        })
+      );
+
+      const accountsData = results.map((r, i) => r.status === 'fulfilled' ? r.value : {
+        ...trackedAccounts[i],
+        teamName: 'Error',
+        managerName: 'Unknown',
+        overallPoints: 0,
+        overallRank: null,
+        gwPoints: 0,
+        gwRank: null,
+        lastGw: null,
+        status: 'error'
+      });
+
+      return res.json({ trackedAccounts: accountsData, timestamp: Date.now() });
     }
 
     return res.status(404).json({ error: "Admin route not found" });
