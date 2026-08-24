@@ -183,10 +183,33 @@ export interface ChipAdvice {
   reason: string;
 }
 
+export interface EntryHistory {
+  points: number;
+  total_points: number;
+  overall_rank: number;
+  rank: number;
+  event_transfers: number;
+  event_transfers_cost: number;
+  value: number;
+  bank: number;
+}
+
+export interface ManagerInfo {
+  id: number;
+  teamName: string;
+  managerName: string;
+  summary_overall_rank?: number;
+  summary_overall_points?: number;
+  summary_event_points?: number;
+  last_deadline_total_transfers?: number;
+}
+
 export interface TeamSyncResponse {
   squad: ScoredPlayer[];
   transfers: TransferRecommendation[];
   chips: ChipAdvice[];
   bank?: number;
   totalCost?: number;
+  entryHistory?: EntryHistory | null;
+  managerInfo?: ManagerInfo | null;
 }
