@@ -337,7 +337,7 @@ export class FPLService {
       const d = squadList.filter(p => p.position === "DEF").sort(sortByScore);
       const m = squadList.filter(p => p.position === "MID").sort(sortByScore);
       const f = squadList.filter(p => p.position === "FWD").sort(sortByScore);
-      const mand = [g[0], ...d.slice(0, 10), ...m.slice(0, 2), ...f.slice(0, 1)].filter(Boolean) as ScoredPlayer[];
+      const mand = [g[0], ...d.slice(0, 3), ...m.slice(0, 2), ...f.slice(0, 1)].filter(Boolean) as ScoredPlayer[];
       const remaining = [...d.slice(3), ...m.slice(2), ...f.slice(1)].sort(sortByScore);
       return [...mand, ...remaining.slice(0, 4)].filter(Boolean) as ScoredPlayer[];
     };
@@ -355,14 +355,14 @@ export class FPLService {
         const gkps = scored.filter(p => p.position === 'GKP').sort(sortByScore).slice(0, 2);
         const defs = scored.filter(p => p.position === 'DEF').sort(sortByScore).slice(0, 5);
         const mids = scored.filter(p => p.position === 'MID').sort(sortByScore).slice(0, 5);
-        const fwds = scored.filter(p => p.position === 'FWD').sort(sortByScore).slice(0, 10);
+        const fwds = scored.filter(p => p.position === 'FWD').sort(sortByScore).slice(0, 3);
         squad = [...gkps, ...defs, ...mids, ...fwds];
       }
     } else {
       const gkps = scored.filter(p => p.position === 'GKP').sort(sortByScore).slice(0, 2);
       const defs = scored.filter(p => p.position === 'DEF').sort(sortByScore).slice(0, 5);
       const mids = scored.filter(p => p.position === 'MID').sort(sortByScore).slice(0, 5);
-      const fwds = scored.filter(p => p.position === 'FWD').sort(sortByScore).slice(0, 10);
+      const fwds = scored.filter(p => p.position === 'FWD').sort(sortByScore).slice(0, 3);
       squad = [...gkps, ...defs, ...mids, ...fwds];
     }
     
