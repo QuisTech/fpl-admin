@@ -321,15 +321,34 @@ export class FPLService {
       .slice(0, 5)
       .map(p => p.id);
 
+    const params = getParamsForRiskMode(riskMode, baseWeights);
+    const effectiveBudget = budget * (params.budgetMultiplier || 1.0);
+
     const activeLockedSet = new Set<number>(lockedSet);
     if (scenario === 'template') {
+      let currentLockedCost = Array.from(activeLockedSet).reduce((sum: number, id: number) => {
+        const p = scored.find(x => x.id === id);
+        return sum + Number(p?.cost || 0);
+      }, 0);
+
       templateAnchorIds.forEach(id => {
-        if (!excludedSet.has(id)) activeLockedSet.add(id);
+        if (excludedSet.has(id)) return;
+        const p = scored.find(x => x.id === id);
+        if (!p) return;
+        
+        const pCost = Number(p.cost || p.now_cost || 0);
+        const newCount = activeLockedSet.size + 1;
+        const remainingSlots = Math.max(0, 15 - newCount);
+        const minRemainingCost = remainingSlots * 42; // Minimum ~4.2m per remaining slot
+
+        if (currentLockedCost + pCost + minRemainingCost <= effectiveBudget) {
+          activeLockedSet.add(id);
+          currentLockedCost += pCost;
+        }
       });
     }
 
     const availableIds = new Set<number>(scored.map(p => p.id));
-    const params = getParamsForRiskMode(riskMode, baseWeights);
 
     // Helper to build 11-man starting XI from 15-man squad
     const buildStartingXI = (squadList: ScoredPlayer[]) => {
@@ -414,8 +433,25 @@ export class FPLService {
 
         // Solve Template Shield
         const templateSet = new Set<number>(lockedSet);
+        let currentTemplateCost = Array.from(templateSet).reduce((sum: number, id: number) => {
+          const p = scored.find(x => x.id === id);
+          return sum + Number(p?.cost || 0);
+        }, 0);
+
         templateAnchorIds.forEach(id => {
-          if (!excludedSet.has(id)) templateSet.add(id);
+          if (excludedSet.has(id)) return;
+          const p = scored.find(x => x.id === id);
+          if (!p) return;
+
+          const pCost = Number(p.cost || p.now_cost || 0);
+          const newCount = templateSet.size + 1;
+          const remainingSlots = Math.max(0, 15 - newCount);
+          const minRemainingCost = remainingSlots * 42;
+
+          if (currentTemplateCost + pCost + minRemainingCost <= effectiveBudget) {
+            templateSet.add(id);
+            currentTemplateCost += pCost;
+          }
         });
         const templateIds = solveOptimalSquad(oracle, nextEventId, budget, 8, params, availableIds, templateSet, excludedSet);
         const templateSquad = scored.filter(p => templateIds.includes(p.id));
