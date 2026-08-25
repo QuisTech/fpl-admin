@@ -167,16 +167,19 @@ export class ProjectionEngine {
       const diffOffset = (fix.difficulty || 3) - 3;
       
       // Sub-model 1: Attacking Returns
-      let expectedAttack = (this.params.betaAttackBase || 0.3) 
-        + (this.params.betaXG || 3.0) * player.xG90
-        + (this.params.betaXA || 3.0) * player.xA90
-        + (this.params.betaXGI3 || 0.5) * player.xGI3
-        + (this.params.betaTeamAttack || 0.5) * (teamAttack - 1.5)
-        + (this.params.betaOppDefense || -1.0) * (oppDefense - 1.5)
-        + (this.params.betaAttFixture || -0.4) * diffOffset
-        + (this.params.betaAttHome || 0.2) * isHome;
-        
-      expectedAttack = Math.max(0, expectedAttack) * minuteFraction;
+      let expectedAttack = 0;
+      if (player.position !== 'GKP') {
+        expectedAttack = (this.params.betaAttackBase || 0.3) 
+          + (this.params.betaXG || 3.0) * player.xG90
+          + (this.params.betaXA || 3.0) * player.xA90
+          + (this.params.betaXGI3 || 0.5) * player.xGI3
+          + (this.params.betaTeamAttack || 0.5) * (teamAttack - 1.5)
+          + (this.params.betaOppDefense || -1.0) * (oppDefense - 1.5)
+          + (this.params.betaAttFixture || -0.4) * diffOffset
+          + (this.params.betaAttHome || 0.2) * isHome;
+          
+        expectedAttack = Math.max(0, expectedAttack) * minuteFraction;
+      }
 
       // Sub-model 2: Clean Sheet Probability
       // Only Defenders and GKs get full CS points (4). Mids get (1). Fwds get 0.
@@ -190,8 +193,11 @@ export class ProjectionEngine {
       expectedCsProb = Math.max(0.02, Math.min(0.70, expectedCsProb)) * minuteFraction;
       const expectedCS = expectedCsProb * csMultiplier;
 
-      // Sub-model 3: Bonus
-      let expectedBonus = Math.max(0, 0.10 + 0.25 * expectedAttack + (expectedCS > 1.5 ? 0.35 : 0));
+      // Sub-model 3: Saves (Goalkeepers only)
+      const expectedSaves = player.position === 'GKP' ? (0.75 * minuteFraction) : 0;
+
+      // Sub-model 4: Bonus
+      let expectedBonus = Math.max(0, 0.05 + 0.25 * expectedAttack + (expectedCS > 1.5 ? 0.35 : 0));
 
       // Sub-model 4: Appearance
       // Roughly 2 points if > 60 mins, 1 pt if < 60 mins
@@ -213,7 +219,7 @@ export class ProjectionEngine {
       const bonusVar = expectedBonus * 1.5; // Heuristic
 
       // Total XP and Variance
-      totalXp += expectedAppearance + expectedAttack + expectedCS + expectedBonus;
+      totalXp += expectedAppearance + expectedAttack + expectedCS + expectedSaves + expectedBonus;
       totalVar += appVar + attackVar + csVar + bonusVar;
     });
     
