@@ -111,7 +111,8 @@ export function solveOptimalSquad(
     
     posList.forEach(c => {
       const isTop = sorted.slice(0, limit).some(top => top.id === c.id);
-      if (isTop || c.cost <= 45 || c.isLocked) {
+      const eo = oracle.getTop1kEO?.(c.id) ?? 0;
+      if (isTop || c.cost <= 45 || c.cost >= 85 || c.isLocked || eo >= 15) {
         filteredCandidates.push(c);
       }
     });
