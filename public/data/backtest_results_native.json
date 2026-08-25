@@ -1,98 +1,98 @@
 {
-  "generatedAt": "2026-08-13T10:44:27.752Z",
+  "generatedAt": "2026-08-25T14:19:34.279Z",
   "fuel": "native",
   "startGw": 1,
   "endGw": 1,
   "hasLivePoints": true,
   "totals": {
     "safe": {
-      "totalPoints": 36,
-      "alphaVsTemplate": 4.8
+      "totalPoints": 82,
+      "alphaVsTemplate": 67.9
     },
     "risky": {
-      "totalPoints": 36.3,
-      "alphaVsTemplate": 5.1
+      "totalPoints": 56,
+      "alphaVsTemplate": 41.9
     },
     "value": {
-      "totalPoints": 31.5,
-      "alphaVsTemplate": 0.3
+      "totalPoints": 21,
+      "alphaVsTemplate": 6.9
     },
     "template": {
-      "totalPoints": 31.2
+      "totalPoints": 14.1
     }
   },
   "gameweeks": [
     {
       "gameweek": 1,
-      "templateScore": 31.2,
+      "templateScore": 14.1,
       "safe": {
         "mode": "SAFE",
         "startingXI": [
           "Raya (ARS)",
-          "Gabriel (ARS)",
           "Virgil (LIV)",
           "O'Reilly (MCI)",
+          "Tarkowski (EVE)",
           "B.Fernandes (MUN)",
-          "Palmer (CHE)",
-          "Strand Larsen (CRY)",
-          "Wirtz (LIV)",
-          "Pedro Porro (TOT)",
-          "Van de Ven (TOT)",
-          "Reijnders (MCI)"
+          "Mbeumo (MUN)",
+          "João Pedro (CHE)",
+          "Calafiori (ARS)",
+          "Gvardiol (MCI)",
+          "Ødegaard (ARS)",
+          "Dewsbury-Hall (EVE)"
         ],
-        "captain": "Palmer (C)",
-        "projectedGwXp": 32.8,
-        "projected8GwXp": 186.8,
-        "actualPoints": 36,
-        "averageXiEo": 32.9,
-        "alphaVsTemplate": 4.8
+        "captain": "Ødegaard (C)",
+        "projectedGwXp": 34.1,
+        "projected8GwXp": 181.1,
+        "actualPoints": 82,
+        "averageXiEo": 50,
+        "alphaVsTemplate": 67.9
       },
       "risky": {
         "mode": "RISKY",
         "startingXI": [
           "Raya (ARS)",
           "Gabriel (ARS)",
-          "O'Reilly (MCI)",
-          "Lacroix (CHE)",
-          "Cunha (MUN)",
-          "Gibbs-White (NFO)",
-          "N.Jackson (CHE)",
+          "Virgil (LIV)",
+          "Guéhi (MCI)",
+          "B.Fernandes (MUN)",
+          "Palmer (CHE)",
+          "David (BHA)",
           "Matheus N. (MCI)",
           "Senesi (TOT)",
-          "Doku (MCI)",
-          "Bruno G. (ARS)"
+          "Mudryk (CHE)",
+          "Hamer (COV)"
         ],
-        "captain": "Raya (C)",
-        "projectedGwXp": 32.3,
-        "projected8GwXp": 184,
-        "actualPoints": 36.3,
-        "averageXiEo": 1.9,
-        "alphaVsTemplate": 5.1
+        "captain": "Palmer (C)",
+        "projectedGwXp": 35.9,
+        "projected8GwXp": 186.2,
+        "actualPoints": 56,
+        "averageXiEo": 8.2,
+        "alphaVsTemplate": 41.9
       },
       "value": {
         "mode": "VALUE",
         "startingXI": [
           "Raya (ARS)",
+          "Virgil (LIV)",
           "O'Reilly (MCI)",
-          "Matheus N. (MCI)",
-          "Senesi (TOT)",
-          "Sangaré (BRE)",
-          "Barco (CHE)",
-          "Awoniyi (NFO)",
           "Araujo (LIV)",
-          "Diomande (NFO)",
+          "Barco (CHE)",
           "Mudryk (CHE)",
+          "Awoniyi (COV)",
+          "Diomande (NFO)",
+          "Mukiele (SUN)",
+          "Hamer (COV)",
           "Palacios (FUL)"
         ],
         "captain": "Raya (C)",
-        "projectedGwXp": 27.5,
+        "projectedGwXp": 31.5,
         "projected8GwXp": 156.6,
-        "actualPoints": 31.5,
-        "averageXiEo": 0.6,
-        "alphaVsTemplate": 0.3
+        "actualPoints": 21,
+        "averageXiEo": 1.8,
+        "alphaVsTemplate": 6.9
       },
       "riskySwapCount": 8,
-      "riskyAvgSwapCost": 0.04,
+      "riskyAvgSwapCost": -0.08,
       "riskyQuality": "PASS"
     }
   ]

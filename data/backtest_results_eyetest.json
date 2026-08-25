@@ -1,99 +1,99 @@
 {
-  "generatedAt": "2026-08-13T10:47:35.082Z",
+  "generatedAt": "2026-08-25T14:20:04.044Z",
   "fuel": "eyetest",
   "startGw": 1,
   "endGw": 1,
   "hasLivePoints": true,
   "totals": {
     "safe": {
-      "totalPoints": 70.2,
-      "alphaVsTemplate": 12.5
+      "totalPoints": 49,
+      "alphaVsTemplate": 34.9
     },
     "risky": {
-      "totalPoints": 72.5,
-      "alphaVsTemplate": 14.8
+      "totalPoints": 70,
+      "alphaVsTemplate": 55.9
     },
     "value": {
-      "totalPoints": 69.2,
-      "alphaVsTemplate": 11.5
+      "totalPoints": 59,
+      "alphaVsTemplate": 44.9
     },
     "template": {
-      "totalPoints": 57.7
+      "totalPoints": 14.1
     }
   },
   "gameweeks": [
     {
       "gameweek": 1,
-      "templateScore": 57.7,
+      "templateScore": 14.1,
       "safe": {
         "mode": "SAFE",
         "startingXI": [
-          "Verbruggen (BHA)",
-          "Lewis (MCI)",
-          "Sanchez (BOU)",
-          "De Cuyper (BHA)",
-          "B.Fernandes (MUN)",
-          "Cherki (MCI)",
-          "Awoniyi (NFO)",
+          "Rushworth (COV)",
+          "Guéhi (MCI)",
+          "Thomas (COV)",
+          "Dasilva (COV)",
+          "Rogers (CHE)",
+          "Mbeumo (MUN)",
           "Haaland (MCI)",
-          "Saka (ARS)",
-          "Nmecha (LEE)",
-          "Chiesa (LIV)"
+          "Thiago (BRE)",
+          "Isak (LIV)",
+          "Szoboszlai (LIV)",
+          "Lewis-Potter (BRE)"
         ],
         "captain": "Haaland (C)",
-        "projectedGwXp": 60.7,
-        "projected8GwXp": 424.8,
-        "actualPoints": 70.2,
-        "averageXiEo": 19,
-        "alphaVsTemplate": 12.5
+        "projectedGwXp": 92.8,
+        "projected8GwXp": 611.2,
+        "actualPoints": 49,
+        "averageXiEo": 19.1,
+        "alphaVsTemplate": 34.9
       },
       "risky": {
         "mode": "RISKY",
         "startingXI": [
-          "Tzolakis (HUL)",
-          "Lewis (MCI)",
-          "Calafiori (ARS)",
-          "White (ARS)",
-          "B.Fernandes (MUN)",
-          "Cherki (MCI)",
-          "Awoniyi (NFO)",
+          "Rushworth (COV)",
+          "Reinildo (SUN)",
+          "Guéhi (MCI)",
+          "Thomas (COV)",
+          "Palmer (CHE)",
+          "Szoboszlai (LIV)",
           "Haaland (MCI)",
-          "Saka (ARS)",
-          "Nmecha (LEE)",
-          "Chiesa (LIV)"
+          "Isak (LIV)",
+          "Lewis-Potter (BRE)",
+          "Wissa (NEW)",
+          "Hall (NEW)"
         ],
-        "captain": "Awoniyi (C)",
-        "projectedGwXp": 60.7,
-        "projected8GwXp": 422.8,
-        "actualPoints": 72.5,
-        "averageXiEo": 12.7,
-        "alphaVsTemplate": 14.8
+        "captain": "Palmer (C)",
+        "projectedGwXp": 88.4,
+        "projected8GwXp": 606.1,
+        "actualPoints": 70,
+        "averageXiEo": 10,
+        "alphaVsTemplate": 55.9
       },
       "value": {
         "mode": "VALUE",
         "startingXI": [
-          "Matthews (CRY)",
-          "Lewis (MCI)",
-          "De Cuyper (BHA)",
-          "Targett (HUL)",
-          "B.Fernandes (MUN)",
-          "Cherki (MCI)",
-          "Awoniyi (NFO)",
-          "Saka (ARS)",
-          "Nmecha (LEE)",
-          "Abraham (AVL)",
-          "Chiesa (LIV)"
+          "Rushworth (COV)",
+          "Guéhi (MCI)",
+          "Thomas (COV)",
+          "Dasilva (COV)",
+          "Rogers (CHE)",
+          "Szoboszlai (LIV)",
+          "Isak (LIV)",
+          "Lewis-Potter (BRE)",
+          "Wissa (NEW)",
+          "Hall (NEW)",
+          "Nketiah (CRY)"
         ],
-        "captain": "Awoniyi (C)",
-        "projectedGwXp": 57.5,
-        "projected8GwXp": 408.9,
-        "actualPoints": 69.2,
-        "averageXiEo": 6.3,
-        "alphaVsTemplate": 11.5
+        "captain": "Rogers (C)",
+        "projectedGwXp": 84.3,
+        "projected8GwXp": 584.1,
+        "actualPoints": 59,
+        "averageXiEo": 4.5,
+        "alphaVsTemplate": 44.9
       },
-      "riskySwapCount": 3,
-      "riskyAvgSwapCost": 0.08,
-      "riskyQuality": "PASS"
+      "riskySwapCount": 4,
+      "riskyAvgSwapCost": 0.16,
+      "riskyQuality": "WARNING"
     }
   ]
 }
