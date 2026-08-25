@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-25T14:35:29.171Z",
+  "generatedAt": "2026-08-25T15:01:25.613Z",
   "fuel": "native",
   "startGw": 1,
   "endGw": 1,
@@ -75,14 +75,14 @@
           "Raya (ARS)",
           "Virgil (LIV)",
           "O'Reilly (MCI)",
-          "Araujo (LIV)",
-          "Barco (CHE)",
+          "Araujo (BOU)",
+          "Barco (BHA)",
           "Mudryk (CHE)",
-          "Awoniyi (COV)",
-          "Diomande (NFO)",
-          "Mukiele (SUN)",
+          "Awoniyi (NFO)",
+          "Diomande (RBL)",
+          "Mukiele (BOU)",
           "Hamer (COV)",
-          "Palacios (FUL)"
+          "Palacios (BHA)"
         ],
         "captain": "Raya (C)",
         "projectedGwXp": 31.5,
@@ -91,8 +91,8 @@
         "averageXiEo": 1.8,
         "alphaVsTemplate": 6.9
       },
-      "riskySwapCount": 8,
-      "riskyAvgSwapCost": -0.08,
+      "riskySwapCount": 7,
+      "riskyAvgSwapCost": -0.28,
       "riskyQuality": "PASS"
     }
   ]

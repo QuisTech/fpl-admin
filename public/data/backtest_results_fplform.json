@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-08-25T14:35:19.195Z",
+  "generatedAt": "2026-08-25T15:01:25.580Z",
   "fuel": "fplform",
   "startGw": 1,
   "endGw": 1,
   "hasLivePoints": true,
   "totals": {
     "safe": {
-      "totalPoints": 51,
-      "alphaVsTemplate": 36.9
+      "totalPoints": 52,
+      "alphaVsTemplate": 37.9
     },
     "risky": {
-      "totalPoints": 73,
-      "alphaVsTemplate": 58.9
+      "totalPoints": 52,
+      "alphaVsTemplate": 37.9
     },
     "value": {
-      "totalPoints": 59,
-      "alphaVsTemplate": 44.9
+      "totalPoints": 38,
+      "alphaVsTemplate": 23.9
     },
     "template": {
       "totalPoints": 14.1
@@ -28,71 +28,71 @@
       "safe": {
         "mode": "SAFE",
         "startingXI": [
-          "Lammens (MUN)",
+          "Verbruggen (BHA)",
+          "Gabriel (ARS)",
           "Virgil (LIV)",
-          "Guéhi (MCI)",
-          "Senesi (TOT)",
+          "Senesi (BOU)",
           "B.Fernandes (MUN)",
           "Szoboszlai (LIV)",
           "Thiago (BRE)",
+          "Enzo (CHE)",
           "Tavernier (BOU)",
-          "Watkins (AVL)",
-          "João Pedro (CHE)",
-          "E.Le Fée (SUN)"
+          "E.Le Fée (SUN)",
+          "João Pedro (CHE)"
         ],
         "captain": "B.Fernandes (C)",
         "projectedGwXp": 55.5,
         "projected8GwXp": 280.5,
-        "actualPoints": 51,
+        "actualPoints": 52,
         "averageXiEo": 20.9,
-        "alphaVsTemplate": 36.9
+        "alphaVsTemplate": 37.9
       },
       "risky": {
         "mode": "RISKY",
         "startingXI": [
-          "Suzuki (AVL)",
-          "Guéhi (MCI)",
-          "Senesi (TOT)",
-          "Lacroix (CHE)",
+          "Travers (BOU)",
+          "Senesi (BOU)",
+          "Truffert (BOU)",
+          "Lacroix (CRY)",
           "B.Fernandes (MUN)",
           "Palmer (CHE)",
           "Watkins (AVL)",
-          "Tavernier (BOU)",
           "Rice (ARS)",
-          "Stach (LEE)",
+          "Enzo (CHE)",
+          "Tavernier (BOU)",
           "Pedro Porro (TOT)"
         ],
         "captain": "Palmer (C)",
         "projectedGwXp": 54,
         "projected8GwXp": 278.3,
-        "actualPoints": 73,
+        "actualPoints": 52,
         "averageXiEo": 5.5,
-        "alphaVsTemplate": 58.9
+        "alphaVsTemplate": 37.9
       },
       "value": {
         "mode": "VALUE",
         "startingXI": [
           "Leno (FUL)",
-          "Guéhi (MCI)",
+          "Truffert (BOU)",
           "Pedro Porro (TOT)",
           "Thiaw (NEW)",
           "Szoboszlai (LIV)",
+          "Enzo (CHE)",
+          "Calvert-Lewin (EVE)",
           "Tavernier (BOU)",
-          "Thiago (BRE)",
           "E.Le Fée (SUN)",
-          "Stach (LEE)",
-          "Groß (BHA)",
-          "Van Hecke (TOT)"
+          "Garner (EVE)",
+          "Van Hecke (BHA)"
         ],
         "captain": "Szoboszlai (C)",
         "projectedGwXp": 50.1,
         "projected8GwXp": 257.5,
-        "actualPoints": 59,
+        "actualPoints": 38,
         "averageXiEo": 3.6,
-        "alphaVsTemplate": 44.9
+        "alphaVsTemplate": 23.9
       },
-      "riskySwapCount": 6,
-      "riskyAvgSwapCost": 0.05,
+      "riskySwapCount": 5,
+      "riskyAvgSwapCost": -0.05,
       "riskyQuality": "PASS"
     }
   ]
