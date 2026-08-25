@@ -280,12 +280,14 @@ export function solveCaptain(
   const getCaptainScore = (id: number) => {
     const dist = oracle.getDistribution(id, gameweek);
     const eo = oracle.getTop1kEO?.(id) ?? 0;
+    const pos = oracle.getPosition(id);
+    const posMultiplier = (pos === 'FWD' || pos === 'MID') ? 1.25 : 1.0;
     
     const targetTail = params.betaVariance > 0 ? (dist.tails[15] || 0) : (dist.tails[8] || 0);
     const tailWeight = Math.abs(params.betaVariance) * 10; 
     const skewReward = params.betaVariance > 0 ? ((dist.skewness || 0) * 0.5) : 0;
 
-    return dist.mean + (tailWeight * targetTail) + skewReward + (params.betaEO * eo / 100);
+    return (dist.mean + (tailWeight * targetTail) + skewReward + (params.betaEO * eo / 100)) * posMultiplier;
   };
 
   const playersWithScores = xiIds.map(id => ({
@@ -304,6 +306,8 @@ export function solveCaptain(
   const getVCScore = (id: number) => {
     const dist = oracle.getDistribution(id, gameweek);
     const eo = oracle.getTop1kEO?.(id) ?? 0;
+    const pos = oracle.getPosition(id);
+    const posMultiplier = (pos === 'FWD' || pos === 'MID') ? 1.25 : 1.0;
     
     const targetTail = vcParams.betaVariance > 0 ? (dist.tails[15] || 0) : (dist.tails[8] || 0);
     const tailWeight = Math.abs(vcParams.betaVariance) * 10; 
@@ -312,7 +316,7 @@ export function solveCaptain(
     const lambda = 5.0;
     const correlation = getCorrelation(oracle, captain.id, id);
     
-    return baseScore - (lambda * correlation);
+    return (baseScore * posMultiplier) - (lambda * correlation);
   };
 
   const vcCandidates = xiIds
