@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-08-25T14:25:29.551Z",
+  "generatedAt": "2026-08-25T14:35:06.098Z",
   "fuel": "eyetest",
   "startGw": 1,
   "endGw": 1,
   "hasLivePoints": true,
   "totals": {
     "safe": {
-      "totalPoints": 49,
-      "alphaVsTemplate": 34.9
+      "totalPoints": 75,
+      "alphaVsTemplate": 60.9
     },
     "risky": {
-      "totalPoints": 70,
-      "alphaVsTemplate": 55.9
+      "totalPoints": 79,
+      "alphaVsTemplate": 64.9
     },
     "value": {
-      "totalPoints": 59,
-      "alphaVsTemplate": 44.9
+      "totalPoints": 72,
+      "alphaVsTemplate": 57.9
     },
     "template": {
       "totalPoints": 14.1
@@ -28,72 +28,72 @@
       "safe": {
         "mode": "SAFE",
         "startingXI": [
-          "Rushworth (COV)",
-          "Guéhi (MCI)",
-          "Thomas (COV)",
-          "Dasilva (COV)",
-          "Rogers (CHE)",
-          "Mbeumo (MUN)",
+          "Sánchez (CHE)",
+          "Aina (NFO)",
+          "N.Williams (NFO)",
+          "De Cuyper (BHA)",
+          "Cherki (MCI)",
+          "Saka (ARS)",
           "Haaland (MCI)",
-          "Thiago (BRE)",
-          "Isak (LIV)",
-          "Szoboszlai (LIV)",
-          "Lewis-Potter (BRE)"
+          "Nketiah (CRY)",
+          "Hinshelwood (BHA)",
+          "Guéhi (MCI)",
+          "Anthony (BRE)"
         ],
         "captain": "Haaland (C)",
-        "projectedGwXp": 92.8,
-        "projected8GwXp": 611.2,
-        "actualPoints": 49,
-        "averageXiEo": 19.1,
-        "alphaVsTemplate": 34.9
+        "projectedGwXp": 96.7,
+        "projected8GwXp": 614.5,
+        "actualPoints": 75,
+        "averageXiEo": 12.7,
+        "alphaVsTemplate": 60.9
       },
       "risky": {
         "mode": "RISKY",
         "startingXI": [
-          "Rushworth (COV)",
-          "Reinildo (SUN)",
+          "Sánchez (CHE)",
+          "Murillo (NFO)",
+          "De Cuyper (BHA)",
           "Guéhi (MCI)",
-          "Thomas (COV)",
-          "Palmer (CHE)",
-          "Szoboszlai (LIV)",
+          "Cherki (MCI)",
+          "Saka (ARS)",
           "Haaland (MCI)",
-          "Isak (LIV)",
-          "Lewis-Potter (BRE)",
-          "Wissa (NEW)",
-          "Hall (NEW)"
+          "Nketiah (CRY)",
+          "Alcaraz (EVE)",
+          "Hinshelwood (BHA)",
+          "Anthony (BRE)"
         ],
-        "captain": "Palmer (C)",
-        "projectedGwXp": 88.4,
-        "projected8GwXp": 606.1,
-        "actualPoints": 70,
-        "averageXiEo": 10,
-        "alphaVsTemplate": 55.9
+        "captain": "Cherki (C)",
+        "projectedGwXp": 95.3,
+        "projected8GwXp": 625.4,
+        "actualPoints": 79,
+        "averageXiEo": 8.2,
+        "alphaVsTemplate": 64.9
       },
       "value": {
         "mode": "VALUE",
         "startingXI": [
-          "Rushworth (COV)",
+          "Sánchez (CHE)",
+          "Aina (NFO)",
+          "De Cuyper (BHA)",
           "Guéhi (MCI)",
-          "Thomas (COV)",
-          "Dasilva (COV)",
-          "Rogers (CHE)",
-          "Szoboszlai (LIV)",
-          "Isak (LIV)",
-          "Lewis-Potter (BRE)",
-          "Wissa (NEW)",
-          "Hall (NEW)",
-          "Nketiah (CRY)"
+          "Cherki (MCI)",
+          "Alcaraz (EVE)",
+          "Nketiah (CRY)",
+          "Merino (ARS)",
+          "Hinshelwood (BHA)",
+          "Anthony (BRE)",
+          "Isak (LIV)"
         ],
-        "captain": "Rogers (C)",
-        "projectedGwXp": 84.3,
-        "projected8GwXp": 584.1,
-        "actualPoints": 59,
+        "captain": "Cherki (C)",
+        "projectedGwXp": 91,
+        "projected8GwXp": 602.3,
+        "actualPoints": 72,
         "averageXiEo": 4.5,
-        "alphaVsTemplate": 44.9
+        "alphaVsTemplate": 57.9
       },
-      "riskySwapCount": 4,
-      "riskyAvgSwapCost": 0.16,
-      "riskyQuality": "WARNING"
+      "riskySwapCount": 2,
+      "riskyAvgSwapCost": -0.68,
+      "riskyQuality": "PASS"
     }
   ]
 }

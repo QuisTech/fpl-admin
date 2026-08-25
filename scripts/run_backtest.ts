@@ -123,10 +123,10 @@ async function runBacktest() {
     const actualPointsMap = await fetchActualPointsForGw(gw);
     const hasLivePoints = Object.keys(actualPointsMap).length > 0;
 
-    // 3. Generate recommendations for SAFE, RISKY (aggressive), and VALUE modes
-    const safeRec = await FPLService.getRecommendations('safe', 1000, 'admin', fuel);
-    const riskyRec = await FPLService.getRecommendations('aggressive', 1000, 'admin', fuel);
-    const valueRec = await FPLService.getRecommendations('value', 1000, 'admin', fuel);
+    // 3. Generate recommendations for SAFE, RISKY (aggressive), and VALUE modes for the historical GW
+    const safeRec = await FPLService.getRecommendations('safe', 1000, 'admin', fuel, 'quant', [], [], gw);
+    const riskyRec = await FPLService.getRecommendations('aggressive', 1000, 'admin', fuel, 'quant', [], [], gw);
+    const valueRec = await FPLService.getRecommendations('value', 1000, 'admin', fuel, 'quant', [], [], gw);
 
     const calculateActualScore = (startingXI: any[], captain: any) => {
       let total = 0;

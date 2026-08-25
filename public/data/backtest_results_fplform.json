@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-25T14:19:05.226Z",
+  "generatedAt": "2026-08-25T14:35:19.195Z",
   "fuel": "fplform",
   "startGw": 1,
   "endGw": 1,
@@ -10,12 +10,12 @@
       "alphaVsTemplate": 36.9
     },
     "risky": {
-      "totalPoints": 74,
-      "alphaVsTemplate": 59.9
+      "totalPoints": 73,
+      "alphaVsTemplate": 58.9
     },
     "value": {
-      "totalPoints": 60,
-      "alphaVsTemplate": 45.9
+      "totalPoints": 59,
+      "alphaVsTemplate": 44.9
     },
     "template": {
       "totalPoints": 14.1
@@ -60,21 +60,21 @@
           "Tavernier (BOU)",
           "Rice (ARS)",
           "Stach (LEE)",
-          "Truffert (BOU)"
+          "Pedro Porro (TOT)"
         ],
         "captain": "Palmer (C)",
         "projectedGwXp": 54,
-        "projected8GwXp": 278.2,
-        "actualPoints": 74,
+        "projected8GwXp": 278.3,
+        "actualPoints": 73,
         "averageXiEo": 5.5,
-        "alphaVsTemplate": 59.9
+        "alphaVsTemplate": 58.9
       },
       "value": {
         "mode": "VALUE",
         "startingXI": [
           "Leno (FUL)",
           "Guéhi (MCI)",
-          "Truffert (BOU)",
+          "Pedro Porro (TOT)",
           "Thiaw (NEW)",
           "Szoboszlai (LIV)",
           "Tavernier (BOU)",
@@ -87,9 +87,9 @@
         "captain": "Szoboszlai (C)",
         "projectedGwXp": 50.1,
         "projected8GwXp": 257.5,
-        "actualPoints": 60,
+        "actualPoints": 59,
         "averageXiEo": 3.6,
-        "alphaVsTemplate": 45.9
+        "alphaVsTemplate": 44.9
       },
       "riskySwapCount": 6,
       "riskyAvgSwapCost": 0.05,

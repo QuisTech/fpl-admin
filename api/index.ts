@@ -248,20 +248,23 @@ export class FPLService {
     fuel: string = 'fplform',
     scenario: 'quant' | 'template' = 'quant',
     lockedPlayerIds: number[] = [],
-    excludedPlayerIds: number[] = []
+    excludedPlayerIds: number[] = [],
+    targetGw?: number
   ): Promise<RecommendationResponse> {
     // For eye-test mode, skip FPL API call and use CSV data only
     let players: any[] = [];
     let teams: any[] = [];
     let fixtures: any[] = [];
-    let nextEventId = 1;
+    let nextEventId = targetGw || 1;
 
     try {
       const baseData = await this.getBaseData();
       players = baseData.players;
       teams = baseData.teams;
       fixtures = baseData.fixtures;
-      nextEventId = baseData.nextEventId;
+      if (!targetGw) {
+        nextEventId = baseData.nextEventId;
+      }
     } catch (err: any) {
       console.error('[FPLService] Failed to fetch FPL API data:', err.message);
       if (!this.cache) {
