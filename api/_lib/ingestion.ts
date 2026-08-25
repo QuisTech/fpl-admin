@@ -177,14 +177,38 @@ export abstract class BaseOracle implements XPOracle {
       let xG90 = Math.min(1.0, (expectedGoalsPer90 * 0.25) + (priorXG * 0.75));
       let xA90 = Math.min(0.7, (expectedAssistsPer90 * 0.25) + (priorXA * 0.75));
 
+      const completedGws = Math.max(1, nextEventId - 1);
+      const rawMinutes = p.minutes || 0;
+      const starts = p.starts || 0;
+      const avgMins = rawMinutes / completedGws;
+      const startRate = starts / completedGws;
+      const isAvail = p.status === 'a' && probPlay > 0.5;
+
+      let dynamicPredictedMins = 0;
+      if (!isAvail) {
+        dynamicPredictedMins = 0;
+      } else if (nextEventId === 1) {
+        // Pre-season before GW1: use price baseline & availability
+        dynamicPredictedMins = (cost >= 45 ? 85 : 0) * probPlay;
+      } else if (startRate >= 0.5 || (completedGws <= 1 && starts >= 1)) {
+        // Regular confirmed starter (started >=50% of matches)
+        dynamicPredictedMins = Math.max(65, Math.min(90, avgMins)) * probPlay;
+      } else if (rawMinutes > 0) {
+        // Impact substitute (played minutes but not a starter)
+        dynamicPredictedMins = Math.max(15, Math.min(35, avgMins)) * probPlay;
+      } else {
+        // Unused bench / reserve (0 minutes played)
+        dynamicPredictedMins = 0;
+      }
+
       this.featuresMatrix[fplId] = {
         id: fplId,
         name: playerName,
         position: pos,
         teamId,
         price: cost / 10,
-        minutesLast4: probPlay * 90 * 4,
-        startsLast4: probPlay * 4,
+        minutesLast4: dynamicPredictedMins * 4,
+        startsLast4: (dynamicPredictedMins >= 60 ? 1 : 0) * 4,
         xGLast4: xG90 * 4,
         xALast4: xA90 * 4,
         shotsLast4: 0,
@@ -198,21 +222,21 @@ export abstract class BaseOracle implements XPOracle {
         keyPasses90: 0,
         fixturesByGw,
         
-        minutesLast1: probPlay * 90,
-        minutesLast3: probPlay * 90 * 3,
-        minutesLast5: probPlay * 90 * 5,
-        minutesEWMA: probPlay * 90,
-        startsLast5: probPlay * 5,
-        seasonMinutesPercent: probPlay,
+        minutesLast1: dynamicPredictedMins,
+        minutesLast3: dynamicPredictedMins * 3,
+        minutesLast5: dynamicPredictedMins * 5,
+        minutesEWMA: dynamicPredictedMins,
+        startsLast5: (dynamicPredictedMins >= 60 ? 1 : 0) * 5,
+        seasonMinutesPercent: dynamicPredictedMins / 90,
         restHours: 168,
         fixturesLast7Days: 1,
         fixturesLast14Days: 2,
         minutesVolatility: 0,
         chanceOfPlayingThisRound: probPlay * 100,
         selectionMomentum: 0,
-        consecutiveStarts: 0,
+        consecutiveStarts: starts,
 
-        predictedMinutes: probPlay * 90,
+        predictedMinutes: dynamicPredictedMins,
         injuryStatus: probPlay < 1.0 ? 'Injured/Doubtful' : null,
         eo: this.top1kData[fplId]?.eo || 0
       };

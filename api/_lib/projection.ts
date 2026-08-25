@@ -145,16 +145,16 @@ export class ProjectionEngine {
       (this.params.betaMinutesTrend || 0) * (player.minutesTrend || 0)
     ));
     
-    // If the ML model didn't provide enough weights to predict > 20 mins, but the player is fit, 
-    // fall back to their basic predicted probability of playing to prevent zeroing out xP.
-    if (expectedMinutes < 20 && player.predictedMinutes > 20) {
-        expectedMinutes = player.predictedMinutes;
+    // Use dynamic predicted minutes from feature store
+    if (player.predictedMinutes !== undefined) {
+      expectedMinutes = player.predictedMinutes;
     }
-    // Save to player so oracle can expose it if needed
+    
+    // Save to player so oracle can expose it
     player.predictedMinutes = expectedMinutes;
     
     // Weight the points model by expected minutes fraction
-    const minuteFraction = expectedMinutes / 90;
+    const minuteFraction = expectedMinutes > 0 ? expectedMinutes / 90 : 0;
     
     fixtures.forEach(fix => {
       const isHome = fix.isHome ? 1 : 0;
