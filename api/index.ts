@@ -150,11 +150,12 @@ export class FPLService {
     
     const next3Fix = (fixtures || [])
       .filter(f => (f.team_h === p.team || f.team_a === p.team) && f.event !== null && f.event >= nextEventId)
-      .slice(0, 3)
+      .slice(0, 10)
       .map(f => {
         const isHome = f.team_h === p.team;
         const oppTeam = teams.find(t => t.id === (isHome ? f.team_a : f.team_h));
         return {
+          event: f.event,
           opponent: oppTeam ? oppTeam.short_name : "TBD",
           difficulty: isHome ? f.team_h_difficulty : f.team_a_difficulty,
           is_home: isHome
@@ -336,7 +337,7 @@ export class FPLService {
       const d = squadList.filter(p => p.position === "DEF").sort(sortByScore);
       const m = squadList.filter(p => p.position === "MID").sort(sortByScore);
       const f = squadList.filter(p => p.position === "FWD").sort(sortByScore);
-      const mand = [g[0], ...d.slice(0, 3), ...m.slice(0, 2), ...f.slice(0, 1)].filter(Boolean) as ScoredPlayer[];
+      const mand = [g[0], ...d.slice(0, 10), ...m.slice(0, 2), ...f.slice(0, 1)].filter(Boolean) as ScoredPlayer[];
       const remaining = [...d.slice(3), ...m.slice(2), ...f.slice(1)].sort(sortByScore);
       return [...mand, ...remaining.slice(0, 4)].filter(Boolean) as ScoredPlayer[];
     };
@@ -354,14 +355,14 @@ export class FPLService {
         const gkps = scored.filter(p => p.position === 'GKP').sort(sortByScore).slice(0, 2);
         const defs = scored.filter(p => p.position === 'DEF').sort(sortByScore).slice(0, 5);
         const mids = scored.filter(p => p.position === 'MID').sort(sortByScore).slice(0, 5);
-        const fwds = scored.filter(p => p.position === 'FWD').sort(sortByScore).slice(0, 3);
+        const fwds = scored.filter(p => p.position === 'FWD').sort(sortByScore).slice(0, 10);
         squad = [...gkps, ...defs, ...mids, ...fwds];
       }
     } else {
       const gkps = scored.filter(p => p.position === 'GKP').sort(sortByScore).slice(0, 2);
       const defs = scored.filter(p => p.position === 'DEF').sort(sortByScore).slice(0, 5);
       const mids = scored.filter(p => p.position === 'MID').sort(sortByScore).slice(0, 5);
-      const fwds = scored.filter(p => p.position === 'FWD').sort(sortByScore).slice(0, 3);
+      const fwds = scored.filter(p => p.position === 'FWD').sort(sortByScore).slice(0, 10);
       squad = [...gkps, ...defs, ...mids, ...fwds];
     }
     
