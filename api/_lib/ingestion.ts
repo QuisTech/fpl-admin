@@ -167,9 +167,15 @@ export abstract class BaseOracle implements XPOracle {
       if (probPlay === null || probPlay === undefined) probPlay = 100;
       probPlay = Math.max(0, Math.min(100, probPlay)) / 100;
 
-      const gamesPlayed = Math.max(3.0, (p.minutes || 0) / 90);
-      let xG90 = Math.min(1.0, (parseFloat(p.expected_goals || "0") / gamesPlayed));
-      let xA90 = Math.min(0.7, (parseFloat(p.expected_assists || "0") / gamesPlayed));
+      const expectedGoalsPer90 = typeof p.expected_goals_per_90 === 'number' ? p.expected_goals_per_90 : parseFloat(p.expected_goals_per_90 || p.expected_goals || "0");
+      const expectedAssistsPer90 = typeof p.expected_assists_per_90 === 'number' ? p.expected_assists_per_90 : parseFloat(p.expected_assists_per_90 || p.expected_assists || "0");
+
+      const priceScale = (cost / 10) / 7.0;
+      const priorXG = (pos === 'FWD' ? 0.35 : pos === 'MID' ? 0.18 : pos === 'DEF' ? 0.04 : 0.0) * priceScale;
+      const priorXA = (pos === 'MID' ? 0.18 : pos === 'FWD' ? 0.12 : pos === 'DEF' ? 0.06 : 0.0) * priceScale;
+
+      let xG90 = Math.min(1.0, (expectedGoalsPer90 * 0.25) + (priorXG * 0.75));
+      let xA90 = Math.min(0.7, (expectedAssistsPer90 * 0.25) + (priorXA * 0.75));
 
       this.featuresMatrix[fplId] = {
         id: fplId,

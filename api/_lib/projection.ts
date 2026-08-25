@@ -164,33 +164,34 @@ export class ProjectionEngine {
       const teamAttack = fix.teamAttackRating || 1.5;
       const teamDefense = fix.teamDefenseRating || 1.5;
       
+      const diffOffset = (fix.difficulty || 3) - 3;
+      
       // Sub-model 1: Attacking Returns
-      let expectedAttack = (this.params.betaAttackBase || 0) 
-        + (this.params.betaXG || 0) * player.xG90
-        + (this.params.betaXA || 0) * player.xA90
-        + (this.params.betaXGI3 || 0) * player.xGI3
-        + (this.params.betaXGI5 || 0) * player.xGI5
-        + (this.params.betaTeamAttack || 0) * teamAttack
-        + (this.params.betaOppDefense || 0) * oppDefense
-        + (this.params.betaAttFixture || 0) * (fix.difficulty || 3)
-        + (this.params.betaAttHome || 0) * isHome;
+      let expectedAttack = (this.params.betaAttackBase || 0.3) 
+        + (this.params.betaXG || 3.0) * player.xG90
+        + (this.params.betaXA || 3.0) * player.xA90
+        + (this.params.betaXGI3 || 0.5) * player.xGI3
+        + (this.params.betaTeamAttack || 0.5) * (teamAttack - 1.5)
+        + (this.params.betaOppDefense || -1.0) * (oppDefense - 1.5)
+        + (this.params.betaAttFixture || -0.4) * diffOffset
+        + (this.params.betaAttHome || 0.2) * isHome;
         
       expectedAttack = Math.max(0, expectedAttack) * minuteFraction;
 
       // Sub-model 2: Clean Sheet Probability
       // Only Defenders and GKs get full CS points (4). Mids get (1). Fwds get 0.
       let csMultiplier = player.position === 'DEF' || player.position === 'GKP' ? 4 : (player.position === 'MID' ? 1 : 0);
-      let expectedCsProb = (this.params.betaCsBase || 0)
-        + (this.params.betaTeamDefense || 0) * teamDefense 
-        + (this.params.betaOppAttack || 0) * oppAttack
-        + (this.params.betaCsFixture || 0) * (fix.difficulty || 3)
-        + (this.params.betaCsHome || 0) * isHome;
+      let expectedCsProb = (this.params.betaCsBase || 0.30)
+        + (this.params.betaTeamDefense || 0.4) * (teamDefense - 1.5)
+        + (this.params.betaOppAttack || -0.4) * (oppAttack - 1.5)
+        + (this.params.betaCsFixture || -0.08) * diffOffset
+        + (this.params.betaCsHome || 0.05) * isHome;
 
-      expectedCsProb = Math.max(0, Math.min(1, expectedCsProb)) * minuteFraction;
+      expectedCsProb = Math.max(0.02, Math.min(0.70, expectedCsProb)) * minuteFraction;
       const expectedCS = expectedCsProb * csMultiplier;
 
       // Sub-model 3: Bonus
-      let expectedBonus = Math.max(0, (this.params.betaBonusBase || 0) + (this.params.betaBpsBaseline || 0) * (expectedAttack + (expectedCS > 0 ? 0.5 : 0)));
+      let expectedBonus = Math.max(0, 0.10 + 0.25 * expectedAttack + (expectedCS > 1.5 ? 0.35 : 0));
 
       // Sub-model 4: Appearance
       // Roughly 2 points if > 60 mins, 1 pt if < 60 mins
