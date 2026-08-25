@@ -109,7 +109,8 @@ export const FixtureList = ({ data }: FixtureListProps) => {
       <div className="mt-4 p-2 bg-slate-950 rounded-xl border border-fpl-border/40 flex items-center justify-between text-[8px] text-slate-400 font-mono">
         <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" /> Easy (2)</span>
         <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block" /> Med (3)</span>
-        <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-rose-400 inline-block" /> Hard (4+)</span>
+        <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-rose-400 inline-block" /> Hard (4)</span>
+        <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-purple-400 inline-block" /> Extreme (5)</span>
       </div>
     </div>
   );
