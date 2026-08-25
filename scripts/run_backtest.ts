@@ -26,11 +26,15 @@ interface BacktestGwSummary {
   riskyQuality: string;
 }
 
-async function fetchActualPointsForGw(gameweek: number): Promise<Record<number, number>> {
+async function fetchActualPointsForGw(gameweek: number, latestFinishedGw: number): Promise<Record<number, number>> {
   const actualPointsMap: Record<number, number> = {};
+  if (gameweek > latestFinishedGw) {
+    return actualPointsMap;
+  }
   try {
     const url = `https://fantasy.premierleague.com/api/event/${gameweek}/live/`;
     const response = await fetch(url, {
+      signal: AbortSignal.timeout(4000),
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
       }
@@ -56,6 +60,7 @@ async function fetchActualPointsForGw(gameweek: number): Promise<Record<number, 
 async function detectLatestFinishedGameweek(): Promise<number> {
   try {
     const res = await fetch('https://fantasy.premierleague.com/api/bootstrap-static/', {
+      signal: AbortSignal.timeout(5000),
       headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
     });
     if (res.ok) {
@@ -83,8 +88,10 @@ async function runBacktest() {
     if (args[i] === '--fuel' && args[i + 1]) fuel = args[i + 1];
   }
 
+  const latestFinishedGw = await detectLatestFinishedGameweek();
+
   if (endGw === null) {
-    endGw = await detectLatestFinishedGameweek();
+    endGw = latestFinishedGw;
   }
 
   console.log(`\n===============================================================`);
@@ -95,8 +102,8 @@ async function runBacktest() {
   const gwSummaries: BacktestGwSummary[] = [];
 
   for (let gw = startGw; gw <= endGw; gw++) {
-    // 1. Ensure snapshot exists
-    if (!SnapshotService.hasSnapshot(gw)) {
+    // 1. Ensure snapshot exists for completed gameweeks
+    if (gw <= latestFinishedGw && !SnapshotService.hasSnapshot(gw)) {
       console.log(`[Backtest] No snapshot found for GW${gw}. Creating point-in-time snapshot...`);
       SnapshotService.saveSnapshot(gw);
     }
@@ -120,13 +127,13 @@ async function runBacktest() {
     }
 
     // 2. Fetch actual live points for GW
-    const actualPointsMap = await fetchActualPointsForGw(gw);
+    const actualPointsMap = await fetchActualPointsForGw(gw, latestFinishedGw);
     const hasLivePoints = Object.keys(actualPointsMap).length > 0;
 
     // 3. Generate recommendations for SAFE, RISKY (aggressive), and VALUE modes for the historical GW
-    const safeRec = await FPLService.getRecommendations('safe', 1000, 'admin', fuel, 'quant', [], [], gw);
-    const riskyRec = await FPLService.getRecommendations('aggressive', 1000, 'admin', fuel, 'quant', [], [], gw);
-    const valueRec = await FPLService.getRecommendations('value', 1000, 'admin', fuel, 'quant', [], [], gw);
+    const safeRec = await FPLService.getRecommendations('safe', 1000, 'free', fuel, 'quant', [], [], gw);
+    const riskyRec = await FPLService.getRecommendations('aggressive', 1000, 'free', fuel, 'quant', [], [], gw);
+    const valueRec = await FPLService.getRecommendations('value', 1000, 'free', fuel, 'quant', [], [], gw);
 
     const calculateActualScore = (startingXI: any[], captain: any) => {
       let total = 0;

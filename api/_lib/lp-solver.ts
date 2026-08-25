@@ -100,30 +100,41 @@ export function solveOptimalSquad(
     }
   });
 
-  // Keep top candidates per position + all cheap fodder + all locked
-  const posLimit: Record<string, number> = { gkp: 25, def: 40, mid: 40, fwd: 30 };
+  // Keep top candidates per position + best value budget enablers + all locked
+  const posLimit: Record<string, number> = { gkp: 15, def: 25, mid: 25, fwd: 20 };
   const filteredCandidates: typeof candidates = [];
 
   (['gkp', 'def', 'mid', 'fwd'] as const).forEach(pos => {
     const posList = candidates.filter(c => c.pos === pos);
-    const sorted = posList.sort((a, b) => (b.score / (b.cost / 10)) - (a.score / (a.cost / 10)));
-    const limit = posLimit[pos] || 35;
-    
+    const sortedByVFM = [...posList].sort((a, b) => (b.score / (b.cost / 10)) - (a.score / (a.cost / 10)));
+    const sortedByScore = [...posList].sort((a, b) => b.score - a.score);
+    const sortedByCost = [...posList].sort((a, b) => a.cost - b.cost);
+
+    const limit = posLimit[pos] || 25;
+    const selectedIds = new Set<number>();
+
+    // Top points scorers
+    sortedByScore.slice(0, limit).forEach(c => selectedIds.add(c.id));
+    // Top value-for-money
+    sortedByVFM.slice(0, limit).forEach(c => selectedIds.add(c.id));
+    // Cheapest budget enablers (top 5 cheapest per position)
+    sortedByCost.slice(0, 5).forEach(c => selectedIds.add(c.id));
+    // Any locked player
+    posList.filter(c => c.isLocked).forEach(c => selectedIds.add(c.id));
+
     posList.forEach(c => {
-      const isTop = sorted.slice(0, limit).some(top => top.id === c.id);
-      const eo = oracle.getTop1kEO?.(c.id) ?? 0;
-      if (isTop || c.cost <= 45 || c.cost >= 85 || c.isLocked || eo >= 15) {
+      if (selectedIds.has(c.id)) {
         filteredCandidates.push(c);
       }
     });
   });
 
-  // Top captain contenders only (capScore >= 4.0 or top 25)
+  // Top captain contenders only (top 8 highest scoring attackers)
   const topCaptainIds = new Set(
     filteredCandidates
-      .filter(c => c.capScore >= 3.5 || c.isLocked)
+      .filter(c => (c.capScore >= 3.5 && (c.pos === 'mid' || c.pos === 'fwd')) || c.isLocked)
       .sort((a, b) => b.capScore - a.capScore)
-      .slice(0, 25)
+      .slice(0, 8)
       .map(c => c.id)
   );
 

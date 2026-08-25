@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-08-25T15:01:25.613Z",
+  "generatedAt": "2026-08-25T15:40:15.931Z",
   "fuel": "native",
   "startGw": 1,
   "endGw": 1,
   "hasLivePoints": true,
   "totals": {
     "safe": {
-      "totalPoints": 82,
-      "alphaVsTemplate": 67.9
+      "totalPoints": 57,
+      "alphaVsTemplate": 42.9
     },
     "risky": {
-      "totalPoints": 56,
-      "alphaVsTemplate": 41.9
+      "totalPoints": 68,
+      "alphaVsTemplate": 53.9
     },
     "value": {
-      "totalPoints": 21,
-      "alphaVsTemplate": 6.9
+      "totalPoints": 57,
+      "alphaVsTemplate": 42.9
     },
     "template": {
       "totalPoints": 14.1
@@ -29,23 +29,23 @@
         "mode": "SAFE",
         "startingXI": [
           "Raya (ARS)",
+          "Gabriel (ARS)",
           "Virgil (LIV)",
           "O'Reilly (MCI)",
-          "Tarkowski (EVE)",
           "B.Fernandes (MUN)",
-          "Mbeumo (MUN)",
-          "João Pedro (CHE)",
-          "Calafiori (ARS)",
-          "Gvardiol (MCI)",
-          "Ødegaard (ARS)",
-          "Dewsbury-Hall (EVE)"
+          "Saka (ARS)",
+          "Haaland (MCI)",
+          "Palmer (CHE)",
+          "Semenyo (MCI)",
+          "Lacroix (CHE)",
+          "Tarkowski (EVE)"
         ],
-        "captain": "Ødegaard (C)",
-        "projectedGwXp": 34.1,
-        "projected8GwXp": 181.1,
-        "actualPoints": 82,
-        "averageXiEo": 50,
-        "alphaVsTemplate": 67.9
+        "captain": "Haaland (C)",
+        "projectedGwXp": 41.1,
+        "projected8GwXp": 211.3,
+        "actualPoints": 57,
+        "averageXiEo": 22.7,
+        "alphaVsTemplate": 42.9
       },
       "risky": {
         "mode": "RISKY",
@@ -53,47 +53,47 @@
           "Raya (ARS)",
           "Gabriel (ARS)",
           "Virgil (LIV)",
-          "Guéhi (MCI)",
+          "O'Reilly (MCI)",
           "B.Fernandes (MUN)",
+          "Saka (ARS)",
+          "Haaland (MCI)",
           "Palmer (CHE)",
-          "David (BHA)",
-          "Matheus N. (MCI)",
-          "Senesi (TOT)",
-          "Mudryk (CHE)",
-          "Hamer (COV)"
+          "Semenyo (MCI)",
+          "Lacroix (CHE)",
+          "Tarkowski (EVE)"
         ],
         "captain": "Palmer (C)",
-        "projectedGwXp": 35.9,
-        "projected8GwXp": 186.2,
-        "actualPoints": 56,
-        "averageXiEo": 8.2,
-        "alphaVsTemplate": 41.9
+        "projectedGwXp": 40.3,
+        "projected8GwXp": 211.3,
+        "actualPoints": 68,
+        "averageXiEo": 22.7,
+        "alphaVsTemplate": 53.9
       },
       "value": {
         "mode": "VALUE",
         "startingXI": [
           "Raya (ARS)",
+          "Gabriel (ARS)",
           "Virgil (LIV)",
           "O'Reilly (MCI)",
-          "Araujo (BOU)",
-          "Barco (BHA)",
-          "Mudryk (CHE)",
-          "Awoniyi (NFO)",
-          "Diomande (RBL)",
-          "Mukiele (BOU)",
-          "Hamer (COV)",
-          "Palacios (BHA)"
+          "B.Fernandes (MUN)",
+          "Saka (ARS)",
+          "Haaland (MCI)",
+          "Palmer (CHE)",
+          "Semenyo (MCI)",
+          "Lacroix (CHE)",
+          "Tarkowski (EVE)"
         ],
-        "captain": "Raya (C)",
-        "projectedGwXp": 31.5,
-        "projected8GwXp": 156.6,
-        "actualPoints": 21,
-        "averageXiEo": 1.8,
-        "alphaVsTemplate": 6.9
+        "captain": "B.Fernandes (C)",
+        "projectedGwXp": 41.1,
+        "projected8GwXp": 211.3,
+        "actualPoints": 57,
+        "averageXiEo": 22.7,
+        "alphaVsTemplate": 42.9
       },
-      "riskySwapCount": 7,
-      "riskyAvgSwapCost": -0.28,
-      "riskyQuality": "PASS"
+      "riskySwapCount": 0,
+      "riskyAvgSwapCost": 0,
+      "riskyQuality": "N/A"
     }
   ]
 }
