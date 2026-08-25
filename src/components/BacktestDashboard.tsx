@@ -48,12 +48,28 @@ interface BacktestData {
   gameweeks: GameweekData[];
 }
 
-export const BacktestDashboard = () => {
-  const [activeTab, setActiveTab] = useState<'fplform' | 'native' | 'eye-test'>('fplform');
+interface BacktestDashboardProps {
+  initialFuel?: string;
+}
+
+export const BacktestDashboard = ({ initialFuel }: BacktestDashboardProps) => {
+  const normalizeFuel = (f?: string): 'fplform' | 'native' | 'eye-test' => {
+    if (f === 'native') return 'native';
+    if (f === 'eyetest' || f === 'eye-test') return 'eye-test';
+    return 'eye-test'; // Default to EYE-TEST
+  };
+
+  const [activeTab, setActiveTab] = useState<'fplform' | 'native' | 'eye-test'>(normalizeFuel(initialFuel));
   const [data, setData] = useState<BacktestData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedGw, setExpandedGw] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (initialFuel) {
+      setActiveTab(normalizeFuel(initialFuel));
+    }
+  }, [initialFuel]);
 
   useEffect(() => {
     setLoading(true);

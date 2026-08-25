@@ -226,7 +226,7 @@ function FPLApp() {
               ) : tab === 'performance' ? (
                 <PerformanceView history={history} fetchLivePoints={fetchLivePoints} />
               ) : tab === 'backtest' ? (
-                <BacktestDashboard />
+                <BacktestDashboard initialFuel={fuel} />
               ) : tab === 'chips' ? (
                 <ChipAdvisor syncedData={syncedData} tier={tier} setTab={setTab} userId={activeUserId} />
               ) : (
