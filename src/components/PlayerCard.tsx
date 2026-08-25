@@ -34,8 +34,8 @@ export const PlayerCard = ({
       isViceCaptain ? "border-fpl-pink" : 
       isExcluded ? "border-rose-500/50 opacity-40" : "border-slate-800",
       compact 
-        ? "w-[54px] h-[72px] sm:w-20 sm:h-28" 
-        : "w-[68px] h-[88px] sm:w-28 sm:h-36"
+        ? "w-[58px] min-h-[82px] sm:w-20 sm:min-h-32" 
+        : "w-[72px] min-h-[96px] sm:w-28 sm:min-h-40"
     )}>
       {isCaptain && (
         <div className="absolute -top-1.5 -right-1.5 sm:-top-2 sm:-right-2 bg-fpl-green text-slate-950 font-black px-1 sm:px-1.5 py-0.25 sm:py-0.5 rounded text-[7px] sm:text-[8px] z-10">
@@ -114,6 +114,27 @@ export const PlayerCard = ({
                 : 'Diff'}
           </span>
         </div>
+
+        {/* Next 3 Fixture Difficulty Pills */}
+        {player.next_fixtures && player.next_fixtures.length > 0 && (
+          <div className="flex items-center justify-center gap-0.5 mt-0.5 sm:mt-1 w-full px-0.5">
+            {player.next_fixtures.slice(0, 3).map((f, idx) => (
+              <span
+                key={idx}
+                title={`${f.opponent} (${f.is_home ? 'Home' : 'Away'}) - FDR ${f.difficulty}`}
+                className={cn(
+                  "text-[6px] sm:text-[7.5px] font-black px-0.5 sm:px-1 py-0.25 rounded font-mono leading-none tracking-tighter truncate flex items-center justify-center",
+                  f.difficulty <= 2 ? "bg-emerald-500/25 text-emerald-300 border border-emerald-500/40" :
+                  f.difficulty === 3 ? "bg-amber-500/25 text-amber-300 border border-amber-500/40" :
+                  f.difficulty === 4 ? "bg-rose-500/25 text-rose-300 border border-rose-500/40" :
+                  "bg-purple-500/25 text-purple-300 border border-purple-500/40"
+                )}
+              >
+                {f.opponent}{f.is_home ? '(H)' : '(A)'}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
       
       {/* Mathematical Engine Proof Tooltip */}

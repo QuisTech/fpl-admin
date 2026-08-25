@@ -148,6 +148,19 @@ export class FPLService {
     const position = posMap[p.element_type] || "MID";
     const team = teams.find(t => t.id === p.team);
     
+    const next3Fix = (fixtures || [])
+      .filter(f => (f.team_h === p.team || f.team_a === p.team) && f.event !== null && f.event >= nextEventId)
+      .slice(0, 3)
+      .map(f => {
+        const isHome = f.team_h === p.team;
+        const oppTeam = teams.find(t => t.id === (isHome ? f.team_a : f.team_h));
+        return {
+          opponent: oppTeam ? oppTeam.short_name : "TBD",
+          difficulty: isHome ? f.team_h_difficulty : f.team_a_difficulty,
+          is_home: isHome
+        };
+      });
+
     return {
       ...p,
       position,
@@ -156,7 +169,7 @@ export class FPLService {
       score: this.calculatePlayerScore(baseXp, p, riskMode, fuel, fixtures, nextEventId),
       xP: baseXp,
       ppm: (p.total_points || 0) / (p.now_cost / 10),
-      next_fixtures: [],
+      next_fixtures: next3Fix,
       isCaptain: false,
       isViceCaptain: false
     };
