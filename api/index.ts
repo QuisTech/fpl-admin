@@ -629,6 +629,18 @@ export class FPLService {
     const squadIds = new Set(squad.map(p => p.id));
     const params = getParamsForRiskMode(riskMode, baseWeights);
 
+    const get8GwXp = (id: number) => {
+      let sum = 0;
+      for (let step = 0; step < 8; step++) {
+        sum += oracle.getXP(id, gameweek + step);
+      }
+      return Math.round(sum * 10) / 10;
+    };
+
+    const squad8GwXpBefore = Math.round(
+      squad.reduce((sum, p) => sum + get8GwXp(p.id), 0) * 10
+    ) / 10;
+
     squad.forEach(outPlayer => {
       const betterOptions = candidates.filter(p => 
         p.position === outPlayer.position && 
@@ -646,11 +658,21 @@ export class FPLService {
         const transferUtilityDelta = (inPlayer.xP - outPlayer.xP) - params.betaVariance * (inVar - outVar) + params.betaEO * (inEO - outEO);
         const xPDelta = inPlayer.xP - outPlayer.xP;
 
+        const horizon8GwXpIn = get8GwXp(inPlayer.id);
+        const horizon8GwXpOut = get8GwXp(outPlayer.id);
+        const horizon8GwDelta = Math.round((horizon8GwXpIn - horizon8GwXpOut) * 10) / 10;
+        const squad8GwXpAfter = Math.round((squad8GwXpBefore + horizon8GwDelta) * 10) / 10;
+
         transfers.push({ 
           out: outPlayer, 
           in: inPlayer, 
           localTransferSignal: transferUtilityDelta, 
-          xPDelta 
+          xPDelta,
+          horizon8GwXpIn,
+          horizon8GwXpOut,
+          horizon8GwDelta,
+          squad8GwXpBefore,
+          squad8GwXpAfter
         });
       }
     });
@@ -796,6 +818,18 @@ export class FPLService {
 
     let transfers: TransferRecommendation[] = [];
     
+    const get8GwXp = (id: number) => {
+      let sum = 0;
+      for (let step = 0; step < 8; step++) {
+        sum += oracle.getXP(id, baseData.nextEventId + step);
+      }
+      return Math.round(sum * 10) / 10;
+    };
+
+    const squad8GwXpBefore = Math.round(
+      myPicks.reduce((sum, p) => sum + get8GwXp(p.id), 0) * 10
+    ) / 10;
+
     // Only Strategy/GrandCru get optimal transfers
     if (tier !== 'free') {
       if (optimalFirstMove === 'TRANSFER' && bestFutures.length > 0 && bestFutures[0].firstTransfersIn && bestFutures[0].firstTransfersOut) {
@@ -817,11 +851,21 @@ export class FPLService {
             const transferUtilityDelta = (inScored.xP - outPlayer.xP) - params.betaVariance * (inVar - outVar) + params.betaEO * (inEO - outEO);
             const xPDelta = inScored.xP - outPlayer.xP;
 
+            const horizon8GwXpIn = get8GwXp(inPlayer.id);
+            const horizon8GwXpOut = get8GwXp(outPlayer.id);
+            const horizon8GwDelta = Math.round((horizon8GwXpIn - horizon8GwXpOut) * 10) / 10;
+            const squad8GwXpAfter = Math.round((squad8GwXpBefore + horizon8GwDelta) * 10) / 10;
+
             transfers.push({
               out: outPlayer,
               in: inScored,
               localTransferSignal: transferUtilityDelta,
-              xPDelta
+              xPDelta,
+              horizon8GwXpIn,
+              horizon8GwXpOut,
+              horizon8GwDelta,
+              squad8GwXpBefore,
+              squad8GwXpAfter
             });
           }
         }

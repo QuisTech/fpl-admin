@@ -180,6 +180,11 @@ export interface TransferRecommendation {
   in: ScoredPlayer;
   localTransferSignal: number;
   xPDelta: number;
+  horizon8GwXpIn?: number;
+  horizon8GwXpOut?: number;
+  horizon8GwDelta?: number;
+  squad8GwXpBefore?: number;
+  squad8GwXpAfter?: number;
 }
 
 export interface ChipAdvice {
