@@ -67,6 +67,7 @@ export const BacktestDashboard = ({ initialFuel }: BacktestDashboardProps) => {
   const [expandedGw, setExpandedGw] = useState<number | null>(null);
 
   // Trigger Backtest Modal State
+  const [isAdmin, setIsAdmin] = useState(false);
   const [showRunModal, setShowRunModal] = useState(false);
   const [runMode, setRunMode] = useState<'auto' | 'custom'>('auto');
   const [startGw, setStartGw] = useState(1);
@@ -74,6 +75,26 @@ export const BacktestDashboard = ({ initialFuel }: BacktestDashboardProps) => {
   const [triggering, setTriggering] = useState(false);
   const [triggerStatus, setTriggerStatus] = useState<string | null>(null);
   const [triggerError, setTriggerError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const user = auth.currentUser;
+      if (!user) {
+        setIsAdmin(false);
+        return;
+      }
+      try {
+        const token = await user.getIdToken();
+        const res = await fetch('/api/admin/check', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setIsAdmin(res.ok);
+      } catch {
+        setIsAdmin(false);
+      }
+    };
+    checkAdmin();
+  }, []);
 
   const handleTriggerBacktest = async () => {
     setTriggering(true);
@@ -238,17 +259,19 @@ export const BacktestDashboard = ({ initialFuel }: BacktestDashboardProps) => {
           </p>
         </div>
         <div className="flex flex-col items-end gap-2">
-          <button
-            onClick={() => {
-              setShowRunModal(true);
-              setTriggerStatus(null);
-              setTriggerError(null);
-            }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-black uppercase tracking-wider transition-all shadow-sm active:scale-95"
-          >
-            <Play className="w-3 h-3 fill-current" />
-            Run Backtest
-          </button>
+          {isAdmin && (
+            <button
+              onClick={() => {
+                setShowRunModal(true);
+                setTriggerStatus(null);
+                setTriggerError(null);
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-black uppercase tracking-wider transition-all shadow-sm active:scale-95"
+            >
+              <Play className="w-3 h-3 fill-current" />
+              Run Backtest
+            </button>
+          )}
           {!data.hasLivePoints && (
             <span className="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20">
               Projected (No Live Data Yet)
