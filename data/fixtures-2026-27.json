@@ -2,7 +2,7 @@
   {
     "code": 2645195,
     "event": 1,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 1,
     "kickoff_time": "2026-08-21T19:00:00Z",
@@ -372,7 +372,7 @@
   {
     "code": 2645198,
     "event": 1,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 4,
     "kickoff_time": "2026-08-22T11:30:00Z",
@@ -746,7 +746,7 @@
   {
     "code": 2645197,
     "event": 1,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 3,
     "kickoff_time": "2026-08-22T14:00:00Z",
@@ -1103,7 +1103,7 @@
   {
     "code": 2645199,
     "event": 1,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 5,
     "kickoff_time": "2026-08-22T14:00:00Z",
@@ -1475,7 +1475,7 @@
   {
     "code": 2645200,
     "event": 1,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 6,
     "kickoff_time": "2026-08-22T14:00:00Z",
@@ -1804,7 +1804,7 @@
   {
     "code": 2645196,
     "event": 1,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 2,
     "kickoff_time": "2026-08-22T16:30:00Z",
@@ -2175,7 +2175,7 @@
   {
     "code": 2645201,
     "event": 1,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 7,
     "kickoff_time": "2026-08-23T13:00:00Z",
@@ -2558,7 +2558,7 @@
   {
     "code": 2645202,
     "event": 1,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 8,
     "kickoff_time": "2026-08-23T13:00:00Z",
@@ -2923,7 +2923,7 @@
   {
     "code": 2645203,
     "event": 1,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 9,
     "kickoff_time": "2026-08-23T15:30:00Z",
@@ -3324,7 +3324,7 @@
   {
     "code": 2645204,
     "event": 1,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 10,
     "kickoff_time": "2026-08-24T19:00:00Z",
