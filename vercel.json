@@ -7,7 +7,7 @@
     },
     {
       "source": "/api/cron/auto-snapshot",
-      "destination": "/api/cron/auto-snapshot"
+      "destination": "/api"
     },
     {
       "source": "/api/admin/(.*)",
