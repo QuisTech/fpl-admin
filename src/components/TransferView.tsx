@@ -229,7 +229,7 @@ export const TransferView = ({ syncedData, tier = 'ai-agent', setTab, userId }: 
               </span>
             </div>
 
-            {/* 8-GW Squad Horizon Summary Banner */}
+            {/* 8-Gameweek Strategy Squad Horizon Summary Banner */}
             {transfers.length > 0 && transfers[0].squad8GwXpBefore !== undefined && (
               <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-fpl-purple/40 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 shadow-md relative overflow-hidden">
                 <div className="flex items-center gap-2.5">
@@ -238,10 +238,10 @@ export const TransferView = ({ syncedData, tier = 'ai-agent', setTab, userId }: 
                   </div>
                   <div className="flex flex-col">
                     <span className="text-[10px] font-black uppercase text-white tracking-wider flex items-center gap-1.5">
-                      8-Gameweek Squad Horizon Lookahead
+                      8-Gameweek Strategy Squad Horizon
                     </span>
                     <span className="text-[9px] text-slate-400 font-medium">
-                      Multi-horizon cumulative projected points for your 15-man squad
+                      Multi-strategy scraped projection & squad lookahead analysis for your 15-man squad
                     </span>
                   </div>
                 </div>
@@ -253,7 +253,7 @@ export const TransferView = ({ syncedData, tier = 'ai-agent', setTab, userId }: 
                   </div>
                   <ArrowRightCircle className="w-3.5 h-3.5 text-fpl-purple shrink-0" />
                   <div className="text-right">
-                    <span className="text-[8px] text-fpl-green font-bold uppercase block">Optimized Squad (8-GW)</span>
+                    <span className="text-[8px] text-fpl-green font-bold uppercase block">Strategy Squad (8-GW)</span>
                     <span className="text-xs font-mono font-black text-fpl-green">{transfers[0].squad8GwXpAfter} pts</span>
                   </div>
                   <div className="bg-fpl-green/10 border border-fpl-green/30 px-2 py-1 rounded-lg text-right shrink-0">
@@ -394,12 +394,12 @@ export const TransferView = ({ syncedData, tier = 'ai-agent', setTab, userId }: 
                           )}
                         </div>
 
-                        {/* 8-GW Horizon Lookahead Impact Row */}
+                        {/* Strategy Horizon Swap Impact Row */}
                         {rec.horizon8GwDelta !== undefined && (
                           <div className="bg-slate-950/70 border border-fpl-border/30 rounded-lg p-1.5 flex flex-wrap items-center justify-between gap-1.5">
                             <div className="flex items-center gap-1 text-slate-400">
                               <Layers className="w-3 h-3 text-fpl-purple shrink-0" />
-                              <span className="font-bold uppercase tracking-wider text-[8px]">8-Gameweek Horizon Impact:</span>
+                              <span className="font-bold uppercase tracking-wider text-[8px]">Strategy 8-GW Impact:</span>
                             </div>
                             <div className="flex items-center gap-2 font-mono">
                               <span className="text-slate-400 text-[8px]">In: <span className="text-slate-200 font-bold">{rec.horizon8GwXpIn} pts</span></span>
