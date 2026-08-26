@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-25T15:40:09.425Z",
+  "generatedAt": "2026-08-26T18:01:02.953Z",
   "fuel": "fplform",
   "startGw": 1,
   "endGw": 1,
@@ -42,7 +42,7 @@
         ],
         "captain": "B.Fernandes (C)",
         "projectedGwXp": 59.2,
-        "projected8GwXp": 301.7,
+        "projected8GwXp": 301.6,
         "actualPoints": 69,
         "averageXiEo": 19.1,
         "alphaVsTemplate": 54.9
@@ -64,7 +64,7 @@
         ],
         "captain": "Palmer (C)",
         "projectedGwXp": 58.1,
-        "projected8GwXp": 301.7,
+        "projected8GwXp": 301.6,
         "actualPoints": 80,
         "averageXiEo": 19.1,
         "alphaVsTemplate": 65.9
@@ -86,7 +86,7 @@
         ],
         "captain": "B.Fernandes (C)",
         "projectedGwXp": 59.2,
-        "projected8GwXp": 301.7,
+        "projected8GwXp": 301.6,
         "actualPoints": 69,
         "averageXiEo": 19.1,
         "alphaVsTemplate": 54.9
