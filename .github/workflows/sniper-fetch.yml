@@ -25,16 +25,19 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+          cache: 'npm'
+
+      - name: Check FPL Deadline (Sniper Window)
+        id: sniper
+        run: node scripts/check-deadline.cjs
           
       - name: Install Dependencies
+        if: steps.sniper.outputs.should_run == 'true'
         run: npm ci
 
       - name: Install Playwright Browsers
+        if: steps.sniper.outputs.should_run == 'true'
         run: npx playwright install chromium
-        
-      - name: Check FPL Deadline (Sniper Window)
-        id: sniper
-        run: npx tsx scripts/check-deadline.ts
         
       # The subsequent steps only run if should_run was set to 'true'
       - name: Fetch FPLForm Data
