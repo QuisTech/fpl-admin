@@ -6,6 +6,10 @@
       "destination": "/api/decision-logs"
     },
     {
+      "source": "/api/auto-snapshot",
+      "destination": "/api/auto-snapshot"
+    },
+    {
       "source": "/api/admin/(.*)",
       "destination": "/api/admin"
     },
@@ -25,6 +29,9 @@
     },
     "api/decision-logs.ts": {
       "maxDuration": 15
+    },
+    "api/auto-snapshot.ts": {
+      "maxDuration": 30
     }
   },
   "crons": [
