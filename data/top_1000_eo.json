@@ -1,479 +1,1287 @@
 {
   "gameweek": 1,
-  "lastUpdated": 1787410674516,
-  "sampleSize": 10,
+  "lastUpdated": 1787772088818,
+  "sampleSize": 1000,
   "leagueId": "321",
   "leagueName": "Top 1% 25/26 League",
   "players": {
     "1": {
       "name": "Raya",
-      "ownership": 10,
-      "started": 10,
-      "eo": 10,
+      "ownership": 31.1,
+      "started": 28.9,
+      "eo": 31.1,
       "captain": 0,
       "tripleCaptain": 0
     },
     "4": {
       "name": "Gabriel",
-      "ownership": 10,
-      "started": 10,
-      "eo": 20,
-      "captain": 10,
+      "ownership": 19.5,
+      "started": 18.5,
+      "eo": 20.7,
+      "captain": 1.2,
       "tripleCaptain": 0
     },
     "8": {
       "name": "Calafiori",
-      "ownership": 80,
-      "started": 80,
-      "eo": 100,
-      "captain": 20,
+      "ownership": 87.3,
+      "started": 83.7,
+      "eo": 87.8,
+      "captain": 0.5,
       "tripleCaptain": 0
     },
     "10": {
       "name": "White",
-      "ownership": 80,
-      "started": 80,
-      "eo": 80,
-      "captain": 0,
+      "ownership": 51.4,
+      "started": 48.3,
+      "eo": 51.5,
+      "captain": 0.1,
       "tripleCaptain": 0
     },
     "11": {
       "name": "Mosquera",
-      "ownership": 10,
-      "started": 10,
-      "eo": 10,
+      "ownership": 7.2,
+      "started": 7,
+      "eo": 7.2,
       "captain": 0,
       "tripleCaptain": 0
     },
     "12": {
       "name": "Saka",
-      "ownership": 20,
-      "started": 20,
-      "eo": 20,
+      "ownership": 0.8,
+      "started": 0.8,
+      "eo": 1.2,
+      "captain": 0.4,
+      "tripleCaptain": 0
+    },
+    "13": {
+      "name": "Rice",
+      "ownership": 0.1,
+      "started": 0.1,
+      "eo": 0.1,
       "captain": 0,
       "tripleCaptain": 0
     },
     "15": {
       "name": "Ødegaard",
-      "ownership": 70,
-      "started": 70,
-      "eo": 120,
-      "captain": 50,
+      "ownership": 17.1,
+      "started": 16.4,
+      "eo": 17.8,
+      "captain": 0.7,
       "tripleCaptain": 0
     },
     "26": {
       "name": "Havertz",
-      "ownership": 10,
-      "started": 10,
-      "eo": 10,
+      "ownership": 2.2,
+      "started": 1.9,
+      "eo": 2.6,
+      "captain": 0.4,
+      "tripleCaptain": 0
+    },
+    "31": {
+      "name": "Konsa",
+      "ownership": 0.4,
+      "started": 0,
+      "eo": 0.2,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "32": {
+      "name": "Cash",
+      "ownership": 0.1,
+      "started": 0,
+      "eo": 0,
       "captain": 0,
       "tripleCaptain": 0
     },
     "40": {
       "name": "Rogers",
-      "ownership": 10,
-      "started": 10,
-      "eo": 10,
+      "ownership": 9,
+      "started": 8.3,
+      "eo": 9,
       "captain": 0,
       "tripleCaptain": 0
     },
-    "70": {
-      "name": "Kluivert",
-      "ownership": 10,
-      "started": 10,
-      "eo": 10,
+    "41": {
+      "name": "Buendía",
+      "ownership": 0.1,
+      "started": 0.1,
+      "eo": 0.1,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "45": {
+      "name": "McGinn",
+      "ownership": 0.1,
+      "started": 0,
+      "eo": 0.1,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "51": {
+      "name": "George Hemmings",
+      "ownership": 0.3,
+      "started": 0,
+      "eo": 0.3,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "57": {
+      "name": "Petrović",
+      "ownership": 0.2,
+      "started": 0,
+      "eo": 0.2,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "59": {
+      "name": "Dennis",
+      "ownership": 0.1,
+      "started": 0,
+      "eo": 0,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "67": {
+      "name": "Rayan",
+      "ownership": 0.3,
+      "started": 0.1,
+      "eo": 0.2,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "68": {
+      "name": "Tavernier",
+      "ownership": 0.1,
+      "started": 0.1,
+      "eo": 0.1,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "79": {
+      "name": "Evanilson",
+      "ownership": 0.1,
+      "started": 0,
+      "eo": 0,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "82": {
+      "name": "Kelleher",
+      "ownership": 1.8,
+      "started": 1,
+      "eo": 1.8,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "84": {
+      "name": "Collins",
+      "ownership": 0.1,
+      "started": 0.1,
+      "eo": 0.1,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "86": {
+      "name": "Lewis-Potter",
+      "ownership": 0.1,
+      "started": 0,
+      "eo": 0.1,
       "captain": 0,
       "tripleCaptain": 0
     },
     "87": {
       "name": "Ajer",
-      "ownership": 10,
-      "started": 0,
-      "eo": 0,
+      "ownership": 25.6,
+      "started": 7.8,
+      "eo": 25.6,
       "captain": 0,
       "tripleCaptain": 0
     },
     "88": {
       "name": "Kayode",
-      "ownership": 10,
-      "started": 10,
-      "eo": 10,
+      "ownership": 5,
+      "started": 2.4,
+      "eo": 5,
       "captain": 0,
       "tripleCaptain": 0
     },
     "94": {
       "name": "Schade",
-      "ownership": 10,
-      "started": 10,
-      "eo": 10,
+      "ownership": 7.5,
+      "started": 5.7,
+      "eo": 7.5,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "95": {
+      "name": "O.Dango",
+      "ownership": 0.6,
+      "started": 0.4,
+      "eo": 0.6,
       "captain": 0,
       "tripleCaptain": 0
     },
     "106": {
       "name": "Thiago",
-      "ownership": 20,
-      "started": 20,
-      "eo": 20,
-      "captain": 0,
+      "ownership": 11.9,
+      "started": 10.6,
+      "eo": 12,
+      "captain": 0.1,
       "tripleCaptain": 0
     },
     "109": {
       "name": "Verbruggen",
-      "ownership": 60,
-      "started": 20,
-      "eo": 50,
+      "ownership": 80.1,
+      "started": 29.3,
+      "eo": 79.9,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "110": {
+      "name": "Rushworth",
+      "ownership": 0.2,
+      "started": 0,
+      "eo": 0.1,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "112": {
+      "name": "Van Hecke",
+      "ownership": 3.5,
+      "started": 2.4,
+      "eo": 3.5,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "113": {
+      "name": "F.Kadıoğlu",
+      "ownership": 0.3,
+      "started": 0,
+      "eo": 0.3,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "115": {
+      "name": "De Cuyper",
+      "ownership": 45.6,
+      "started": 14.6,
+      "eo": 45.6,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "116": {
+      "name": "Dunk",
+      "ownership": 0.1,
+      "started": 0,
+      "eo": 0.1,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "123": {
+      "name": "Hinshelwood",
+      "ownership": 12.2,
+      "started": 7.8,
+      "eo": 12.2,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "124": {
+      "name": "Groß",
+      "ownership": 11.3,
+      "started": 7.7,
+      "eo": 11.2,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "125": {
+      "name": "Georginio",
+      "ownership": 1,
+      "started": 0.5,
+      "eo": 1,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "127": {
+      "name": "Gomez",
+      "ownership": 10.5,
+      "started": 2.7,
+      "eo": 10.5,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "129": {
+      "name": "Ayari",
+      "ownership": 0.1,
+      "started": 0.1,
+      "eo": 0.1,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "140": {
+      "name": "Sánchez",
+      "ownership": 0.6,
+      "started": 0.3,
+      "eo": 0.6,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "142": {
+      "name": "James",
+      "ownership": 0.2,
+      "started": 0.1,
+      "eo": 0.1,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "149": {
+      "name": "Colwill",
+      "ownership": 0.5,
+      "started": 0.3,
+      "eo": 0.5,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "152": {
+      "name": "Palestra",
+      "ownership": 2.3,
+      "started": 0,
+      "eo": 2.3,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "154": {
+      "name": "Palmer",
+      "ownership": 33.3,
+      "started": 31.2,
+      "eo": 34.8,
+      "captain": 1.5,
+      "tripleCaptain": 0
+    },
+    "159": {
+      "name": "Caicedo",
+      "ownership": 0.4,
+      "started": 0,
+      "eo": 0.4,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "162": {
+      "name": "Andrey Santos",
+      "ownership": 0.2,
+      "started": 0.1,
+      "eo": 0.1,
       "captain": 0,
       "tripleCaptain": 0
     },
     "165": {
       "name": "João Pedro",
-      "ownership": 70,
-      "started": 60,
-      "eo": 70,
+      "ownership": 99.3,
+      "started": 94.2,
+      "eo": 104.8,
+      "captain": 5.5,
+      "tripleCaptain": 0
+    },
+    "173": {
+      "name": "Thomas",
+      "ownership": 0.9,
+      "started": 0,
+      "eo": 0.7,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "175": {
+      "name": "van Ewijk",
+      "ownership": 0.5,
+      "started": 0,
+      "eo": 0.4,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "195": {
+      "name": "Simms",
+      "ownership": 0.1,
+      "started": 0,
+      "eo": 0,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "200": {
+      "name": "Lacroix",
+      "ownership": 0.8,
+      "started": 0.6,
+      "eo": 0.8,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "201": {
+      "name": "Muñoz",
+      "ownership": 0.1,
+      "started": 0,
+      "eo": 0,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "202": {
+      "name": "Richards",
+      "ownership": 0.1,
+      "started": 0.1,
+      "eo": 0.1,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "203": {
+      "name": "Canvot",
+      "ownership": 0.5,
+      "started": 0.1,
+      "eo": 0.5,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "204": {
+      "name": "Mitchell",
+      "ownership": 0.4,
+      "started": 0.1,
+      "eo": 0.4,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "208": {
+      "name": "Sarr",
+      "ownership": 0.6,
+      "started": 0,
+      "eo": 0.5,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "226": {
+      "name": "Pickford",
+      "ownership": 2,
+      "started": 1.3,
+      "eo": 2,
       "captain": 0,
       "tripleCaptain": 0
     },
     "229": {
       "name": "Tarkowski",
-      "ownership": 20,
-      "started": 20,
-      "eo": 20,
+      "ownership": 6.5,
+      "started": 4.9,
+      "eo": 6.5,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "230": {
+      "name": "Branthwaite",
+      "ownership": 0.5,
+      "started": 0.4,
+      "eo": 0.5,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "231": {
+      "name": "Keane",
+      "ownership": 0.1,
+      "started": 0,
+      "eo": 0.1,
       "captain": 0,
       "tripleCaptain": 0
     },
     "233": {
       "name": "Mykolenko",
-      "ownership": 10,
-      "started": 0,
-      "eo": 10,
+      "ownership": 1.4,
+      "started": 0.5,
+      "eo": 1.4,
       "captain": 0,
       "tripleCaptain": 0
     },
     "236": {
       "name": "Dewsbury-Hall",
-      "ownership": 60,
-      "started": 40,
-      "eo": 60,
+      "ownership": 3.3,
+      "started": 2.7,
+      "eo": 3.3,
       "captain": 0,
       "tripleCaptain": 0
     },
     "237": {
       "name": "Ndiaye",
-      "ownership": 20,
-      "started": 20,
-      "eo": 20,
+      "ownership": 51.7,
+      "started": 41.3,
+      "eo": 51.6,
       "captain": 0,
       "tripleCaptain": 0
     },
-    "254": {
-      "name": "Robinson",
-      "ownership": 10,
+    "246": {
+      "name": "Röhl",
+      "ownership": 0.1,
       "started": 0,
-      "eo": 0,
+      "eo": 0.1,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "249": {
+      "name": "Barry",
+      "ownership": 3.4,
+      "started": 0.8,
+      "eo": 3.4,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "250": {
+      "name": "Leno",
+      "ownership": 0.5,
+      "started": 0,
+      "eo": 0.4,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "258": {
+      "name": "Castagne",
+      "ownership": 0.1,
+      "started": 0,
+      "eo": 0.1,
       "captain": 0,
       "tripleCaptain": 0
     },
     "259": {
       "name": "Diop",
-      "ownership": 10,
-      "started": 0,
-      "eo": 0,
+      "ownership": 14.4,
+      "started": 2.1,
+      "eo": 14.3,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "260": {
+      "name": "Wilson",
+      "ownership": 0.5,
+      "started": 0.5,
+      "eo": 0.5,
       "captain": 0,
       "tripleCaptain": 0
     },
     "272": {
       "name": "Kusi-Asare",
-      "ownership": 10,
+      "ownership": 0.1,
       "started": 0,
       "eo": 0,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "277": {
+      "name": "Egan",
+      "ownership": 0.3,
+      "started": 0,
+      "eo": 0.3,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "290": {
+      "name": "Slater",
+      "ownership": 0.6,
+      "started": 0.2,
+      "eo": 0.6,
       "captain": 0,
       "tripleCaptain": 0
     },
     "295": {
       "name": "McBurnie",
-      "ownership": 10,
+      "ownership": 0.6,
+      "started": 0.1,
+      "eo": 0.6,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "301": {
+      "name": "Palmer",
+      "ownership": 0.1,
       "started": 0,
-      "eo": 10,
+      "eo": 0.1,
       "captain": 0,
       "tripleCaptain": 0
     },
     "304": {
       "name": "O'Shea",
-      "ownership": 10,
-      "started": 0,
-      "eo": 10,
+      "ownership": 11.3,
+      "started": 0.8,
+      "eo": 11.2,
       "captain": 0,
       "tripleCaptain": 0
     },
     "305": {
       "name": "Davis",
-      "ownership": 30,
-      "started": 20,
-      "eo": 30,
+      "ownership": 15.4,
+      "started": 2.3,
+      "eo": 15.2,
       "captain": 0,
       "tripleCaptain": 0
     },
-    "326": {
-      "name": "Perri",
-      "ownership": 10,
+    "306": {
+      "name": "Greaves",
+      "ownership": 0.2,
+      "started": 0,
+      "eo": 0.2,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "316": {
+      "name": "Emersonn",
+      "ownership": 0.1,
+      "started": 0.1,
+      "eo": 0.1,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "321": {
+      "name": "Walle Egeli",
+      "ownership": 1,
+      "started": 0.1,
+      "eo": 1,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "327": {
+      "name": "Bijol",
+      "ownership": 0.1,
+      "started": 0,
+      "eo": 0.1,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "328": {
+      "name": "Struijk",
+      "ownership": 0.1,
       "started": 0,
       "eo": 0,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "329": {
+      "name": "Rodon",
+      "ownership": 13.7,
+      "started": 3.9,
+      "eo": 13.6,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "330": {
+      "name": "Bogle",
+      "ownership": 0.2,
+      "started": 0.1,
+      "eo": 0.2,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "332": {
+      "name": "Justin",
+      "ownership": 1,
+      "started": 0.4,
+      "eo": 1,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "334": {
+      "name": "Muharemović",
+      "ownership": 21.7,
+      "started": 10.7,
+      "eo": 21.6,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "335": {
+      "name": "Stach",
+      "ownership": 1.9,
+      "started": 1.5,
+      "eo": 1.9,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "338": {
+      "name": "Ampadu",
+      "ownership": 0.5,
+      "started": 0.2,
+      "eo": 0.5,
       "captain": 0,
       "tripleCaptain": 0
     },
     "346": {
       "name": "Calvert-Lewin",
-      "ownership": 10,
-      "started": 0,
-      "eo": 10,
+      "ownership": 68.8,
+      "started": 44.8,
+      "eo": 68.5,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "356": {
+      "name": "Virgil",
+      "ownership": 3.4,
+      "started": 2.8,
+      "eo": 3.4,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "357": {
+      "name": "Frimpong",
+      "ownership": 0.2,
+      "started": 0.1,
+      "eo": 0.2,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "358": {
+      "name": "Kerkez",
+      "ownership": 0.5,
+      "started": 0.5,
+      "eo": 0.5,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "362": {
+      "name": "Jacquet",
+      "ownership": 0.6,
+      "started": 0.4,
+      "eo": 0.5,
       "captain": 0,
       "tripleCaptain": 0
     },
     "366": {
       "name": "Wirtz",
-      "ownership": 30,
-      "started": 30,
-      "eo": 30,
-      "captain": 0,
+      "ownership": 7.7,
+      "started": 7.2,
+      "eo": 7.8,
+      "captain": 0.1,
       "tripleCaptain": 0
     },
     "367": {
       "name": "Gakpo",
-      "ownership": 10,
-      "started": 10,
-      "eo": 10,
+      "ownership": 4.3,
+      "started": 3.9,
+      "eo": 4.3,
       "captain": 0,
       "tripleCaptain": 0
     },
     "368": {
       "name": "Szoboszlai",
-      "ownership": 10,
-      "started": 10,
-      "eo": 10,
+      "ownership": 54.2,
+      "started": 50.5,
+      "eo": 54.2,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "369": {
+      "name": "Ngumoha",
+      "ownership": 0.2,
+      "started": 0.2,
+      "eo": 0.2,
       "captain": 0,
       "tripleCaptain": 0
     },
     "379": {
       "name": "Isak",
-      "ownership": 30,
-      "started": 20,
-      "eo": 30,
+      "ownership": 29.6,
+      "started": 27.5,
+      "eo": 29.9,
+      "captain": 0.3,
+      "tripleCaptain": 0
+    },
+    "384": {
+      "name": "Donnarumma",
+      "ownership": 0.4,
+      "started": 0.1,
+      "eo": 0.4,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "385": {
+      "name": "Trafford",
+      "ownership": 1.5,
+      "started": 1.3,
+      "eo": 1.5,
       "captain": 0,
       "tripleCaptain": 0
     },
     "387": {
       "name": "O'Reilly",
-      "ownership": 10,
-      "started": 0,
-      "eo": 10,
+      "ownership": 6.1,
+      "started": 5.2,
+      "eo": 6.1,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "388": {
+      "name": "Guéhi",
+      "ownership": 0.9,
+      "started": 0.6,
+      "eo": 0.9,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "390": {
+      "name": "Rúben",
+      "ownership": 0.2,
+      "started": 0.1,
+      "eo": 0.2,
       "captain": 0,
       "tripleCaptain": 0
     },
     "391": {
       "name": "Gvardiol",
-      "ownership": 30,
-      "started": 20,
-      "eo": 30,
+      "ownership": 15.6,
+      "started": 12.9,
+      "eo": 15.5,
       "captain": 0,
       "tripleCaptain": 0
     },
     "397": {
       "name": "Semenyo",
-      "ownership": 40,
-      "started": 40,
-      "eo": 40,
-      "captain": 0,
+      "ownership": 14.6,
+      "started": 13.4,
+      "eo": 14.7,
+      "captain": 0.1,
       "tripleCaptain": 0
     },
     "398": {
       "name": "Foden",
-      "ownership": 30,
-      "started": 30,
-      "eo": 30,
+      "ownership": 2.7,
+      "started": 2.6,
+      "eo": 2.7,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "399": {
+      "name": "Cherki",
+      "ownership": 0.1,
+      "started": 0,
+      "eo": 0.1,
       "captain": 0,
       "tripleCaptain": 0
     },
     "411": {
       "name": "Haaland",
-      "ownership": 70,
-      "started": 70,
-      "eo": 70,
-      "captain": 0,
+      "ownership": 60,
+      "started": 60,
+      "eo": 99.9,
+      "captain": 39.9,
       "tripleCaptain": 0
     },
     "412": {
       "name": "Lammens",
-      "ownership": 60,
-      "started": 40,
-      "eo": 60,
+      "ownership": 16.6,
+      "started": 13.6,
+      "eo": 16.6,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "415": {
+      "name": "Dorgu",
+      "ownership": 0.2,
+      "started": 0.2,
+      "eo": 0.2,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "417": {
+      "name": "Dalot",
+      "ownership": 0.4,
+      "started": 0.2,
+      "eo": 0.4,
       "captain": 0,
       "tripleCaptain": 0
     },
     "418": {
       "name": "Maguire",
-      "ownership": 40,
-      "started": 30,
-      "eo": 40,
+      "ownership": 47.4,
+      "started": 41.4,
+      "eo": 47.3,
       "captain": 0,
       "tripleCaptain": 0
     },
-    "423": {
-      "name": "Shaw",
-      "ownership": 20,
-      "started": 0,
-      "eo": 20,
-      "captain": 0,
-      "tripleCaptain": 0
-    },
-    "426": {
-      "name": "B.Fernandes",
-      "ownership": 40,
-      "started": 40,
-      "eo": 60,
-      "captain": 20,
-      "tripleCaptain": 0
-    },
-    "427": {
-      "name": "Mbeumo",
-      "ownership": 70,
-      "started": 60,
-      "eo": 70,
-      "captain": 0,
-      "tripleCaptain": 0
-    },
-    "467": {
-      "name": "Sels",
-      "ownership": 10,
-      "started": 10,
-      "eo": 10,
-      "captain": 0,
-      "tripleCaptain": 0
-    },
-    "469": {
-      "name": "N.Williams",
-      "ownership": 30,
-      "started": 30,
-      "eo": 30,
-      "captain": 0,
-      "tripleCaptain": 0
-    },
-    "473": {
-      "name": "Aina",
-      "ownership": 20,
-      "started": 10,
-      "eo": 20,
-      "captain": 0,
-      "tripleCaptain": 0
-    },
-    "480": {
-      "name": "Gibbs-White",
-      "ownership": 30,
-      "started": 30,
-      "eo": 30,
-      "captain": 0,
-      "tripleCaptain": 0
-    },
-    "491": {
-      "name": "Igor Jesus",
-      "ownership": 30,
-      "started": 10,
-      "eo": 30,
-      "captain": 0,
-      "tripleCaptain": 0
-    },
-    "496": {
-      "name": "Kinsky",
-      "ownership": 30,
-      "started": 10,
-      "eo": 30,
-      "captain": 0,
-      "tripleCaptain": 0
-    },
-    "498": {
-      "name": "Senesi",
-      "ownership": 10,
+    "419": {
+      "name": "Martinez",
+      "ownership": 0.1,
       "started": 0,
       "eo": 0,
       "captain": 0,
       "tripleCaptain": 0
     },
+    "423": {
+      "name": "Shaw",
+      "ownership": 28.6,
+      "started": 23.1,
+      "eo": 28.6,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "426": {
+      "name": "B.Fernandes",
+      "ownership": 77.3,
+      "started": 77,
+      "eo": 124.7,
+      "captain": 47.4,
+      "tripleCaptain": 0
+    },
+    "427": {
+      "name": "Mbeumo",
+      "ownership": 67.9,
+      "started": 65.5,
+      "eo": 69.2,
+      "captain": 1.3,
+      "tripleCaptain": 0
+    },
+    "428": {
+      "name": "Cunha",
+      "ownership": 0.5,
+      "started": 0.5,
+      "eo": 0.5,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "431": {
+      "name": "Amad",
+      "ownership": 0.1,
+      "started": 0,
+      "eo": 0.1,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "449": {
+      "name": "Hall",
+      "ownership": 0.1,
+      "started": 0,
+      "eo": 0.1,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "455": {
+      "name": "Tonali",
+      "ownership": 0.1,
+      "started": 0,
+      "eo": 0.1,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "464": {
+      "name": "Wissa",
+      "ownership": 0.5,
+      "started": 0.3,
+      "eo": 0.5,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "467": {
+      "name": "Sels",
+      "ownership": 0.3,
+      "started": 0.1,
+      "eo": 0.3,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "469": {
+      "name": "N.Williams",
+      "ownership": 14,
+      "started": 8,
+      "eo": 14,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "471": {
+      "name": "Milenković",
+      "ownership": 0.2,
+      "started": 0,
+      "eo": 0.2,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "473": {
+      "name": "Aina",
+      "ownership": 5.2,
+      "started": 2.3,
+      "eo": 5.1,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "480": {
+      "name": "Gibbs-White",
+      "ownership": 2.8,
+      "started": 2.7,
+      "eo": 2.9,
+      "captain": 0.1,
+      "tripleCaptain": 0
+    },
+    "481": {
+      "name": "Anderson",
+      "ownership": 2.1,
+      "started": 1.8,
+      "eo": 2.1,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "483": {
+      "name": "Ndoye",
+      "ownership": 0.6,
+      "started": 0.5,
+      "eo": 0.6,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "488": {
+      "name": "I.Sangaré",
+      "ownership": 0.3,
+      "started": 0,
+      "eo": 0.3,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "491": {
+      "name": "Igor Jesus",
+      "ownership": 2.6,
+      "started": 1.7,
+      "eo": 2.6,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "492": {
+      "name": "Awoniyi",
+      "ownership": 0.1,
+      "started": 0,
+      "eo": 0,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "496": {
+      "name": "Kinsky",
+      "ownership": 56.2,
+      "started": 21.6,
+      "eo": 55.6,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "497": {
+      "name": "Dubravka",
+      "ownership": 0.4,
+      "started": 0,
+      "eo": 0.2,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "498": {
+      "name": "Senesi",
+      "ownership": 0.3,
+      "started": 0.1,
+      "eo": 0.2,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "499": {
+      "name": "Pedro Porro",
+      "ownership": 0.4,
+      "started": 0,
+      "eo": 0.2,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "502": {
+      "name": "Robertson",
+      "ownership": 2.3,
+      "started": 1,
+      "eo": 2.3,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "504": {
+      "name": "Vuskovic",
+      "ownership": 7,
+      "started": 3.1,
+      "eo": 7,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "514": {
+      "name": "Tel",
+      "ownership": 0.3,
+      "started": 0.3,
+      "eo": 0.3,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "515": {
+      "name": "Maddison",
+      "ownership": 0.1,
+      "started": 0.1,
+      "eo": 0.1,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "523": {
+      "name": "Moore",
+      "ownership": 0.1,
+      "started": 0,
+      "eo": 0.1,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "527": {
+      "name": "Richarlison",
+      "ownership": 7,
+      "started": 3.7,
+      "eo": 7,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
     "529": {
       "name": "Roefs",
-      "ownership": 10,
-      "started": 10,
-      "eo": 10,
+      "ownership": 3,
+      "started": 2,
+      "eo": 3,
       "captain": 0,
       "tripleCaptain": 0
     },
     "532": {
       "name": "Ballard",
-      "ownership": 10,
+      "ownership": 11.5,
+      "started": 6.4,
+      "eo": 11.5,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "533": {
+      "name": "Mukiele",
+      "ownership": 0.5,
       "started": 0,
-      "eo": 10,
+      "eo": 0.4,
       "captain": 0,
       "tripleCaptain": 0
     },
     "534": {
       "name": "Hume",
-      "ownership": 20,
-      "started": 10,
-      "eo": 20,
+      "ownership": 14,
+      "started": 4.1,
+      "eo": 13.9,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "536": {
+      "name": "Reinildo",
+      "ownership": 0.1,
+      "started": 0,
+      "eo": 0.1,
       "captain": 0,
       "tripleCaptain": 0
     },
     "539": {
       "name": "O'Nien",
-      "ownership": 10,
-      "started": 0,
-      "eo": 10,
+      "ownership": 0.8,
+      "started": 0.1,
+      "eo": 0.8,
       "captain": 0,
       "tripleCaptain": 0
     },
     "542": {
       "name": "E.Le Fée",
-      "ownership": 10,
-      "started": 10,
-      "eo": 10,
+      "ownership": 8.2,
+      "started": 5.9,
+      "eo": 8.1,
       "captain": 0,
       "tripleCaptain": 0
     },
     "544": {
       "name": "Xhaka",
-      "ownership": 20,
-      "started": 20,
-      "eo": 20,
+      "ownership": 1.1,
+      "started": 0.6,
+      "eo": 1,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "545": {
+      "name": "Sadiki",
+      "ownership": 0.1,
+      "started": 0,
+      "eo": 0.1,
       "captain": 0,
       "tripleCaptain": 0
     },
     "552": {
       "name": "Brobbey",
-      "ownership": 40,
-      "started": 10,
-      "eo": 30,
+      "ownership": 11.2,
+      "started": 7.3,
+      "eo": 11.2,
       "captain": 0,
       "tripleCaptain": 0
     },
     "557": {
       "name": "Tzolis",
-      "ownership": 10,
-      "started": 10,
-      "eo": 10,
+      "ownership": 50.2,
+      "started": 46.3,
+      "eo": 50.6,
+      "captain": 0.4,
+      "tripleCaptain": 0
+    },
+    "558": {
+      "name": "Schlager",
+      "ownership": 0.1,
+      "started": 0.1,
+      "eo": 0.1,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "562": {
+      "name": "Maeda",
+      "ownership": 0.1,
+      "started": 0,
+      "eo": 0.1,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "564": {
+      "name": "Scherpen",
+      "ownership": 4.7,
+      "started": 0.5,
+      "eo": 4.7,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "565": {
+      "name": "M.Sangaré",
+      "ownership": 40.6,
+      "started": 14.4,
+      "eo": 40.6,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "569": {
+      "name": "Gonzalo",
+      "ownership": 0.3,
+      "started": 0.1,
+      "eo": 0.3,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "571": {
+      "name": "Florentino",
+      "ownership": 0.1,
+      "started": 0,
+      "eo": 0.1,
       "captain": 0,
       "tripleCaptain": 0
     },
     "572": {
       "name": "Tzolakis",
-      "ownership": 10,
+      "ownership": 0.2,
       "started": 0,
-      "eo": 10,
+      "eo": 0.2,
       "captain": 0,
       "tripleCaptain": 0
     },
     "586": {
       "name": "Mendy",
-      "ownership": 10,
+      "ownership": 0.2,
       "started": 0,
-      "eo": 10,
+      "eo": 0.2,
+      "captain": 0,
+      "tripleCaptain": 0
+    },
+    "599": {
+      "name": "Cherif",
+      "ownership": 0.1,
+      "started": 0,
+      "eo": 0.1,
       "captain": 0,
       "tripleCaptain": 0
     }
