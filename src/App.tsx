@@ -43,12 +43,14 @@ import { FeatureFlagsPage } from './pages/admin/FeatureFlagsPage';
 import { FPLTrackerPage } from './pages/admin/FPLTrackerPage';
 
 import { SnapshotToast, SnapshotToastData } from './components/SnapshotToast';
+import { SnapshotModal } from './components/SnapshotModal';
 
 function FPLApp() {
   const [riskMode, setRiskMode] = useState<'safe' | 'aggressive' | 'value'>('safe');
   const [fuel, setFuel] = useState<'fplform' | 'native' | 'eye-test'>('fplform');
   const [tab, setTab] = useState<'optimizer' | 'pitch' | 'picks' | 'transfers' | 'chips' | 'performance' | 'backtest' | 'agent'>('optimizer');
   const [snapshotToast, setSnapshotToast] = useState<SnapshotToastData | null>(null);
+  const [isSnapshotModalOpen, setIsSnapshotModalOpen] = useState(false);
 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [profileTab, setProfileTab] = useState<string | null>(null);
@@ -112,7 +114,7 @@ function FPLApp() {
     if (success) setTab('transfers');
   };
 
-  const handleSnapshot = () => {
+  const executeManualSnapshot = () => {
     if (data) {
       const success = takeSnapshot(data.nextEventId, data, riskMode, fuel, activeScenario);
       if (success) {
@@ -130,6 +132,14 @@ function FPLApp() {
           timestamp: Date.now()
         });
       }
+    }
+  };
+
+  const handleSnapshotClick = () => {
+    if (isSuperAdmin) {
+      setIsSnapshotModalOpen(true);
+    } else {
+      executeManualSnapshot();
     }
   };
 
@@ -177,7 +187,7 @@ function FPLApp() {
               </div>
               <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2 w-full md:w-auto">
                 <button 
-                  onClick={handleSnapshot}
+                  onClick={handleSnapshotClick}
                   className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-1.5 bg-slate-900 border border-fpl-border rounded-xl text-xs font-black uppercase text-slate-300 hover:text-white hover:bg-slate-800 transition-colors shadow-sm"
                   title="Save current recommendations to track performance after the gameweek"
                 >
@@ -283,6 +293,11 @@ function FPLApp() {
       <SnapshotToast 
         toast={snapshotToast} 
         onClose={() => setSnapshotToast(null)} 
+      />
+      <SnapshotModal 
+        isOpen={isSnapshotModalOpen}
+        onClose={() => setIsSnapshotModalOpen(false)}
+        onTakeManualSnapshot={executeManualSnapshot}
       />
     </div>
   );

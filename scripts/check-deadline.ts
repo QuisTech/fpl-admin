@@ -5,6 +5,18 @@ const FPL_BASE_URL = 'https://fantasy.premierleague.com/api/bootstrap-static/';
 
 (async () => {
   try {
+    const isForced = process.env.GITHUB_EVENT_NAME === 'workflow_dispatch' ||
+                     process.env.INPUT_FORCE === 'true' || 
+                     process.env.FORCE_RUN === 'true' || 
+                     process.argv.includes('--force');
+
+    if (isForced) {
+      console.log('⚡ [Deadline Sniper] FORCED MANUAL EXECUTION TRIGGERED! Bypassing deadline window restriction.');
+      if (process.env.GITHUB_OUTPUT) {
+        fs.appendFileSync(process.env.GITHUB_OUTPUT, 'should_run=true\n');
+      }
+      process.exit(0);
+    }
     // 1. Fetch bootstrap-static using axios with standard headers to bypass Cloudflare/agent limits
     const response = await axios.get(FPL_BASE_URL, {
       headers: {
