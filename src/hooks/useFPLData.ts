@@ -37,6 +37,7 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
 
   const effectiveSnapshotKey = teamId ? `team_${teamId.trim()}` : userId;
 
+  // Load user tier and profile ONCE on login/auth init
   useEffect(() => {
     if (authInitialized && userId) {
       axios.get(`/api/user?userId=${userId}`)
@@ -55,8 +56,12 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
           }
         })
         .catch(() => {});
+    }
+  }, [userId, authInitialized]);
 
-      // Fetch backend snapshots for cross-device persistence
+  // Fetch backend performance snapshots when effectiveSnapshotKey changes
+  useEffect(() => {
+    if (authInitialized && userId) {
       const keyToFetch = effectiveSnapshotKey || userId;
       axios.get(`/api/snapshots?userId=${keyToFetch}`)
         .then(res => {
