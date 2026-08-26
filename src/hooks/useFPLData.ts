@@ -65,13 +65,9 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
       const keyToFetch = effectiveSnapshotKey || userId;
       axios.get(`/api/snapshots?userId=${keyToFetch}`)
         .then(res => {
-          if (res.data?.history && typeof res.data.history === 'object' && Object.keys(res.data.history).length > 0) {
-            setHistory((prev: any) => {
-              const merged = { ...res.data.history, ...prev };
-              localStorage.setItem('fpl_optimizer_history', JSON.stringify(merged));
-              return merged;
-            });
-          }
+          const fetchedHistory = (res.data?.history && typeof res.data.history === 'object') ? res.data.history : {};
+          setHistory(fetchedHistory);
+          localStorage.setItem('fpl_optimizer_history', JSON.stringify(fetchedHistory));
         })
         .catch(err => console.warn("[Snapshots API] Backend fetch notice:", err));
     }
@@ -197,9 +193,9 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
       // Fetch performance snapshots for the target teamId (allows Super Admin to inspect any team's history)
       axios.get(`/api/snapshots?userId=team_${teamId.trim()}`)
         .then(snapRes => {
-          if (snapRes.data?.history && typeof snapRes.data.history === 'object') {
-            setHistory((prev: any) => ({ ...prev, ...snapRes.data.history }));
-          }
+          const fetchedHistory = (snapRes.data?.history && typeof snapRes.data.history === 'object') ? snapRes.data.history : {};
+          setHistory(fetchedHistory);
+          localStorage.setItem('fpl_optimizer_history', JSON.stringify(fetchedHistory));
         })
         .catch(err => console.warn("[Snapshots API] Fetch notice on sync:", err));
 
