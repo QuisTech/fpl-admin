@@ -11,14 +11,17 @@ export default async function handler(req: Request, res: Response) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  let userId = (req.query.userId as string) || (req.body?.userId as string) || '';
+  let rawUserId = (req.query.userId as string) || (req.body?.userId as string) || '';
+  let userId = rawUserId;
   
-  // Try verifying Firebase auth token if present
-  try {
-    const uid = await verifyAuth(req as any, res as any);
-    if (uid) userId = uid;
-  } catch (e) {
-    // Fall back to query/body userId for guest/anonymous sessions
+  // Only verify auth token if not explicitly requesting a team_ snapshot
+  if (!rawUserId.startsWith('team_')) {
+    try {
+      const uid = await verifyAuth(req as any, res as any);
+      if (uid) userId = uid;
+    } catch (e) {
+      // Fall back to query/body userId for guest/anonymous sessions
+    }
   }
 
   if (!userId) {
@@ -37,13 +40,14 @@ export default async function handler(req: Request, res: Response) {
     }
 
     if (req.method === 'POST') {
-      const { history } = req.body;
+      const { history, season } = req.body;
       if (!history || typeof history !== 'object') {
         return res.status(400).json({ error: "Invalid history payload" });
       }
 
       await db.collection('user_snapshots').doc(userId).set({
         history,
+        season: season || '2026/27',
         updatedAt: new Date()
       }, { merge: true });
 
