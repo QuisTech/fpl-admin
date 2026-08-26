@@ -21,6 +21,11 @@ export async function detectGameweek(): Promise<{ gwId: number; deadlineTime: st
 export async function runAutoSnapshots(overrideGwId?: number) {
   console.log("🚀 [AutoSnapshot] Starting Pre-Deadline Automated Cloud Snapshots...");
 
+  if (!process.env.GOOGLE_CLOUD_PROJECT_ID?.trim()) {
+    console.log("ℹ️ [AutoSnapshot] GOOGLE_CLOUD_PROJECT_ID not found in environment secrets. Skipping Firestore cloud snapshots.");
+    return;
+  }
+
   const db = getFirestore();
   if (!db) {
     console.warn("⚠️ [AutoSnapshot] Could not initialize Firestore. Check GOOGLE_CLOUD_* environment variables.");
