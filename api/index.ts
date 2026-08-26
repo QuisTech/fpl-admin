@@ -1189,6 +1189,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({ tweets });
     }
 
+    if (url.includes('/api/cron/auto-snapshot')) {
+      const cronHandler = (await import('./cron/auto-snapshot.js')).default;
+      return cronHandler(req, res);
+    }
+
     if (url.includes('/api/ping')) {
       return res.status(200).json({ status: "ok", message: "Grand Cru Engine Online" });
     }

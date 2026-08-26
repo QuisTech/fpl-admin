@@ -1,7 +1,7 @@
 import { getFirestore } from "../../lib/firestore.js";
 import type { Request, Response } from "express";
 
-export default async function handler(req: Request, res: Response) {
+export default async function handler(req: any, res: any) {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   // Validate Authorization secret for Vercel Cron or GitHub trigger

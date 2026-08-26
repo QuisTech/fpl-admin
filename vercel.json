@@ -6,6 +6,10 @@
       "destination": "/api/decision-logs"
     },
     {
+      "source": "/api/cron/auto-snapshot",
+      "destination": "/api/cron/auto-snapshot"
+    },
+    {
       "source": "/api/admin/(.*)",
       "destination": "/api/admin"
     },
