@@ -2,10 +2,10 @@ import Groq from "groq-sdk";
 
 // ─── Model Tiers (priority order: best → most available) ───────────────
 const MODEL_TIERS = [
-  "llama-3.3-70b-versatile",
   "openai/gpt-oss-120b",
+  "qwen/qwen3.8-27b",
   "qwen/qwen3.6-27b",
-  "llama-3.1-8b-instant",
+  "groq/compound",
   "openai/gpt-oss-20b",
 ] as const;
 
@@ -79,6 +79,7 @@ async function sleep(ms: number) {
 // ─── Types ─────────────────────────────────────────────────────────────
 export interface LLMCallOptions {
   prompt: string;
+  system?: string;
   temperature?: number;
   jsonMode?: boolean;
 }
@@ -103,6 +104,18 @@ export async function callLLMWithFallback(
   }> = [];
   let totalAttempts = 0;
 
+  const systemContent =
+    options.system ||
+    (options.jsonMode
+      ? "You are a helpful assistant that responds strictly in valid raw JSON format without reasoning tags or markdown code blocks."
+      : undefined);
+
+  const messages: Array<{ role: "system" | "user"; content: string }> = [];
+  if (systemContent) {
+    messages.push({ role: "system", content: systemContent });
+  }
+  messages.push({ role: "user", content: options.prompt });
+
   for (const model of MODEL_TIERS) {
     for (let keyIndex = 0; keyIndex < keys.length; keyIndex++) {
       const groq = new Groq({ apiKey: keys[keyIndex] });
@@ -116,7 +129,7 @@ export async function callLLMWithFallback(
 
           const response = await groq.chat.completions.create({
             model,
-            messages: [{ role: "user", content: options.prompt }],
+            messages,
             temperature: options.temperature ?? 0.3,
             ...(options.jsonMode
               ? { response_format: { type: "json_object" } }

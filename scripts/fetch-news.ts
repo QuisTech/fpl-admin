@@ -171,7 +171,12 @@ async function getFPLPlayers(): Promise<FPLPlayer[]> {
   };
 
   try {
-    const result = await callLLMWithFallback({ prompt, temperature: 0.1, jsonMode: true });
+    const result = await callLLMWithFallback({
+      system: "You are an FPL news extraction assistant. Respond strictly in valid raw JSON format without markdown code blocks, reasoning tags, or conversational text.",
+      prompt,
+      temperature: 0.1,
+      jsonMode: true
+    });
     parsed = safeParseJSON(result.text);
   } catch (e: any) {
     console.warn("[NewsFetcher] LLM processing warning, using default parsed structure:", e.message);
