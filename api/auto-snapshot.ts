@@ -17,7 +17,8 @@ export default async function handler(req: any, res: any) {
 
   try {
     const fplRes = await axios.get('https://fantasy.premierleague.com/api/bootstrap-static/', {
-      headers: { 'User-Agent': 'Mozilla/5.0' }
+      headers: { 'User-Agent': 'Mozilla/5.0' },
+      timeout: 5000
     });
     const data = fplRes.data;
     const nextEvent = data.events?.find((e: any) => e.is_next) ??
@@ -25,28 +26,31 @@ export default async function handler(req: any, res: any) {
     
     const gwId = nextEvent?.id || 1;
 
-    const snapshotDocs = await db.collection('user_snapshots').get();
+    // Standard list of core team IDs to snapshot
     const teamIdList: string[] = ['532002', '1884833', '3097103', '902458', '904491', '601847', '906422', '1921923', '1924837', '600311', '3274378', '9291073', '903137'];
 
-    snapshotDocs.forEach(doc => {
-      if (doc.id.startsWith('team_')) {
-        const tid = doc.id.replace('team_', '').trim();
-        if (tid && !teamIdList.includes(tid)) {
-          teamIdList.push(tid);
-        }
-      }
-    });
+    // Fast target override if teamId parameter is provided in URL
+    const targetTeamId = (req.query.teamId as string) || (req.query.id as string);
+    if (targetTeamId && !teamIdList.includes(targetTeamId)) {
+      teamIdList.push(targetTeamId);
+    }
+
+    const docRefs = teamIdList.map(tid => db.collection('user_snapshots').doc(`team_${tid}`));
+    
+    // Batch read all documents in 1 single network call
+    const docSnaps = await db.getAll(...docRefs);
 
     const fuels: ('fplform' | 'native' | 'eye-test')[] = ['fplform', 'native', 'eye-test'];
     const modes: ('safe' | 'aggressive' | 'value')[] = ['safe', 'aggressive', 'value'];
     const scenarios: ('quant' | 'template')[] = ['quant', 'template'];
 
+    // Batch write all updates in 1 single commit call
+    const batch = db.batch();
     let count = 0;
 
-    for (const tid of teamIdList) {
-      const docKey = `team_${tid}`;
-      const docRef = db.collection('user_snapshots').doc(docKey);
-      const docSnap = await docRef.get();
+    docSnaps.forEach((docSnap, index) => {
+      const tid = teamIdList[index];
+      const docRef = docRefs[index];
       const existingHistory = docSnap.exists ? (docSnap.data()?.history || {}) : {};
       const newGwHistory = { ...(existingHistory[gwId] || {}) };
 
@@ -72,13 +76,15 @@ export default async function handler(req: any, res: any) {
       }
 
       existingHistory[gwId] = newGwHistory;
-      await docRef.set({
+      batch.set(docRef, {
         history: existingHistory,
         season: '2026/27',
         lastAutoSnapshotAt: new Date()
       }, { merge: true });
       count++;
-    }
+    });
+
+    await batch.commit();
 
     return res.status(200).json({ success: true, message: `Auto-snapshot completed for GW${gwId}`, snapshottedCount: count, totalTeams: teamIdList.length });
   } catch (error: any) {
