@@ -960,7 +960,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
-    if (url.includes('/api/cron/auto-snapshot') || url.includes('/cron/auto-snapshot')) {
+    if (url.includes('auto-snapshot')) {
       const cronHandler = (await import('./cron/auto-snapshot.js')).default;
       return cronHandler(req, res);
     }
