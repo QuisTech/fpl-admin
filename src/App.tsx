@@ -42,11 +42,14 @@ import { AnalyticsPage } from './pages/admin/AnalyticsPage';
 import { FeatureFlagsPage } from './pages/admin/FeatureFlagsPage';
 import { FPLTrackerPage } from './pages/admin/FPLTrackerPage';
 
+import { SnapshotToast, SnapshotToastData } from './components/SnapshotToast';
+
 function FPLApp() {
   const [riskMode, setRiskMode] = useState<'safe' | 'aggressive' | 'value'>('safe');
   const [fuel, setFuel] = useState<'fplform' | 'native' | 'eye-test'>('fplform');
   const [tab, setTab] = useState<'optimizer' | 'pitch' | 'picks' | 'transfers' | 'chips' | 'performance' | 'backtest' | 'agent'>('optimizer');
-  
+  const [snapshotToast, setSnapshotToast] = useState<SnapshotToastData | null>(null);
+
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [profileTab, setProfileTab] = useState<string | null>(null);
   const [authUser, setAuthUser] = useState<any>(null);
@@ -115,7 +118,17 @@ function FPLApp() {
       if (success) {
         const scenarioLabel = activeScenario === 'quant' ? 'Quant Optimal' : 'Risky Template Shield';
         const fuelLabel = fuel === 'eye-test' ? 'Eye Test' : fuel === 'native' ? 'Native FPL' : 'FPLForm';
-        alert(`Snapshot saved for GW${data.nextEventId} [${fuelLabel} • ${scenarioLabel} • ${riskMode.toUpperCase()}]`);
+        
+        setSnapshotToast({
+          gwId: data.nextEventId,
+          fuel,
+          scenario: activeScenario,
+          riskMode,
+          fuelLabel,
+          scenarioLabel,
+          riskLabel: riskMode.toUpperCase(),
+          timestamp: Date.now()
+        });
       }
     }
   };
@@ -266,6 +279,10 @@ function FPLApp() {
         isOpen={isAuthModalOpen} 
         onClose={() => setIsAuthModalOpen(false)} 
         anonymousId={activeUserId}
+      />
+      <SnapshotToast 
+        toast={snapshotToast} 
+        onClose={() => setSnapshotToast(null)} 
       />
     </div>
   );
