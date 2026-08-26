@@ -139,10 +139,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         await axios.post(
           'https://api.github.com/repos/QuisTech/fpl-admin/actions/workflows/sniper-fetch.yml/dispatches',
           {
-            ref: 'main',
-            inputs: {
-              force: 'true'
-            }
+            ref: 'main'
           },
           {
             headers: {
