@@ -53,6 +53,19 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
           }
         })
         .catch(() => {});
+
+      // Fetch backend snapshots for cross-device persistence
+      axios.get(`/api/snapshots?userId=${userId}`)
+        .then(res => {
+          if (res.data?.history && typeof res.data.history === 'object' && Object.keys(res.data.history).length > 0) {
+            setHistory((prev: any) => {
+              const merged = { ...res.data.history, ...prev };
+              localStorage.setItem('fpl_optimizer_history', JSON.stringify(merged));
+              return merged;
+            });
+          }
+        })
+        .catch(err => console.warn("[Snapshots API] Backend fetch notice:", err));
     }
   }, [userId, authInitialized]);
 
@@ -97,34 +110,60 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
     }
   };
 
-  const takeSnapshot = (gwId: number, currentModeData: RecommendationResponse, mode: string) => {
+  const takeSnapshot = (
+    gwId: number, 
+    currentModeData: RecommendationResponse, 
+    mode: 'safe' | 'aggressive' | 'value' = 'safe',
+    currentFuel: 'fplform' | 'native' | 'eye-test' = 'fplform',
+    currentScenario: 'quant' | 'template' = 'quant'
+  ) => {
     if (!gwId || !currentModeData) {
       console.warn("[Snapshot] Missing GW ID or Data");
       return false;
     }
     
+    const snapshotKey = `${currentFuel}_${currentScenario}_${mode}`;
+
+    const snapshotItem = {
+      key: snapshotKey,
+      fuel: currentFuel,
+      scenario: currentScenario,
+      riskMode: mode,
+      fuelLabel: currentFuel === 'eye-test' ? 'Eye Test' : currentFuel === 'native' ? 'Native FPL' : 'FPLForm',
+      scenarioLabel: currentScenario === 'quant' ? 'Quant Optimal' : 'Risky Template Shield',
+      riskLabel: mode.toUpperCase(),
+      players: currentModeData.startingXI.map(p => ({
+        id: p.id,
+        web_name: p.web_name,
+        score: p.score,
+        position: p.position
+      })),
+      xP: currentModeData.expectedPoints,
+      captainId: currentModeData.captain?.id,
+      viceCaptainId: currentModeData.viceCaptain?.id,
+      timestamp: Date.now()
+    };
+
     const newHistory = { ...history };
-    const gwHistory = newHistory[gwId] || { safe: null, aggressive: null, value: null };
+    const gwHistory = newHistory[gwId] || {};
     
     newHistory[gwId] = {
       ...gwHistory,
-      [mode]: {
-        players: currentModeData.startingXI.map(p => ({
-          id: p.id,
-          web_name: p.web_name,
-          score: p.score,
-          position: p.position
-        })),
-        xP: currentModeData.expectedPoints,
-        captainId: currentModeData.captain?.id,
-        viceCaptainId: currentModeData.viceCaptain?.id,
-        timestamp: Date.now()
-      }
+      [snapshotKey]: snapshotItem,
+      // Retain legacy key for backward compatibility
+      [mode]: snapshotItem
     };
 
     setHistory(newHistory);
     localStorage.setItem('fpl_optimizer_history', JSON.stringify(newHistory));
-    console.log(`[Snapshot] Saved GW${gwId} [${mode}] with ${newHistory[gwId][mode].players.length} players`);
+
+    // Persist to backend Firestore endpoint for cross-device access
+    if (userId) {
+      axios.post('/api/snapshots', { userId, history: newHistory })
+        .catch(err => console.warn("[Snapshots API] Backend save notice:", err));
+    }
+
+    console.log(`[Snapshot] Saved GW${gwId} [${snapshotKey}] with ${snapshotItem.players.length} players`);
     return true;
   };
 

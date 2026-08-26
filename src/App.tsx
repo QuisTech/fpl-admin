@@ -111,9 +111,11 @@ function FPLApp() {
 
   const handleSnapshot = () => {
     if (data) {
-      const success = takeSnapshot(data.nextEventId, data, riskMode);
+      const success = takeSnapshot(data.nextEventId, data, riskMode, fuel, activeScenario);
       if (success) {
-        alert(`Snapshot taken for GW${data.nextEventId} [${riskMode.toUpperCase()}]`);
+        const scenarioLabel = activeScenario === 'quant' ? 'Quant Optimal' : 'Risky Template Shield';
+        const fuelLabel = fuel === 'eye-test' ? 'Eye Test' : fuel === 'native' ? 'Native FPL' : 'FPLForm';
+        alert(`Snapshot saved for GW${data.nextEventId} [${fuelLabel} • ${scenarioLabel} • ${riskMode.toUpperCase()}]`);
       }
     }
   };

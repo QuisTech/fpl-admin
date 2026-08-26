@@ -37,10 +37,42 @@ export const PerformanceView = ({ history, fetchLivePoints }: PerformanceViewPro
     return total;
   };
 
+  const getSnapshotsForGW = (gwData: Record<string, any>) => {
+    if (!gwData || typeof gwData !== 'object') return [];
+    const list: any[] = [];
+    const seenKeys = new Set<string>();
+
+    Object.keys(gwData).forEach(key => {
+      const item = gwData[key];
+      if (!item || typeof item !== 'object' || !item.players) return;
+
+      const fuel = item.fuel || 'fplform';
+      const scenario = item.scenario || 'quant';
+      const riskMode = item.riskMode || (['safe', 'aggressive', 'value'].includes(key) ? key : 'safe');
+      const uniqueId = item.key || `${fuel}_${scenario}_${riskMode}_${item.timestamp || key}`;
+
+      if (!seenKeys.has(uniqueId)) {
+        seenKeys.add(uniqueId);
+        list.push({
+          ...item,
+          uniqueId,
+          fuel,
+          scenario,
+          riskMode,
+          fuelLabel: item.fuelLabel || (fuel === 'eye-test' ? 'Eye Test' : fuel === 'native' ? 'Native FPL' : 'FPLForm'),
+          scenarioLabel: item.scenarioLabel || (scenario === 'quant' ? 'Quant Optimal' : 'Risky Template Shield'),
+          riskLabel: item.riskLabel || riskMode.toUpperCase()
+        });
+      }
+    });
+
+    return list.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+  };
+
   const [expandedModes, setExpandedModes] = useState<Record<string, boolean>>({});
 
-  const toggleExpand = (gwId: number, mode: string) => {
-    const key = `${gwId}-${mode}`;
+  const toggleExpand = (gwId: number, modeKey: string) => {
+    const key = `${gwId}-${modeKey}`;
     setExpandedModes(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
@@ -74,6 +106,8 @@ export const PerformanceView = ({ history, fetchLivePoints }: PerformanceViewPro
     <div className="space-y-6 overflow-y-auto pr-2 custom-scrollbar">
       {gws.map(gwId => {
         const modes = history[gwId];
+        const snapshotsList = getSnapshotsForGW(modes);
+
         return (
           <div key={gwId} className="bg-slate-950/40 border border-fpl-border rounded-2xl p-5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
@@ -91,32 +125,53 @@ export const PerformanceView = ({ history, fetchLivePoints }: PerformanceViewPro
             </div>
 
             <div className="flex flex-col gap-4">
-              {(['safe', 'aggressive', 'value'] as const).map(mode => {
-                const data = modes[mode];
-                if (!data) return null;
-                
+              {snapshotsList.map(data => {
                 const normalizedXP = data.xP || 0;
                 const actual = calculateActual(gwId, data);
                 const diff = actual - normalizedXP;
                 const hasStarted = actual > 0;
-                const isExpanded = !!expandedModes[`${gwId}-${mode}`];
+                const isExpanded = !!expandedModes[`${gwId}-${data.uniqueId}`];
                 
                 const activeCaptainId = data.captainId && actualScores[gwId]?.[data.captainId]?.minutes === 0 
                   ? data.viceCaptainId 
                   : data.captainId;
 
                 return (
-                  <div key={mode} className="bg-card-bg border border-fpl-border rounded-xl p-4 transition-all">
-                    <div className="flex justify-between items-start mb-3">
-                      <p className={cn(
-                        "text-[9px] font-black uppercase tracking-widest",
-                        mode === 'aggressive' ? "text-orange-400" : 
-                        mode === 'value' ? "text-cyan-400" : 
-                        "text-fpl-green"
-                      )}>{mode}</p>
+                  <div key={data.uniqueId} className="bg-card-bg border border-fpl-border rounded-xl p-4 transition-all">
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {/* Fuel Source Badge */}
+                        <span className={cn(
+                          "text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded border",
+                          data.fuel === 'eye-test' ? "bg-amber-500/10 text-amber-400 border-amber-500/30" :
+                          data.fuel === 'native' ? "bg-blue-500/10 text-blue-400 border-blue-500/30" :
+                          "bg-fpl-purple/20 text-fpl-purple border-fpl-purple/40"
+                        )}>
+                          {data.fuelLabel}
+                        </span>
+
+                        {/* Scenario Strategy Badge */}
+                        <span className={cn(
+                          "text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded border",
+                          data.scenario === 'template' ? "bg-rose-500/10 text-rose-400 border-rose-500/30" :
+                          "bg-fpl-green/10 text-fpl-green border-fpl-green/30"
+                        )}>
+                          {data.scenarioLabel}
+                        </span>
+
+                        {/* Risk Tier Badge */}
+                        <span className={cn(
+                          "text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded",
+                          data.riskMode === 'aggressive' ? "bg-orange-500/20 text-orange-400" : 
+                          data.riskMode === 'value' ? "bg-cyan-500/20 text-cyan-400" : 
+                          "bg-slate-800 text-slate-300"
+                        )}>
+                          {data.riskLabel}
+                        </span>
+                      </div>
                       
                       <button 
-                        onClick={() => toggleExpand(gwId, mode)}
+                        onClick={() => toggleExpand(gwId, data.uniqueId)}
                         className="text-[8px] text-slate-500 hover:text-white uppercase font-bold tracking-tighter"
                       >
                         {isExpanded ? '[ HIDE SQUAD ]' : '[ VIEW SQUAD ]'}
