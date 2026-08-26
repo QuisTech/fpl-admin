@@ -956,7 +956,22 @@ async function handleAutoSnapshot(req: any, res: any) {
     
     const gwId = nextEvent?.id || 1;
 
-    const teamIdList: string[] = ['532002', '1884833', '3097103', '902458', '904491', '601847', '906422', '1921923', '1924837', '600311', '3274378', '9291073', '903137'];
+    const defaultTeamIds: string[] = ['532002', '1884833', '3097103', '902458', '904491', '601847', '906422', '1921923', '1924837', '600311', '3274378', '9291073', '903137'];
+    const teamIdList: string[] = [...defaultTeamIds];
+
+    try {
+      const snapshotDocs = await db.collection('user_snapshots').get();
+      snapshotDocs.forEach(doc => {
+        if (doc.id.startsWith('team_')) {
+          const tid = doc.id.replace('team_', '').trim();
+          if (tid && !teamIdList.includes(tid)) {
+            teamIdList.push(tid);
+          }
+        }
+      });
+    } catch (err: any) {
+      console.warn("[AutoSnapshot] Notice fetching Firestore team documents:", err.message);
+    }
 
     const targetTeamId = (req.query?.teamId as string) || (req.query?.id as string);
     if (targetTeamId && !teamIdList.includes(targetTeamId)) {
