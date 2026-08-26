@@ -233,10 +233,10 @@ export const PerformanceView = ({ history, fetchLivePoints }: PerformanceViewPro
                       <div className="flex flex-wrap items-center gap-1.5">
                         {/* Fuel Source Badge */}
                         <span className={cn(
-                          "text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded border",
+                          "text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border",
                           data.fuel === 'eye-test' ? "bg-amber-500/10 text-amber-400 border-amber-500/30" :
                           data.fuel === 'native' ? "bg-blue-500/10 text-blue-400 border-blue-500/30" :
-                          "bg-purple-600 text-white border-purple-400/50 shadow-sm font-black"
+                          "bg-fpl-purple text-white border-fpl-purple/50 shadow-sm"
                         )}>
                           {data.fuelLabel}
                         </span>

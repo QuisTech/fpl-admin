@@ -79,10 +79,10 @@ export const SnapshotToast: React.FC<SnapshotToastProps> = ({ toast, onClose, du
             <div className="flex flex-wrap items-center gap-1.5 mt-3 pt-2.5 border-t border-slate-800/80">
               {/* Fuel Source Badge */}
               <span className={cn(
-                "text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border flex items-center gap-1",
+                "text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border flex items-center gap-1",
                 toast.fuel === 'eye-test' ? "bg-amber-500/10 text-amber-400 border-amber-500/30" :
                 toast.fuel === 'native' ? "bg-blue-500/10 text-blue-400 border-blue-500/30" :
-                "bg-purple-600 text-white border-purple-400/50 shadow-sm font-black"
+                "bg-fpl-purple text-white border-fpl-purple/50 shadow-sm"
               )}>
                 <Sparkles className="w-2.5 h-2.5" />
                 {toast.fuelLabel}
