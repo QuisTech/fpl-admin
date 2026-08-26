@@ -5,11 +5,13 @@
  * Called automatically by the Sniper GitHub Action ~2 hours before each GW deadline.
  * 
  * Reads the current gameweek from top_1000_eo.json or the FPL API bootstrap,
- * then copies fplform.csv, fpl_native.csv, and top_1000_eo.json into data/snapshots/gw_{X}/
+ * copies fplform.csv, fpl_native.csv, and top_1000_eo.json into data/snapshots/gw_{X}/,
+ * and executes cloud pre-deadline snapshots for registered teams in Firestore.
  */
 import fs from 'fs';
 import path from 'path';
 import { SnapshotService } from '../api/_lib/snapshot-service.ts';
+import { runAutoSnapshots } from './auto-snapshot.ts';
 
 async function detectGameweek(): Promise<number> {
   // Try reading from top_1000_eo.json first
@@ -43,8 +45,15 @@ async function detectGameweek(): Promise<number> {
 const gw = await detectGameweek();
 
 if (SnapshotService.hasSnapshot(gw)) {
-  console.log(`[Snapshot] GW${gw} snapshot already exists. Skipping.`);
+  console.log(`[Snapshot] GW${gw} file snapshot already exists. Skipping file copy.`);
 } else {
   const result = SnapshotService.saveSnapshot(gw);
   console.log(`[Snapshot] ${result.message}`);
+}
+
+// Automatically execute pre-deadline Cloud Firestore snapshots
+try {
+  await runAutoSnapshots(gw);
+} catch (err: any) {
+  console.warn(`[Snapshot] Cloud auto-snapshot notice: ${err.message}`);
 }
