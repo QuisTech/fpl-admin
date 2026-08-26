@@ -935,6 +935,8 @@ export class FPLService {
       chips,
       bank,
       totalCost,
+      entryHistory,
+      managerInfo
     };
   }
 }
