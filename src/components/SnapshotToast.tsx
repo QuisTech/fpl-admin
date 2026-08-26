@@ -82,7 +82,7 @@ export const SnapshotToast: React.FC<SnapshotToastProps> = ({ toast, onClose, du
                 "text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border flex items-center gap-1",
                 toast.fuel === 'eye-test' ? "bg-amber-500/10 text-amber-400 border-amber-500/30" :
                 toast.fuel === 'native' ? "bg-blue-500/10 text-blue-400 border-blue-500/30" :
-                "bg-fpl-purple/20 text-fpl-purple border-fpl-purple/40"
+                "bg-purple-600 text-white border-purple-400/50 shadow-sm font-black"
               )}>
                 <Sparkles className="w-2.5 h-2.5" />
                 {toast.fuelLabel}

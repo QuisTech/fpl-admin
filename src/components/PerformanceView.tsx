@@ -236,7 +236,7 @@ export const PerformanceView = ({ history, fetchLivePoints }: PerformanceViewPro
                           "text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded border",
                           data.fuel === 'eye-test' ? "bg-amber-500/10 text-amber-400 border-amber-500/30" :
                           data.fuel === 'native' ? "bg-blue-500/10 text-blue-400 border-blue-500/30" :
-                          "bg-fpl-purple/20 text-fpl-purple border-fpl-purple/40"
+                          "bg-purple-600 text-white border-purple-400/50 shadow-sm font-black"
                         )}>
                           {data.fuelLabel}
                         </span>

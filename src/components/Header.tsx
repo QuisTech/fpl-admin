@@ -71,8 +71,8 @@ export const Header = ({ data, riskMode, setRiskMode, fuel, setFuel, onOpenAuth,
               <button 
                 onClick={() => setFuel('fplform')}
                 className={cn(
-                  "flex-1 sm:flex-none px-2 sm:px-3 py-1.5 sm:py-0.5 text-[9px] sm:text-[10px] rounded font-bold transition-all text-center",
-                  fuel === 'fplform' ? "bg-fpl-purple text-white" : "text-slate-400 hover:text-slate-200"
+                  "flex-1 sm:flex-none px-2 sm:px-3 py-1.5 sm:py-0.5 text-[9px] sm:text-[10px] rounded font-black transition-all text-center",
+                  fuel === 'fplform' ? "bg-purple-600 text-white shadow-sm shadow-purple-600/30" : "text-slate-400 hover:text-slate-200"
                 )}
               >FPLFORM</button>
               <button 
