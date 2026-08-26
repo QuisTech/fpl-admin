@@ -90,7 +90,7 @@ export const SnapshotModal: React.FC<SnapshotModalProps> = ({
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="text-sm font-black text-white uppercase tracking-wider">Snapshot Control Hub</h3>
-                  <span className="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-fpl-purple/20 text-fpl-purple border border-fpl-purple/30">
+                  <span className="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/40 shadow-sm">
                     Super Admin
                   </span>
                 </div>
