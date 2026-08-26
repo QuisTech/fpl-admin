@@ -83,6 +83,49 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.json({ success: true });
     }
 
+    if (url.includes('/api/admin/run-backtest') && req.method === 'POST') {
+      const { startGw, endGw } = req.body || {};
+      const ghToken = process.env.GH_PAT || process.env.GITHUB_TOKEN;
+
+      if (!ghToken) {
+        return res.status(400).json({
+          error: 'GitHub Token (GH_PAT) is not configured in Vercel Environment Variables. Please set GH_PAT with Actions write permission.'
+        });
+      }
+
+      try {
+        await axios.post(
+          'https://api.github.com/repos/QuisTech/fpl-admin/actions/workflows/backtest-run.yml/dispatches',
+          {
+            ref: 'main',
+            inputs: {
+              start_gw: startGw ? String(startGw) : '1',
+              end_gw: endGw ? String(endGw) : ''
+            }
+          },
+          {
+            headers: {
+              'Authorization': `Bearer ${ghToken.trim()}`,
+              'Accept': 'application/vnd.github+json',
+              'X-GitHub-Api-Version': '2022-11-28',
+              'User-Agent': 'FPL-Admin-App'
+            }
+          }
+        );
+
+        await logAudit(adminId, 'TRIGGER_BACKTEST', adminId, { startGw, endGw });
+        return res.json({
+          success: true,
+          message: `Backtest pipeline triggered on GitHub Actions for GW${startGw || 1} to GW${endGw || 'auto'}.`
+        });
+      } catch (err: any) {
+        console.error('[Admin] Failed to trigger GitHub Action:', err?.response?.data || err.message);
+        return res.status(500).json({
+          error: `Failed to trigger GitHub Action: ${err?.response?.data?.message || err.message}`
+        });
+      }
+    }
+
     if (url.includes('/api/admin/grant-tier-access') && req.method === 'POST') {
       const { userId, tier, beta_expires_at, beta_tier, notes } = req.body;
       if (!userId || !tier) return res.status(400).json({ error: 'Missing userId or tier' });
