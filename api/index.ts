@@ -37,18 +37,16 @@ export class FPLService {
 
   private static getHeaders() {
     return {
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
       "Accept": "application/json, text/plain, */*",
-      "Accept-Language": "en-US,en;q=0.9",
+      "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
       "Accept-Encoding": "gzip, deflate, br",
       "Referer": "https://fantasy.premierleague.com/",
       "Origin": "https://fantasy.premierleague.com",
-      "Sec-Ch-Ua": '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
-      "Sec-Ch-Ua-Mobile": "?0",
-      "Sec-Ch-Ua-Platform": '"Windows"',
+      "Connection": "keep-alive",
       "Sec-Fetch-Dest": "empty",
       "Sec-Fetch-Mode": "cors",
-      "Sec-Fetch-Site": "same-origin"
+      "Sec-Fetch-Site": "same-site"
     };
   }
 
@@ -69,95 +67,6 @@ export class FPLService {
       }
     }
     throw new Error(`Failed to fetch ${url} after ${retries} attempts`);
-  }
-
-  private static buildLocalFallbackBaseData() {
-    console.warn(`[FPL API Fallback] FPL official API unavailable or blocked (403). Utilizing local scraped dataset fallback.`);
-
-    const teams: FPLTeam[] = [
-      { id: 1, name: "Arsenal", short_name: "ARS", strength: 4 },
-      { id: 2, name: "Aston Villa", short_name: "AVL", strength: 3 },
-      { id: 3, name: "Bournemouth", short_name: "BOU", strength: 3 },
-      { id: 4, name: "Brentford", short_name: "BRE", strength: 3 },
-      { id: 5, name: "Brighton", short_name: "BHA", strength: 3 },
-      { id: 6, name: "Burnley", short_name: "BUR", strength: 2 },
-      { id: 7, name: "Chelsea", short_name: "CHE", strength: 4 },
-      { id: 8, name: "Crystal Palace", short_name: "CRY", strength: 3 },
-      { id: 9, name: "Everton", short_name: "EVE", strength: 3 },
-      { id: 10, name: "Fulham", short_name: "FUL", strength: 3 },
-      { id: 11, name: "Leeds", short_name: "LEE", strength: 2 },
-      { id: 12, name: "Liverpool", short_name: "LIV", strength: 5 },
-      { id: 13, name: "Man City", short_name: "MCI", strength: 5 },
-      { id: 14, name: "Man Utd", short_name: "MUN", strength: 4 },
-      { id: 15, name: "Newcastle", short_name: "NEW", strength: 4 },
-      { id: 16, name: "Nottm Forest", short_name: "NFO", strength: 3 },
-      { id: 17, name: "Spurs", short_name: "TOT", strength: 4 },
-      { id: 18, name: "Sunderland", short_name: "SUN", strength: 2 },
-      { id: 19, name: "West Ham", short_name: "WHU", strength: 3 },
-      { id: 20, name: "Wolves", short_name: "WOL", strength: 3 }
-    ];
-
-    const oracle = new CSVOracle('data/fplform_scraped.csv', [], 'safe', [], teams, 1);
-    const playerIds = oracle.getAllPlayerIds();
-
-    const posToType: Record<string, number> = { GKP: 1, DEF: 2, MID: 3, FWD: 4 };
-
-    const players: FPLPlayer[] = playerIds.map(id => {
-      const posStr = oracle.getPosition(id);
-      const teamName = oracle.getTeam(id);
-      const teamObj = teams.find(t => t.short_name.toLowerCase() === teamName.toLowerCase()) || teams[0];
-
-      return {
-        id,
-        web_name: oracle.playerNames[id] || `Player ${id}`,
-        first_name: "",
-        second_name: oracle.playerNames[id] || `Player ${id}`,
-        now_cost: oracle.getCost(id) || 50,
-        element_type: posToType[posStr] || 3,
-        team: teamObj.id,
-        total_points: Math.round(oracle.getXP(id, 1) * 20),
-        form: (oracle.getXP(id, 1)).toFixed(1),
-        points_per_game: (oracle.getXP(id, 1)).toFixed(1),
-        selected_by_percent: (oracle.getTop1kOwnership?.(id) || 5.0).toFixed(1),
-        minutes: 90,
-        goals_scored: 0,
-        assists: 0,
-        clean_sheets: 0,
-        status: "a",
-        news: "",
-        ep_this: (oracle.getXP(id, 1)).toFixed(1),
-        ep_next: (oracle.getXP(id, 1)).toFixed(1),
-        chance_of_playing_this_round: 100,
-        chance_of_playing_next_round: 100,
-        expected_goals: "0.0",
-        expected_assists: "0.0",
-        expected_goal_involvements: "0.0",
-        expected_conceded: "0.0",
-        influence: "0.0",
-        creativity: "0.0",
-        threat: "0.0",
-        ict_index: "0.0"
-      };
-    });
-
-    const fixtures: FPLFixture[] = [];
-    for (let gw = 1; gw <= 38; gw++) {
-      for (let t = 1; t <= 20; t += 2) {
-        fixtures.push({
-          id: gw * 100 + t,
-          team_h: t,
-          team_a: t + 1,
-          team_h_difficulty: 3,
-          team_a_difficulty: 3,
-          event: gw,
-          finished: gw < 1
-        });
-      }
-    }
-
-    const result = { players, teams, fixtures, nextEventId: 1, currentEventId: 1 };
-    this.cache = { data: result, timestamp: Date.now() };
-    return result;
   }
 
   static async getBaseData() {
@@ -202,8 +111,15 @@ export class FPLService {
         return this.cache.data;
       }
       
-      // Return local scraped dataset fallback so app never crashes
-      return this.buildLocalFallbackBaseData();
+      // If no cache at all, return minimal data structure to allow eye-test mode to work
+      console.warn('[FPLService] No cache available, returning minimal data for eye-test mode');
+      return {
+        players: [],
+        teams: [],
+        fixtures: [],
+        nextEventId: 1,
+        currentEventId: 1
+      };
     }
   }
 
