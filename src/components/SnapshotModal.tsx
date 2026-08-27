@@ -154,10 +154,10 @@ export const SnapshotModal: React.FC<SnapshotModalProps> = ({
                 <div>
                   <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-white">
                     <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                    Immediate Manual Snapshot (Active Pitch State)
+                    Full Matrix Manual Snapshot (All 18 Strategy Combinations)
                   </div>
                   <p className="text-[10px] text-slate-400 mt-1 leading-relaxed">
-                    Instantly saves your current browser pitch view, active risk mode, scenario, and fuel selections directly to your Firestore profile.
+                    Instantly evaluates and captures all 18 strategy matrix combinations (3 Fuels × 2 Scenarios × 3 Risk Modes) at once for your active squad into your Firestore profile.
                   </p>
                 </div>
               </label>

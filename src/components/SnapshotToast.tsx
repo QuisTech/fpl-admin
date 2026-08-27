@@ -56,7 +56,7 @@ export const SnapshotToast: React.FC<SnapshotToastProps> = ({ toast, onClose, du
                     </span>
                   </div>
                   <span className="text-[10px] text-slate-400 font-medium">
-                    Synced to cloud cross-device backend
+                    Synced all 18 strategy matrix combinations to cloud
                   </span>
                 </div>
               </div>

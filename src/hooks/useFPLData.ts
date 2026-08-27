@@ -114,22 +114,34 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
     }
   };
 
-  const takeSnapshot = (
+  const takeSnapshot = async (
     gwId: number, 
     currentModeData: RecommendationResponse, 
     mode: 'safe' | 'aggressive' | 'value' = 'safe',
     currentFuel: 'fplform' | 'native' | 'eye-test' = 'fplform',
     currentScenario: 'quant' | 'template' = 'quant'
-  ) => {
+  ): Promise<boolean> => {
     if (!gwId || !currentModeData) {
       console.warn("[Snapshot] Missing GW ID or Data");
       return false;
     }
     
-    const snapshotKey = `${currentFuel}_${currentScenario}_${mode}`;
+    const fuels: ('fplform' | 'native' | 'eye-test')[] = ['fplform', 'native', 'eye-test'];
+    const scenarios: ('quant' | 'template')[] = ['quant', 'template'];
+    const modes: ('safe' | 'aggressive' | 'value')[] = ['safe', 'aggressive', 'value'];
 
-    const snapshotItem = {
-      key: snapshotKey,
+    const budgetQuery = syncedData ? `&budget=${(syncedData.totalCost || 0) + (syncedData.bank || 0)}` : '';
+    const lockedQuery = lockedPlayerIds.length > 0 ? `&locked=${lockedPlayerIds.join(',')}` : '';
+    const excludedQuery = excludedPlayerIds.length > 0 ? `&excluded=${excludedPlayerIds.join(',')}` : '';
+
+    const newHistory = { ...history };
+    const gwHistory = { ...(newHistory[gwId] || {}) };
+    const now = Date.now();
+
+    // 1. Immediately record current active view snapshot
+    const activeSnapshotKey = `${currentFuel}_${currentScenario}_${mode}`;
+    const activeSnapshotItem = {
+      key: activeSnapshotKey,
       fuel: currentFuel,
       scenario: currentScenario,
       riskMode: mode,
@@ -145,18 +157,59 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
       xP: currentModeData.expectedPoints,
       captainId: currentModeData.captain?.id,
       viceCaptainId: currentModeData.viceCaptain?.id,
-      timestamp: Date.now()
+      timestamp: now
     };
 
-    const newHistory = { ...history };
-    const gwHistory = newHistory[gwId] || {};
-    
-    newHistory[gwId] = {
-      ...gwHistory,
-      [snapshotKey]: snapshotItem,
-      // Retain legacy key for backward compatibility
-      [mode]: snapshotItem
-    };
+    gwHistory[activeSnapshotKey] = activeSnapshotItem;
+    gwHistory[mode] = activeSnapshotItem;
+
+    // 2. Fetch & record all 18 combinations in parallel to capture full matrix
+    const promises: Promise<any>[] = [];
+    for (const f of fuels) {
+      for (const s of scenarios) {
+        for (const m of modes) {
+          if (f === currentFuel && s === currentScenario && m === mode) continue;
+          promises.push(
+            axios.get(`/api/recommendations?riskMode=${m}&fuel=${f}&scenario=${s}${budgetQuery}${lockedQuery}${excludedQuery}&userId=${userId}&tier=${tier}`)
+              .then(res => ({ fuel: f, scenario: s, riskMode: m, data: res.data }))
+              .catch(err => {
+                console.warn(`[Snapshot] Notice generating ${f}_${s}_${m}:`, err.message);
+                return null;
+              })
+          );
+        }
+      }
+    }
+
+    const results = await Promise.all(promises);
+
+    results.forEach(res => {
+      if (res && res.data && res.data.startingXI) {
+        const key = `${res.fuel}_${res.scenario}_${res.riskMode}`;
+        const item = {
+          key,
+          fuel: res.fuel,
+          scenario: res.scenario,
+          riskMode: res.riskMode,
+          fuelLabel: res.fuel === 'eye-test' ? 'Eye Test' : res.fuel === 'native' ? 'Native FPL' : 'FPLForm',
+          scenarioLabel: res.scenario === 'quant' ? 'Quant Optimal' : 'Risky Template Shield',
+          riskLabel: res.riskMode.toUpperCase(),
+          players: res.data.startingXI.map((p: any) => ({
+            id: p.id,
+            web_name: p.web_name,
+            score: p.score,
+            position: p.position
+          })),
+          xP: res.data.expectedPoints,
+          captainId: res.data.captain?.id,
+          viceCaptainId: res.data.viceCaptain?.id,
+          timestamp: now
+        };
+        gwHistory[key] = item;
+      }
+    });
+
+    newHistory[gwId] = gwHistory;
 
     setHistory(newHistory);
     localStorage.setItem('fpl_optimizer_history', JSON.stringify(newHistory));
@@ -168,7 +221,7 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
         .catch(err => console.warn("[Snapshots API] Backend save notice:", err));
     }
 
-    console.log(`[Snapshot] Saved GW${gwId} [${snapshotKey}] with ${snapshotItem.players.length} players`);
+    console.log(`[Snapshot] Saved complete 18-combination GW${gwId} matrix for ${keyToSave}`);
     return true;
   };
 

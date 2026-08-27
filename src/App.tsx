@@ -114,9 +114,9 @@ function FPLApp() {
     if (success) setTab('transfers');
   };
 
-  const executeManualSnapshot = () => {
+  const executeManualSnapshot = async () => {
     if (data) {
-      const success = takeSnapshot(data.nextEventId, data, riskMode, fuel, activeScenario);
+      const success = await takeSnapshot(data.nextEventId, data, riskMode, fuel, activeScenario);
       if (success) {
         const scenarioLabel = activeScenario === 'quant' ? 'Quant Optimal' : 'Risky Template Shield';
         const fuelLabel = fuel === 'eye-test' ? 'Eye Test' : fuel === 'native' ? 'Native FPL' : 'FPLForm';
