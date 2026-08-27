@@ -628,6 +628,19 @@ export class FPLService {
     };
   }
 
+  static calculateStrategicScore(rec: TransferRecommendation): number {
+    const localSignal = rec.localTransferSignal || (rec.xPDelta || 0);
+    const horizonDelta = rec.horizon8GwDelta || 0;
+    const priceDiff = ((rec.out?.now_cost || 0) - (rec.in?.now_cost || 0)) / 10;
+    const financialBonus = priceDiff > 0 ? priceDiff * 0.75 : 0;
+    
+    // Dead capital bonus: if outPlayer has virtually no expected return over 8 weeks (<= 2.0 pts)
+    const isDeadWeight = (rec.horizon8GwXpOut || 0) <= 2.0;
+    const deadWeightBonus = isDeadWeight ? 1.5 : 0;
+    
+    return Math.round((localSignal + (0.35 * horizonDelta) + financialBonus + deadWeightBonus) * 10) / 10;
+  }
+
   static generateTransfers(squad: ScoredPlayer[], candidates: ScoredPlayer[], oracle: XPOracle, riskMode: string, gameweek: number): TransferRecommendation[] {
     const transfers: TransferRecommendation[] = [];
     const squadIds = new Set(squad.map(p => p.id));
@@ -667,7 +680,7 @@ export class FPLService {
         const horizon8GwDelta = Math.round((horizon8GwXpIn - horizon8GwXpOut) * 10) / 10;
         const squad8GwXpAfter = Math.round((squad8GwXpBefore + horizon8GwDelta) * 10) / 10;
 
-        transfers.push({ 
+        const rec: TransferRecommendation = { 
           out: outPlayer, 
           in: inPlayer, 
           localTransferSignal: transferUtilityDelta, 
@@ -677,10 +690,12 @@ export class FPLService {
           horizon8GwDelta,
           squad8GwXpBefore,
           squad8GwXpAfter
-        });
+        };
+        rec.strategicScore = FPLService.calculateStrategicScore(rec);
+        transfers.push(rec);
       }
     });
-    return transfers.sort((a, b) => b.localTransferSignal - a.localTransferSignal).slice(0, 5);
+    return transfers.sort((a, b) => (b.strategicScore ?? 0) - (a.strategicScore ?? 0)).slice(0, 5);
   }
 
   static generateChipAdvice(squad: ScoredPlayer[], riskMode: string): ChipAdvice[] {
@@ -860,7 +875,7 @@ export class FPLService {
             const horizon8GwDelta = Math.round((horizon8GwXpIn - horizon8GwXpOut) * 10) / 10;
             const squad8GwXpAfter = Math.round((squad8GwXpBefore + horizon8GwDelta) * 10) / 10;
 
-            transfers.push({
+            const rec: TransferRecommendation = {
               out: outPlayer,
               in: inScored,
               localTransferSignal: transferUtilityDelta,
@@ -870,7 +885,9 @@ export class FPLService {
               horizon8GwDelta,
               squad8GwXpBefore,
               squad8GwXpAfter
-            });
+            };
+            rec.strategicScore = FPLService.calculateStrategicScore(rec);
+            transfers.push(rec);
           }
         }
       }
@@ -878,21 +895,22 @@ export class FPLService {
       if (transfers.length === 0) {
         transfers = this.generateTransfers(myPicks, candidates, oracle, riskMode, baseData.nextEventId);
       } else {
-        // The LP Solver found the 1 true optimal path. 
-        // We will append 4 alternative independent swaps for variety in the UI.
+        // Append alternative independent swaps and rank the full pool by holistic strategic score
         const alternativeSwaps = this.generateTransfers(myPicks, candidates, oracle, riskMode, baseData.nextEventId);
         
-        // Keep track of the exact swaps we already have
         const existingSwapSignatures = new Set(transfers.map(t => `${t.out.id}-${t.in.id}`));
+        const allCandidates = [...transfers];
         
         for (const swap of alternativeSwaps) {
-          if (transfers.length >= 5) break;
           const sig = `${swap.out.id}-${swap.in.id}`;
           if (!existingSwapSignatures.has(sig)) {
-            transfers.push(swap);
+            allCandidates.push(swap);
             existingSwapSignatures.add(sig);
           }
         }
+        transfers = allCandidates
+          .sort((a, b) => (b.strategicScore ?? 0) - (a.strategicScore ?? 0))
+          .slice(0, 5);
       }
     }
 
