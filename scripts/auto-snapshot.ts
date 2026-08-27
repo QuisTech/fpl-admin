@@ -80,7 +80,7 @@ export async function runAutoSnapshots(overrideGwId?: number) {
           for (const mode of modes) {
             const snapshotKey = `${fuel}_${scenario}_${mode}`;
             try {
-              const result = await FPLService.getRecommendations(mode, 1000, 'admin', fuel, scenario, [], [], gwId);
+              const result = await FPLService.getRecommendations(mode, 1000, 'admin', fuel, scenario, [], [], gwId, true);
 
               const snapshotItem = {
                 key: snapshotKey,

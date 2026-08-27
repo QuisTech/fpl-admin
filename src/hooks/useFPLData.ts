@@ -170,7 +170,7 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
         for (const m of modes) {
           if (f === currentFuel && s === currentScenario && m === mode) continue;
           tasks.push(() => 
-            axios.get(`/api/recommendations?riskMode=${m}&fuel=${f}&scenario=${s}${budgetQuery}${lockedQuery}${excludedQuery}&userId=${userId}&tier=${tier}`)
+            axios.get(`/api/recommendations?riskMode=${m}&fuel=${f}&scenario=${s}${budgetQuery}${lockedQuery}${excludedQuery}&userId=${userId}&tier=${tier}&skipComparison=true`)
               .then(res => ({ fuel: f, scenario: s, riskMode: m, data: res.data }))
               .catch(err => {
                 console.warn(`[Snapshot] Notice generating ${f}_${s}_${m}:`, err.message);

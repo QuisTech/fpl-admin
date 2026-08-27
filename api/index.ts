@@ -249,7 +249,8 @@ export class FPLService {
     scenario: 'quant' | 'template' = 'quant',
     lockedPlayerIds: number[] = [],
     excludedPlayerIds: number[] = [],
-    targetGw?: number
+    targetGw?: number,
+    skipComparison: boolean = false
   ): Promise<RecommendationResponse> {
     // For eye-test mode, skip FPL API call and use CSV data only
     let players: any[] = [];
@@ -423,11 +424,12 @@ export class FPLService {
 
     // Pillar 1: Compute Scenario Comparison (Quant Optimum vs Template Shield)
     let scenarioComparison = undefined;
-    try {
-        // Solve Quant
-        const quantIds = solveOptimalSquad(oracle, nextEventId, budget, 8, params, availableIds, lockedSet, excludedSet);
-        const quantSquad = scored.filter(p => quantIds.includes(p.id));
-        const quantXI = buildStartingXI(quantSquad);
+    if (!skipComparison) {
+      try {
+          // Solve Quant
+          const quantIds = solveOptimalSquad(oracle, nextEventId, budget, 8, params, availableIds, lockedSet, excludedSet);
+          const quantSquad = scored.filter(p => quantIds.includes(p.id));
+          const quantXI = buildStartingXI(quantSquad);
         const { captain: qCapId } = solveCaptain(oracle, nextEventId, quantXI.map(p => p.id), params);
         const quantCap = quantXI.find(p => p.id === qCapId) || quantXI[0];
         const quantXp = Math.round((quantXI.reduce((sum, p) => sum + (p.xP || 0), 0) + (quantCap?.xP || 0)) * 10) / 10;
@@ -522,6 +524,7 @@ export class FPLService {
       } catch (e) {
         // ignore scenario solve errors
       }
+    }
 
     // Pillar 3: "Why Omitted?" Analysis for high-profile assets
     const omissionAnalysis: any[] = [];
@@ -1009,7 +1012,7 @@ async function handleAutoSnapshot(req: any, res: any) {
             for (const mode of modes) {
               const snapshotKey = `${fuel}_${scenario}_${mode}`;
               try {
-                const result = await FPLService.getRecommendations(mode, budget, 'admin', fuel, scenario, [], [], gwId);
+                const result = await FPLService.getRecommendations(mode, budget, 'admin', fuel, scenario, [], [], gwId, true);
 
                 const snapshotItem = {
                   key: snapshotKey,
@@ -1128,8 +1131,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const excludedIds = Array.isArray(req.body?.excludedIds) 
         ? req.body.excludedIds 
         : (excludedStr ? excludedStr.split(',').map((s: string) => parseInt(s.trim())).filter((n: number) => !isNaN(n)) : []);
+      const skipComparison = query.skipComparison === 'true';
 
-      const result = await FPLService.getRecommendations(riskMode, budget, tier, fuel, scenario, lockedIds, excludedIds);
+      const result = await FPLService.getRecommendations(riskMode, budget, tier, fuel, scenario, lockedIds, excludedIds, undefined, skipComparison);
       return res.status(200).json(result);
     } 
     
