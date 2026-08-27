@@ -272,7 +272,13 @@ export const TransferView = ({ syncedData, tier = 'ai-agent', setTab, userId }: 
               </div>
             ) : (
               <div className="space-y-3">
-                {transfers.map((rec, i) => {
+                {[...transfers]
+                  .sort((a, b) => {
+                    const scoreA = a.strategicScore ?? a.xPDelta ?? 0;
+                    const scoreB = b.strategicScore ?? b.xPDelta ?? 0;
+                    return scoreB - scoreA;
+                  })
+                  .map((rec, i) => {
                   const isStartingXI = (rec.out.position_in_squad ?? 0) <= 11;
                   const priceDiff = (rec.out.now_cost - rec.in.now_cost) / 10;
                   const isHovered = hoveredSwapIndex === i;
@@ -387,7 +393,7 @@ export const TransferView = ({ syncedData, tier = 'ai-agent', setTab, userId }: 
                                   : "Equal Price"}
                             </span>
                           </div>
-                          {i === 0 && (
+                          {i === 0 && (rec.strategicScore || rec.xPDelta) > 0 && (
                             <span className="text-fpl-green font-black uppercase tracking-widest text-[8px] flex items-center gap-1">
                               <Sparkles className="w-2.5 h-2.5 animate-spin" /> Top Swap Recommendation
                             </span>
