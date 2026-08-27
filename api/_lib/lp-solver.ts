@@ -13,6 +13,10 @@ interface LPSolverModel {
   constraints: Record<string, { max?: number; min?: number; equal?: number }>;
   variables: Record<string, Record<string, number>>;
   ints: Record<string, 1>;
+  options?: {
+    timeout?: number;
+    tolerance?: number;
+  };
 }
 
 function getPlayerScore(oracle: XPOracle, gameweek: number, id: number, horizon: number, params: UtilityParameters): number {
@@ -61,7 +65,11 @@ export function solveOptimalSquad(
       total_cap: { max: 1 }
     },
     variables: {},
-    ints: {}
+    ints: {},
+    options: {
+      timeout: 3000,
+      tolerance: 0.02
+    }
   };
 
   if (params.minEoTotal) {
@@ -221,7 +229,11 @@ export function solveStartingXI(
       fwd: { min: 1, max: 3 } 
     },
     variables: {},
-    ints: {}
+    ints: {},
+    options: {
+      timeout: 1500,
+      tolerance: 0.01
+    }
   };
 
   squadIds.forEach(id => {
@@ -372,7 +384,11 @@ export function solveOptimalTransfers(
       keep: { min: 15 - maxTransfers }
     },
     variables: {},
-    ints: {}
+    ints: {},
+    options: {
+      timeout: 3000,
+      tolerance: 0.02
+    }
   };
 
   allIds.forEach(id => {

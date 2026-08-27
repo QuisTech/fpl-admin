@@ -167,8 +167,13 @@ export abstract class BaseOracle implements XPOracle {
       if (probPlay === null || probPlay === undefined) probPlay = 100;
       probPlay = Math.max(0, Math.min(100, probPlay)) / 100;
 
-      const expectedGoalsPer90 = typeof p.expected_goals_per_90 === 'number' ? p.expected_goals_per_90 : parseFloat(p.expected_goals_per_90 || p.expected_goals || "0");
-      const expectedAssistsPer90 = typeof p.expected_assists_per_90 === 'number' ? p.expected_assists_per_90 : parseFloat(p.expected_assists_per_90 || p.expected_assists || "0");
+      const safeParseFloat = (val: any) => {
+        const parsed = parseFloat(val);
+        return isNaN(parsed) ? 0 : parsed;
+      };
+
+      const expectedGoalsPer90 = typeof p.expected_goals_per_90 === 'number' ? p.expected_goals_per_90 : safeParseFloat(p.expected_goals_per_90 || p.expected_goals || "0");
+      const expectedAssistsPer90 = typeof p.expected_assists_per_90 === 'number' ? p.expected_assists_per_90 : safeParseFloat(p.expected_assists_per_90 || p.expected_assists || "0");
 
       const priceScale = (cost / 10) / 7.0;
       const priorXG = (pos === 'FWD' ? 0.35 : pos === 'MID' ? 0.18 : pos === 'DEF' ? 0.04 : 0.0) * priceScale;
