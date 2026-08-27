@@ -182,7 +182,7 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
     }
 
     const results: any[] = [];
-    const batchSize = 3;
+    const batchSize = 1;
     for (let i = 0; i < tasks.length; i += batchSize) {
       const batch = tasks.slice(i, i + batchSize).map(task => task());
       const batchResults = await Promise.all(batch);
