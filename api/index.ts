@@ -646,6 +646,10 @@ export class FPLService {
     const squadIds = new Set(squad.map(p => p.id));
     const params = getParamsForRiskMode(riskMode, baseWeights);
 
+    // Build team count map for 3-player-per-club constraint
+    const squadTeamCounts: Record<number, number> = {};
+    squad.forEach(p => { squadTeamCounts[p.team] = (squadTeamCounts[p.team] || 0) + 1; });
+
     const get8GwXp = (id: number) => {
       let sum = 0;
       for (let step = 0; step < 8; step++) {
@@ -659,12 +663,16 @@ export class FPLService {
     ) / 10;
 
     squad.forEach(outPlayer => {
-      const betterOptions = candidates.filter(p => 
-        p.position === outPlayer.position && 
-        !squadIds.has(p.id) && 
-        p.now_cost <= outPlayer.now_cost &&
-        (p.score || 0) > (outPlayer.score || 0) + 0.5
-      ).sort((a, b) => (b.score || 0) - (a.score || 0));
+      const betterOptions = candidates.filter(p => {
+        if (p.position !== outPlayer.position) return false;
+        if (squadIds.has(p.id)) return false;
+        if (p.now_cost > outPlayer.now_cost) return false;
+        if ((p.score || 0) <= (outPlayer.score || 0) + 0.5) return false;
+        // Enforce 3-player-per-club: count how many from inPlayer's team remain after removing outPlayer
+        const teamCountAfterRemoval = (squadTeamCounts[p.team] || 0) - (p.team === outPlayer.team ? 1 : 0);
+        if (teamCountAfterRemoval >= 3) return false;
+        return true;
+      }).sort((a, b) => (b.score || 0) - (a.score || 0));
 
       if (betterOptions.length > 0) {
         const inPlayer = betterOptions[0];
@@ -855,10 +863,18 @@ export class FPLService {
         const ins = bestFutures[0].firstTransfersIn;
         const outs = bestFutures[0].firstTransfersOut;
         const params = getParamsForRiskMode(riskMode, baseWeights);
+        // Build team count map for 3-player-per-club constraint in LP transfers
+        const lpTeamCounts: Record<number, number> = {};
+        myPicks.forEach(p => { lpTeamCounts[p.team] = (lpTeamCounts[p.team] || 0) + 1; });
+
         for (let i = 0; i < ins.length; i++) {
           const inPlayer = baseData.players.find(p => p.id === ins[i]);
           const outPlayer = myPicks.find(p => p.id === outs[i]);
           if (inPlayer && outPlayer) {
+            // Enforce 3-player-per-club: skip if adding inPlayer would exceed 3 from same club
+            const teamCountAfterRemoval = (lpTeamCounts[inPlayer.team] || 0) - (inPlayer.team === outPlayer.team ? 1 : 0);
+            if (teamCountAfterRemoval >= 3) continue;
+
             const inXp = oracle.getXP(inPlayer.id, baseData.nextEventId);
             const inScored = FPLService.mapToScoredPlayer(inPlayer, baseData.teams, baseData.fixtures, baseData.nextEventId, riskMode, inXp, fuel);
             
