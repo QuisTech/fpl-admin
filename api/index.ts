@@ -372,13 +372,21 @@ export class FPLService {
         }
         squad = scored.filter(p => optimalIds.includes(p.id));
       } catch (err: any) {
-        console.warn("[FPLService] LP Solver failed, falling back to heuristic selection:", err.message);
-        isHeuristicFallback = true;
-        const gkps = scored.filter(p => p.position === 'GKP').sort(sortByScore).slice(0, 2);
-        const defs = scored.filter(p => p.position === 'DEF').sort(sortByScore).slice(0, 5);
-        const mids = scored.filter(p => p.position === 'MID').sort(sortByScore).slice(0, 5);
-        const fwds = scored.filter(p => p.position === 'FWD').sort(sortByScore).slice(0, 3);
-        squad = [...gkps, ...defs, ...mids, ...fwds];
+        console.warn("[FPLService] LP Solver failed with full template anchors, retrying with core locks:", err.message);
+        try {
+          // Retry LP solver with core user locks only if template anchors caused budget/team-limit infeasibility
+          const fallbackIds = solveOptimalSquad(oracle, nextEventId, budget, 8, params, availableIds, lockedSet, excludedSet);
+          if (!fallbackIds || fallbackIds.length === 0) throw new Error("Fallback LP solver also infeasible");
+          squad = scored.filter(p => fallbackIds.includes(p.id));
+        } catch (fallbackErr) {
+          console.warn("[FPLService] Fallback LP Solver failed, using heuristic selection:", err.message);
+          isHeuristicFallback = true;
+          const gkps = scored.filter(p => p.position === 'GKP').sort(sortByScore).slice(0, 2);
+          const defs = scored.filter(p => p.position === 'DEF').sort(sortByScore).slice(0, 5);
+          const mids = scored.filter(p => p.position === 'MID').sort(sortByScore).slice(0, 5);
+          const fwds = scored.filter(p => p.position === 'FWD').sort(sortByScore).slice(0, 3);
+          squad = [...gkps, ...defs, ...mids, ...fwds];
+        }
       }
     } else {
       const gkps = scored.filter(p => p.position === 'GKP').sort(sortByScore).slice(0, 2);
@@ -456,7 +464,10 @@ export class FPLService {
             currentTemplateCost += pCost;
           }
         });
-        const templateIds = solveOptimalSquad(oracle, nextEventId, budget, 8, params, availableIds, templateSet, excludedSet);
+        let templateIds = solveOptimalSquad(oracle, nextEventId, budget, 8, params, availableIds, templateSet, excludedSet);
+        if (!templateIds || templateIds.length === 0) {
+          templateIds = solveOptimalSquad(oracle, nextEventId, budget, 8, params, availableIds, lockedSet, excludedSet);
+        }
         const templateSquad = scored.filter(p => templateIds.includes(p.id));
         const templateXI = buildStartingXI(templateSquad);
         const { captain: tCapId } = solveCaptain(oracle, nextEventId, templateXI.map(p => p.id), params);
