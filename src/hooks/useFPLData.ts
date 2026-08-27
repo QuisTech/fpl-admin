@@ -163,13 +163,13 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
     gwHistory[activeSnapshotKey] = activeSnapshotItem;
     gwHistory[mode] = activeSnapshotItem;
 
-    // 2. Fetch & record all 18 combinations in parallel to capture full matrix
-    const promises: Promise<any>[] = [];
+    // 2. Fetch & record all 18 combinations in chunks to avoid overwhelming Vercel (504 Timeouts)
+    const tasks: (() => Promise<any>)[] = [];
     for (const f of fuels) {
       for (const s of scenarios) {
         for (const m of modes) {
           if (f === currentFuel && s === currentScenario && m === mode) continue;
-          promises.push(
+          tasks.push(() => 
             axios.get(`/api/recommendations?riskMode=${m}&fuel=${f}&scenario=${s}${budgetQuery}${lockedQuery}${excludedQuery}&userId=${userId}&tier=${tier}`)
               .then(res => ({ fuel: f, scenario: s, riskMode: m, data: res.data }))
               .catch(err => {
@@ -181,7 +181,13 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
       }
     }
 
-    const results = await Promise.all(promises);
+    const results: any[] = [];
+    const batchSize = 3;
+    for (let i = 0; i < tasks.length; i += batchSize) {
+      const batch = tasks.slice(i, i + batchSize).map(task => task());
+      const batchResults = await Promise.all(batch);
+      results.push(...batchResults);
+    }
 
     results.forEach(res => {
       if (res && res.data && res.data.startingXI) {
