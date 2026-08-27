@@ -364,36 +364,28 @@ export class FPLService {
       return [...mand, ...remaining.slice(0, 4)].filter(Boolean) as ScoredPlayer[];
     };
 
-    if (tier !== 'free') {
-      try {
-        const optimalIds = solveOptimalSquad(oracle, nextEventId, budget, 8, params, availableIds, activeLockedSet, excludedSet);
-        if (!optimalIds || optimalIds.length === 0) {
-          throw new Error("LP Solver returned empty or infeasible solution.");
-        }
-        squad = scored.filter(p => optimalIds.includes(p.id));
-      } catch (err: any) {
-        console.warn("[FPLService] LP Solver failed with full template anchors, retrying with core locks:", err.message);
-        try {
-          // Retry LP solver with core user locks only if template anchors caused budget/team-limit infeasibility
-          const fallbackIds = solveOptimalSquad(oracle, nextEventId, budget, 8, params, availableIds, lockedSet, excludedSet);
-          if (!fallbackIds || fallbackIds.length === 0) throw new Error("Fallback LP solver also infeasible");
-          squad = scored.filter(p => fallbackIds.includes(p.id));
-        } catch (fallbackErr) {
-          console.warn("[FPLService] Fallback LP Solver failed, using heuristic selection:", err.message);
-          isHeuristicFallback = true;
-          const gkps = scored.filter(p => p.position === 'GKP').sort(sortByScore).slice(0, 2);
-          const defs = scored.filter(p => p.position === 'DEF').sort(sortByScore).slice(0, 5);
-          const mids = scored.filter(p => p.position === 'MID').sort(sortByScore).slice(0, 5);
-          const fwds = scored.filter(p => p.position === 'FWD').sort(sortByScore).slice(0, 3);
-          squad = [...gkps, ...defs, ...mids, ...fwds];
-        }
+    try {
+      const optimalIds = solveOptimalSquad(oracle, nextEventId, budget, 8, params, availableIds, activeLockedSet, excludedSet);
+      if (!optimalIds || optimalIds.length === 0) {
+        throw new Error("LP Solver returned empty or infeasible solution.");
       }
-    } else {
-      const gkps = scored.filter(p => p.position === 'GKP').sort(sortByScore).slice(0, 2);
-      const defs = scored.filter(p => p.position === 'DEF').sort(sortByScore).slice(0, 5);
-      const mids = scored.filter(p => p.position === 'MID').sort(sortByScore).slice(0, 5);
-      const fwds = scored.filter(p => p.position === 'FWD').sort(sortByScore).slice(0, 3);
-      squad = [...gkps, ...defs, ...mids, ...fwds];
+      squad = scored.filter(p => optimalIds.includes(p.id));
+    } catch (err: any) {
+      console.warn("[FPLService] LP Solver failed with full template anchors, retrying with core locks:", err.message);
+      try {
+        // Retry LP solver with core user locks only if template anchors caused budget/team-limit infeasibility
+        const fallbackIds = solveOptimalSquad(oracle, nextEventId, budget, 8, params, availableIds, lockedSet, excludedSet);
+        if (!fallbackIds || fallbackIds.length === 0) throw new Error("Fallback LP solver also infeasible");
+        squad = scored.filter(p => fallbackIds.includes(p.id));
+      } catch (fallbackErr) {
+        console.warn("[FPLService] Fallback LP Solver failed, using heuristic selection:", err.message);
+        isHeuristicFallback = true;
+        const gkps = scored.filter(p => p.position === 'GKP').sort(sortByScore).slice(0, 2);
+        const defs = scored.filter(p => p.position === 'DEF').sort(sortByScore).slice(0, 5);
+        const mids = scored.filter(p => p.position === 'MID').sort(sortByScore).slice(0, 5);
+        const fwds = scored.filter(p => p.position === 'FWD').sort(sortByScore).slice(0, 3);
+        squad = [...gkps, ...defs, ...mids, ...fwds];
+      }
     }
     
     const startingXI = buildStartingXI(squad);
@@ -431,8 +423,7 @@ export class FPLService {
 
     // Pillar 1: Compute Scenario Comparison (Quant Optimum vs Template Shield)
     let scenarioComparison = undefined;
-    if (tier !== 'free') {
-      try {
+    try {
         // Solve Quant
         const quantIds = solveOptimalSquad(oracle, nextEventId, budget, 8, params, availableIds, lockedSet, excludedSet);
         const quantSquad = scored.filter(p => quantIds.includes(p.id));
@@ -531,7 +522,6 @@ export class FPLService {
       } catch (e) {
         // ignore scenario solve errors
       }
-    }
 
     // Pillar 3: "Why Omitted?" Analysis for high-profile assets
     const omissionAnalysis: any[] = [];
@@ -577,7 +567,7 @@ export class FPLService {
     }
 
     let swapAnalysisResult = undefined;
-    if (riskMode !== 'safe' && tier !== 'free') {
+    if (riskMode !== 'safe') {
       try {
         const safeParams = getParamsForRiskMode('safe', baseWeights);
         const safeOptimalIds = solveOptimalSquad(oracle, nextEventId, budget, 8, safeParams, availableIds);
