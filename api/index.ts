@@ -140,15 +140,6 @@ export class FPLService {
       else if (costInMillions >= 8.0) score *= 1.08;
     }
 
-    // Machine Learning / Eye-Test heuristic: 
-    // If the season is underway (GW3+) and a player has exactly 0 minutes, 
-    // they are an extreme rotation/minutes risk (e.g. frozen out like Chiesa).
-    // Tank their score to force the engine to recognize them as "dead capital"
-    // and prioritize them for a transfer OUT over active players.
-    if (nextEventId !== undefined && nextEventId > 2 && (player.minutes || 0) === 0) {
-      score *= 0.1;
-    }
-
     return score;
   }
 

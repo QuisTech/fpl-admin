@@ -94,7 +94,16 @@ export class ProjectionEngine {
    */
   public predict(input: ProjectionInput, targetGw: number): { expected: number, variance: number } {
     if (input.source === 'NATIVE' || input.source === 'FPLFORM') {
-      const xp = input.externalXP || 0;
+      let xp = input.externalXP || 0;
+      
+      // Dynamic ML Blending: Governor on external fuels
+      // If our native feature pipeline dynamically predicts 0 minutes 
+      // (e.g. frozen out or unused bench player), we dynamically throttle 
+      // external projections to prevent them from hallucinating points.
+      if (input.features && input.features.predictedMinutes === 0 && xp > 0) {
+        xp *= 0.1;
+      }
+
       const pApp = input.features ? (input.features.chanceOfPlayingThisRound / 100) : 1.0;
       
       let p90 = 0, p60 = 0, pSub = 0;
