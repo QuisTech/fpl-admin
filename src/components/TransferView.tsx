@@ -73,9 +73,21 @@ export const TransferView = ({ syncedData, tier = 'ai-agent', setTab, userId }: 
   const rawBank = entryHistory?.bank ?? syncedData.bank ?? 0;
   const bankValue = rawBank > 50 ? rawBank / 10 : rawBank;
 
-  const latestPoints = entryHistory?.points ?? managerInfo?.summary_event_points ?? 0;
-  const totalPoints = entryHistory?.total_points ?? managerInfo?.summary_overall_points ?? (squad ? squad.reduce((sum, p) => sum + (p.total_points || 0), 0) : 0);
-  const overallRank = entryHistory?.overall_rank ?? managerInfo?.summary_overall_rank;
+  const latestPoints = (managerInfo?.summary_event_points !== undefined && managerInfo.summary_event_points !== null)
+    ? managerInfo.summary_event_points
+    : (entryHistory?.points ?? 0);
+
+  const totalPoints = (managerInfo?.summary_overall_points !== undefined && managerInfo.summary_overall_points !== null)
+    ? managerInfo.summary_overall_points
+    : (entryHistory?.total_points ?? (squad ? squad.reduce((sum, p) => sum + (p.total_points || 0), 0) : 0));
+
+  const overallRank = (managerInfo?.summary_overall_rank !== undefined && managerInfo.summary_overall_rank !== null)
+    ? managerInfo.summary_overall_rank
+    : entryHistory?.overall_rank;
+
+  const gwRank = (managerInfo?.summary_event_rank !== undefined && managerInfo.summary_event_rank !== null)
+    ? managerInfo.summary_event_rank
+    : entryHistory?.rank;
 
   return (
     <motion.div
@@ -132,9 +144,9 @@ export const TransferView = ({ syncedData, tier = 'ai-agent', setTab, userId }: 
               </span>
               <span className="text-[9px] text-slate-500 font-bold uppercase">pts</span>
             </div>
-            {entryHistory?.rank ? (
+            {gwRank ? (
               <span className="text-[8px] text-slate-500 font-mono truncate mt-0.5">
-                GW Rank: #{entryHistory.rank.toLocaleString()}
+                GW Rank: #{gwRank.toLocaleString()}
               </span>
             ) : (
               <span className="text-[8px] text-slate-500 font-mono mt-0.5">Live Round</span>

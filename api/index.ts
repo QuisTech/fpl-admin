@@ -808,6 +808,7 @@ export class FPLService {
             summary_overall_rank: d.summary_overall_rank,
             summary_overall_points: d.summary_overall_points,
             summary_event_points: d.summary_event_points,
+            summary_event_rank: d.summary_event_rank,
             last_deadline_total_transfers: d.last_deadline_total_transfers
           };
         }

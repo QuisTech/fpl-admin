@@ -224,6 +224,7 @@ export interface ManagerInfo {
   summary_overall_rank?: number;
   summary_overall_points?: number;
   summary_event_points?: number;
+  summary_event_rank?: number;
   last_deadline_total_transfers?: number;
 }
 
