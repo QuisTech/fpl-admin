@@ -218,60 +218,44 @@ export function solveStartingXI(
   squadIds: number[],
   params: UtilityParameters = DEFAULT_PARAMETERS
 ): number[] {
-  const model: LPSolverModel = {
-    optimize: "score",
-    opType: "max",
-    constraints: { 
-      total: { equal: 11 }, 
-      gkp: { equal: 1 }, 
-      def: { min: 3, max: 5 }, 
-      mid: { min: 2, max: 5 }, 
-      fwd: { min: 1, max: 3 } 
-    },
-    variables: {},
-    ints: {},
-    options: {
-      timeout: 1500,
-      tolerance: 0.01
-    }
-  };
-
-  squadIds.forEach(id => {
-    const v = `p_${id}`;
-    const pos = oracle.getPosition(id).toLowerCase();
-    
-    // We only care about the single upcoming gameweek for the XI (horizon = 1)
-    const score = getPlayerScore(oracle, gameweek, id, 1, params);
-
-    model.variables[v] = { 
-      score, 
-      total: 1, 
-      [pos]: 1, 
-      [v]: 1
+  // Score each player in the squad for the upcoming gameweek (horizon = 1)
+  const scored = squadIds.map(id => {
+    const rawPos = (oracle.getPosition(id) || 'MID').toUpperCase();
+    const pos = rawPos === 'GK' ? 'GKP' : rawPos;
+    return {
+      id,
+      pos,
+      score: getPlayerScore(oracle, gameweek, id, 1, params)
     };
-    model.constraints[v] = { max: 1 };
-    model.ints[v] = 1;
   });
 
-  const solution = solver.Solve(model) as Record<string, any>;
-  
-  if (!solution || !solution.feasible) {
-    // Failsafe: Just pick the first valid formation if LP fails for some reason
-    // In practice, LP will never fail here because squad is 2/5/5/3.
-    return squadIds.slice(0, 11);
-  }
-  
-  const xiIds: number[] = [];
-  for (const key in solution) {
-    if (key.startsWith('p_')) {
-      const val = solution[key];
-      if (val === true || val === 1 || (typeof val === 'number' && val > 0.5)) {
-        xiIds.push(parseInt(key.replace('p_', '')));
-      }
-    }
+  const gkps = scored.filter(p => p.pos === 'GKP').sort((a, b) => b.score - a.score);
+  const defs = scored.filter(p => p.pos === 'DEF').sort((a, b) => b.score - a.score);
+  const mids = scored.filter(p => p.pos === 'MID').sort((a, b) => b.score - a.score);
+  const fwds = scored.filter(p => p.pos === 'FWD').sort((a, b) => b.score - a.score);
+
+  // Exact FPL formation rules: 1 GKP, 3 DEF, 2 MID, 1 FWD mandatory (7 players)
+  if (gkps.length >= 1 && defs.length >= 3 && mids.length >= 2 && fwds.length >= 1) {
+    const mandatory = [
+      gkps[0],
+      defs[0], defs[1], defs[2],
+      mids[0], mids[1],
+      fwds[0]
+    ];
+
+    // The remaining 7 outfielders compete for the remaining 4 starting slots by highest score
+    const flexPool = [
+      ...defs.slice(3),
+      ...mids.slice(2),
+      ...fwds.slice(1)
+    ].sort((a, b) => b.score - a.score);
+
+    const startingXI = [...mandatory, ...flexPool.slice(0, 4)];
+    return startingXI.map(p => p.id);
   }
 
-  return xiIds;
+  // Failsafe fallback
+  return squadIds.slice(0, 11);
 }
 
 function getCorrelation(oracle: XPOracle, p1: number, p2: number): number {

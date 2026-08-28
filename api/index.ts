@@ -36,6 +36,8 @@ export class FPLService {
   private static CACHE_TTL = 5 * 60 * 1000; // 5 minutes
   private static recCache: Map<string, { data: RecommendationResponse; timestamp: number }> = new Map();
   private static REC_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+  private static teamPicksCache: Map<string, { teamRes: any; managerInfo: ManagerInfo | null; timestamp: number }> = new Map();
+  private static TEAM_PICKS_CACHE_TTL = 2 * 60 * 1000; // 2 minutes
 
   private static getHeaders() {
     return {
@@ -771,42 +773,56 @@ export class FPLService {
     const csvFileName = fuel === 'native' ? 'fpl_native.csv' : 'fplform.csv';
     const oracle = OracleFactory.create(`data/${csvFileName}`, baseData.players, fuel, baseData.fixtures, baseData.teams, baseData.nextEventId, riskMode);
 
-    // 2. Fetch live user team & manager metadata
-    let teamRes;
+    // 2. Fetch live user team & manager metadata (cached in-memory for 2 mins)
+    const picksCacheKey = `team_${teamId}_gw_${currentEvent}`;
+    let teamRes: any;
     let managerInfo: ManagerInfo | null = null;
-    try {
-      const [picksRes, entryRes] = await Promise.allSettled([
-        this.fetchWithRetry(`${FPL_BASE_URL}/entry/${teamId}/event/${currentEvent}/picks/`),
-        this.fetchWithRetry(`${FPL_BASE_URL}/entry/${teamId}/`)
-      ]);
 
-      if (picksRes.status === 'fulfilled' && picksRes.value?.data) {
-        teamRes = picksRes.value;
-      } else {
-        const err: any = (picksRes as any).reason;
-        if (err?.response?.status === 404) {
-          throw new Error(`FPL API Error: Team ID ${teamId} not found, or squads are currently locked and hidden by FPL until the Gameweek 1 deadline.`);
+    const cachedPicks = this.teamPicksCache.get(picksCacheKey);
+    if (cachedPicks && Date.now() - cachedPicks.timestamp < this.TEAM_PICKS_CACHE_TTL) {
+      teamRes = cachedPicks.teamRes;
+      managerInfo = cachedPicks.managerInfo;
+    } else {
+      try {
+        const [picksRes, entryRes] = await Promise.allSettled([
+          this.fetchWithRetry(`${FPL_BASE_URL}/entry/${teamId}/event/${currentEvent}/picks/`),
+          this.fetchWithRetry(`${FPL_BASE_URL}/entry/${teamId}/`)
+        ]);
+
+        if (picksRes.status === 'fulfilled' && picksRes.value?.data) {
+          teamRes = picksRes.value;
+        } else {
+          const err: any = (picksRes as any).reason;
+          if (err?.response?.status === 404) {
+            throw new Error(`FPL API Error: Team ID ${teamId} not found, or squads are currently locked and hidden by FPL until the Gameweek 1 deadline.`);
+          }
+          throw err || new Error("Failed to fetch team picks");
         }
-        throw err || new Error("Failed to fetch team picks");
-      }
 
-      if (entryRes.status === 'fulfilled' && entryRes.value?.data) {
-        const d = entryRes.value.data;
-        managerInfo = {
-          id: d.id,
-          teamName: d.name || 'FPL Team',
-          managerName: `${d.player_first_name || ''} ${d.player_last_name || ''}`.trim(),
-          summary_overall_rank: d.summary_overall_rank,
-          summary_overall_points: d.summary_overall_points,
-          summary_event_points: d.summary_event_points,
-          last_deadline_total_transfers: d.last_deadline_total_transfers
-        };
+        if (entryRes.status === 'fulfilled' && entryRes.value?.data) {
+          const d = entryRes.value.data;
+          managerInfo = {
+            id: d.id,
+            teamName: d.name || 'FPL Team',
+            managerName: `${d.player_first_name || ''} ${d.player_last_name || ''}`.trim(),
+            summary_overall_rank: d.summary_overall_rank,
+            summary_overall_points: d.summary_overall_points,
+            summary_event_points: d.summary_event_points,
+            last_deadline_total_transfers: d.last_deadline_total_transfers
+          };
+        }
+
+        this.teamPicksCache.set(picksCacheKey, { teamRes, managerInfo, timestamp: Date.now() });
+        if (this.teamPicksCache.size > 100) {
+          const oldest = this.teamPicksCache.keys().next().value;
+          if (oldest) this.teamPicksCache.delete(oldest);
+        }
+      } catch (err: any) {
+        if (err.message && err.message.includes('FPL API Error')) {
+          throw err;
+        }
+        throw new Error(`FPL Sync Error: ${err.message || 'Could not retrieve team data'}`);
       }
-    } catch (err: any) {
-      if (err.message && err.message.includes('FPL API Error')) {
-        throw err;
-      }
-      throw new Error(`FPL Sync Error: ${err.message || 'Could not retrieve team data'}`);
     }
 
     const myPicks = teamRes.data.picks.map((p: any) => {
