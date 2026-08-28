@@ -20,12 +20,18 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
     return saved ? JSON.parse(saved) : {};
   });
 
+  const [profileLoaded, setProfileLoaded] = useState(false);
+
   useEffect(() => {
     localStorage.setItem('fpl_optimizer_history', JSON.stringify(history));
   }, [history]);
 
   useEffect(() => {
-    fetchRecommendations();
+    const controller = new AbortController();
+    fetchRecommendations(controller.signal);
+    return () => {
+      controller.abort();
+    };
   }, [riskMode, fuel, syncedData?.totalCost, syncedData?.bank, userId, authInitialized, activeScenario, lockedPlayerIds, excludedPlayerIds]);
 
   useEffect(() => {
@@ -35,17 +41,14 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [riskMode, fuel]);
 
-  const effectiveSnapshotKey = teamId ? `team_${teamId.trim()}` : userId;
-
   // Load user tier and profile ONCE on login/auth init
   useEffect(() => {
     if (authInitialized && userId) {
-      axios.get(`/api/user?userId=${userId}`)
-        .then(res => setTier(res.data.tier))
-        .catch(console.error);
-
       axios.get(`/api/user-profile?userId=${userId}`)
         .then(res => {
+          if (res.data?.tier) {
+            setTier(res.data.tier);
+          }
           if (res.data?.fplTeamId) {
             setTeamId(res.data.fplTeamId);
           }
@@ -54,15 +57,18 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
           } else if (res.data?.fplTeamId) {
             setIsTeamIdLocked(true);
           }
+          setProfileLoaded(true);
         })
-        .catch(() => {});
+        .catch(() => {
+          setProfileLoaded(true);
+        });
     }
   }, [userId, authInitialized]);
 
-  // Fetch backend performance snapshots when effectiveSnapshotKey changes
+  // Fetch backend performance snapshots once profile is loaded or teamId changes
   useEffect(() => {
-    if (authInitialized && userId) {
-      const keyToFetch = effectiveSnapshotKey || userId;
+    if (authInitialized && userId && profileLoaded) {
+      const keyToFetch = teamId ? `team_${teamId.trim()}` : userId;
       axios.get(`/api/snapshots?userId=${keyToFetch}`)
         .then(res => {
           const fetchedHistory = (res.data?.history && typeof res.data.history === 'object') ? res.data.history : {};
@@ -71,7 +77,7 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
         })
         .catch(err => console.warn("[Snapshots API] Backend fetch notice:", err));
     }
-  }, [userId, authInitialized, effectiveSnapshotKey]);
+  }, [userId, authInitialized, profileLoaded, teamId]);
 
   const toggleLock = (playerId: number) => {
     setExcludedPlayerIds(prev => prev.filter(id => id !== playerId));
@@ -92,7 +98,7 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
     setExcludedPlayerIds([]);
   };
 
-  const fetchRecommendations = async () => {
+  const fetchRecommendations = async (signal?: AbortSignal) => {
     if (!authInitialized || !userId) return;
     setLoading(true);
     try {
@@ -101,12 +107,18 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
       const lockedQuery = lockedPlayerIds.length > 0 ? `&locked=${lockedPlayerIds.join(',')}` : '';
       const excludedQuery = excludedPlayerIds.length > 0 ? `&excluded=${excludedPlayerIds.join(',')}` : '';
       
-      const res = await axios.get(`/api/recommendations?riskMode=${riskMode}&fuel=${fuel}${budgetQuery}${scenarioQuery}${lockedQuery}${excludedQuery}&userId=${userId}&tier=${tier}`);
+      const res = await axios.get(
+        `/api/recommendations?riskMode=${riskMode}&fuel=${fuel}${budgetQuery}${scenarioQuery}${lockedQuery}${excludedQuery}&userId=${userId}&tier=${tier}`,
+        { signal }
+      );
       if (res.data) {
         setData(res.data);
       }
       setError(null);
     } catch (err: any) {
+      if (axios.isCancel(err) || err.name === 'CanceledError' || err.name === 'AbortError') {
+        return;
+      }
       console.error("Fetch error:", err);
       setError(err.response?.data?.message || err.message || "Failed to load recommendations");
     } finally {
@@ -163,7 +175,7 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
     gwHistory[activeSnapshotKey] = activeSnapshotItem;
     gwHistory[mode] = activeSnapshotItem;
 
-    // 2. Fetch & record all 18 combinations in chunks to avoid overwhelming Vercel (504 Timeouts)
+    // 2. Fetch & record all 18 combinations in concurrent batches (accelerated by backend memoization)
     const tasks: (() => Promise<any>)[] = [];
     for (const f of fuels) {
       for (const s of scenarios) {
@@ -182,7 +194,7 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
     }
 
     const results: any[] = [];
-    const batchSize = 1;
+    const batchSize = 4;
     for (let i = 0; i < tasks.length; i += batchSize) {
       const batch = tasks.slice(i, i + batchSize).map(task => task());
       const batchResults = await Promise.all(batch);
@@ -221,7 +233,7 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
     localStorage.setItem('fpl_optimizer_history', JSON.stringify(newHistory));
 
     // Persist to backend Firestore endpoint for cross-device access
-    const keyToSave = effectiveSnapshotKey || userId;
+    const keyToSave = teamId ? `team_${teamId.trim()}` : userId;
     if (keyToSave) {
       axios.post('/api/snapshots', { userId: keyToSave, history: newHistory, season: '2026/27' })
         .catch(err => console.warn("[Snapshots API] Backend save notice:", err));

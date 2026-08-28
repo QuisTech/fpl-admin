@@ -1,4 +1,4 @@
-import { getFirestore, isAdminUser } from "../lib/firestore.js";
+import { getFirestore, isAdminUser, getUserProfileAndRole } from "../lib/firestore.js";
 import { verifyAuth } from "./_lib/auth.js";
 import type { Request, Response } from "express";
 
@@ -16,21 +16,21 @@ export default async function handler(req: Request, res: Response) {
   const userId = uid;
 
   const db = getFirestore();
-  const isAdmin = await isAdminUser(userId);
 
   try {
     if (req.method === 'GET') {
-      // Fetch profile
-      const profile = await db.collection('user_profiles').doc(userId).get();
-      if (!profile.exists) {
+      // Fetch profile and role in a single parallel lookup (replaces 3 sequential roundtrips)
+      const { isAdmin, tier, profile, user } = await getUserProfileAndRole(userId);
+      
+      if (!profile) {
         // Return a default profile for new anonymous users instead of 404
         return res.json({
           userId,
-          email: 'Anonymous User',
-          displayName: 'Guest Manager',
-          username: 'guest_' + userId.substring(0, 5),
+          email: user?.email || 'Anonymous User',
+          displayName: user?.displayName || 'Guest Manager',
+          username: user?.username || 'guest_' + userId.substring(0, 5),
           fplVerified: false,
-          tier: 'free',
+          tier,
           isAdmin,
           preferences: {
             defaultRiskMode: 'safe',
@@ -41,10 +41,13 @@ export default async function handler(req: Request, res: Response) {
         });
       }
       return res.json({
-        ...profile.data(),
+        ...profile,
+        tier,
         isAdmin
       });
     }
+
+    const isAdmin = await isAdminUser(userId);
 
     if (req.method === 'PUT') {
       // Update profile

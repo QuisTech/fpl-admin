@@ -23,6 +23,26 @@ export interface XPOracle {
   playerNames: Record<number, string>;
 }
 
+const fileCache: Record<string, { content: string; mtimeMs: number }> = {};
+function getCachedFile(filePath: string): string | null {
+  try {
+    const fullPath = path.resolve(process.cwd(), filePath);
+    if (!fs.existsSync(fullPath)) return null;
+    const stat = fs.statSync(fullPath);
+    const cached = fileCache[fullPath];
+    if (cached && cached.mtimeMs === stat.mtimeMs) {
+      return cached.content;
+    }
+    const content = fs.readFileSync(fullPath, 'utf-8');
+    fileCache[fullPath] = { content, mtimeMs: stat.mtimeMs };
+    return content;
+  } catch {
+    return null;
+  }
+}
+
+let cachedTop1kData: { raw: string; parsed: any } | null = null;
+
 // ─────────────────────────────────────────────────────────────────────────────
 // BaseOracle — Shared metadata, Sentiment, and Feature mappings from FPL API.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -52,11 +72,14 @@ export abstract class BaseOracle implements XPOracle {
   }
 
   private loadTop1kData(players: any[] = []) {
-    const jsonPath = path.resolve(process.cwd(), 'data', 'top_1000_eo.json');
-    if (fs.existsSync(jsonPath)) {
+    const raw = getCachedFile('data/top_1000_eo.json');
+    if (raw) {
       try {
-        const raw = fs.readFileSync(jsonPath, 'utf-8');
-        const parsed = JSON.parse(raw);
+        let parsed = (cachedTop1kData && cachedTop1kData.raw === raw) ? cachedTop1kData.parsed : null;
+        if (!parsed) {
+          parsed = JSON.parse(raw);
+          cachedTop1kData = { raw, parsed };
+        }
         if (parsed && parsed.players) {
           Object.keys(parsed.players).forEach(pId => {
             const data = parsed.players[pId];
@@ -322,13 +345,12 @@ export class FplformOracle extends BaseOracle {
     this.populateMetadataAndFeatures(players, fixtures, teams, nextEventId);
 
     // 2. Load and parse the FPLForm CSV file to override expected points (xpMatrix)
-    const fullPath = path.resolve(process.cwd(), filePath);
-    if (!fs.existsSync(fullPath)) {
-      console.warn(`[FplformOracle] Data file not found at ${fullPath}`);
+    const fileContent = getCachedFile(filePath);
+    if (!fileContent) {
+      console.warn(`[FplformOracle] Data file not found at ${filePath}`);
       return;
     }
 
-    const fileContent = fs.readFileSync(fullPath, 'utf-8');
     const lines = fileContent.split('\n');
 
     const teamShortMap: Record<string, number> = {};

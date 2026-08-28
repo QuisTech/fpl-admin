@@ -91,8 +91,10 @@ export async function getAIDecisions(userId: string, limit = 50): Promise<AIDeci
 
 export const SUPER_ADMIN_EMAILS = ['michquis@gmail.com'];
 
-export async function isAdminUser(userId: string): Promise<boolean> {
-  if (!userId) return false;
+export async function getUserProfileAndRole(userId: string) {
+  if (!userId) {
+    return { isAdmin: false, tier: 'free', profile: null, user: null };
+  }
   const db = getFirestore();
   try {
     const [userDoc, profileDoc] = await Promise.all([
@@ -102,12 +104,25 @@ export async function isAdminUser(userId: string): Promise<boolean> {
     const uData = userDoc.data() || {};
     const pData = profileDoc.data() || {};
     const email = (uData.email || pData.email || '').toLowerCase().trim();
-    if (SUPER_ADMIN_EMAILS.includes(email)) return true;
-    if (uData.role === 'admin' || uData.tier === 'admin' || pData.role === 'admin' || pData.tier === 'admin') return true;
+    const isAdmin = SUPER_ADMIN_EMAILS.includes(email) || 
+                    uData.role === 'admin' || uData.tier === 'admin' || 
+                    pData.role === 'admin' || pData.tier === 'admin';
+    const tier = uData.tier || pData.tier || 'free';
+    return {
+      isAdmin,
+      tier,
+      profile: profileDoc.exists ? pData : null,
+      user: userDoc.exists ? uData : null
+    };
   } catch (err) {
-    console.error("[Firestore] Error checking admin status:", err);
+    console.error("[Firestore] Error fetching user profile and role:", err);
+    return { isAdmin: false, tier: 'free', profile: null, user: null };
   }
-  return false;
+}
+
+export async function isAdminUser(userId: string): Promise<boolean> {
+  const { isAdmin } = await getUserProfileAndRole(userId);
+  return isAdmin;
 }
 
 export async function getUserTier(userId: string): Promise<string> {

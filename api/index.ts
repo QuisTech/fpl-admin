@@ -34,6 +34,8 @@ interface LPSolverModel {
 export class FPLService {
   private static cache: { data: any; timestamp: number } | null = null;
   private static CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+  private static recCache: Map<string, { data: RecommendationResponse; timestamp: number }> = new Map();
+  private static REC_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
   private static getHeaders() {
     return {
@@ -252,6 +254,16 @@ export class FPLService {
     targetGw?: number,
     skipComparison: boolean = false
   ): Promise<RecommendationResponse> {
+    const hasCustomConstraints = (lockedPlayerIds && lockedPlayerIds.length > 0) || (excludedPlayerIds && excludedPlayerIds.length > 0);
+    const cacheKey = `${riskMode}_${fuel}_${scenario}_${budget}_${tier}_${targetGw || 'auto'}_${skipComparison}`;
+
+    if (!hasCustomConstraints) {
+      const cached = this.recCache.get(cacheKey);
+      if (cached && (Date.now() - cached.timestamp < this.REC_CACHE_TTL)) {
+        return JSON.parse(JSON.stringify(cached.data));
+      }
+    }
+
     // For eye-test mode, skip FPL API call and use CSV data only
     let players: any[] = [];
     let teams: any[] = [];
@@ -586,7 +598,7 @@ export class FPLService {
 
     const totalXpWithCaptain = Math.round((startingXI.reduce((sum, p) => sum + (p.xP || 0), 0) + (captain?.xP || 0)) * 10) / 10;
 
-    return { 
+    const response: RecommendationResponse = { 
       squad, 
       startingXI, 
       bench,
@@ -626,6 +638,16 @@ export class FPLService {
       nextEventId,
       lastUpdated: Date.now()
     };
+
+    if (!hasCustomConstraints) {
+      this.recCache.set(cacheKey, { data: response, timestamp: Date.now() });
+      if (this.recCache.size > 50) {
+        const oldestKey = this.recCache.keys().next().value;
+        if (oldestKey) this.recCache.delete(oldestKey);
+      }
+    }
+
+    return response;
   }
 
   static calculateStrategicScore(rec: TransferRecommendation): number {
@@ -1166,6 +1188,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         ? req.body.excludedIds 
         : (excludedStr ? excludedStr.split(',').map((s: string) => parseInt(s.trim())).filter((n: number) => !isNaN(n)) : []);
       const skipComparison = query.skipComparison === 'true';
+
+      if (lockedIds.length === 0 && excludedIds.length === 0) {
+        res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+      }
 
       const result = await FPLService.getRecommendations(riskMode, budget, tier, fuel, scenario, lockedIds, excludedIds, undefined, skipComparison);
       return res.status(200).json(result);
