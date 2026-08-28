@@ -22,3 +22,4 @@ test_firebase_init.mjs
 # Backtesting Data & Logs
 data/vaastav/
 backtests/
+data/backtest_results_*.json
