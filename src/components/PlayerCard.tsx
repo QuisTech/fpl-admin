@@ -106,7 +106,7 @@ export const PlayerCard = ({
       {isCaptain && (
         <div 
           title="Captain (2x Points)"
-          className="absolute -top-1.5 -left-1 sm:-top-2 sm:-left-1.5 z-30 flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-black text-[#00ff85] border-2 border-[#00ff85] font-black text-[10px] sm:text-xs shadow-[0_0_10px_rgba(0,255,133,0.4)]"
+          className="absolute -top-1.5 -left-1 sm:-top-2 sm:-left-1.5 z-30 flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[#37003c] text-white border-2 border-white/80 font-black text-[10px] sm:text-xs shadow-lg"
         >
           C
         </div>
@@ -114,9 +114,9 @@ export const PlayerCard = ({
       {isViceCaptain && !isCaptain && (
         <div 
           title="Vice Captain"
-          className="absolute -top-1.5 -left-1 sm:-top-2 sm:-left-1.5 z-30 flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-slate-900 text-amber-300 border-2 border-amber-400 font-black text-[9px] sm:text-[11px] shadow-sm"
+          className="absolute -top-1.5 -left-1 sm:-top-2 sm:-left-1.5 z-30 flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[#37003c] text-[#00ff87] border-2 border-white/80 font-black text-[9px] sm:text-[11px] shadow-lg flex items-center gap-0.5"
         >
-          V
+          <span>V</span>
         </div>
       )}
 
@@ -166,8 +166,8 @@ export const PlayerCard = ({
         </div>
       )}
 
-      {/* 1. Official Club Jersey Container */}
-      <div className="relative flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 mb-0.5 drop-shadow-[0_4px_6px_rgba(0,0,0,0.6)]">
+      {/* 1. Official Club Jersey Container with Frosted Spotlight */}
+      <div className="relative flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 mb-0.5 rounded-xl bg-white/10 border border-white/15 backdrop-blur-xs p-1 shadow-sm drop-shadow-[0_4px_6px_rgba(0,0,0,0.4)]">
         {!imgError ? (
           <img 
             src={shirtUrl} 

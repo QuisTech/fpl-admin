@@ -165,16 +165,12 @@ export const PitchView = ({
         )}
       </div>
 
-      {/* 🌟 Authentic Football Pitch Container (Official Premier League 3D Perspective Broadcast Pitch) */}
+      {/* 🌟 Authentic Football Pitch Container (Full Edge-to-Edge Stadium Green Turf) */}
       <div className="relative mx-auto w-full py-1">
-        <div 
-          className="relative rounded-2xl overflow-hidden shadow-2xl border-2 border-emerald-500/60 bg-[#00a350] p-2 sm:p-4 md:p-6"
-          style={{
-            clipPath: 'polygon(6.5% 0%, 93.5% 0%, 100% 100%, 0% 100%)',
-          }}
-        >
+        <div className="relative rounded-2xl overflow-hidden shadow-2xl border-2 border-emerald-500/50 bg-[#00a350] p-2 sm:p-4">
+          
           {/* 🎛️ Pitch Stadium HUD: Floating Fixture Ticker Toggle */}
-          <div className="absolute top-3 right-3 sm:top-4 sm:right-8 z-30">
+          <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-30">
             <button
               onClick={() => setShowFixtures(!showFixtures)}
               className={cn(
@@ -206,163 +202,164 @@ export const PitchView = ({
               background: `repeating-linear-gradient(
                 to bottom,
                 #00a350,
-                #00a350 46px,
-                #009b4d 46px,
-                #009b4d 92px
+                #00a350 48px,
+                #009b4d 48px,
+                #009b4d 96px
               )`
             }}
           />
 
-          {/* 🏟️ Authentic High-Contrast Official Pitch Diagram (Vector SVG) */}
+          {/* 🏟️ Authentic Zoomed Official Pitch Diagram SVG (Full Edge-to-Edge Perspective) */}
           <svg 
-            className="absolute inset-0 w-full h-full pointer-events-none stroke-white/70 fill-none" 
+            className="absolute inset-0 w-full h-full pointer-events-none stroke-white/80 fill-none" 
             preserveAspectRatio="none" 
-            viewBox="0 0 1000 700"
+            viewBox="0 0 800 1000"
           >
-            {/* Outer Pitch Touchlines & Boundary (Tapered Perspective) */}
-            <polygon points="65,10 935,10 990,690 10,690" strokeWidth="3.5" />
-            
-            {/* Goal Mouth & Net (Behind Goal Line) */}
-            <polygon points="410,1 590,1 595,10 405,10" strokeWidth="2" className="stroke-white/40 fill-white/10" />
+            {/* Top Goal Net (Above Goal Line with Crosshatch Pattern) */}
+            <polygon points="280,4 520,4 532,32 268,32" strokeWidth="1.8" className="stroke-white/50 fill-white/10" />
+            <line x1="320" y1="4" x2="320" y2="32" strokeWidth="1" className="stroke-white/40" />
+            <line x1="360" y1="4" x2="360" y2="32" strokeWidth="1" className="stroke-white/40" />
+            <line x1="400" y1="4" x2="400" y2="32" strokeWidth="1" className="stroke-white/40" />
+            <line x1="440" y1="4" x2="440" y2="32" strokeWidth="1" className="stroke-white/40" />
+            <line x1="480" y1="4" x2="480" y2="32" strokeWidth="1" className="stroke-white/40" />
+            <line x1="275" y1="18" x2="525" y2="18" strokeWidth="1" className="stroke-white/40" />
 
-            {/* Top 6-Yard Goal Box */}
-            <polygon points="370,10 630,10 638,78 362,78" strokeWidth="2.5" />
+            {/* Top Goal Line */}
+            <line x1="120" y1="32" x2="680" y2="32" strokeWidth="3" />
+
+            {/* Slanted Sideline Touchlines (Tapering from Top Inward to Edge-to-Edge at Halfway Line) */}
+            <line x1="120" y1="32" x2="0" y2="700" strokeWidth="3.5" />
+            <line x1="680" y1="32" x2="800" y2="700" strokeWidth="3.5" />
+
+            {/* Top 6-Yard Goal Area */}
+            <polygon points="290,32 510,32 518,92 282,92" strokeWidth="2.2" />
 
             {/* Top 18-Yard Penalty Area in Perspective */}
-            <polygon points="250,10 750,10 770,205 230,205" strokeWidth="3" />
+            <polygon points="190,32 610,32 630,225 170,225" strokeWidth="2.8" />
             
             {/* Penalty Spot */}
-            <circle cx="500" cy="140" r="4" className="fill-white/80" stroke="none" />
+            <circle cx="400" cy="155" r="4.5" className="fill-white" stroke="none" />
             
-            {/* Penalty Arc ('D' Curving Downwards) */}
-            <path d="M 400,205 A 110,70 0 0,0 600,205" strokeWidth="2.5" />
+            {/* Penalty Arc ('D' Curving Downwards from 18-Yard Box) */}
+            <path d="M 315,225 A 95,60 0 0,0 485,225" strokeWidth="2.5" />
 
             {/* Top Corner Arcs */}
-            <path d="M 65,45 A 35,35 0 0,1 100,10" strokeWidth="2.5" />
-            <path d="M 900,10 A 35,35 0 0,1 935,45" strokeWidth="2.5" />
+            <path d="M 120,62 A 30,30 0 0,1 150,32" strokeWidth="2.5" />
+            <path d="M 650,32 A 30,30 0 0,1 680,62" strokeWidth="2.5" />
 
-            {/* Bottom Halfway Line */}
-            <line x1="10" y1="690" x2="990" y2="690" strokeWidth="4" />
+            {/* Halfway Line (Cutting edge-to-edge behind the forwards) */}
+            <line x1="0" y1="700" x2="800" y2="700" strokeWidth="4" />
             
-            {/* Extended Center Circle Semi-Circle Arc & Center Spot */}
-            <path d="M 300,690 A 210,135 0 0,1 700,690" strokeWidth="3" />
-            <circle cx="500" cy="690" r="5" className="fill-white/80" stroke="none" />
+            {/* Huge Prominent Center Circle (Surrounding the forwards) */}
+            <ellipse cx="400" cy="700" rx="170" ry="115" strokeWidth="3.2" />
+            <circle cx="400" cy="700" r="5" className="fill-white" stroke="none" />
           </svg>
 
           {/* 🏟️ Starting XI Lines on the Pitch */}
-          <div className="relative z-10 flex flex-col justify-around min-h-[480px] sm:min-h-[540px] md:min-h-[600px] py-2 px-3 sm:px-8">
-          
-          {/* Goalkeeper Line */}
-          <div className="flex justify-around items-center w-full my-1">
-            {formation.gkp.map(p => (
-              <PlayerCard 
-                key={p.id} 
-                player={p} 
-                showFixtures={showFixtures}
-                isCaptain={!!(data?.captain?.id && p.id === data.captain.id)} 
-                isViceCaptain={!!(data?.viceCaptain?.id && p.id === data.viceCaptain.id)}
-                isLocked={lockedPlayerIds.includes(p.id)}
-                isExcluded={excludedPlayerIds.includes(p.id)}
-                onToggleLock={onToggleLock}
-                onToggleExclude={onToggleExclude}
-              />
-            ))}
-          </div>
-
-          {/* Defenders Line */}
-          <div className="flex justify-around items-center w-full my-1">
-            {formation.def.map(p => (
-              <PlayerCard 
-                key={p.id} 
-                player={p} 
-                showFixtures={showFixtures}
-                isCaptain={!!(data?.captain?.id && p.id === data.captain.id)} 
-                isViceCaptain={!!(data?.viceCaptain?.id && p.id === data.viceCaptain.id)}
-                isLocked={lockedPlayerIds.includes(p.id)}
-                isExcluded={excludedPlayerIds.includes(p.id)}
-                onToggleLock={onToggleLock}
-                onToggleExclude={onToggleExclude}
-              />
-            ))}
-          </div>
-
-          {/* Midfielders Line */}
-          <div className="flex justify-around items-center w-full my-1">
-            {formation.mid.map(p => (
-              <PlayerCard 
-                key={p.id} 
-                player={p} 
-                showFixtures={showFixtures}
-                isCaptain={!!(data?.captain?.id && p.id === data.captain.id)} 
-                isViceCaptain={!!(data?.viceCaptain?.id && p.id === data.viceCaptain.id)}
-                isLocked={lockedPlayerIds.includes(p.id)}
-                isExcluded={excludedPlayerIds.includes(p.id)}
-                onToggleLock={onToggleLock}
-                onToggleExclude={onToggleExclude}
-              />
-            ))}
-          </div>
-
-          {/* Forwards Line */}
-          <div className="flex justify-around items-center w-full my-1">
-            {formation.fwd.map(p => (
-              <PlayerCard 
-                key={p.id} 
-                player={p} 
-                showFixtures={showFixtures}
-                isCaptain={!!(data?.captain?.id && p.id === data.captain.id)} 
-                isViceCaptain={!!(data?.viceCaptain?.id && p.id === data.viceCaptain.id)}
-                isLocked={lockedPlayerIds.includes(p.id)}
-                isExcluded={excludedPlayerIds.includes(p.id)}
-                onToggleLock={onToggleLock}
-                onToggleExclude={onToggleExclude}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-
-      {/* 🪑 Official Substitutes Bench Shelf */}
-      <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950/90 backdrop-blur-md p-3 shadow-xl">
-        <div className="flex items-center justify-between border-b border-slate-800/80 pb-2 mb-3">
-          <h4 className="text-xs font-black uppercase tracking-widest text-slate-300 flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#00ff85]"></span>
-            <span>Substitutes</span>
-          </h4>
-          <span className="text-[9px] font-mono text-slate-500 uppercase">Auto-Sub Priority (1 → 3)</span>
-        </div>
-
-        <div className="flex justify-around items-end gap-2 px-1">
-          {benchPlayers.map((p, idx) => {
-            const isGkp = idx === 0 || p.element_type === 1 || p.position === 'GKP';
-            const subLabel = isGkp ? 'GKP' : `${idx}. ${p.position || 'SUB'}`;
-
-            return (
-              <div key={p.id} className="flex flex-col items-center gap-1">
-                {/* Official Position / Auto-Sub Priority Header Badge */}
-                <div className={cn(
-                  "px-2 py-0.5 rounded text-[8px] sm:text-[9px] font-mono font-black uppercase tracking-wider",
-                  isGkp 
-                    ? "bg-amber-400/20 text-amber-300 border border-amber-400/40" 
-                    : "bg-slate-800 text-slate-300 border border-slate-700"
-                )}>
-                  {subLabel}
-                </div>
-
+          <div className="relative z-10 flex flex-col justify-around min-h-[480px] sm:min-h-[540px] md:min-h-[580px] py-1 px-1 sm:px-4">
+            
+            {/* Goalkeeper Line (Inside 18-Yard Box) */}
+            <div className="flex justify-around items-center w-full my-1">
+              {formation.gkp.map(p => (
                 <PlayerCard 
+                  key={p.id} 
                   player={p} 
-                  compact 
-                  benchIndex={idx}
                   showFixtures={showFixtures}
+                  isCaptain={!!(data?.captain?.id && p.id === data.captain.id)} 
+                  isViceCaptain={!!(data?.viceCaptain?.id && p.id === data.viceCaptain.id)}
                   isLocked={lockedPlayerIds.includes(p.id)}
                   isExcluded={excludedPlayerIds.includes(p.id)}
                   onToggleLock={onToggleLock}
                   onToggleExclude={onToggleExclude}
                 />
-              </div>
-            );
-          })}
+              ))}
+            </div>
+
+            {/* Defenders Line */}
+            <div className="flex justify-around items-center w-full my-1">
+              {formation.def.map(p => (
+                <PlayerCard 
+                  key={p.id} 
+                  player={p} 
+                  showFixtures={showFixtures}
+                  isCaptain={!!(data?.captain?.id && p.id === data.captain.id)} 
+                  isViceCaptain={!!(data?.viceCaptain?.id && p.id === data.viceCaptain.id)}
+                  isLocked={lockedPlayerIds.includes(p.id)}
+                  isExcluded={excludedPlayerIds.includes(p.id)}
+                  onToggleLock={onToggleLock}
+                  onToggleExclude={onToggleExclude}
+                />
+              ))}
+            </div>
+
+            {/* Midfielders Line */}
+            <div className="flex justify-around items-center w-full my-1">
+              {formation.mid.map(p => (
+                <PlayerCard 
+                  key={p.id} 
+                  player={p} 
+                  showFixtures={showFixtures}
+                  isCaptain={!!(data?.captain?.id && p.id === data.captain.id)} 
+                  isViceCaptain={!!(data?.viceCaptain?.id && p.id === data.viceCaptain.id)}
+                  isLocked={lockedPlayerIds.includes(p.id)}
+                  isExcluded={excludedPlayerIds.includes(p.id)}
+                  onToggleLock={onToggleLock}
+                  onToggleExclude={onToggleExclude}
+                />
+              ))}
+            </div>
+
+            {/* Forwards Line (Inside Center Circle) */}
+            <div className="flex justify-around items-center w-full my-1">
+              {formation.fwd.map(p => (
+                <PlayerCard 
+                  key={p.id} 
+                  player={p} 
+                  showFixtures={showFixtures}
+                  isCaptain={!!(data?.captain?.id && p.id === data.captain.id)} 
+                  isViceCaptain={!!(data?.viceCaptain?.id && p.id === data.viceCaptain.id)}
+                  isLocked={lockedPlayerIds.includes(p.id)}
+                  isExcluded={excludedPlayerIds.includes(p.id)}
+                  onToggleLock={onToggleLock}
+                  onToggleExclude={onToggleExclude}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* 🪑 Official Substitutes Bench Dugout Shelf (Embedded Inside Bottom of Green Pitch) */}
+          <div className="relative z-10 mt-3 rounded-xl border border-emerald-400/40 bg-emerald-950/40 backdrop-blur-md p-2.5 shadow-2xl">
+            <div className="flex justify-around items-end gap-1 sm:gap-2 px-1">
+              {benchPlayers.map((p, idx) => {
+                const isGkp = idx === 0 || p.element_type === 1 || p.position === 'GKP';
+                const subLabel = isGkp ? 'GKP' : `${idx}. ${p.position || 'SUB'}`;
+
+                return (
+                  <div key={p.id} className="flex flex-col items-center gap-1">
+                    {/* Official Position / Auto-Sub Priority Header Label */}
+                    <div className="text-[9px] sm:text-[10px] font-mono font-extrabold uppercase tracking-wider text-emerald-100 border-b border-dotted border-white/40 pb-0.5 px-1">
+                      {subLabel}
+                    </div>
+
+                    {/* Semi-transparent frosted slot card wrapper */}
+                    <div className="bg-white/10 rounded-lg p-1 border border-white/15 shadow-inner">
+                      <PlayerCard 
+                        player={p} 
+                        compact 
+                        benchIndex={idx}
+                        showFixtures={showFixtures}
+                        isLocked={lockedPlayerIds.includes(p.id)}
+                        isExcluded={excludedPlayerIds.includes(p.id)}
+                        onToggleLock={onToggleLock}
+                        onToggleExclude={onToggleExclude}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
         </div>
       </div>
 
