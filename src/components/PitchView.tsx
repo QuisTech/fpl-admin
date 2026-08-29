@@ -56,62 +56,35 @@ export const PitchView = ({
       exit={{ opacity: 0 }}
       className="flex-grow flex flex-col justify-between py-2 w-full max-w-5xl mx-auto"
     >
-      {/* Top Controls: Scenario Switcher, Delta Comparison Bar & Fixture Toggle */}
+      {/* Top Controls: Scenario Switcher & Delta Comparison Bar */}
       <div className="space-y-2 mb-3">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2 bg-slate-950/90 p-2 rounded-xl border border-fpl-border/80 backdrop-blur-md shadow-lg">
           
-          {/* Left: Scenario Switcher & Show/Hide Fixtures Button */}
-          <div className="flex items-center gap-1.5 w-full sm:w-auto">
-            {/* Scenario Switcher */}
-            <div className="flex items-center gap-1 bg-slate-900/90 p-1 rounded-lg border border-slate-800 flex-1 sm:flex-none">
-              <button
-                onClick={() => onSelectScenario?.('quant')}
-                className={cn(
-                  "flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-wider transition-all",
-                  activeScenario === 'quant'
-                    ? "bg-fpl-green text-slate-950 shadow-[0_0_12px_rgba(0,255,133,0.35)]"
-                    : "text-slate-400 hover:text-slate-200"
-                )}
-              >
-                <Zap className="w-3 h-3" />
-                <span>Quant Optimal</span>
-              </button>
-              <button
-                onClick={() => onSelectScenario?.('template')}
-                className={cn(
-                  "flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-wider transition-all",
-                  activeScenario === 'template'
-                    ? "bg-purple-600 text-white shadow-[0_0_12px_rgba(168,85,247,0.35)]"
-                    : "text-slate-400 hover:text-slate-200"
-                )}
-              >
-                <Shield className="w-3 h-3 text-purple-300" />
-                <span>Template Shield</span>
-              </button>
-            </div>
-
-            {/* 🗓️ Show / Hide Fixtures Toggle Button */}
+          {/* Left: Scenario Switcher */}
+          <div className="flex items-center gap-1.5 bg-slate-900/90 p-1 rounded-lg border border-slate-800 w-full sm:w-auto">
             <button
-              onClick={() => setShowFixtures(!showFixtures)}
+              onClick={() => onSelectScenario?.('quant')}
               className={cn(
-                "flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border text-[10px] font-black uppercase tracking-wider transition-all shadow-sm",
-                showFixtures 
-                  ? "bg-slate-900 border-slate-700 text-[#00ff85] hover:border-[#00ff85]/50" 
-                  : "bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-900"
+                "flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-wider transition-all",
+                activeScenario === 'quant'
+                  ? "bg-fpl-green text-slate-950 shadow-[0_0_12px_rgba(0,255,133,0.35)]"
+                  : "text-slate-400 hover:text-slate-200"
               )}
-              title="Toggle upcoming 3-match fixture ticker under players"
             >
-              {showFixtures ? (
-                <>
-                  <Eye className="w-3 h-3 text-[#00ff85]" />
-                  <span className="hidden md:inline">Fixtures On</span>
-                </>
-              ) : (
-                <>
-                  <EyeOff className="w-3 h-3 text-slate-500" />
-                  <span className="hidden md:inline">Fixtures Off</span>
-                </>
+              <Zap className="w-3 h-3" />
+              <span>Quant Optimal</span>
+            </button>
+            <button
+              onClick={() => onSelectScenario?.('template')}
+              className={cn(
+                "flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-wider transition-all",
+                activeScenario === 'template'
+                  ? "bg-purple-600 text-white shadow-[0_0_12px_rgba(168,85,247,0.35)]"
+                  : "text-slate-400 hover:text-slate-200"
               )}
+            >
+              <Shield className="w-3 h-3 text-purple-300" />
+              <span>Template Shield</span>
             </button>
           </div>
 
@@ -200,6 +173,32 @@ export const PitchView = ({
             clipPath: 'polygon(3.5% 0%, 96.5% 0%, 100% 100%, 0% 100%)',
           }}
         >
+          {/* 🎛️ Pitch Stadium HUD: Floating Fixture Ticker Toggle */}
+          <div className="absolute top-3 right-3 sm:top-4 sm:right-6 z-30">
+            <button
+              onClick={() => setShowFixtures(!showFixtures)}
+              className={cn(
+                "flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider backdrop-blur-md transition-all shadow-lg select-none",
+                showFixtures 
+                  ? "bg-black/70 border-emerald-400/50 text-[#00ff85] hover:bg-black/90 hover:border-emerald-400" 
+                  : "bg-black/40 border-white/20 text-white/70 hover:bg-black/70 hover:text-white"
+              )}
+              title="Toggle upcoming 3-match FDR fixture ticker under players"
+            >
+              {showFixtures ? (
+                <>
+                  <Eye className="w-3 h-3 text-[#00ff85]" />
+                  <span>3-Match FDR: On</span>
+                </>
+              ) : (
+                <>
+                  <EyeOff className="w-3 h-3 text-white/50" />
+                  <span>3-Match FDR: Off</span>
+                </>
+              )}
+            </button>
+          </div>
+
           {/* Realistic Mown Grass Horizontal Lawn Stripes Background */}
           <div 
             className="absolute inset-0 pointer-events-none"
