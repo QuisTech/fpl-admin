@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { cn } from '../lib/utils';
 import { ScoredPlayer } from '../types';
-import { Lock, Ban, ShieldAlert } from 'lucide-react';
+import { Lock, Ban } from 'lucide-react';
 
 interface PlayerCardProps {
   player: ScoredPlayer;
@@ -12,7 +12,8 @@ interface PlayerCardProps {
   onToggleLock?: (id: number) => void;
   onToggleExclude?: (id: number) => void;
   compact?: boolean;
-  benchIndex?: number; // 0: GKP, 1: 1st Sub, 2: 2nd Sub, 3: 3rd Sub
+  benchIndex?: number;
+  showFixtures?: boolean;
   key?: number | string;
 }
 
@@ -78,6 +79,7 @@ export const PlayerCard = ({
   onToggleLock, 
   onToggleExclude, 
   compact = false,
+  showFixtures = true,
   benchIndex
 }: PlayerCardProps) => {
   const [imgError, setImgError] = useState(false);
@@ -96,7 +98,7 @@ export const PlayerCard = ({
   return (
     <div className={cn(
       "group relative flex flex-col items-center justify-start transition-all duration-200 hover:scale-105 select-none",
-      compact ? "w-[70px] sm:w-20" : "w-[78px] sm:w-[94px] md:w-28",
+      compact ? "w-[72px] sm:w-[84px]" : "w-[80px] sm:w-[98px] md:w-[114px]",
       isExcluded && "opacity-35 grayscale"
     )}>
 
@@ -188,16 +190,16 @@ export const PlayerCard = ({
         )}
 
         {/* Floating Analytical xP Badge on Jersey */}
-        <div className="absolute -bottom-1 -right-1 sm:-bottom-1.5 sm:-right-1.5 bg-slate-950/95 border border-fpl-green/60 text-fpl-green font-mono font-black text-[7.5px] sm:text-[9px] px-1 py-0.25 rounded shadow-lg backdrop-blur-xs flex items-center gap-0.5">
+        <div className="absolute -bottom-1 -right-1 sm:-bottom-1.5 sm:-right-1.5 bg-slate-950/95 border border-fpl-green/70 text-fpl-green font-mono font-black text-[8px] sm:text-[9.5px] px-1 py-0.25 rounded shadow-lg backdrop-blur-xs flex items-center gap-0.5">
           <span>{typeof player.xP === 'number' ? player.xP.toFixed(1) : '—'}</span>
           <span className="text-[6px] text-slate-400 font-normal">xP</span>
         </div>
       </div>
 
       {/* 2. Official 2-Tier Nameplate */}
-      <div className="w-full rounded shadow-md overflow-hidden border border-slate-900/60">
+      <div className="w-full rounded shadow-md overflow-hidden border border-black/40">
         
-        {/* Tier 1: Player Name Bar (Official Dark Navy/Purple Theme) */}
+        {/* Tier 1: Player Name Bar (Official Dark Navy/Purple Background) */}
         <div className="bg-[#37003c] px-1 py-0.5 text-center flex items-center justify-center gap-1">
           <span className="font-extrabold text-white text-[9px] sm:text-[11px] leading-tight truncate">
             {player.web_name}
@@ -207,20 +209,20 @@ export const PlayerCard = ({
           )}
         </div>
 
-        {/* Tier 2: Next Fixture or Live Points Bar */}
+        {/* Tier 2: Next Fixture Bar (Distinctive Background Colors for Instant Visibility) */}
         <div className={cn(
-          "px-1 py-0.5 text-center flex items-center justify-between text-[7.5px] sm:text-[9px] font-bold font-mono tracking-tight",
+          "px-1 py-0.5 text-center flex items-center justify-between text-[7.5px] sm:text-[9px] font-extrabold font-mono tracking-tight shadow-inner",
           nextFixture ? (
-            nextFixture.difficulty <= 2 ? "bg-emerald-950 text-emerald-300 border-t border-emerald-800/40" :
-            nextFixture.difficulty === 3 ? "bg-slate-900 text-slate-200 border-t border-slate-800" :
-            nextFixture.difficulty === 4 ? "bg-rose-950 text-rose-300 border-t border-rose-800/40" :
-            "bg-purple-950 text-purple-200 border-t border-purple-800/40"
-          ) : "bg-slate-900 text-slate-300 border-t border-slate-800"
+            nextFixture.difficulty <= 2 ? "bg-[#00753b] text-white" :
+            nextFixture.difficulty === 3 ? "bg-[#374151] text-white" :
+            nextFixture.difficulty === 4 ? "bg-[#e11d48] text-white" :
+            "bg-[#881337] text-white"
+          ) : "bg-slate-800 text-slate-200"
         )}>
-          <span className="truncate flex-1">
+          <span className="truncate flex-1 font-black">
             {nextFixture ? `${nextFixture.opponent} (${nextFixture.is_home ? 'H' : 'A'})` : teamShort}
           </span>
-          <span className="text-[6.5px] sm:text-[7.5px] text-slate-400 font-normal ml-0.5">
+          <span className="text-[6.5px] sm:text-[7.5px] text-white/90 font-bold ml-1 px-1 py-0.25 rounded bg-black/25">
             {typeof player.eo === 'number' && player.eo > 0 
               ? `${player.eo.toFixed(0)}%` 
               : `£${(player.now_cost / 10).toFixed(1)}M`}
@@ -228,19 +230,19 @@ export const PlayerCard = ({
         </div>
       </div>
 
-      {/* 3. Next 3 FDR Fixture Difficulty Ticker */}
-      {!compact && player.next_fixtures && player.next_fixtures.length > 0 && (
+      {/* 3. Next 3 FDR Fixture Difficulty Ticker (Distinctive Solid Backgrounds) */}
+      {showFixtures && !compact && player.next_fixtures && player.next_fixtures.length > 0 && (
         <div className="flex items-center justify-center gap-0.5 mt-1 w-full px-0.5">
           {player.next_fixtures.slice(0, 3).map((f, idx) => (
             <span
               key={idx}
               title={`${f.opponent} (${f.is_home ? 'Home' : 'Away'}) - FDR ${f.difficulty}`}
               className={cn(
-                "text-[6px] sm:text-[7.5px] font-black px-0.5 sm:px-1 py-0.25 rounded font-mono leading-none tracking-tighter truncate flex items-center justify-center",
-                f.difficulty <= 2 ? "bg-emerald-500/25 text-emerald-300 border border-emerald-500/40" :
-                f.difficulty === 3 ? "bg-amber-500/25 text-amber-300 border border-amber-500/40" :
-                f.difficulty === 4 ? "bg-rose-500/25 text-rose-300 border border-rose-500/40" :
-                "bg-purple-500/25 text-purple-300 border border-purple-500/40"
+                "text-[6.5px] sm:text-[8px] font-extrabold px-1 py-0.5 rounded font-mono leading-none tracking-tighter truncate flex items-center justify-center shadow-md",
+                f.difficulty <= 2 ? "bg-[#00753b] text-white border border-emerald-400/40" :
+                f.difficulty === 3 ? "bg-[#374151] text-white border border-slate-500/40" :
+                f.difficulty === 4 ? "bg-[#e11d48] text-white border border-rose-400/40" :
+                "bg-[#881337] text-white border border-pink-400/40"
               )}
             >
               {f.opponent}{f.is_home ? '(H)' : '(A)'}
