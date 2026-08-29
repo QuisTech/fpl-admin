@@ -217,43 +217,58 @@ export const PitchView = ({
             preserveAspectRatio="none" 
             viewBox="0 0 800 1050"
           >
-            {/* 🏟️ Stadium Outer Flanks (#0f172a Dark Surround Meeting Edge at Tail of Defenders y=365) */}
+            {/* 🏟️ Stadium Outer Flanks (#0f172a Dark Surround Outside Pitch & Billboard Headers) */}
             <polygon 
-              points="-10,-10 290,-10 290,4 278,4 105,12 0,365 -10,365 -10,-10" 
+              points="-10,-10 125,-10 125,6 105,12 0,365 -10,365 -10,-10" 
               className="fill-[#0f172a] stroke-[#0f172a]" 
               strokeWidth="2"
             />
             <polygon 
-              points="810,-10 510,-10 510,4 522,4 695,12 800,365 810,365 810,-10" 
+              points="810,-10 675,-10 675,6 695,12 800,365 810,365 810,-10" 
               className="fill-[#0f172a] stroke-[#0f172a]" 
               strokeWidth="2"
             />
             <polygon 
-              points="285,-10 515,-10 515,4 285,4" 
+              points="125,-10 675,-10 675,6 125,6" 
               className="fill-[#0f172a] stroke-[#0f172a]" 
               strokeWidth="2"
             />
 
             {/* 🏟️ Parallel Outer Pitch Boundary (Meeting Edge at Tail of Defenders y=365) */}
             <polyline 
-              points="0,365 105,12 280,12" 
+              points="0,365 105,12 125,6" 
               strokeWidth="2" 
               className="stroke-white/70" 
             />
             <polyline 
-              points="520,12 695,12 800,365" 
+              points="675,6 695,12 800,365" 
               strokeWidth="2" 
               className="stroke-white/70" 
             />
 
-            {/* Top Goal Net (Above Goal Line with Crosshatch Pattern) */}
-            <polygon points="290,4 510,4 522,30 278,30" strokeWidth="1.8" className="stroke-white/50 fill-white/10" />
-            <line x1="330" y1="4" x2="330" y2="30" strokeWidth="1" className="stroke-white/40" />
-            <line x1="370" y1="4" x2="370" y2="30" strokeWidth="1" className="stroke-white/40" />
-            <line x1="400" y1="4" x2="400" y2="30" strokeWidth="1" className="stroke-white/40" />
-            <line x1="430" y1="4" x2="430" y2="30" strokeWidth="1" className="stroke-white/40" />
-            <line x1="470" y1="4" x2="470" y2="30" strokeWidth="1" className="stroke-white/40" />
-            <line x1="284" y1="16" x2="516" y2="16" strokeWidth="1" className="stroke-white/40" />
+            {/* 🌟 Left Billboard: Vibrant Cyan "Fantasy" with Premier League Crown Lion */}
+            <rect x="125" y="6" width="215" height="26" rx="6" className="fill-[#00e5ff] stroke-none" />
+            <g transform="translate(170, 10)">
+              {/* Crowned Lion Head Vector */}
+              <path d="M12 2L14.5 5.5L18 4L16.5 8L20 9.5L17.5 12.5L18.5 16L15 14.5L13 18L11 14.5L7.5 16L8.5 12.5L6 9.5L9.5 8L8 4L11.5 5.5Z" fill="#37003c" />
+              <text x="24" y="14" fill="#37003c" fontSize="14" fontWeight="900" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="0.4">Fantasy</text>
+            </g>
+
+            {/* 🌟 Center Goal Net (With Blue/Cyan Mesh Grid & White Goalposts) */}
+            <polygon points="340,6 460,6 465,30 335,30" className="fill-[#00b4d8]/30 stroke-white" strokeWidth="2" />
+            <line x1="365" y1="6" x2="365" y2="30" strokeWidth="1" className="stroke-white/60" />
+            <line x1="390" y1="6" x2="390" y2="30" strokeWidth="1" className="stroke-white/60" />
+            <line x1="410" y1="6" x2="410" y2="30" strokeWidth="1" className="stroke-white/60" />
+            <line x1="435" y1="6" x2="435" y2="30" strokeWidth="1" className="stroke-white/60" />
+            <line x1="337" y1="18" x2="463" y2="18" strokeWidth="1" className="stroke-white/60" />
+
+            {/* 🌟 Right Billboard: Vibrant Violet "Fantasy" with Premier League Crown Lion */}
+            <rect x="460" y="6" width="215" height="26" rx="6" className="fill-[#6366f1] stroke-none" />
+            <g transform="translate(505, 10)">
+              {/* Crowned Lion Head Vector */}
+              <path d="M12 2L14.5 5.5L18 4L16.5 8L20 9.5L17.5 12.5L18.5 16L15 14.5L13 18L11 14.5L7.5 16L8.5 12.5L6 9.5L9.5 8L8 4L11.5 5.5Z" fill="#1e1b4b" />
+              <text x="24" y="14" fill="#1e1b4b" fontSize="14" fontWeight="900" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="0.4">Fantasy</text>
+            </g>
 
             {/* Top Goal Line */}
             <line x1="125" y1="30" x2="675" y2="30" strokeWidth="3" />
@@ -394,6 +409,11 @@ export const PitchView = ({
                 );
               })}
             </div>
+            
+            {/* 🪑 Official Substitutes Header Label */}
+            <p className="text-center text-white font-extrabold text-xs sm:text-sm tracking-wider mt-2.5 drop-shadow-md">
+              Substitutes
+            </p>
           </div>
 
         </div>
