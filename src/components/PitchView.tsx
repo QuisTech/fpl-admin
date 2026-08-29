@@ -255,11 +255,11 @@ export const PitchView = ({
             <circle cx="400" cy="700" r="5" className="fill-white" stroke="none" />
           </svg>
 
-          {/* 🏟️ Starting XI Lines on the Pitch with Generous Breathing Room */}
-          <div className="relative z-10 flex flex-col justify-between min-h-[540px] sm:min-h-[620px] md:min-h-[700px] lg:min-h-[760px] py-4 sm:py-6 px-1 sm:px-4 md:px-8">
+          {/* 🏟️ Starting XI Lines on the Pitch with Fantastic Airy Spacing */}
+          <div className="relative z-10 flex flex-col justify-between min-h-[560px] sm:min-h-[640px] md:min-h-[720px] lg:min-h-[780px] py-4 sm:py-6 px-1 sm:px-4 md:px-8">
             
             {/* Goalkeeper Line (Inside 18-Yard Box) */}
-            <div className="flex justify-evenly items-center w-full my-1 sm:my-2">
+            <div className="flex justify-center items-center gap-4 sm:gap-8 md:gap-12 w-full my-1 sm:my-2">
               {formation.gkp.map(p => (
                 <PlayerCard 
                   key={p.id} 
@@ -276,7 +276,7 @@ export const PitchView = ({
             </div>
 
             {/* Defenders Line */}
-            <div className="flex justify-evenly items-center w-full my-2 sm:my-3">
+            <div className="flex justify-center items-center gap-3 sm:gap-6 md:gap-8 lg:gap-10 w-full my-2 sm:my-3.5">
               {formation.def.map(p => (
                 <PlayerCard 
                   key={p.id} 
@@ -293,7 +293,7 @@ export const PitchView = ({
             </div>
 
             {/* Midfielders Line */}
-            <div className="flex justify-evenly items-center w-full my-2 sm:my-3">
+            <div className="flex justify-center items-center gap-3 sm:gap-6 md:gap-8 lg:gap-10 w-full my-2 sm:my-3.5">
               {formation.mid.map(p => (
                 <PlayerCard 
                   key={p.id} 
@@ -310,7 +310,7 @@ export const PitchView = ({
             </div>
 
             {/* Forwards Line (Inside Center Circle) */}
-            <div className="flex justify-evenly items-center w-full my-1 sm:my-2">
+            <div className="flex justify-center items-center gap-4 sm:gap-8 md:gap-12 w-full my-1 sm:my-2">
               {formation.fwd.map(p => (
                 <PlayerCard 
                   key={p.id} 
