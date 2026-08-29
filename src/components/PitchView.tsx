@@ -360,8 +360,11 @@ export const PitchView = ({
             </div>
           </div>
 
+          {/* 🌿 Smooth Bottom Grass-to-App Background Fade (#0f172a at Bench Nameplates) */}
+          <div className="absolute inset-x-0 bottom-0 h-28 sm:h-36 bg-gradient-to-b from-transparent via-[#0f172a]/70 to-[#0f172a] pointer-events-none z-10" />
+
           {/* 🪑 Official Substitutes Bench Dugout Shelf (Proportional Frosted Shelf at Pitch Bottom) */}
-          <div className="relative z-10 w-full max-w-[90%] mx-auto mt-4 sm:mt-6 rounded-xl border border-emerald-400/40 bg-emerald-950/45 backdrop-blur-md p-3 sm:p-4 shadow-2xl">
+          <div className="relative z-20 w-full max-w-[90%] mx-auto mt-4 sm:mt-6 rounded-xl border border-white/15 bg-[#0f172a]/40 backdrop-blur-md p-3 sm:p-4 shadow-2xl">
             <div className="flex justify-around items-end gap-1 sm:gap-3 px-1 sm:px-2">
               {benchPlayers.map((p, idx) => {
                 const isGkp = idx === 0 || p.element_type === 1 || p.position === 'GKP';
