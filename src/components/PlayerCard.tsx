@@ -133,7 +133,10 @@ export const PlayerCard = ({
 
       {/* Interactive Solver Constraints Hover Overlay */}
       {(onToggleLock || onToggleExclude) && (
-        <div className="absolute -top-2 right-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 z-40 bg-slate-950/90 p-0.5 rounded-md border border-slate-700 shadow-xl">
+        <div className={cn(
+          "absolute opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 z-40 bg-slate-950/90 p-0.5 rounded-md border border-slate-700 shadow-xl",
+          isGkp && !compact ? "top-1 right-0" : "-top-2 right-0"
+        )}>
           {onToggleLock && (
             <button
               onClick={(e) => {
@@ -214,18 +217,18 @@ export const PlayerCard = ({
           <span className="font-extrabold text-slate-950 text-[9px] sm:text-[11px] leading-tight truncate">
             {player.web_name}
           </span>
-          {player.now_cost >= 80 && (
-            <span className="text-amber-500 text-[8px] font-black" title="Premium Asset">★</span>
-          )}
         </div>
 
-        {/* Tier 2: Next Fixture Bar (Clean Official Background with FDR Color Accent Pill) */}
-        <div className="bg-slate-50 px-1 py-0.5 text-center flex items-center justify-between text-[7.5px] sm:text-[9px] font-extrabold font-mono tracking-tight text-slate-800">
-          <span className="truncate flex-1 font-black">
-            {nextFixture ? `${nextFixture.opponent} (${nextFixture.is_home ? 'H' : 'A'})` : teamShort}
+        {/* Tier 2: Next Fixture & Solid FDR Price/EO Pill */}
+        <div className="w-full bg-slate-50 px-1 py-0.5 flex items-center justify-between gap-1 text-[7.5px] sm:text-[9px] font-bold text-slate-800">
+          {/* Opponent & Venue Info */}
+          <span className="truncate tracking-tighter text-slate-700 font-semibold font-mono">
+            {nextFixture ? `${nextFixture.opponent} (${nextFixture.is_home ? 'H' : 'A'})` : '-'}
           </span>
+
+          {/* Solid FDR-Colored Accent Pill (Price or Est. EO) */}
           <span className={cn(
-            "text-[6.5px] sm:text-[7.5px] font-black px-1 py-0.25 rounded text-white ml-1 shadow-xs",
+            "text-[7px] sm:text-[8px] font-black px-1 py-0.2 rounded text-white font-mono shrink-0 shadow-sm",
             nextFixture ? (
               nextFixture.difficulty <= 2 ? "bg-[#00753b]" :
               nextFixture.difficulty === 3 ? "bg-[#374151]" :
@@ -261,8 +264,11 @@ export const PlayerCard = ({
         </div>
       )}
 
-      {/* 4. Engine Math Hover Tooltip */}
-      <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity z-50 bg-slate-950/95 backdrop-blur-md border border-slate-700 text-slate-300 text-[9px] p-2.5 rounded-lg shadow-2xl w-40 bottom-full mb-2 left-1/2 -translate-x-1/2 pointer-events-none">
+      {/* 4. Engine Math Hover Tooltip (Pops downward for GK to avoid top header clipping, upward for outfielders) */}
+      <div className={cn(
+        "absolute opacity-0 group-hover:opacity-100 transition-opacity z-50 bg-slate-950/95 backdrop-blur-md border border-slate-700 text-slate-300 text-[9px] p-2.5 rounded-lg shadow-2xl w-40 left-1/2 -translate-x-1/2 pointer-events-none",
+        isGkp && !compact ? "top-full mt-2" : "bottom-full mb-2"
+      )}>
         <div className="font-bold border-b border-slate-800 pb-1 mb-1.5 text-white flex justify-between items-center">
           <span>{player.web_name}</span>
           <span className="text-[8px] font-mono text-slate-400">{teamShort} • {player.position}</span>
