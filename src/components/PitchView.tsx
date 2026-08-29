@@ -169,7 +169,7 @@ export const PitchView = ({
 
       {/* 🌟 Authentic Football Pitch Container (1:1 Proportional Match with Official FPL) */}
       <div className="relative mx-auto w-full max-w-2xl py-1">
-        <div className="relative rounded-2xl overflow-hidden shadow-2xl border-2 border-emerald-500/50 bg-[#00a350] p-2 sm:p-4">
+        <div className="relative rounded-2xl overflow-hidden shadow-2xl border-2 border-slate-800 bg-[#00a350] p-2 sm:p-4">
           
           {/* 🎛️ Pitch Stadium HUD: Floating Fixture Ticker Toggle */}
           <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-30">
@@ -217,18 +217,21 @@ export const PitchView = ({
             preserveAspectRatio="none" 
             viewBox="0 0 800 1050"
           >
-            {/* 🏟️ Stadium Outer Flanks (#030619 Dark Surround in Upper Half Outside Slanted Sidelines) */}
+            {/* 🏟️ Stadium Outer Flanks (#0f172a Dark Surround in Upper Half Outside Slanted Sidelines) */}
             <polygon 
-              points="0,0 290,0 290,4 278,30 125,30 0,700 0,0" 
-              className="fill-[#030619] stroke-none" 
+              points="-10,-10 290,-10 290,4 278,30 125,30 0,700 -10,700 -10,-10" 
+              className="fill-[#0f172a] stroke-[#0f172a]" 
+              strokeWidth="2"
             />
             <polygon 
-              points="800,0 510,0 510,4 522,30 675,30 800,700 800,0" 
-              className="fill-[#030619] stroke-none" 
+              points="810,-10 510,-10 510,4 522,30 675,30 800,700 810,700 810,-10" 
+              className="fill-[#0f172a] stroke-[#0f172a]" 
+              strokeWidth="2"
             />
             <polygon 
-              points="290,0 510,0 510,4 290,4" 
-              className="fill-[#030619] stroke-none" 
+              points="285,-10 515,-10 515,4 285,4" 
+              className="fill-[#0f172a] stroke-[#0f172a]" 
+              strokeWidth="2"
             />
 
             {/* Top Goal Net (Above Goal Line with Crosshatch Pattern) */}
