@@ -213,37 +213,40 @@ export const PitchView = ({
             }}
           />
 
-          {/* 🏟️ Authentic Zoomed Half-Pitch Perspective Markings SVG */}
+          {/* 🏟️ Authentic High-Contrast Official Pitch Diagram (Vector SVG) */}
           <svg 
-            className="absolute inset-0 w-full h-full pointer-events-none stroke-white/45 fill-none" 
+            className="absolute inset-0 w-full h-full pointer-events-none stroke-white/70 fill-none" 
             preserveAspectRatio="none" 
             viewBox="0 0 1000 700"
           >
-            {/* Outer Pitch Boundary (Defending Half in Pronounced Perspective) */}
-            <polygon points="70,12 930,12 990,690 10,690" strokeWidth="3" />
+            {/* Outer Pitch Touchlines & Boundary (Tapered Perspective) */}
+            <polygon points="65,10 935,10 990,690 10,690" strokeWidth="3.5" />
             
-            {/* Top Goal Box (6-yard area) */}
-            <polygon points="375,12 625,12 632,75 368,75" strokeWidth="2.2" />
+            {/* Goal Mouth & Net (Behind Goal Line) */}
+            <polygon points="410,1 590,1 595,10 405,10" strokeWidth="2" className="stroke-white/40 fill-white/10" />
 
-            {/* Top Penalty Area (18-yard box in Perspective) */}
-            <polygon points="255,12 745,12 765,195 235,195" strokeWidth="2.5" />
+            {/* Top 6-Yard Goal Box */}
+            <polygon points="370,10 630,10 638,78 362,78" strokeWidth="2.5" />
+
+            {/* Top 18-Yard Penalty Area in Perspective */}
+            <polygon points="250,10 750,10 770,205 230,205" strokeWidth="3" />
             
             {/* Penalty Spot */}
-            <circle cx="500" cy="135" r="3.5" className="fill-white/60" />
+            <circle cx="500" cy="140" r="4" className="fill-white/80" stroke="none" />
             
-            {/* Penalty Arc ('D' extending downwards) */}
-            <path d="M 405,195 A 105,65 0 0,0 595,195" strokeWidth="2.2" />
+            {/* Penalty Arc ('D' Curving Downwards) */}
+            <path d="M 400,205 A 110,70 0 0,0 600,205" strokeWidth="2.5" />
 
             {/* Top Corner Arcs */}
-            <path d="M 70,45 A 32,32 0 0,1 102,12" strokeWidth="2.2" />
-            <path d="M 898,12 A 32,32 0 0,1 930,45" strokeWidth="2.2" />
+            <path d="M 65,45 A 35,35 0 0,1 100,10" strokeWidth="2.5" />
+            <path d="M 900,10 A 35,35 0 0,1 935,45" strokeWidth="2.5" />
 
-            {/* Bottom Halfway Line & Center Circle (Extended in Foreground) */}
-            <line x1="10" y1="690" x2="990" y2="690" strokeWidth="3.5" />
+            {/* Bottom Halfway Line */}
+            <line x1="10" y1="690" x2="990" y2="690" strokeWidth="4" />
             
-            {/* Large Semi-Circle Center Arc Bulging Upwards into Foreground */}
-            <path d="M 310,690 A 200,125 0 0,1 690,690" strokeWidth="2.8" />
-            <circle cx="500" cy="690" r="4.5" className="fill-white/60" />
+            {/* Extended Center Circle Semi-Circle Arc & Center Spot */}
+            <path d="M 300,690 A 210,135 0 0,1 700,690" strokeWidth="3" />
+            <circle cx="500" cy="690" r="5" className="fill-white/80" stroke="none" />
           </svg>
 
           {/* 🏟️ Starting XI Lines on the Pitch */}
