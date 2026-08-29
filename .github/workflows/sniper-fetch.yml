@@ -5,8 +5,8 @@ permissions:
 
 on:
   schedule:
-    # Runs at the top of every hour
-    - cron: '0 * * * *'
+    # Runs every 30 minutes to reliably catch the pre-deadline golden window with zero queue misses
+    - cron: '*/30 * * * *'
   workflow_dispatch:
     # Allows you to trigger it manually from the GitHub UI for testing
 
