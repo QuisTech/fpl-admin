@@ -89,8 +89,9 @@ export const PlayerCard = ({
   const teamShort = player.team_short_name?.toUpperCase() || 'UNK';
   const teamCode = TEAM_SHIRT_CODES[teamShort] || player.team || 1;
   const isGkp = player.element_type === 1 || player.position === 'GKP';
-  const shirtFileName = `shirt_${teamCode}${isGkp ? '_1' : ''}-66.webp`;
-  const shirtUrl = `https://fantasy.premierleague.com/dist/img/shirts/standard/${shirtFileName}`;
+  const shirtBaseName = `shirt_${teamCode}${isGkp ? '_1' : ''}`;
+  const shirtUrl = `https://fantasy.premierleague.com/dist/img/shirts/standard/${shirtBaseName}-220.webp`;
+  const shirtSrcSet = `https://fantasy.premierleague.com/dist/img/shirts/standard/${shirtBaseName}-66.webp 66w, https://fantasy.premierleague.com/dist/img/shirts/standard/${shirtBaseName}-110.webp 110w, https://fantasy.premierleague.com/dist/img/shirts/standard/${shirtBaseName}-220.webp 220w`;
 
   const nextFixture = player.next_fixtures?.[0];
   const colors = TEAM_COLORS[teamShort] || { primary: '#37003c', secondary: '#00ff85' };
@@ -169,13 +170,22 @@ export const PlayerCard = ({
       {/* 1. Official Club Jersey Container with Frosted Spotlight */}
       <div className="relative flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 mb-0.5 rounded-xl bg-white/10 border border-white/15 backdrop-blur-xs p-1 shadow-sm drop-shadow-[0_4px_6px_rgba(0,0,0,0.4)]">
         {!imgError ? (
-          <img 
-            src={shirtUrl} 
-            alt={player.team_name || teamShort}
-            className="w-full h-full object-contain filter hover:brightness-110 transition-all pointer-events-none"
-            onError={() => setImgError(true)}
-            loading="lazy"
-          />
+          <picture className="w-full h-full flex items-center justify-center">
+            <source 
+              type="image/webp" 
+              srcSet={shirtSrcSet}
+              sizes="(min-width: 768px) 110px, 90px"
+            />
+            <img 
+              src={shirtUrl} 
+              srcSet={shirtSrcSet}
+              sizes="(min-width: 768px) 110px, 90px"
+              alt={player.team_name || teamShort}
+              className="w-full h-full object-contain filter hover:brightness-110 transition-all pointer-events-none"
+              onError={() => setImgError(true)}
+              loading="lazy"
+            />
+          </picture>
         ) : (
           /* SVG Vector Jersey Fallback */
           <svg viewBox="0 0 100 100" className="w-11 h-11 sm:w-13 sm:h-13 object-contain">
