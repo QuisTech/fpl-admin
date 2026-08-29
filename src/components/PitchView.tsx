@@ -161,57 +161,57 @@ export const PitchView = ({
         )}
       </div>
 
-      {/* 🌟 Authentic Football Pitch Container */}
-      <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-emerald-500/30 bg-[#052e16] p-2 sm:p-4">
+      {/* 🌟 Authentic Football Pitch Container (Official Premier League #00a350 & #009b4d Turf) */}
+      <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-emerald-600/40 bg-[#00a350] p-2 sm:p-4">
         
         {/* Realistic Mown Grass Horizontal Lawn Stripes Background */}
         <div 
-          className="absolute inset-0 pointer-events-none opacity-90"
+          className="absolute inset-0 pointer-events-none"
           style={{
             background: `repeating-linear-gradient(
               to bottom,
-              #052e16,
-              #052e16 38px,
-              #064e3b 38px,
-              #064e3b 76px
+              #00a350,
+              #00a350 42px,
+              #009b4d 42px,
+              #009b4d 84px
             )`
           }}
         />
 
         {/* Crisp Field Boundary & Pitch Markings SVG Overlay */}
-        <div className="absolute inset-2 sm:inset-4 border-2 border-white/20 rounded-xl pointer-events-none">
+        <div className="absolute inset-2 sm:inset-4 border-2 border-white/35 rounded-xl pointer-events-none">
           {/* Halfway Line */}
-          <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white/20 -translate-y-1/2" />
+          <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white/35 -translate-y-1/2" />
           
           {/* Center Circle */}
-          <div className="absolute top-1/2 left-1/2 w-28 h-28 sm:w-36 sm:h-36 border-2 border-white/20 rounded-full -translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute top-1/2 left-1/2 w-2 h-2 bg-white/30 rounded-full -translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute top-1/2 left-1/2 w-28 h-28 sm:w-36 sm:h-36 border-2 border-white/35 rounded-full -translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute top-1/2 left-1/2 w-2 h-2 bg-white/40 rounded-full -translate-x-1/2 -translate-y-1/2" />
 
           {/* Top Penalty Box (GKP Area) */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 sm:w-64 h-20 sm:h-24 border-b-2 border-x-2 border-white/20 rounded-b-lg">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 sm:w-64 h-20 sm:h-24 border-b-2 border-x-2 border-white/35 rounded-b-lg">
             {/* Goal Box */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 sm:w-32 h-8 sm:h-10 border-b-2 border-x-2 border-white/20 rounded-b" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 sm:w-32 h-8 sm:h-10 border-b-2 border-x-2 border-white/35 rounded-b" />
             {/* Penalty Spot */}
-            <div className="absolute top-14 sm:top-16 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-white/30 rounded-full" />
+            <div className="absolute top-14 sm:top-16 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-white/40 rounded-full" />
             {/* Penalty Arc */}
-            <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-16 h-8 border-b-2 border-white/20 rounded-b-full" />
+            <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-16 h-8 border-b-2 border-white/35 rounded-b-full" />
           </div>
 
           {/* Bottom Penalty Box */}
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-48 sm:w-64 h-20 sm:h-24 border-t-2 border-x-2 border-white/20 rounded-t-lg">
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-48 sm:w-64 h-20 sm:h-24 border-t-2 border-x-2 border-white/35 rounded-t-lg">
             {/* Goal Box */}
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 sm:w-32 h-8 sm:h-10 border-t-2 border-x-2 border-white/20 rounded-t" />
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 sm:w-32 h-8 sm:h-10 border-t-2 border-x-2 border-white/35 rounded-t" />
             {/* Penalty Spot */}
-            <div className="absolute bottom-14 sm:bottom-16 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-white/30 rounded-full" />
+            <div className="absolute bottom-14 sm:bottom-16 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-white/40 rounded-full" />
             {/* Penalty Arc */}
-            <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-16 h-8 border-t-2 border-white/20 rounded-t-full" />
+            <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-16 h-8 border-t-2 border-white/35 rounded-t-full" />
           </div>
 
           {/* Corner Arcs */}
-          <div className="absolute top-0 left-0 w-4 h-4 border-b-2 border-r-2 border-white/20 rounded-br-full" />
-          <div className="absolute top-0 right-0 w-4 h-4 border-b-2 border-l-2 border-white/20 rounded-bl-full" />
-          <div className="absolute bottom-0 left-0 w-4 h-4 border-t-2 border-r-2 border-white/20 rounded-tr-full" />
-          <div className="absolute bottom-0 right-0 w-4 h-4 border-t-2 border-l-2 border-white/20 rounded-tl-full" />
+          <div className="absolute top-0 left-0 w-4 h-4 border-b-2 border-r-2 border-white/35 rounded-br-full" />
+          <div className="absolute top-0 right-0 w-4 h-4 border-b-2 border-l-2 border-white/35 rounded-bl-full" />
+          <div className="absolute bottom-0 left-0 w-4 h-4 border-t-2 border-r-2 border-white/35 rounded-tr-full" />
+          <div className="absolute bottom-0 right-0 w-4 h-4 border-t-2 border-l-2 border-white/35 rounded-tl-full" />
         </div>
 
         {/* 🏟️ Starting XI Lines on the Pitch */}
