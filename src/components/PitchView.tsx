@@ -217,14 +217,14 @@ export const PitchView = ({
             preserveAspectRatio="none" 
             viewBox="0 0 800 1050"
           >
-            {/* 🏟️ Stadium Outer Flanks (#0f172a Dark Surround in Upper Half Outside Slanted Sidelines) */}
+            {/* 🏟️ Stadium Outer Flanks (#0f172a Dark Surround in Upper Half Meeting Edge at Midfielders y=580) */}
             <polygon 
-              points="-10,-10 290,-10 290,4 278,30 125,30 0,700 -10,700 -10,-10" 
+              points="-10,-10 290,-10 290,4 278,30 125,30 0,580 -10,580 -10,-10" 
               className="fill-[#0f172a] stroke-[#0f172a]" 
               strokeWidth="2"
             />
             <polygon 
-              points="810,-10 510,-10 510,4 522,30 675,30 800,700 810,700 810,-10" 
+              points="810,-10 510,-10 510,4 522,30 675,30 800,580 810,580 810,-10" 
               className="fill-[#0f172a] stroke-[#0f172a]" 
               strokeWidth="2"
             />
@@ -246,9 +246,11 @@ export const PitchView = ({
             {/* Top Goal Line */}
             <line x1="125" y1="30" x2="675" y2="30" strokeWidth="3" />
 
-            {/* Slanted Sideline Touchlines (Tapering from Top Inward to Edge-to-Edge at Halfway Line) */}
-            <line x1="125" y1="30" x2="0" y2="700" strokeWidth="3.5" />
-            <line x1="675" y1="30" x2="800" y2="700" strokeWidth="3.5" />
+            {/* Slanted Sideline Touchlines (Tapering from Top Inward to Edge at Midfielders y=580) */}
+            <line x1="125" y1="30" x2="0" y2="580" strokeWidth="3.5" />
+            <line x1="0" y1="580" x2="0" y2="700" strokeWidth="3.5" />
+            <line x1="675" y1="30" x2="800" y2="580" strokeWidth="3.5" />
+            <line x1="800" y1="580" x2="800" y2="700" strokeWidth="3.5" />
 
             {/* Top 6-Yard Goal Area */}
             <polygon points="295,30 505,30 512,85 288,85" strokeWidth="2.2" />
@@ -263,8 +265,8 @@ export const PitchView = ({
             <path d="M 325,175 A 85,50 0 0,0 475,175" strokeWidth="2.5" />
 
             {/* Top Corner Arcs (Curving Inwards and Touching Both Goal Line & Slanted Sideline) */}
-            <path d="M 119.9,57.5 A 28,28 0 0,0 153,30" strokeWidth="2.5" />
-            <path d="M 647,30 A 28,28 0 0,0 680.1,57.5" strokeWidth="2.5" />
+            <path d="M 118.8,57.3 A 28,28 0 0,0 153,30" strokeWidth="2.5" />
+            <path d="M 647,30 A 28,28 0 0,0 681.2,57.3" strokeWidth="2.5" />
 
             {/* Halfway Line (Cutting horizontally through the center of the Forwards row) */}
             <line x1="0" y1="700" x2="800" y2="700" strokeWidth="4" />
