@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import { PlayerCard } from './PlayerCard';
 import { RecommendationResponse, ScoredPlayer } from '../types';
-import { Zap, Shield, Lock, Ban, X, ArrowRightLeft, Sparkles } from 'lucide-react';
+import { Zap, Shield, Lock, Ban, X, ArrowRightLeft } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface PitchViewProps {
@@ -43,6 +43,7 @@ export const PitchView = ({
   data?.topPicks?.fwd?.forEach(p => allPlayersMap.set(p.id, p));
 
   const hasConstraints = lockedPlayerIds.length > 0 || excludedPlayerIds.length > 0;
+  const benchPlayers = data?.bench?.filter(Boolean) || [];
 
   return (
     <motion.div 
@@ -50,11 +51,11 @@ export const PitchView = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex-grow flex flex-col justify-between py-2"
+      className="flex-grow flex flex-col justify-between py-2 w-full max-w-5xl mx-auto"
     >
       {/* Top Controls: Scenario Switcher & Delta Comparison Bar */}
       <div className="space-y-2 mb-3">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 bg-slate-950/80 p-2 rounded-xl border border-fpl-border/70 backdrop-blur-sm">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 bg-slate-950/90 p-2 rounded-xl border border-fpl-border/80 backdrop-blur-md shadow-lg">
           {/* Scenario Switcher */}
           <div className="flex items-center gap-1.5 bg-slate-900/90 p-1 rounded-lg border border-slate-800 w-full sm:w-auto">
             <button
@@ -62,7 +63,7 @@ export const PitchView = ({
               className={cn(
                 "flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-wider transition-all",
                 activeScenario === 'quant'
-                  ? "bg-fpl-green text-slate-950 shadow-[0_0_10px_rgba(0,255,133,0.3)]"
+                  ? "bg-fpl-green text-slate-950 shadow-[0_0_12px_rgba(0,255,133,0.35)]"
                   : "text-slate-400 hover:text-slate-200"
               )}
             >
@@ -74,7 +75,7 @@ export const PitchView = ({
               className={cn(
                 "flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-wider transition-all",
                 activeScenario === 'template'
-                  ? "bg-purple-600 text-white shadow-[0_0_10px_rgba(168,85,247,0.3)]"
+                  ? "bg-purple-600 text-white shadow-[0_0_12px_rgba(168,85,247,0.35)]"
                   : "text-slate-400 hover:text-slate-200"
               )}
             >
@@ -86,7 +87,7 @@ export const PitchView = ({
           {/* Delta Metric Badge Bar */}
           {delta && (
             <div className="flex items-center gap-2 text-[10px] font-mono w-full sm:w-auto justify-between sm:justify-end">
-              <div className="flex items-center gap-1 bg-slate-900/80 px-2.5 py-1 rounded-lg border border-slate-800">
+              <div className="flex items-center gap-1 bg-slate-900/90 px-2.5 py-1 rounded-lg border border-slate-800">
                 <span className="text-slate-500 font-bold uppercase text-[8px]">Delta xP</span>
                 <span className={cn(
                   "font-black font-mono",
@@ -96,7 +97,7 @@ export const PitchView = ({
                 </span>
               </div>
 
-              <div className="flex items-center gap-1 bg-slate-900/80 px-2.5 py-1 rounded-lg border border-slate-800">
+              <div className="flex items-center gap-1 bg-slate-900/90 px-2.5 py-1 rounded-lg border border-slate-800">
                 <span className="text-slate-500 font-bold uppercase text-[8px]">Delta EO</span>
                 <span className={cn(
                   "font-black font-mono",
@@ -107,7 +108,7 @@ export const PitchView = ({
               </div>
 
               {delta.swaps?.length > 0 && (
-                <div className="flex items-center gap-1 bg-slate-900/80 px-2.5 py-1 rounded-lg border border-slate-800 hidden md:flex">
+                <div className="flex items-center gap-1 bg-slate-900/90 px-2.5 py-1 rounded-lg border border-slate-800 hidden md:flex">
                   <ArrowRightLeft className="w-3 h-3 text-slate-400" />
                   <span className="text-slate-300 font-bold">{delta.swaps.length} Swaps</span>
                 </div>
@@ -118,7 +119,7 @@ export const PitchView = ({
 
         {/* Active Constraints (Locks & Excludes) Pill Bar */}
         {hasConstraints && (
-          <div className="flex flex-wrap items-center gap-1.5 px-2 py-1.5 bg-slate-950/60 border border-slate-800/80 rounded-lg">
+          <div className="flex flex-wrap items-center gap-1.5 px-2 py-1.5 bg-slate-950/70 border border-slate-800/90 rounded-lg backdrop-blur-sm">
             <span className="text-[8px] font-black uppercase text-slate-500 tracking-wider mr-1">Active Rules:</span>
             {lockedPlayerIds.map(id => {
               const p = allPlayersMap.get(id);
@@ -160,81 +161,171 @@ export const PitchView = ({
         )}
       </div>
 
-      {/* Starting XI Lines */}
-      <div className="flex justify-around items-center my-1">
-        {formation.gkp.map(p => (
-          <PlayerCard 
-            key={p.id} 
-            player={p} 
-            isCaptain={!!(data?.captain?.id && p.id === data.captain.id)} 
-            isViceCaptain={!!(data?.viceCaptain?.id && p.id === data.viceCaptain.id)}
-            isLocked={lockedPlayerIds.includes(p.id)}
-            isExcluded={excludedPlayerIds.includes(p.id)}
-            onToggleLock={onToggleLock}
-            onToggleExclude={onToggleExclude}
-          />
-        ))}
-      </div>
-      <div className="flex justify-around items-center my-1">
-        {formation.def.map(p => (
-          <PlayerCard 
-            key={p.id} 
-            player={p} 
-            isCaptain={!!(data?.captain?.id && p.id === data.captain.id)} 
-            isViceCaptain={!!(data?.viceCaptain?.id && p.id === data.viceCaptain.id)}
-            isLocked={lockedPlayerIds.includes(p.id)}
-            isExcluded={excludedPlayerIds.includes(p.id)}
-            onToggleLock={onToggleLock}
-            onToggleExclude={onToggleExclude}
-          />
-        ))}
-      </div>
-      <div className="flex justify-around items-center my-1">
-        {formation.mid.map(p => (
-          <PlayerCard 
-            key={p.id} 
-            player={p} 
-            isCaptain={!!(data?.captain?.id && p.id === data.captain.id)} 
-            isViceCaptain={!!(data?.viceCaptain?.id && p.id === data.viceCaptain.id)}
-            isLocked={lockedPlayerIds.includes(p.id)}
-            isExcluded={excludedPlayerIds.includes(p.id)}
-            onToggleLock={onToggleLock}
-            onToggleExclude={onToggleExclude}
-          />
-        ))}
-      </div>
-      <div className="flex justify-around items-center my-1">
-        {formation.fwd.map(p => (
-          <PlayerCard 
-            key={p.id} 
-            player={p} 
-            isCaptain={!!(data?.captain?.id && p.id === data.captain.id)} 
-            isViceCaptain={!!(data?.viceCaptain?.id && p.id === data.viceCaptain.id)}
-            isLocked={lockedPlayerIds.includes(p.id)}
-            isExcluded={excludedPlayerIds.includes(p.id)}
-            onToggleLock={onToggleLock}
-            onToggleExclude={onToggleExclude}
-          />
-        ))}
+      {/* 🌟 Authentic Football Pitch Container */}
+      <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-emerald-500/30 bg-[#052e16] p-2 sm:p-4">
+        
+        {/* Realistic Mown Grass Horizontal Lawn Stripes Background */}
+        <div 
+          className="absolute inset-0 pointer-events-none opacity-90"
+          style={{
+            background: `repeating-linear-gradient(
+              to bottom,
+              #052e16,
+              #052e16 38px,
+              #064e3b 38px,
+              #064e3b 76px
+            )`
+          }}
+        />
+
+        {/* Crisp Field Boundary & Pitch Markings SVG Overlay */}
+        <div className="absolute inset-2 sm:inset-4 border-2 border-white/20 rounded-xl pointer-events-none">
+          {/* Halfway Line */}
+          <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white/20 -translate-y-1/2" />
+          
+          {/* Center Circle */}
+          <div className="absolute top-1/2 left-1/2 w-28 h-28 sm:w-36 sm:h-36 border-2 border-white/20 rounded-full -translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute top-1/2 left-1/2 w-2 h-2 bg-white/30 rounded-full -translate-x-1/2 -translate-y-1/2" />
+
+          {/* Top Penalty Box (GKP Area) */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 sm:w-64 h-20 sm:h-24 border-b-2 border-x-2 border-white/20 rounded-b-lg">
+            {/* Goal Box */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 sm:w-32 h-8 sm:h-10 border-b-2 border-x-2 border-white/20 rounded-b" />
+            {/* Penalty Spot */}
+            <div className="absolute top-14 sm:top-16 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-white/30 rounded-full" />
+            {/* Penalty Arc */}
+            <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-16 h-8 border-b-2 border-white/20 rounded-b-full" />
+          </div>
+
+          {/* Bottom Penalty Box */}
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-48 sm:w-64 h-20 sm:h-24 border-t-2 border-x-2 border-white/20 rounded-t-lg">
+            {/* Goal Box */}
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 sm:w-32 h-8 sm:h-10 border-t-2 border-x-2 border-white/20 rounded-t" />
+            {/* Penalty Spot */}
+            <div className="absolute bottom-14 sm:bottom-16 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-white/30 rounded-full" />
+            {/* Penalty Arc */}
+            <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-16 h-8 border-t-2 border-white/20 rounded-t-full" />
+          </div>
+
+          {/* Corner Arcs */}
+          <div className="absolute top-0 left-0 w-4 h-4 border-b-2 border-r-2 border-white/20 rounded-br-full" />
+          <div className="absolute top-0 right-0 w-4 h-4 border-b-2 border-l-2 border-white/20 rounded-bl-full" />
+          <div className="absolute bottom-0 left-0 w-4 h-4 border-t-2 border-r-2 border-white/20 rounded-tr-full" />
+          <div className="absolute bottom-0 right-0 w-4 h-4 border-t-2 border-l-2 border-white/20 rounded-tl-full" />
+        </div>
+
+        {/* 🏟️ Starting XI Lines on the Pitch */}
+        <div className="relative z-10 flex flex-col justify-around min-h-[460px] sm:min-h-[520px] md:min-h-[580px] py-2">
+          
+          {/* Goalkeeper Line */}
+          <div className="flex justify-around items-center w-full my-1">
+            {formation.gkp.map(p => (
+              <PlayerCard 
+                key={p.id} 
+                player={p} 
+                isCaptain={!!(data?.captain?.id && p.id === data.captain.id)} 
+                isViceCaptain={!!(data?.viceCaptain?.id && p.id === data.viceCaptain.id)}
+                isLocked={lockedPlayerIds.includes(p.id)}
+                isExcluded={excludedPlayerIds.includes(p.id)}
+                onToggleLock={onToggleLock}
+                onToggleExclude={onToggleExclude}
+              />
+            ))}
+          </div>
+
+          {/* Defenders Line */}
+          <div className="flex justify-around items-center w-full my-1">
+            {formation.def.map(p => (
+              <PlayerCard 
+                key={p.id} 
+                player={p} 
+                isCaptain={!!(data?.captain?.id && p.id === data.captain.id)} 
+                isViceCaptain={!!(data?.viceCaptain?.id && p.id === data.viceCaptain.id)}
+                isLocked={lockedPlayerIds.includes(p.id)}
+                isExcluded={excludedPlayerIds.includes(p.id)}
+                onToggleLock={onToggleLock}
+                onToggleExclude={onToggleExclude}
+              />
+            ))}
+          </div>
+
+          {/* Midfielders Line */}
+          <div className="flex justify-around items-center w-full my-1">
+            {formation.mid.map(p => (
+              <PlayerCard 
+                key={p.id} 
+                player={p} 
+                isCaptain={!!(data?.captain?.id && p.id === data.captain.id)} 
+                isViceCaptain={!!(data?.viceCaptain?.id && p.id === data.viceCaptain.id)}
+                isLocked={lockedPlayerIds.includes(p.id)}
+                isExcluded={excludedPlayerIds.includes(p.id)}
+                onToggleLock={onToggleLock}
+                onToggleExclude={onToggleExclude}
+              />
+            ))}
+          </div>
+
+          {/* Forwards Line */}
+          <div className="flex justify-around items-center w-full my-1">
+            {formation.fwd.map(p => (
+              <PlayerCard 
+                key={p.id} 
+                player={p} 
+                isCaptain={!!(data?.captain?.id && p.id === data.captain.id)} 
+                isViceCaptain={!!(data?.viceCaptain?.id && p.id === data.viceCaptain.id)}
+                isLocked={lockedPlayerIds.includes(p.id)}
+                isExcluded={excludedPlayerIds.includes(p.id)}
+                onToggleLock={onToggleLock}
+                onToggleExclude={onToggleExclude}
+              />
+            ))}
+          </div>
+
+        </div>
       </div>
 
-      {/* Pitch Bench Sub-Component */}
-      <div className="mt-4 pt-3 border-t border-fpl-border/50">
-        <div className="flex justify-center gap-2">
-           {data?.bench?.filter(Boolean).map(p => (
-             <PlayerCard 
-               key={p.id} 
-               player={p} 
-               compact 
-               isLocked={lockedPlayerIds.includes(p.id)}
-               isExcluded={excludedPlayerIds.includes(p.id)}
-               onToggleLock={onToggleLock}
-               onToggleExclude={onToggleExclude}
-             />
-           ))}
+      {/* 🪑 Official Substitutes Bench Shelf */}
+      <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950/90 backdrop-blur-md p-3 shadow-xl">
+        <div className="flex items-center justify-between border-b border-slate-800/80 pb-2 mb-3">
+          <h4 className="text-xs font-black uppercase tracking-widest text-slate-300 flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#00ff85]"></span>
+            <span>Substitutes</span>
+          </h4>
+          <span className="text-[9px] font-mono text-slate-500 uppercase">Auto-Sub Priority (1 → 3)</span>
         </div>
-        <p className="text-center text-[9px] font-bold text-slate-600 uppercase tracking-widest mt-2 px-6">Substitution Bench</p>
+
+        <div className="flex justify-around items-end gap-2 px-1">
+          {benchPlayers.map((p, idx) => {
+            const isGkp = idx === 0 || p.element_type === 1 || p.position === 'GKP';
+            const subLabel = isGkp ? 'GKP' : `${idx}. ${p.position || 'SUB'}`;
+
+            return (
+              <div key={p.id} className="flex flex-col items-center gap-1">
+                {/* Official Position / Auto-Sub Priority Header Badge */}
+                <div className={cn(
+                  "px-2 py-0.5 rounded text-[8px] sm:text-[9px] font-mono font-black uppercase tracking-wider",
+                  isGkp 
+                    ? "bg-amber-400/20 text-amber-300 border border-amber-400/40" 
+                    : "bg-slate-800 text-slate-300 border border-slate-700"
+                )}>
+                  {subLabel}
+                </div>
+
+                <PlayerCard 
+                  player={p} 
+                  compact 
+                  benchIndex={idx}
+                  isLocked={lockedPlayerIds.includes(p.id)}
+                  isExcluded={excludedPlayerIds.includes(p.id)}
+                  onToggleLock={onToggleLock}
+                  onToggleExclude={onToggleExclude}
+                />
+              </div>
+            );
+          })}
+        </div>
       </div>
+
     </motion.div>
   );
 };
