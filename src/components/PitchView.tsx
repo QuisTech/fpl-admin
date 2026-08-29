@@ -191,16 +191,16 @@ export const PitchView = ({
             <svg 
               className="absolute inset-0 w-full h-full stroke-white/80 fill-none" 
               preserveAspectRatio="none" 
-              viewBox="0 0 800 1050"
+              viewBox="0 0 800 840"
             >
               {/* 🏟️ Stadium Outer Flanks (#0f172a Dark Surround Outside Pitch & Billboard Headers) */}
               <polygon 
-                points="-10,-10 105,-10 105,6 0,365 -10,365 -10,-10" 
+                points="-10,-10 105,-10 105,6 0,295 -10,295 -10,-10" 
                 className="fill-[#0f172a] stroke-[#0f172a]" 
                 strokeWidth="2"
               />
               <polygon 
-                points="810,-10 695,-10 695,6 800,365 810,365 810,-10" 
+                points="810,-10 695,-10 695,6 800,295 810,295 810,-10" 
                 className="fill-[#0f172a] stroke-[#0f172a]" 
                 strokeWidth="2"
               />
@@ -210,9 +210,9 @@ export const PitchView = ({
                 strokeWidth="2"
               />
 
-              {/* 🏟️ Straight Continuous Parallel Outer Pitch Boundary (From Top Corners at y=6 to Outer Edges at y=365) */}
-              <line x1="105" y1="6" x2="0" y2="365" strokeWidth="2" className="stroke-white/70" />
-              <line x1="695" y1="6" x2="800" y2="365" strokeWidth="2" className="stroke-white/70" />
+              {/* 🏟️ Straight Continuous Parallel Outer Pitch Boundary (From Top Corners at y=6 to Outer Edges at y=295) */}
+              <line x1="105" y1="6" x2="0" y2="295" strokeWidth="2" className="stroke-white/70" />
+              <line x1="695" y1="6" x2="800" y2="295" strokeWidth="2" className="stroke-white/70" />
               <line x1="105" y1="6" x2="695" y2="6" strokeWidth="2" className="stroke-white/70" />
 
               {/* 🌟 Left Billboard: Vibrant Cyan "Fantasy" with Premier League Crown Lion */}
@@ -243,34 +243,34 @@ export const PitchView = ({
               {/* Top Goal Line */}
               <line x1="125" y1="30" x2="675" y2="30" strokeWidth="3" />
 
-              {/* Slanted Sideline Touchlines (Tapering from Top Inward to Edge at Defenders y=450) */}
-              <line x1="125" y1="30" x2="0" y2="450" strokeWidth="3.5" />
-              <line x1="0" y1="450" x2="0" y2="700" strokeWidth="3.5" />
-              <line x1="675" y1="30" x2="800" y2="450" strokeWidth="3.5" />
-              <line x1="800" y1="450" x2="800" y2="700" strokeWidth="3.5" />
+              {/* Slanted Sideline Touchlines (Tapering from Top Inward to Edge at Defenders y=365) */}
+              <line x1="125" y1="30" x2="0" y2="365" strokeWidth="3.5" />
+              <line x1="0" y1="365" x2="0" y2="560" strokeWidth="3.5" />
+              <line x1="675" y1="30" x2="800" y2="365" strokeWidth="3.5" />
+              <line x1="800" y1="365" x2="800" y2="560" strokeWidth="3.5" />
 
               {/* Top 6-Yard Goal Area */}
-              <polygon points="295,30 505,30 512,85 288,85" strokeWidth="2.2" />
+              <polygon points="295,30 505,30 512,75 288,75" strokeWidth="2.2" />
 
               {/* Top 18-Yard Penalty Area in Perspective */}
-              <polygon points="200,30 600,30 618,175 182,175" strokeWidth="2.8" />
+              <polygon points="200,30 600,30 618,150 182,150" strokeWidth="2.8" />
               
               {/* Penalty Spot */}
-              <circle cx="400" cy="130" r="4.5" className="fill-white" stroke="none" />
+              <circle cx="400" cy="110" r="4.5" className="fill-white" stroke="none" />
               
               {/* Penalty Arc ('D' Curving Downwards from 18-Yard Box) */}
-              <path d="M 325,175 A 85,50 0 0,0 475,175" strokeWidth="2.5" />
+              <path d="M 325,150 A 85,45 0 0,0 475,150" strokeWidth="2.5" />
 
               {/* Top Corner Arcs (Curving Inwards and Touching Both Goal Line & Slanted Sideline) */}
               <path d="M 117.0,56.8 A 28,28 0 0,0 153,30" strokeWidth="2.5" />
               <path d="M 647,30 A 28,28 0 0,0 683.0,56.8" strokeWidth="2.5" />
 
               {/* Halfway Line (Cutting horizontally through the center of the Forwards row) */}
-              <line x1="0" y1="700" x2="800" y2="700" strokeWidth="4" />
+              <line x1="0" y1="560" x2="800" y2="560" strokeWidth="4" />
               
-              {/* Huge Prominent Center Circle (Encircling the Forwards row) */}
-              <ellipse cx="400" cy="700" rx="180" ry="120" strokeWidth="3.2" />
-              <circle cx="400" cy="700" r="5" className="fill-white" stroke="none" />
+              {/* Huge Center Circle (Encircling Forwards, bottom touches y=665 at Bench Shelf Intersection) */}
+              <ellipse cx="400" cy="560" rx="170" ry="105" strokeWidth="3.2" />
+              <circle cx="400" cy="560" r="5" className="fill-white" stroke="none" />
             </svg>
           </div>
 
@@ -300,11 +300,11 @@ export const PitchView = ({
             </button>
           </div>
 
-          {/* 🏟️ Starting XI Lines on the Pitch (Exact Row Proportions matching Official FPL) */}
-          <div className="relative z-10 flex flex-col justify-between min-h-[620px] sm:min-h-[700px] md:min-h-[760px] pt-14 pb-3 sm:pt-20 sm:pb-5">
+          {/* 🏟️ Starting XI Lines on the Pitch (Compact Responsive Row Proportions) */}
+          <div className="relative z-10 flex flex-col justify-between min-h-[460px] sm:min-h-[520px] md:min-h-[580px] pt-7 pb-1 sm:pt-9 sm:pb-2">
             
-            {/* Row 1: Goalkeeper (Inside Goalmouth & 18-Yard Box with Upward Tooltip Clearance) */}
-            <div className="flex justify-center items-center w-full my-1">
+            {/* Row 1: Goalkeeper (Inside Goalmouth & 18-Yard Box) */}
+            <div className="flex justify-center items-center w-full my-0.5 sm:my-1">
               {formation.gkp.map(p => (
                 <PlayerCard 
                   key={p.id} 
@@ -321,7 +321,7 @@ export const PitchView = ({
             </div>
 
             {/* Row 2: Defenders (Upper Pitch between Penalty Box & Midfield) */}
-            <div className="flex justify-around items-center w-full max-w-[85%] mx-auto my-2 sm:my-3">
+            <div className="flex justify-around items-center w-full max-w-[86%] mx-auto my-0.5 sm:my-1.5">
               {formation.def.map(p => (
                 <PlayerCard 
                   key={p.id} 
@@ -338,7 +338,7 @@ export const PitchView = ({
             </div>
 
             {/* Row 3: Midfielders (Wider Middle Pitch above Halfway Line) */}
-            <div className="flex justify-around items-center w-full max-w-[96%] mx-auto my-2 sm:my-3">
+            <div className="flex justify-around items-center w-full max-w-[96%] mx-auto my-0.5 sm:my-1.5">
               {formation.mid.map(p => (
                 <PlayerCard 
                   key={p.id} 
@@ -355,7 +355,7 @@ export const PitchView = ({
             </div>
 
             {/* Row 4: Forwards (Inside the Center Circle & Over Halfway Line) */}
-            <div className="flex justify-around items-center w-full max-w-[78%] mx-auto my-2 sm:my-3">
+            <div className="flex justify-around items-center w-full max-w-[78%] mx-auto my-0.5 sm:my-1.5">
               {formation.fwd.map(p => (
                 <PlayerCard 
                   key={p.id} 
@@ -373,11 +373,11 @@ export const PitchView = ({
           </div>
 
           {/* 🌿 Smooth Bottom Grass-to-App Background Fade (#0f172a at Bench Nameplates) */}
-          <div className="absolute inset-x-0 bottom-0 h-28 sm:h-36 bg-gradient-to-b from-transparent via-[#0f172a]/70 to-[#0f172a] pointer-events-none z-10" />
+          <div className="absolute inset-x-0 bottom-0 h-24 sm:h-32 bg-gradient-to-b from-transparent via-[#0f172a]/70 to-[#0f172a] pointer-events-none z-10" />
 
-          {/* 🪑 Official Substitutes Bench Dugout Shelf (Proportional Frosted Shelf at Pitch Bottom) */}
-          <div className="relative z-20 w-full max-w-[90%] mx-auto mt-4 sm:mt-6 rounded-xl border border-white/15 bg-[#0f172a]/40 backdrop-blur-md p-3 sm:p-4 shadow-2xl">
-            <div className="flex justify-around items-end gap-1 sm:gap-3 px-1 sm:px-2">
+          {/* 🪑 Official Substitutes Bench Dugout Shelf (Proportional Frosted Shelf at Pitch Bottom intersecting Center Circle) */}
+          <div className="relative z-20 w-full max-w-[92%] mx-auto mt-1 sm:mt-3 rounded-xl border border-white/15 bg-[#0f172a]/40 backdrop-blur-md p-2 sm:p-3 shadow-2xl">
+            <div className="flex justify-around items-end gap-1 sm:gap-2 px-1">
               {benchPlayers.map((p, idx) => {
                 const isGkp = idx === 0 || p.element_type === 1 || p.position === 'GKP';
                 const subLabel = isGkp ? 'GKP' : `${idx}. ${p.position || 'SUB'}`;
@@ -385,12 +385,12 @@ export const PitchView = ({
                 return (
                   <div key={p.id} className="flex flex-col items-center gap-1">
                     {/* Official Position / Auto-Sub Priority Header Label */}
-                    <div className="text-[9px] sm:text-[10px] font-mono font-extrabold uppercase tracking-wider text-emerald-100 border-b border-dotted border-white/40 pb-0.5 px-1">
+                    <div className="text-[8.5px] sm:text-[9.5px] font-mono font-extrabold uppercase tracking-wider text-emerald-100 border-b border-dotted border-white/40 pb-0.5 px-1">
                       {subLabel}
                     </div>
 
                     {/* Semi-transparent frosted slot card wrapper */}
-                    <div className="bg-white/10 rounded-lg p-1 border border-white/15 shadow-inner">
+                    <div className="bg-white/10 rounded-lg p-0.5 sm:p-1 border border-white/15 shadow-inner">
                       <PlayerCard 
                         player={p} 
                         compact 
@@ -408,7 +408,7 @@ export const PitchView = ({
             </div>
             
             {/* 🪑 Official Substitutes Header Label */}
-            <p className="text-center text-white font-extrabold text-xs sm:text-sm tracking-wider mt-2.5 drop-shadow-md">
+            <p className="text-center text-white font-extrabold text-[11px] sm:text-xs tracking-wider mt-2 drop-shadow-md">
               Substitutes
             </p>
           </div>

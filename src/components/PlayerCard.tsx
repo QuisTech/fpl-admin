@@ -99,7 +99,7 @@ export const PlayerCard = ({
   return (
     <div className={cn(
       "group relative flex flex-col items-center justify-start transition-all duration-200 hover:scale-105 select-none",
-      compact ? "w-[60px] sm:w-[72px] md:w-[80px]" : "w-[64px] sm:w-[76px] md:w-[84px] lg:w-[90px]",
+      compact ? "w-[52px] sm:w-[68px] md:w-[76px]" : "w-[56px] sm:w-[72px] md:w-[82px] lg:w-[88px]",
       isExcluded && "opacity-35 grayscale"
     )}>
 
@@ -107,7 +107,7 @@ export const PlayerCard = ({
       {isCaptain && (
         <div 
           title="Captain (2x Points)"
-          className="absolute -top-1.5 -left-1 sm:-top-2 sm:-left-1.5 z-30 flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[#37003c] text-white border-2 border-white/80 font-black text-[10px] sm:text-xs shadow-lg"
+          className="absolute -top-1.5 -left-1 sm:-top-2 sm:-left-1.5 z-30 flex items-center justify-center w-4.5 h-4.5 sm:w-6 sm:h-6 rounded-full bg-[#37003c] text-white border-2 border-white/80 font-black text-[9px] sm:text-xs shadow-lg"
         >
           C
         </div>
@@ -115,7 +115,7 @@ export const PlayerCard = ({
       {isViceCaptain && !isCaptain && (
         <div 
           title="Vice Captain"
-          className="absolute -top-1.5 -left-1 sm:-top-2 sm:-left-1.5 z-30 flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[#37003c] text-[#00ff87] border-2 border-white/80 font-black text-[9px] sm:text-[11px] shadow-lg flex items-center gap-0.5"
+          className="absolute -top-1.5 -left-1 sm:-top-2 sm:-left-1.5 z-30 flex items-center justify-center w-4.5 h-4.5 sm:w-6 sm:h-6 rounded-full bg-[#37003c] text-[#00ff87] border-2 border-white/80 font-black text-[8px] sm:text-[11px] shadow-lg flex items-center gap-0.5"
         >
           <span>V</span>
         </div>
@@ -125,7 +125,7 @@ export const PlayerCard = ({
       {isLocked && (
         <div 
           title="Locked in Solver (Mandatory)"
-          className="absolute -top-1.5 -right-1 sm:-top-2 sm:-right-1.5 z-30 flex items-center justify-center w-5 h-5 sm:w-5 sm:h-5 rounded-full bg-amber-400 text-slate-950 shadow-md font-bold"
+          className="absolute -top-1.5 -right-1 sm:-top-2 sm:-right-1.5 z-30 flex items-center justify-center w-4.5 h-4.5 sm:w-5 sm:h-5 rounded-full bg-amber-400 text-slate-950 shadow-md font-bold"
         >
           <Lock className="w-2.5 h-2.5 sm:w-3 sm:h-3 stroke-[2.5]" />
         </div>
@@ -168,7 +168,7 @@ export const PlayerCard = ({
       )}
 
       {/* 1. Official Club Jersey Container with Frosted Spotlight */}
-      <div className="relative flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 mb-0.5 rounded-xl bg-white/10 border border-white/15 backdrop-blur-xs p-1 shadow-sm drop-shadow-[0_4px_6px_rgba(0,0,0,0.4)]">
+      <div className="relative flex items-center justify-center w-10 h-10 sm:w-13 sm:h-13 md:w-15 md:h-15 mb-0.5 rounded-xl bg-white/10 border border-white/15 backdrop-blur-xs p-1 shadow-sm drop-shadow-[0_4px_6px_rgba(0,0,0,0.4)]">
         {!imgError ? (
           <picture className="w-full h-full flex items-center justify-center">
             <source 
@@ -188,7 +188,7 @@ export const PlayerCard = ({
           </picture>
         ) : (
           /* SVG Vector Jersey Fallback */
-          <svg viewBox="0 0 100 100" className="w-11 h-11 sm:w-13 sm:h-13 object-contain">
+          <svg viewBox="0 0 100 100" className="w-9 h-9 sm:w-12 sm:h-12 object-contain">
             <path 
               d="M 30 15 L 42 22 C 46 25 54 25 58 22 L 70 15 L 88 35 L 75 48 L 70 42 L 70 85 C 70 88 68 90 65 90 L 35 90 C 32 90 30 88 30 85 L 30 42 L 25 48 L 12 35 Z" 
               fill={colors.primary} 
@@ -200,9 +200,9 @@ export const PlayerCard = ({
         )}
 
         {/* Floating Analytical xP Badge on Jersey */}
-        <div className="absolute -bottom-1 -right-1 sm:-bottom-1.5 sm:-right-1.5 bg-slate-950/95 border border-fpl-green/70 text-fpl-green font-mono font-black text-[8px] sm:text-[9.5px] px-1 py-0.25 rounded shadow-lg backdrop-blur-xs flex items-center gap-0.5">
+        <div className="absolute -bottom-1 -right-1 sm:-bottom-1.5 sm:-right-1.5 bg-slate-950/95 border border-fpl-green/70 text-fpl-green font-mono font-black text-[7.5px] sm:text-[9px] px-1 py-0.2 rounded shadow-lg backdrop-blur-xs flex items-center gap-0.5">
           <span>{typeof player.xP === 'number' ? player.xP.toFixed(1) : '—'}</span>
-          <span className="text-[6px] text-slate-400 font-normal">xP</span>
+          <span className="text-[5.5px] text-slate-400 font-normal">xP</span>
         </div>
       </div>
 
@@ -211,13 +211,13 @@ export const PlayerCard = ({
         
         {/* Tier 1: Player Name Bar (Official Clean White Background with Sharp Dark Text) */}
         <div className="bg-white px-1 py-0.5 text-center flex items-center justify-center gap-1 border-b border-slate-200/90">
-          <span className="font-extrabold text-slate-950 text-[9px] sm:text-[11px] leading-tight truncate">
+          <span className="font-extrabold text-slate-950 text-[8px] sm:text-[10px] md:text-[11px] leading-tight truncate">
             {player.web_name}
           </span>
         </div>
 
         {/* Tier 2: Next Fixture & Solid FDR Price/EO Pill */}
-        <div className="w-full bg-slate-50 px-1 py-0.5 flex items-center justify-between gap-1 text-[7.5px] sm:text-[9px] font-bold text-slate-800">
+        <div className="w-full bg-slate-50 px-1 py-0.5 flex items-center justify-between gap-0.5 sm:gap-1 text-[6.5px] sm:text-[8px] font-bold text-slate-800">
           {/* Opponent & Venue Info */}
           <span className="truncate tracking-tighter text-slate-700 font-semibold font-mono">
             {nextFixture ? `${nextFixture.opponent} (${nextFixture.is_home ? 'H' : 'A'})` : '-'}
@@ -225,7 +225,7 @@ export const PlayerCard = ({
 
           {/* Solid FDR-Colored Accent Pill (Price or Est. EO) */}
           <span className={cn(
-            "text-[7px] sm:text-[8px] font-black px-1 py-0.2 rounded text-white font-mono shrink-0 shadow-sm",
+            "text-[6.5px] sm:text-[7.5px] font-black px-1 py-0.2 rounded text-white font-mono shrink-0 shadow-sm",
             nextFixture ? (
               nextFixture.difficulty <= 2 ? "bg-[#00753b]" :
               nextFixture.difficulty === 3 ? "bg-[#374151]" :
