@@ -165,8 +165,8 @@ export const PitchView = ({
         )}
       </div>
 
-      {/* 🌟 Authentic Football Pitch Container (Full Edge-to-Edge Stadium Green Turf) */}
-      <div className="relative mx-auto w-full py-1">
+      {/* 🌟 Authentic Football Pitch Container (1:1 Proportional Match with Official FPL) */}
+      <div className="relative mx-auto w-full max-w-2xl py-1">
         <div className="relative rounded-2xl overflow-hidden shadow-2xl border-2 border-emerald-500/50 bg-[#00a350] p-2 sm:p-4">
           
           {/* 🎛️ Pitch Stadium HUD: Floating Fixture Ticker Toggle */}
@@ -209,57 +209,57 @@ export const PitchView = ({
             }}
           />
 
-          {/* 🏟️ Authentic Zoomed Official Pitch Diagram SVG (Full Edge-to-Edge Perspective) */}
+          {/* 🏟️ Authentic Zoomed Official Pitch Diagram SVG (Aligned with Rows) */}
           <svg 
             className="absolute inset-0 w-full h-full pointer-events-none stroke-white/80 fill-none" 
             preserveAspectRatio="none" 
-            viewBox="0 0 800 1000"
+            viewBox="0 0 800 1050"
           >
             {/* Top Goal Net (Above Goal Line with Crosshatch Pattern) */}
-            <polygon points="280,4 520,4 532,32 268,32" strokeWidth="1.8" className="stroke-white/50 fill-white/10" />
-            <line x1="320" y1="4" x2="320" y2="32" strokeWidth="1" className="stroke-white/40" />
-            <line x1="360" y1="4" x2="360" y2="32" strokeWidth="1" className="stroke-white/40" />
-            <line x1="400" y1="4" x2="400" y2="32" strokeWidth="1" className="stroke-white/40" />
-            <line x1="440" y1="4" x2="440" y2="32" strokeWidth="1" className="stroke-white/40" />
-            <line x1="480" y1="4" x2="480" y2="32" strokeWidth="1" className="stroke-white/40" />
-            <line x1="275" y1="18" x2="525" y2="18" strokeWidth="1" className="stroke-white/40" />
+            <polygon points="290,4 510,4 522,30 278,30" strokeWidth="1.8" className="stroke-white/50 fill-white/10" />
+            <line x1="330" y1="4" x2="330" y2="30" strokeWidth="1" className="stroke-white/40" />
+            <line x1="370" y1="4" x2="370" y2="30" strokeWidth="1" className="stroke-white/40" />
+            <line x1="400" y1="4" x2="400" y2="30" strokeWidth="1" className="stroke-white/40" />
+            <line x1="430" y1="4" x2="430" y2="30" strokeWidth="1" className="stroke-white/40" />
+            <line x1="470" y1="4" x2="470" y2="30" strokeWidth="1" className="stroke-white/40" />
+            <line x1="284" y1="16" x2="516" y2="16" strokeWidth="1" className="stroke-white/40" />
 
             {/* Top Goal Line */}
-            <line x1="120" y1="32" x2="680" y2="32" strokeWidth="3" />
+            <line x1="125" y1="30" x2="675" y2="30" strokeWidth="3" />
 
             {/* Slanted Sideline Touchlines (Tapering from Top Inward to Edge-to-Edge at Halfway Line) */}
-            <line x1="120" y1="32" x2="0" y2="700" strokeWidth="3.5" />
-            <line x1="680" y1="32" x2="800" y2="700" strokeWidth="3.5" />
+            <line x1="125" y1="30" x2="0" y2="700" strokeWidth="3.5" />
+            <line x1="675" y1="30" x2="800" y2="700" strokeWidth="3.5" />
 
             {/* Top 6-Yard Goal Area */}
-            <polygon points="290,32 510,32 518,92 282,92" strokeWidth="2.2" />
+            <polygon points="295,30 505,30 512,85 288,85" strokeWidth="2.2" />
 
             {/* Top 18-Yard Penalty Area in Perspective */}
-            <polygon points="190,32 610,32 630,225 170,225" strokeWidth="2.8" />
+            <polygon points="200,30 600,30 618,175 182,175" strokeWidth="2.8" />
             
             {/* Penalty Spot */}
-            <circle cx="400" cy="155" r="4.5" className="fill-white" stroke="none" />
+            <circle cx="400" cy="130" r="4.5" className="fill-white" stroke="none" />
             
             {/* Penalty Arc ('D' Curving Downwards from 18-Yard Box) */}
-            <path d="M 315,225 A 95,60 0 0,0 485,225" strokeWidth="2.5" />
+            <path d="M 325,175 A 85,50 0 0,0 475,175" strokeWidth="2.5" />
 
             {/* Top Corner Arcs (Curving Inwards Into Playing Field) */}
-            <path d="M 126,62 A 30,30 0 0,0 150,32" strokeWidth="2.5" />
-            <path d="M 650,32 A 30,30 0 0,0 674,62" strokeWidth="2.5" />
+            <path d="M 130,58 A 28,28 0 0,0 153,30" strokeWidth="2.5" />
+            <path d="M 647,30 A 28,28 0 0,0 670,58" strokeWidth="2.5" />
 
-            {/* Halfway Line (Cutting edge-to-edge behind the forwards) */}
+            {/* Halfway Line (Cutting horizontally through the center of the Forwards row) */}
             <line x1="0" y1="700" x2="800" y2="700" strokeWidth="4" />
             
-            {/* Huge Prominent Center Circle (Surrounding the forwards) */}
-            <ellipse cx="400" cy="700" rx="170" ry="115" strokeWidth="3.2" />
+            {/* Huge Prominent Center Circle (Encircling the Forwards row) */}
+            <ellipse cx="400" cy="700" rx="180" ry="120" strokeWidth="3.2" />
             <circle cx="400" cy="700" r="5" className="fill-white" stroke="none" />
           </svg>
 
-          {/* 🏟️ Starting XI Lines on the Pitch with Fantastic Airy Spacing */}
-          <div className="relative z-10 flex flex-col justify-between min-h-[560px] sm:min-h-[640px] md:min-h-[720px] lg:min-h-[780px] py-4 sm:py-6 px-1 sm:px-4 md:px-8">
+          {/* 🏟️ Starting XI Lines on the Pitch (Exact Row Proportions matching Official FPL) */}
+          <div className="relative z-10 flex flex-col justify-between min-h-[580px] sm:min-h-[660px] md:min-h-[720px] py-3 sm:py-5">
             
-            {/* Goalkeeper Line (Inside 18-Yard Box) */}
-            <div className="flex justify-center items-center gap-4 sm:gap-8 md:gap-12 w-full my-1 sm:my-2">
+            {/* Row 1: Goalkeeper (Inside Goalmouth & 18-Yard Box) */}
+            <div className="flex justify-center items-center w-full my-1">
               {formation.gkp.map(p => (
                 <PlayerCard 
                   key={p.id} 
@@ -275,8 +275,8 @@ export const PitchView = ({
               ))}
             </div>
 
-            {/* Defenders Line */}
-            <div className="flex justify-center items-center gap-3 sm:gap-6 md:gap-8 lg:gap-10 w-full my-2 sm:my-3.5">
+            {/* Row 2: Defenders (Upper Pitch between Penalty Box & Midfield) */}
+            <div className="flex justify-around items-center w-full max-w-[85%] mx-auto my-2 sm:my-3">
               {formation.def.map(p => (
                 <PlayerCard 
                   key={p.id} 
@@ -292,8 +292,8 @@ export const PitchView = ({
               ))}
             </div>
 
-            {/* Midfielders Line */}
-            <div className="flex justify-center items-center gap-3 sm:gap-6 md:gap-8 lg:gap-10 w-full my-2 sm:my-3.5">
+            {/* Row 3: Midfielders (Wider Middle Pitch above Halfway Line) */}
+            <div className="flex justify-around items-center w-full max-w-[96%] mx-auto my-2 sm:my-3">
               {formation.mid.map(p => (
                 <PlayerCard 
                   key={p.id} 
@@ -309,8 +309,8 @@ export const PitchView = ({
               ))}
             </div>
 
-            {/* Forwards Line (Inside Center Circle) */}
-            <div className="flex justify-center items-center gap-4 sm:gap-8 md:gap-12 w-full my-1 sm:my-2">
+            {/* Row 4: Forwards (Inside the Center Circle & Over Halfway Line) */}
+            <div className="flex justify-around items-center w-full max-w-[78%] mx-auto my-2 sm:my-3">
               {formation.fwd.map(p => (
                 <PlayerCard 
                   key={p.id} 
@@ -327,9 +327,9 @@ export const PitchView = ({
             </div>
           </div>
 
-          {/* 🪑 Official Substitutes Bench Dugout Shelf (Embedded Inside Bottom of Green Pitch with Clean Separation) */}
-          <div className="relative z-10 mt-6 sm:mt-8 rounded-xl border border-emerald-400/40 bg-emerald-950/45 backdrop-blur-md p-3 sm:p-4 shadow-2xl">
-            <div className="flex justify-evenly items-end gap-2 sm:gap-4 md:gap-6 px-1 sm:px-4">
+          {/* 🪑 Official Substitutes Bench Dugout Shelf (Proportional Frosted Shelf at Pitch Bottom) */}
+          <div className="relative z-10 w-full max-w-[90%] mx-auto mt-4 sm:mt-6 rounded-xl border border-emerald-400/40 bg-emerald-950/45 backdrop-blur-md p-3 sm:p-4 shadow-2xl">
+            <div className="flex justify-around items-end gap-1 sm:gap-3 px-1 sm:px-2">
               {benchPlayers.map((p, idx) => {
                 const isGkp = idx === 0 || p.element_type === 1 || p.position === 'GKP';
                 const subLabel = isGkp ? 'GKP' : `${idx}. ${p.position || 'SUB'}`;
