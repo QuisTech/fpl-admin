@@ -56,114 +56,116 @@ export const PitchView = ({
       exit={{ opacity: 0 }}
       className="flex-grow flex flex-col justify-between py-2 w-full max-w-5xl mx-auto"
     >
-      {/* Top Controls: Scenario Switcher & Delta Comparison Bar */}
-      <div className="space-y-2 mb-3">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 bg-slate-950/90 p-2 rounded-xl border border-fpl-border/80 backdrop-blur-md shadow-lg">
-          
-          {/* Left: Scenario Switcher */}
-          <div className="flex items-center gap-1.5 bg-slate-900/90 p-1 rounded-lg border border-slate-800 w-full sm:w-auto">
-            <button
-              onClick={() => onSelectScenario?.('quant')}
-              className={cn(
-                "flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-wider transition-all",
-                activeScenario === 'quant'
-                  ? "bg-fpl-green text-slate-950 shadow-[0_0_12px_rgba(0,255,133,0.35)]"
-                  : "text-slate-400 hover:text-slate-200"
-              )}
-            >
-              <Zap className="w-3 h-3" />
-              <span>Quant Optimal</span>
-            </button>
-            <button
-              onClick={() => onSelectScenario?.('template')}
-              className={cn(
-                "flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-wider transition-all",
-                activeScenario === 'template'
-                  ? "bg-purple-600 text-white shadow-[0_0_12px_rgba(168,85,247,0.35)]"
-                  : "text-slate-400 hover:text-slate-200"
-              )}
-            >
-              <Shield className="w-3 h-3 text-purple-300" />
-              <span>Template Shield</span>
-            </button>
-          </div>
-
-          {/* Right: Delta Metric Badge Bar */}
-          {delta && (
-            <div className="flex items-center gap-2 text-[10px] font-mono w-full sm:w-auto justify-between sm:justify-end">
-              <div className="flex items-center gap-1 bg-slate-900/90 px-2.5 py-1 rounded-lg border border-slate-800">
-                <span className="text-slate-500 font-bold uppercase text-[8px]">Delta xP</span>
-                <span className={cn(
-                  "font-black font-mono",
-                  delta.xpDiff >= 0 ? "text-emerald-400" : "text-amber-400"
-                )}>
-                  {delta.xpDiff > 0 ? `+${delta.xpDiff}` : delta.xpDiff} pts
-                </span>
-              </div>
-
-              <div className="flex items-center gap-1 bg-slate-900/90 px-2.5 py-1 rounded-lg border border-slate-800">
-                <span className="text-slate-500 font-bold uppercase text-[8px]">Delta EO</span>
-                <span className={cn(
-                  "font-black font-mono",
-                  delta.eoDiff >= 0 ? "text-cyan-400" : "text-slate-300"
-                )}>
-                  {delta.eoDiff > 0 ? `+${delta.eoDiff}` : delta.eoDiff}%
-                </span>
-              </div>
-
-              {delta.swaps?.length > 0 && (
-                <div className="flex items-center gap-1 bg-slate-900/90 px-2.5 py-1 rounded-lg border border-slate-800 hidden md:flex">
-                  <ArrowRightLeft className="w-3 h-3 text-slate-400" />
-                  <span className="text-slate-300 font-bold">{delta.swaps.length} Swaps</span>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Active Constraints (Locks & Excludes) Pill Bar */}
-        {hasConstraints && (
-          <div className="flex flex-wrap items-center gap-1.5 px-2 py-1.5 bg-slate-950/70 border border-slate-800/90 rounded-lg backdrop-blur-sm">
-            <span className="text-[8px] font-black uppercase text-slate-500 tracking-wider mr-1">Active Rules:</span>
-            {lockedPlayerIds.map(id => {
-              const p = allPlayersMap.get(id);
-              return (
-                <span key={`lock-${id}`} className="inline-flex items-center gap-1 bg-amber-400/15 border border-amber-400/40 text-amber-300 px-2 py-0.5 rounded text-[9px] font-bold">
-                  <Lock className="w-2.5 h-2.5 text-amber-400" />
-                  <span>{p?.web_name || `ID ${id}`}</span>
-                  {onToggleLock && (
-                    <button onClick={() => onToggleLock(id)} className="hover:text-white ml-0.5">
-                      <X className="w-2.5 h-2.5" />
-                    </button>
-                  )}
-                </span>
-              );
-            })}
-            {excludedPlayerIds.map(id => {
-              const p = allPlayersMap.get(id);
-              return (
-                <span key={`ex-${id}`} className="inline-flex items-center gap-1 bg-rose-500/15 border border-rose-500/40 text-rose-300 px-2 py-0.5 rounded text-[9px] font-bold">
-                  <Ban className="w-2.5 h-2.5 text-rose-400" />
-                  <span>{p?.web_name || `ID ${id}`}</span>
-                  {onToggleExclude && (
-                    <button onClick={() => onToggleExclude(id)} className="hover:text-white ml-0.5">
-                      <X className="w-2.5 h-2.5" />
-                    </button>
-                  )}
-                </span>
-              );
-            })}
-            {onClearConstraints && (
-              <button 
-                onClick={onClearConstraints}
-                className="text-[9px] text-slate-400 hover:text-white underline ml-auto font-bold uppercase tracking-wider"
+      {/* Top Controls: Scenario Switcher & Delta Comparison Bar (Only rendered when onSelectScenario is provided) */}
+      {onSelectScenario && (
+        <div className="space-y-2 mb-3">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 bg-slate-950/90 p-2 rounded-xl border border-fpl-border/80 backdrop-blur-md shadow-lg">
+            
+            {/* Left: Scenario Switcher */}
+            <div className="flex items-center gap-1.5 bg-slate-900/90 p-1 rounded-lg border border-slate-800 w-full sm:w-auto">
+              <button
+                onClick={() => onSelectScenario?.('quant')}
+                className={cn(
+                  "flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-wider transition-all",
+                  activeScenario === 'quant'
+                    ? "bg-fpl-green text-slate-950 shadow-[0_0_12px_rgba(0,255,133,0.35)]"
+                    : "text-slate-400 hover:text-slate-200"
+                )}
               >
-                Reset All
+                <Zap className="w-3 h-3" />
+                <span>Quant Optimal</span>
               </button>
+              <button
+                onClick={() => onSelectScenario?.('template')}
+                className={cn(
+                  "flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-wider transition-all",
+                  activeScenario === 'template'
+                    ? "bg-purple-600 text-white shadow-[0_0_12px_rgba(168,85,247,0.35)]"
+                    : "text-slate-400 hover:text-slate-200"
+                )}
+              >
+                <Shield className="w-3 h-3 text-purple-300" />
+                <span>Template Shield</span>
+              </button>
+            </div>
+
+            {/* Right: Delta Metric Badge Bar */}
+            {delta && (
+              <div className="flex items-center gap-2 text-[10px] font-mono w-full sm:w-auto justify-between sm:justify-end">
+                <div className="flex items-center gap-1 bg-slate-900/90 px-2.5 py-1 rounded-lg border border-slate-800">
+                  <span className="text-slate-500 font-bold uppercase text-[8px]">Delta xP</span>
+                  <span className={cn(
+                    "font-black font-mono",
+                    delta.xpDiff >= 0 ? "text-emerald-400" : "text-amber-400"
+                  )}>
+                    {delta.xpDiff > 0 ? `+${delta.xpDiff}` : delta.xpDiff} pts
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1 bg-slate-900/90 px-2.5 py-1 rounded-lg border border-slate-800">
+                  <span className="text-slate-500 font-bold uppercase text-[8px]">Delta EO</span>
+                  <span className={cn(
+                    "font-black font-mono",
+                    delta.eoDiff >= 0 ? "text-cyan-400" : "text-slate-300"
+                  )}>
+                    {delta.eoDiff > 0 ? `+${delta.eoDiff}` : delta.eoDiff}%
+                  </span>
+                </div>
+
+                {delta.swaps?.length > 0 && (
+                  <div className="flex items-center gap-1 bg-slate-900/90 px-2.5 py-1 rounded-lg border border-slate-800 hidden md:flex">
+                    <ArrowRightLeft className="w-3 h-3 text-slate-400" />
+                    <span className="text-slate-300 font-bold">{delta.swaps.length} Swaps</span>
+                  </div>
+                )}
+              </div>
             )}
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Active Constraints (Locks & Excludes) Pill Bar */}
+      {hasConstraints && (
+        <div className="flex flex-wrap items-center gap-1.5 px-2 py-1.5 mb-2 bg-slate-950/70 border border-slate-800/90 rounded-lg backdrop-blur-sm">
+          <span className="text-[8px] font-black uppercase text-slate-500 tracking-wider mr-1">Active Rules:</span>
+          {lockedPlayerIds.map(id => {
+            const p = allPlayersMap.get(id);
+            return (
+              <span key={`lock-${id}`} className="inline-flex items-center gap-1 bg-amber-400/15 border border-amber-400/40 text-amber-300 px-2 py-0.5 rounded text-[9px] font-bold">
+                <Lock className="w-2.5 h-2.5 text-amber-400" />
+                <span>{p?.web_name || `ID ${id}`}</span>
+                {onToggleLock && (
+                  <button onClick={() => onToggleLock(id)} className="hover:text-white ml-0.5">
+                    <X className="w-2.5 h-2.5" />
+                  </button>
+                )}
+              </span>
+            );
+          })}
+          {excludedPlayerIds.map(id => {
+            const p = allPlayersMap.get(id);
+            return (
+              <span key={`ex-${id}`} className="inline-flex items-center gap-1 bg-rose-500/15 border border-rose-500/40 text-rose-300 px-2 py-0.5 rounded text-[9px] font-bold">
+                <Ban className="w-2.5 h-2.5 text-rose-400" />
+                <span>{p?.web_name || `ID ${id}`}</span>
+                {onToggleExclude && (
+                  <button onClick={() => onToggleExclude(id)} className="hover:text-white ml-0.5">
+                    <X className="w-2.5 h-2.5" />
+                  </button>
+                )}
+              </span>
+            );
+          })}
+          {onClearConstraints && (
+            <button 
+              onClick={onClearConstraints}
+              className="text-[9px] text-slate-400 hover:text-white underline ml-auto font-bold uppercase tracking-wider"
+            >
+              Reset All
+            </button>
+          )}
+        </div>
+      )}
 
       {/* 🌟 Authentic Football Pitch Container (1:1 Proportional Match with Official FPL) */}
       <div className="relative mx-auto w-full max-w-2xl py-1">
