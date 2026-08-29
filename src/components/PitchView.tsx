@@ -217,6 +217,20 @@ export const PitchView = ({
             preserveAspectRatio="none" 
             viewBox="0 0 800 1050"
           >
+            {/* 🏟️ Stadium Outer Flanks (#030619 Dark Surround in Upper Half Outside Slanted Sidelines) */}
+            <polygon 
+              points="0,0 290,0 290,4 278,30 125,30 0,700 0,0" 
+              className="fill-[#030619] stroke-none" 
+            />
+            <polygon 
+              points="800,0 510,0 510,4 522,30 675,30 800,700 800,0" 
+              className="fill-[#030619] stroke-none" 
+            />
+            <polygon 
+              points="290,0 510,0 510,4 290,4" 
+              className="fill-[#030619] stroke-none" 
+            />
+
             {/* Top Goal Net (Above Goal Line with Crosshatch Pattern) */}
             <polygon points="290,4 510,4 522,30 278,30" strokeWidth="1.8" className="stroke-white/50 fill-white/10" />
             <line x1="330" y1="4" x2="330" y2="30" strokeWidth="1" className="stroke-white/40" />
