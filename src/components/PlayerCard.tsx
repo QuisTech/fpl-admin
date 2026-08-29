@@ -98,7 +98,7 @@ export const PlayerCard = ({
   return (
     <div className={cn(
       "group relative flex flex-col items-center justify-start transition-all duration-200 hover:scale-105 select-none",
-      compact ? "w-[72px] sm:w-[84px]" : "w-[80px] sm:w-[98px] md:w-[114px]",
+      compact ? "w-[64px] sm:w-[76px] md:w-[84px]" : "w-[72px] sm:w-[86px] md:w-[98px] lg:w-[104px]",
       isExcluded && "opacity-35 grayscale"
     )}>
 

@@ -255,11 +255,11 @@ export const PitchView = ({
             <circle cx="400" cy="700" r="5" className="fill-white" stroke="none" />
           </svg>
 
-          {/* 🏟️ Starting XI Lines on the Pitch */}
-          <div className="relative z-10 flex flex-col justify-around min-h-[480px] sm:min-h-[540px] md:min-h-[580px] py-1 px-1 sm:px-4">
+          {/* 🏟️ Starting XI Lines on the Pitch with Generous Breathing Room */}
+          <div className="relative z-10 flex flex-col justify-between min-h-[540px] sm:min-h-[620px] md:min-h-[700px] lg:min-h-[760px] py-4 sm:py-6 px-1 sm:px-4 md:px-8">
             
             {/* Goalkeeper Line (Inside 18-Yard Box) */}
-            <div className="flex justify-around items-center w-full my-1">
+            <div className="flex justify-evenly items-center w-full my-1 sm:my-2">
               {formation.gkp.map(p => (
                 <PlayerCard 
                   key={p.id} 
@@ -276,7 +276,7 @@ export const PitchView = ({
             </div>
 
             {/* Defenders Line */}
-            <div className="flex justify-around items-center w-full my-1">
+            <div className="flex justify-evenly items-center w-full my-2 sm:my-3">
               {formation.def.map(p => (
                 <PlayerCard 
                   key={p.id} 
@@ -293,7 +293,7 @@ export const PitchView = ({
             </div>
 
             {/* Midfielders Line */}
-            <div className="flex justify-around items-center w-full my-1">
+            <div className="flex justify-evenly items-center w-full my-2 sm:my-3">
               {formation.mid.map(p => (
                 <PlayerCard 
                   key={p.id} 
@@ -310,7 +310,7 @@ export const PitchView = ({
             </div>
 
             {/* Forwards Line (Inside Center Circle) */}
-            <div className="flex justify-around items-center w-full my-1">
+            <div className="flex justify-evenly items-center w-full my-1 sm:my-2">
               {formation.fwd.map(p => (
                 <PlayerCard 
                   key={p.id} 
@@ -327,9 +327,9 @@ export const PitchView = ({
             </div>
           </div>
 
-          {/* 🪑 Official Substitutes Bench Dugout Shelf (Embedded Inside Bottom of Green Pitch) */}
-          <div className="relative z-10 mt-3 rounded-xl border border-emerald-400/40 bg-emerald-950/40 backdrop-blur-md p-2.5 shadow-2xl">
-            <div className="flex justify-around items-end gap-1 sm:gap-2 px-1">
+          {/* 🪑 Official Substitutes Bench Dugout Shelf (Embedded Inside Bottom of Green Pitch with Clean Separation) */}
+          <div className="relative z-10 mt-6 sm:mt-8 rounded-xl border border-emerald-400/40 bg-emerald-950/45 backdrop-blur-md p-3 sm:p-4 shadow-2xl">
+            <div className="flex justify-evenly items-end gap-2 sm:gap-4 md:gap-6 px-1 sm:px-4">
               {benchPlayers.map((p, idx) => {
                 const isGkp = idx === 0 || p.element_type === 1 || p.position === 'GKP';
                 const subLabel = isGkp ? 'GKP' : `${idx}. ${p.position || 'SUB'}`;
