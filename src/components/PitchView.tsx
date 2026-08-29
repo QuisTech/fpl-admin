@@ -217,14 +217,14 @@ export const PitchView = ({
             preserveAspectRatio="none" 
             viewBox="0 0 800 1050"
           >
-            {/* 🏟️ Stadium Outer Flanks (#0f172a Dark Surround in Upper Half Meeting Edge at Midfielders y=580) */}
+            {/* 🏟️ Stadium Outer Flanks (#0f172a Dark Surround Outside Outer Pitch Boundary) */}
             <polygon 
-              points="-10,-10 290,-10 290,4 278,30 125,30 0,580 -10,580 -10,-10" 
+              points="-10,-10 290,-10 290,4 278,4 105,12 0,474 -10,474 -10,-10" 
               className="fill-[#0f172a] stroke-[#0f172a]" 
               strokeWidth="2"
             />
             <polygon 
-              points="810,-10 510,-10 510,4 522,30 675,30 800,580 810,580 810,-10" 
+              points="810,-10 510,-10 510,4 522,4 695,12 800,474 810,474 810,-10" 
               className="fill-[#0f172a] stroke-[#0f172a]" 
               strokeWidth="2"
             />
@@ -232,6 +232,18 @@ export const PitchView = ({
               points="285,-10 515,-10 515,4 285,4" 
               className="fill-[#0f172a] stroke-[#0f172a]" 
               strokeWidth="2"
+            />
+
+            {/* 🏟️ Parallel Outer Pitch Boundary (Touchline Extension / Green Runoff Margin) */}
+            <polyline 
+              points="0,474 105,12 280,12" 
+              strokeWidth="2" 
+              className="stroke-white/70" 
+            />
+            <polyline 
+              points="520,12 695,12 800,474" 
+              strokeWidth="2" 
+              className="stroke-white/70" 
             />
 
             {/* Top Goal Net (Above Goal Line with Crosshatch Pattern) */}
