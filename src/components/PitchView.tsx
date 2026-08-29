@@ -243,9 +243,9 @@ export const PitchView = ({
             {/* Penalty Arc ('D' Curving Downwards from 18-Yard Box) */}
             <path d="M 315,225 A 95,60 0 0,0 485,225" strokeWidth="2.5" />
 
-            {/* Top Corner Arcs */}
-            <path d="M 120,62 A 30,30 0 0,1 150,32" strokeWidth="2.5" />
-            <path d="M 650,32 A 30,30 0 0,1 680,62" strokeWidth="2.5" />
+            {/* Top Corner Arcs (Curving Inwards Into Playing Field) */}
+            <path d="M 126,62 A 30,30 0 0,0 150,32" strokeWidth="2.5" />
+            <path d="M 650,32 A 30,30 0 0,0 674,62" strokeWidth="2.5" />
 
             {/* Halfway Line (Cutting edge-to-edge behind the forwards) */}
             <line x1="0" y1="700" x2="800" y2="700" strokeWidth="4" />
