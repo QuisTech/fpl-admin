@@ -168,13 +168,13 @@ export const PitchView = ({
       {/* 🌟 Authentic Football Pitch Container (Official Premier League 3D Perspective Broadcast Pitch) */}
       <div className="relative mx-auto w-full py-1">
         <div 
-          className="relative rounded-2xl overflow-hidden shadow-2xl border border-emerald-600/50 bg-[#00a350] p-2 sm:p-4 md:p-6"
+          className="relative rounded-2xl overflow-hidden shadow-2xl border-2 border-emerald-500/60 bg-[#00a350] p-2 sm:p-4 md:p-6"
           style={{
-            clipPath: 'polygon(3.5% 0%, 96.5% 0%, 100% 100%, 0% 100%)',
+            clipPath: 'polygon(6.5% 0%, 93.5% 0%, 100% 100%, 0% 100%)',
           }}
         >
           {/* 🎛️ Pitch Stadium HUD: Floating Fixture Ticker Toggle */}
-          <div className="absolute top-3 right-3 sm:top-4 sm:right-6 z-30">
+          <div className="absolute top-3 right-3 sm:top-4 sm:right-8 z-30">
             <button
               onClick={() => setShowFixtures(!showFixtures)}
               className={cn(
@@ -206,56 +206,48 @@ export const PitchView = ({
               background: `repeating-linear-gradient(
                 to bottom,
                 #00a350,
-                #00a350 44px,
-                #009b4d 44px,
-                #009b4d 88px
+                #00a350 46px,
+                #009b4d 46px,
+                #009b4d 92px
               )`
             }}
           />
 
-          {/* Crisp 3D Broadcast Perspective Pitch Boundary & Field Markings SVG */}
+          {/* 🏟️ Authentic Zoomed Half-Pitch Perspective Markings SVG */}
           <svg 
-            className="absolute inset-0 w-full h-full pointer-events-none stroke-white/40 fill-none" 
+            className="absolute inset-0 w-full h-full pointer-events-none stroke-white/45 fill-none" 
             preserveAspectRatio="none" 
             viewBox="0 0 1000 700"
           >
-            {/* Outer Pitch Border (Tapered in Broadcast Perspective) */}
-            <polygon points="50,15 950,15 985,685 15,685" strokeWidth="2.5" />
+            {/* Outer Pitch Boundary (Defending Half in Pronounced Perspective) */}
+            <polygon points="70,12 930,12 990,690 10,690" strokeWidth="3" />
             
-            {/* Halfway Line */}
-            <line x1="33" y1="350" x2="967" y2="350" strokeWidth="2" />
+            {/* Top Goal Box (6-yard area) */}
+            <polygon points="375,12 625,12 632,75 368,75" strokeWidth="2.2" />
+
+            {/* Top Penalty Area (18-yard box in Perspective) */}
+            <polygon points="255,12 745,12 765,195 235,195" strokeWidth="2.5" />
             
-            {/* Center Circle & Spot in Perspective */}
-            <ellipse cx="500" cy="350" rx="90" ry="55" strokeWidth="2" />
-            <circle cx="500" cy="350" r="3" className="fill-white/50" />
+            {/* Penalty Spot */}
+            <circle cx="500" cy="135" r="3.5" className="fill-white/60" />
+            
+            {/* Penalty Arc ('D' extending downwards) */}
+            <path d="M 405,195 A 105,65 0 0,0 595,195" strokeWidth="2.2" />
 
-            {/* Top Penalty Box (GKP Area - Perspective) */}
-            <polygon points="340,15 660,15 675,145 325,145" strokeWidth="2" />
-            {/* Top Goal Box */}
-            <polygon points="420,15 580,15 585,60 415,60" strokeWidth="1.8" />
-            {/* Top Penalty Spot */}
-            <circle cx="500" cy="100" r="2.5" className="fill-white/50" />
-            {/* Top Penalty Arc */}
-            <path d="M 435,145 A 68,45 0 0,0 565,145" strokeWidth="2" />
+            {/* Top Corner Arcs */}
+            <path d="M 70,45 A 32,32 0 0,1 102,12" strokeWidth="2.2" />
+            <path d="M 898,12 A 32,32 0 0,1 930,45" strokeWidth="2.2" />
 
-            {/* Bottom Penalty Box (Perspective) */}
-            <polygon points="315,555 685,555 700,685 300,685" strokeWidth="2" />
-            {/* Bottom Goal Box */}
-            <polygon points="410,640 590,640 595,685 405,685" strokeWidth="1.8" />
-            {/* Bottom Penalty Spot */}
-            <circle cx="500" cy="600" r="2.5" className="fill-white/50" />
-            {/* Bottom Penalty Arc */}
-            <path d="M 430,555 A 72,50 0 0,1 570,555" strokeWidth="2" />
-
-            {/* Corner Arcs */}
-            <path d="M 50,40 A 25,25 0 0,1 75,15" strokeWidth="2" />
-            <path d="M 925,15 A 25,25 0 0,1 950,40" strokeWidth="2" />
-            <path d="M 15,660 A 25,25 0 0,0 40,685" strokeWidth="2" />
-            <path d="M 960,685 A 25,25 0 0,0 985,660" strokeWidth="2" />
+            {/* Bottom Halfway Line & Center Circle (Extended in Foreground) */}
+            <line x1="10" y1="690" x2="990" y2="690" strokeWidth="3.5" />
+            
+            {/* Large Semi-Circle Center Arc Bulging Upwards into Foreground */}
+            <path d="M 310,690 A 200,125 0 0,1 690,690" strokeWidth="2.8" />
+            <circle cx="500" cy="690" r="4.5" className="fill-white/60" />
           </svg>
 
           {/* 🏟️ Starting XI Lines on the Pitch */}
-          <div className="relative z-10 flex flex-col justify-around min-h-[480px] sm:min-h-[540px] md:min-h-[600px] py-2 px-2 sm:px-6">
+          <div className="relative z-10 flex flex-col justify-around min-h-[480px] sm:min-h-[540px] md:min-h-[600px] py-2 px-3 sm:px-8">
           
           {/* Goalkeeper Line */}
           <div className="flex justify-around items-center w-full my-1">
