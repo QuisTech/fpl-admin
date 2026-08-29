@@ -169,8 +169,111 @@ export const PitchView = ({
 
       {/* 🌟 Authentic Football Pitch Container (1:1 Proportional Match with Official FPL) */}
       <div className="relative mx-auto w-full max-w-2xl py-1">
-        <div className="relative rounded-2xl overflow-hidden shadow-2xl border-2 border-slate-800 bg-[#00a350] p-2 sm:p-4">
+        <div className="relative rounded-2xl shadow-2xl border-2 border-slate-800 bg-[#00a350] p-2 sm:p-4">
           
+          {/* 🌿 Clipped Stadium Turf & Diagram Underlay (Keeps Rounded Corners without Clipping Tooltips) */}
+          <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
+            {/* Realistic Mown Grass Horizontal Lawn Stripes Background */}
+            <div 
+              className="absolute inset-0"
+              style={{
+                background: `repeating-linear-gradient(
+                  to bottom,
+                  #00a350,
+                  #00a350 48px,
+                  #009b4d 48px,
+                  #009b4d 96px
+                )`
+              }}
+            />
+
+            {/* 🏟️ Authentic Zoomed Official Pitch Diagram SVG (Aligned with Rows) */}
+            <svg 
+              className="absolute inset-0 w-full h-full stroke-white/80 fill-none" 
+              preserveAspectRatio="none" 
+              viewBox="0 0 800 1050"
+            >
+              {/* 🏟️ Stadium Outer Flanks (#0f172a Dark Surround Outside Pitch & Billboard Headers) */}
+              <polygon 
+                points="-10,-10 105,-10 105,6 0,365 -10,365 -10,-10" 
+                className="fill-[#0f172a] stroke-[#0f172a]" 
+                strokeWidth="2"
+              />
+              <polygon 
+                points="810,-10 695,-10 695,6 800,365 810,365 810,-10" 
+                className="fill-[#0f172a] stroke-[#0f172a]" 
+                strokeWidth="2"
+              />
+              <polygon 
+                points="105,-10 695,-10 695,6 105,6" 
+                className="fill-[#0f172a] stroke-[#0f172a]" 
+                strokeWidth="2"
+              />
+
+              {/* 🏟️ Straight Continuous Parallel Outer Pitch Boundary (From Top Corners at y=6 to Outer Edges at y=365) */}
+              <line x1="105" y1="6" x2="0" y2="365" strokeWidth="2" className="stroke-white/70" />
+              <line x1="695" y1="6" x2="800" y2="365" strokeWidth="2" className="stroke-white/70" />
+              <line x1="105" y1="6" x2="695" y2="6" strokeWidth="2" className="stroke-white/70" />
+
+              {/* 🌟 Left Billboard: Vibrant Cyan "Fantasy" with Premier League Crown Lion */}
+              <rect x="125" y="6" width="215" height="24" rx="4" className="fill-[#00e5ff] stroke-none" />
+              <g transform="translate(170, 9)">
+                {/* Crowned Lion Head Vector */}
+                <path d="M12 2L14.5 5.5L18 4L16.5 8L20 9.5L17.5 12.5L18.5 16L15 14.5L13 18L11 14.5L7.5 16L8.5 12.5L6 9.5L9.5 8L8 4L11.5 5.5Z" fill="#37003c" />
+                <text x="24" y="14" fill="#37003c" fontSize="14" fontWeight="900" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="0.4">Fantasy</text>
+              </g>
+
+              {/* 🌟 Center Goal Net (Neat & Straight Rectangular Frame with Crisp Grid) */}
+              <rect x="340" y="6" width="120" height="24" className="fill-[#00b4d8]/25 stroke-white" strokeWidth="2.5" />
+              <line x1="364" y1="6" x2="364" y2="30" strokeWidth="1" className="stroke-white/50" />
+              <line x1="388" y1="6" x2="388" y2="30" strokeWidth="1" className="stroke-white/50" />
+              <line x1="412" y1="6" x2="412" y2="30" strokeWidth="1" className="stroke-white/50" />
+              <line x1="436" y1="6" x2="436" y2="30" strokeWidth="1" className="stroke-white/50" />
+              <line x1="340" y1="14" x2="460" y2="14" strokeWidth="1" className="stroke-white/50" />
+              <line x1="340" y1="22" x2="460" y2="22" strokeWidth="1" className="stroke-white/50" />
+
+              {/* 🌟 Right Billboard: Vibrant Violet "Fantasy" with Premier League Crown Lion */}
+              <rect x="460" y="6" width="215" height="24" rx="4" className="fill-[#6366f1] stroke-none" />
+              <g transform="translate(505, 9)">
+                {/* Crowned Lion Head Vector */}
+                <path d="M12 2L14.5 5.5L18 4L16.5 8L20 9.5L17.5 12.5L18.5 16L15 14.5L13 18L11 14.5L7.5 16L8.5 12.5L6 9.5L9.5 8L8 4L11.5 5.5Z" fill="#1e1b4b" />
+                <text x="24" y="14" fill="#1e1b4b" fontSize="14" fontWeight="900" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="0.4">Fantasy</text>
+              </g>
+
+              {/* Top Goal Line */}
+              <line x1="125" y1="30" x2="675" y2="30" strokeWidth="3" />
+
+              {/* Slanted Sideline Touchlines (Tapering from Top Inward to Edge at Defenders y=450) */}
+              <line x1="125" y1="30" x2="0" y2="450" strokeWidth="3.5" />
+              <line x1="0" y1="450" x2="0" y2="700" strokeWidth="3.5" />
+              <line x1="675" y1="30" x2="800" y2="450" strokeWidth="3.5" />
+              <line x1="800" y1="450" x2="800" y2="700" strokeWidth="3.5" />
+
+              {/* Top 6-Yard Goal Area */}
+              <polygon points="295,30 505,30 512,85 288,85" strokeWidth="2.2" />
+
+              {/* Top 18-Yard Penalty Area in Perspective */}
+              <polygon points="200,30 600,30 618,175 182,175" strokeWidth="2.8" />
+              
+              {/* Penalty Spot */}
+              <circle cx="400" cy="130" r="4.5" className="fill-white" stroke="none" />
+              
+              {/* Penalty Arc ('D' Curving Downwards from 18-Yard Box) */}
+              <path d="M 325,175 A 85,50 0 0,0 475,175" strokeWidth="2.5" />
+
+              {/* Top Corner Arcs (Curving Inwards and Touching Both Goal Line & Slanted Sideline) */}
+              <path d="M 117.0,56.8 A 28,28 0 0,0 153,30" strokeWidth="2.5" />
+              <path d="M 647,30 A 28,28 0 0,0 683.0,56.8" strokeWidth="2.5" />
+
+              {/* Halfway Line (Cutting horizontally through the center of the Forwards row) */}
+              <line x1="0" y1="700" x2="800" y2="700" strokeWidth="4" />
+              
+              {/* Huge Prominent Center Circle (Encircling the Forwards row) */}
+              <ellipse cx="400" cy="700" rx="180" ry="120" strokeWidth="3.2" />
+              <circle cx="400" cy="700" r="5" className="fill-white" stroke="none" />
+            </svg>
+          </div>
+
           {/* 🎛️ Pitch Stadium HUD: Floating Fixture Ticker Toggle */}
           <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-30">
             <button
@@ -196,106 +299,6 @@ export const PitchView = ({
               )}
             </button>
           </div>
-
-          {/* Realistic Mown Grass Horizontal Lawn Stripes Background */}
-          <div 
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: `repeating-linear-gradient(
-                to bottom,
-                #00a350,
-                #00a350 48px,
-                #009b4d 48px,
-                #009b4d 96px
-              )`
-            }}
-          />
-
-          {/* 🏟️ Authentic Zoomed Official Pitch Diagram SVG (Aligned with Rows) */}
-          <svg 
-            className="absolute inset-0 w-full h-full pointer-events-none stroke-white/80 fill-none" 
-            preserveAspectRatio="none" 
-            viewBox="0 0 800 1050"
-          >
-            {/* 🏟️ Stadium Outer Flanks (#0f172a Dark Surround Outside Pitch & Billboard Headers) */}
-            <polygon 
-              points="-10,-10 105,-10 105,6 0,365 -10,365 -10,-10" 
-              className="fill-[#0f172a] stroke-[#0f172a]" 
-              strokeWidth="2"
-            />
-            <polygon 
-              points="810,-10 695,-10 695,6 800,365 810,365 810,-10" 
-              className="fill-[#0f172a] stroke-[#0f172a]" 
-              strokeWidth="2"
-            />
-            <polygon 
-              points="105,-10 695,-10 695,6 105,6" 
-              className="fill-[#0f172a] stroke-[#0f172a]" 
-              strokeWidth="2"
-            />
-
-            {/* 🏟️ Straight Continuous Parallel Outer Pitch Boundary (From Top Corners at y=6 to Outer Edges at y=365) */}
-            <line x1="105" y1="6" x2="0" y2="365" strokeWidth="2" className="stroke-white/70" />
-            <line x1="695" y1="6" x2="800" y2="365" strokeWidth="2" className="stroke-white/70" />
-            <line x1="105" y1="6" x2="695" y2="6" strokeWidth="2" className="stroke-white/70" />
-
-            {/* 🌟 Left Billboard: Vibrant Cyan "Fantasy" with Premier League Crown Lion */}
-            <rect x="125" y="6" width="215" height="24" rx="4" className="fill-[#00e5ff] stroke-none" />
-            <g transform="translate(170, 9)">
-              {/* Crowned Lion Head Vector */}
-              <path d="M12 2L14.5 5.5L18 4L16.5 8L20 9.5L17.5 12.5L18.5 16L15 14.5L13 18L11 14.5L7.5 16L8.5 12.5L6 9.5L9.5 8L8 4L11.5 5.5Z" fill="#37003c" />
-              <text x="24" y="14" fill="#37003c" fontSize="14" fontWeight="900" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="0.4">Fantasy</text>
-            </g>
-
-            {/* 🌟 Center Goal Net (Neat & Straight Rectangular Frame with Crisp Grid) */}
-            <rect x="340" y="6" width="120" height="24" className="fill-[#00b4d8]/25 stroke-white" strokeWidth="2.5" />
-            <line x1="364" y1="6" x2="364" y2="30" strokeWidth="1" className="stroke-white/50" />
-            <line x1="388" y1="6" x2="388" y2="30" strokeWidth="1" className="stroke-white/50" />
-            <line x1="412" y1="6" x2="412" y2="30" strokeWidth="1" className="stroke-white/50" />
-            <line x1="436" y1="6" x2="436" y2="30" strokeWidth="1" className="stroke-white/50" />
-            <line x1="340" y1="14" x2="460" y2="14" strokeWidth="1" className="stroke-white/50" />
-            <line x1="340" y1="22" x2="460" y2="22" strokeWidth="1" className="stroke-white/50" />
-
-            {/* 🌟 Right Billboard: Vibrant Violet "Fantasy" with Premier League Crown Lion */}
-            <rect x="460" y="6" width="215" height="24" rx="4" className="fill-[#6366f1] stroke-none" />
-            <g transform="translate(505, 9)">
-              {/* Crowned Lion Head Vector */}
-              <path d="M12 2L14.5 5.5L18 4L16.5 8L20 9.5L17.5 12.5L18.5 16L15 14.5L13 18L11 14.5L7.5 16L8.5 12.5L6 9.5L9.5 8L8 4L11.5 5.5Z" fill="#1e1b4b" />
-              <text x="24" y="14" fill="#1e1b4b" fontSize="14" fontWeight="900" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="0.4">Fantasy</text>
-            </g>
-
-            {/* Top Goal Line */}
-            <line x1="125" y1="30" x2="675" y2="30" strokeWidth="3" />
-
-            {/* Slanted Sideline Touchlines (Tapering from Top Inward to Edge at Defenders y=450) */}
-            <line x1="125" y1="30" x2="0" y2="450" strokeWidth="3.5" />
-            <line x1="0" y1="450" x2="0" y2="700" strokeWidth="3.5" />
-            <line x1="675" y1="30" x2="800" y2="450" strokeWidth="3.5" />
-            <line x1="800" y1="450" x2="800" y2="700" strokeWidth="3.5" />
-
-            {/* Top 6-Yard Goal Area */}
-            <polygon points="295,30 505,30 512,85 288,85" strokeWidth="2.2" />
-
-            {/* Top 18-Yard Penalty Area in Perspective */}
-            <polygon points="200,30 600,30 618,175 182,175" strokeWidth="2.8" />
-            
-            {/* Penalty Spot */}
-            <circle cx="400" cy="130" r="4.5" className="fill-white" stroke="none" />
-            
-            {/* Penalty Arc ('D' Curving Downwards from 18-Yard Box) */}
-            <path d="M 325,175 A 85,50 0 0,0 475,175" strokeWidth="2.5" />
-
-            {/* Top Corner Arcs (Curving Inwards and Touching Both Goal Line & Slanted Sideline) */}
-            <path d="M 117.0,56.8 A 28,28 0 0,0 153,30" strokeWidth="2.5" />
-            <path d="M 647,30 A 28,28 0 0,0 683.0,56.8" strokeWidth="2.5" />
-
-            {/* Halfway Line (Cutting horizontally through the center of the Forwards row) */}
-            <line x1="0" y1="700" x2="800" y2="700" strokeWidth="4" />
-            
-            {/* Huge Prominent Center Circle (Encircling the Forwards row) */}
-            <ellipse cx="400" cy="700" rx="180" ry="120" strokeWidth="3.2" />
-            <circle cx="400" cy="700" r="5" className="fill-white" stroke="none" />
-          </svg>
 
           {/* 🏟️ Starting XI Lines on the Pitch (Exact Row Proportions matching Official FPL) */}
           <div className="relative z-10 flex flex-col justify-between min-h-[620px] sm:min-h-[700px] md:min-h-[760px] pt-14 pb-3 sm:pt-20 sm:pb-5">
