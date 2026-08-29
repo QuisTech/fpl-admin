@@ -192,61 +192,71 @@ export const PitchView = ({
         )}
       </div>
 
-      {/* 🌟 Authentic Football Pitch Container (Official Premier League #00a350 & #009b4d Turf) */}
-      <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-emerald-600/40 bg-[#00a350] p-2 sm:p-4">
-        
-        {/* Realistic Mown Grass Horizontal Lawn Stripes Background */}
+      {/* 🌟 Authentic Football Pitch Container (Official Premier League 3D Perspective Broadcast Pitch) */}
+      <div className="relative mx-auto w-full py-1">
         <div 
-          className="absolute inset-0 pointer-events-none"
+          className="relative rounded-2xl overflow-hidden shadow-2xl border border-emerald-600/50 bg-[#00a350] p-2 sm:p-4 md:p-6"
           style={{
-            background: `repeating-linear-gradient(
-              to bottom,
-              #00a350,
-              #00a350 42px,
-              #009b4d 42px,
-              #009b4d 84px
-            )`
+            clipPath: 'polygon(3.5% 0%, 96.5% 0%, 100% 100%, 0% 100%)',
           }}
-        />
+        >
+          {/* Realistic Mown Grass Horizontal Lawn Stripes Background */}
+          <div 
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: `repeating-linear-gradient(
+                to bottom,
+                #00a350,
+                #00a350 44px,
+                #009b4d 44px,
+                #009b4d 88px
+              )`
+            }}
+          />
 
-        {/* Crisp Field Boundary & Pitch Markings SVG Overlay */}
-        <div className="absolute inset-2 sm:inset-4 border-2 border-white/35 rounded-xl pointer-events-none">
-          {/* Halfway Line */}
-          <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white/35 -translate-y-1/2" />
-          
-          {/* Center Circle */}
-          <div className="absolute top-1/2 left-1/2 w-28 h-28 sm:w-36 sm:h-36 border-2 border-white/35 rounded-full -translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute top-1/2 left-1/2 w-2 h-2 bg-white/40 rounded-full -translate-x-1/2 -translate-y-1/2" />
+          {/* Crisp 3D Broadcast Perspective Pitch Boundary & Field Markings SVG */}
+          <svg 
+            className="absolute inset-0 w-full h-full pointer-events-none stroke-white/40 fill-none" 
+            preserveAspectRatio="none" 
+            viewBox="0 0 1000 700"
+          >
+            {/* Outer Pitch Border (Tapered in Broadcast Perspective) */}
+            <polygon points="50,15 950,15 985,685 15,685" strokeWidth="2.5" />
+            
+            {/* Halfway Line */}
+            <line x1="33" y1="350" x2="967" y2="350" strokeWidth="2" />
+            
+            {/* Center Circle & Spot in Perspective */}
+            <ellipse cx="500" cy="350" rx="90" ry="55" strokeWidth="2" />
+            <circle cx="500" cy="350" r="3" className="fill-white/50" />
 
-          {/* Top Penalty Box (GKP Area) */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 sm:w-64 h-20 sm:h-24 border-b-2 border-x-2 border-white/35 rounded-b-lg">
-            {/* Goal Box */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 sm:w-32 h-8 sm:h-10 border-b-2 border-x-2 border-white/35 rounded-b" />
-            {/* Penalty Spot */}
-            <div className="absolute top-14 sm:top-16 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-white/40 rounded-full" />
-            {/* Penalty Arc */}
-            <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-16 h-8 border-b-2 border-white/35 rounded-b-full" />
-          </div>
+            {/* Top Penalty Box (GKP Area - Perspective) */}
+            <polygon points="340,15 660,15 675,145 325,145" strokeWidth="2" />
+            {/* Top Goal Box */}
+            <polygon points="420,15 580,15 585,60 415,60" strokeWidth="1.8" />
+            {/* Top Penalty Spot */}
+            <circle cx="500" cy="100" r="2.5" className="fill-white/50" />
+            {/* Top Penalty Arc */}
+            <path d="M 435,145 A 68,45 0 0,0 565,145" strokeWidth="2" />
 
-          {/* Bottom Penalty Box */}
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-48 sm:w-64 h-20 sm:h-24 border-t-2 border-x-2 border-white/35 rounded-t-lg">
-            {/* Goal Box */}
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 sm:w-32 h-8 sm:h-10 border-t-2 border-x-2 border-white/35 rounded-t" />
-            {/* Penalty Spot */}
-            <div className="absolute bottom-14 sm:bottom-16 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-white/40 rounded-full" />
-            {/* Penalty Arc */}
-            <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-16 h-8 border-t-2 border-white/35 rounded-t-full" />
-          </div>
+            {/* Bottom Penalty Box (Perspective) */}
+            <polygon points="315,555 685,555 700,685 300,685" strokeWidth="2" />
+            {/* Bottom Goal Box */}
+            <polygon points="410,640 590,640 595,685 405,685" strokeWidth="1.8" />
+            {/* Bottom Penalty Spot */}
+            <circle cx="500" cy="600" r="2.5" className="fill-white/50" />
+            {/* Bottom Penalty Arc */}
+            <path d="M 430,555 A 72,50 0 0,1 570,555" strokeWidth="2" />
 
-          {/* Corner Arcs */}
-          <div className="absolute top-0 left-0 w-4 h-4 border-b-2 border-r-2 border-white/35 rounded-br-full" />
-          <div className="absolute top-0 right-0 w-4 h-4 border-b-2 border-l-2 border-white/35 rounded-bl-full" />
-          <div className="absolute bottom-0 left-0 w-4 h-4 border-t-2 border-r-2 border-white/35 rounded-tr-full" />
-          <div className="absolute bottom-0 right-0 w-4 h-4 border-t-2 border-l-2 border-white/35 rounded-tl-full" />
-        </div>
+            {/* Corner Arcs */}
+            <path d="M 50,40 A 25,25 0 0,1 75,15" strokeWidth="2" />
+            <path d="M 925,15 A 25,25 0 0,1 950,40" strokeWidth="2" />
+            <path d="M 15,660 A 25,25 0 0,0 40,685" strokeWidth="2" />
+            <path d="M 960,685 A 25,25 0 0,0 985,660" strokeWidth="2" />
+          </svg>
 
-        {/* 🏟️ Starting XI Lines on the Pitch */}
-        <div className="relative z-10 flex flex-col justify-around min-h-[460px] sm:min-h-[520px] md:min-h-[580px] py-2">
+          {/* 🏟️ Starting XI Lines on the Pitch */}
+          <div className="relative z-10 flex flex-col justify-around min-h-[480px] sm:min-h-[540px] md:min-h-[600px] py-2 px-2 sm:px-6">
           
           {/* Goalkeeper Line */}
           <div className="flex justify-around items-center w-full my-1">
@@ -315,9 +325,9 @@ export const PitchView = ({
               />
             ))}
           </div>
-
         </div>
       </div>
+    </div>
 
       {/* 🪑 Official Substitutes Bench Shelf */}
       <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950/90 backdrop-blur-md p-3 shadow-xl">
