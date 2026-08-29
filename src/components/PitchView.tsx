@@ -35,7 +35,7 @@ export const PitchView = ({
 }: PitchViewProps) => {
   const [showFixtures, setShowFixtures] = useState(true);
 
-  const scenarioComp = data?.engineDiagnostics?.metrics?.scenarioComparison;
+  const scenarioComp = (data as any)?.engineDiagnostics?.metrics?.scenarioComparison;
   const delta = scenarioComp?.delta;
 
   const allPlayersMap = new Map<number, ScoredPlayer>();
