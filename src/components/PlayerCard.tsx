@@ -133,10 +133,7 @@ export const PlayerCard = ({
 
       {/* Interactive Solver Constraints Hover Overlay */}
       {(onToggleLock || onToggleExclude) && (
-        <div className={cn(
-          "absolute opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 z-40 bg-slate-950/90 p-0.5 rounded-md border border-slate-700 shadow-xl",
-          isGkp && !compact ? "top-1 right-0" : "-top-2 right-0"
-        )}>
+        <div className="absolute -top-2 right-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 z-40 bg-slate-950/90 p-0.5 rounded-md border border-slate-700 shadow-xl">
           {onToggleLock && (
             <button
               onClick={(e) => {
@@ -264,11 +261,8 @@ export const PlayerCard = ({
         </div>
       )}
 
-      {/* 4. Engine Math Hover Tooltip (Pops downward for GK to avoid top header clipping, upward for outfielders) */}
-      <div className={cn(
-        "absolute opacity-0 group-hover:opacity-100 transition-opacity z-50 bg-slate-950/95 backdrop-blur-md border border-slate-700 text-slate-300 text-[9px] p-2.5 rounded-lg shadow-2xl w-40 left-1/2 -translate-x-1/2 pointer-events-none",
-        isGkp && !compact ? "top-full mt-2" : "bottom-full mb-2"
-      )}>
+      {/* 4. Engine Math Hover Tooltip */}
+      <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity z-50 bg-slate-950/95 backdrop-blur-md border border-slate-700 text-slate-300 text-[9px] p-2.5 rounded-lg shadow-2xl w-40 bottom-full mb-2 left-1/2 -translate-x-1/2 pointer-events-none">
         <div className="font-bold border-b border-slate-800 pb-1 mb-1.5 text-white flex justify-between items-center">
           <span>{player.web_name}</span>
           <span className="text-[8px] font-mono text-slate-400">{teamShort} • {player.position}</span>

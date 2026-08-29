@@ -298,7 +298,7 @@ export const PitchView = ({
           </svg>
 
           {/* 🏟️ Starting XI Lines on the Pitch (Exact Row Proportions matching Official FPL) */}
-          <div className="relative z-10 flex flex-col justify-between min-h-[580px] sm:min-h-[660px] md:min-h-[720px] py-3 sm:py-5">
+          <div className="relative z-10 flex flex-col justify-between min-h-[580px] sm:min-h-[660px] md:min-h-[720px] pt-8 pb-3 sm:pt-10 sm:pb-5">
             
             {/* Row 1: Goalkeeper (Inside Goalmouth & 18-Yard Box) */}
             <div className="flex justify-center items-center w-full my-1">
