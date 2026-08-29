@@ -206,33 +206,33 @@ export const PlayerCard = ({
         </div>
       </div>
 
-      {/* 2. Official 2-Tier Nameplate */}
-      <div className="w-full rounded shadow-md overflow-hidden border border-black/40">
+      {/* 2. Official 2-Tier Nameplate (Authentic Official White Background Design) */}
+      <div className="w-full rounded-md shadow-md overflow-hidden border border-slate-300/80 bg-white">
         
-        {/* Tier 1: Player Name Bar (Official Dark Navy/Purple Background) */}
-        <div className="bg-[#37003c] px-1 py-0.5 text-center flex items-center justify-center gap-1">
-          <span className="font-extrabold text-white text-[9px] sm:text-[11px] leading-tight truncate">
+        {/* Tier 1: Player Name Bar (Official Clean White Background with Sharp Dark Text) */}
+        <div className="bg-white px-1 py-0.5 text-center flex items-center justify-center gap-1 border-b border-slate-200/90">
+          <span className="font-extrabold text-slate-950 text-[9px] sm:text-[11px] leading-tight truncate">
             {player.web_name}
           </span>
           {player.now_cost >= 80 && (
-            <span className="text-amber-400 text-[8px] font-bold" title="Premium Asset">★</span>
+            <span className="text-amber-500 text-[8px] font-black" title="Premium Asset">★</span>
           )}
         </div>
 
-        {/* Tier 2: Next Fixture Bar (Distinctive Background Colors for Instant Visibility) */}
-        <div className={cn(
-          "px-1 py-0.5 text-center flex items-center justify-between text-[7.5px] sm:text-[9px] font-extrabold font-mono tracking-tight shadow-inner",
-          nextFixture ? (
-            nextFixture.difficulty <= 2 ? "bg-[#00753b] text-white" :
-            nextFixture.difficulty === 3 ? "bg-[#374151] text-white" :
-            nextFixture.difficulty === 4 ? "bg-[#e11d48] text-white" :
-            "bg-[#881337] text-white"
-          ) : "bg-slate-800 text-slate-200"
-        )}>
+        {/* Tier 2: Next Fixture Bar (Clean Official Background with FDR Color Accent Pill) */}
+        <div className="bg-slate-50 px-1 py-0.5 text-center flex items-center justify-between text-[7.5px] sm:text-[9px] font-extrabold font-mono tracking-tight text-slate-800">
           <span className="truncate flex-1 font-black">
             {nextFixture ? `${nextFixture.opponent} (${nextFixture.is_home ? 'H' : 'A'})` : teamShort}
           </span>
-          <span className="text-[6.5px] sm:text-[7.5px] text-white/90 font-bold ml-1 px-1 py-0.25 rounded bg-black/25">
+          <span className={cn(
+            "text-[6.5px] sm:text-[7.5px] font-black px-1 py-0.25 rounded text-white ml-1 shadow-xs",
+            nextFixture ? (
+              nextFixture.difficulty <= 2 ? "bg-[#00753b]" :
+              nextFixture.difficulty === 3 ? "bg-[#374151]" :
+              nextFixture.difficulty === 4 ? "bg-[#e11d48]" :
+              "bg-[#881337]"
+            ) : "bg-slate-700"
+          )}>
             {typeof player.eo === 'number' && player.eo > 0 
               ? `${player.eo.toFixed(0)}%` 
               : `£${(player.now_cost / 10).toFixed(1)}M`}
