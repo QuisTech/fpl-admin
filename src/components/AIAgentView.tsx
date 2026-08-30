@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'motion/react';
-import { Bot, Sparkles, Send, ShieldAlert } from 'lucide-react';
+import { Bot, Sparkles, Send, ShieldAlert, ChevronLeft, ChevronRight, MessageSquare, Award } from 'lucide-react';
 import { TeamSyncResponse, RecommendationResponse } from '../types';
 import { StripeCheckout } from './StripeCheckout';
 import { AIDecisionLog } from './AIDecisionLog';
@@ -17,16 +17,49 @@ interface AIAgentViewProps {
   fuel: string;
 }
 
+interface ChatMessage {
+  id: string;
+  gameweek: number;
+  prompt?: string;
+  response?: any;
+  timestamp: string;
+}
+
 export const AIAgentView = ({ syncedData, optimalData, tier, userId, riskMode, fuel }: AIAgentViewProps) => {
   const [asking, setAsking] = useState(false);
   const [prompt, setPrompt] = useState('');
-  const [lastPrompt, setLastPrompt] = useState<string | null>(null);
-  const [response, setResponse] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [generatingThread, setGeneratingThread] = useState(false);
   const [generatedThread, setGeneratedThread] = useState<string[] | null>(null);
   const [threadError, setThreadError] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+
+  // 🤖 Gameweek Enveloped Chevron Navigator & Chat History State
+  const currentLiveGw = (syncedData as any)?.gameweek || 2;
+  const [gwsList, setGwsList] = useState<number[]>([currentLiveGw, Math.max(1, currentLiveGw - 1)]);
+  const [selectedGwIndex, setSelectedGwIndex] = useState<number>(0);
+  const [viewAll, setViewAll] = useState<boolean>(false);
+
+  // Chat message history stored per Gameweek
+  const [chatMessages, setChatMessages] = useState<Record<number, ChatMessage[]>>(() => {
+    try {
+      const saved = localStorage.getItem(`fpl_agent_chat_${userId}`);
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  // Save chat messages locally
+  useEffect(() => {
+    if (userId && Object.keys(chatMessages).length > 0) {
+      try {
+        localStorage.setItem(`fpl_agent_chat_${userId}`, JSON.stringify(chatMessages));
+      } catch (e) {
+        console.error("Failed to cache agent chat", e);
+      }
+    }
+  }, [chatMessages, userId]);
 
   useEffect(() => {
     // Check if the current user is an actual admin (role: 'admin') regardless of their tier
@@ -46,27 +79,54 @@ export const AIAgentView = ({ syncedData, optimalData, tier, userId, riskMode, f
     checkAdmin();
   }, [auth.currentUser]);
 
+  // Ensure current sync gameweek is in list
+  useEffect(() => {
+    if (syncedData) {
+      const gw = (syncedData as any).gameweek || 2;
+      setGwsList(prev => {
+        const set = new Set([...prev, gw, Math.max(1, gw - 1)]);
+        return Array.from(set).sort((a, b) => b - a);
+      });
+    }
+  }, [syncedData]);
+
+  const activeGwIndex = Math.min(selectedGwIndex, gwsList.length - 1);
+  const activeGw = gwsList[activeGwIndex] || currentLiveGw;
+
   const handleAskAgent = async () => {
-    if (!syncedData) return;
+    if (!syncedData || prompt.trim() === '') return;
     setAsking(true);
     setError(null);
+    const targetGw = activeGw;
+
     try {
-      // Create body matching getLLMTransferDecision signature roughly
       const res = await axios.post('/api/agent/ask', {
         userId,
-        gameweek: (syncedData as any).gameweek || 1,
+        gameweek: targetGw,
         squad: syncedData.squad,
         bank: syncedData.bank,
         totalCost: syncedData.totalCost,
         chips: {
-          WC: 1, FH: 1, BB: 1, TC: 1 // mock chip state
+          WC: 1, FH: 1, BB: 1, TC: 1 // chip state
         },
         riskMode: riskMode,
         fuel: fuel,
         userPrompt: prompt
       });
-      setLastPrompt(prompt);
-      setResponse(res.data.decision);
+
+      const newMsg: ChatMessage = {
+        id: `msg-${Date.now()}`,
+        gameweek: targetGw,
+        prompt: prompt,
+        response: res.data.decision,
+        timestamp: new Date().toISOString()
+      };
+
+      setChatMessages(prev => ({
+        ...prev,
+        [targetGw]: [...(prev[targetGw] || []), newMsg]
+      }));
+
       setPrompt('');
     } catch (err: any) {
       setError(err.response?.data?.error || err.message);
@@ -125,61 +185,196 @@ export const AIAgentView = ({ syncedData, optimalData, tier, userId, riskMode, f
     );
   }
 
+  const activeMessages = viewAll 
+    ? Object.values(chatMessages).flat() 
+    : (chatMessages[activeGw] || []);
+
   return (
     <motion.div
       key="agent-unlocked"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col h-full space-y-6"
+      className="flex flex-col h-full space-y-4 overflow-y-auto pr-1 custom-scrollbar"
     >
-      <div className="bg-slate-950/80 border border-fpl-border rounded-2xl p-5 flex flex-col gap-4">
-        <div className="flex items-center gap-3 border-b border-fpl-border pb-4">
-          <div className="w-10 h-10 bg-fpl-green/10 rounded-full flex items-center justify-center border border-fpl-green/30">
-            <Bot className="w-5 h-5 text-fpl-green" />
+      {/* 🤖 User Requested Enveloped Chevron Navigator (Keeps Chat Compact & Non-Infinite) */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-slate-950/70 p-3 rounded-2xl border border-fpl-border/60">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl bg-fpl-green/10 border border-fpl-green/30 flex items-center justify-center text-fpl-green shadow-inner">
+            <Award className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-white font-bold">FPL AI Agent</h3>
-            <p className="text-[10px] text-fpl-green uppercase tracking-widest font-black">Online & Ready</p>
+            <h3 className="text-xs font-black text-white uppercase tracking-wider">
+              AI Agent Advisor
+            </h3>
+            <p className="text-[10px] text-slate-400 font-mono">
+              {gwsList.length} Gameweek{gwsList.length > 1 ? 's' : ''} Tracked
+            </p>
           </div>
+        </div>
+
+        <div className="flex items-center justify-between sm:justify-end gap-2">
+          {/* Enveloped Chevron Bar */}
+          <div className="flex items-center gap-1 bg-slate-950 px-2 py-1 rounded-lg border border-fpl-border/50">
+            <button 
+              onClick={() => {
+                setViewAll(false);
+                setSelectedGwIndex(prev => Math.min(gwsList.length - 1, prev + 1));
+              }}
+              disabled={viewAll || activeGwIndex >= gwsList.length - 1}
+              className="p-0.5 rounded text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors" 
+              title="Previous Gameweek"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+
+            <span className="text-[8.5px] font-mono text-emerald-400 font-bold px-1.5 select-none">
+              {viewAll ? `GWs ${gwsList[gwsList.length - 1]}–${gwsList[0]}` : `GW ${activeGw}`}
+            </span>
+
+            <button 
+              onClick={() => {
+                setViewAll(false);
+                setSelectedGwIndex(prev => Math.max(0, prev - 1));
+              }}
+              disabled={viewAll || activeGwIndex <= 0}
+              className="p-0.5 rounded text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors" 
+              title="Next Gameweek"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Gameweek Quick Pills */}
+          {gwsList.length > 1 && (
+            <div className="hidden md:flex items-center gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800">
+              {gwsList.map((gw, idx) => (
+                <button
+                  key={gw}
+                  onClick={() => {
+                    setViewAll(false);
+                    setSelectedGwIndex(idx);
+                  }}
+                  className={cn(
+                    "px-2 py-0.5 rounded text-[9px] font-mono font-bold transition-all",
+                    !viewAll && activeGwIndex === idx 
+                      ? "bg-fpl-green text-slate-950 shadow-sm" 
+                      : "text-slate-400 hover:text-white hover:bg-slate-900"
+                  )}
+                >
+                  GW{gw}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Toggle View All */}
+          {gwsList.length > 1 && (
+            <button
+              onClick={() => setViewAll(!viewAll)}
+              className={cn(
+                "text-[9px] font-mono font-black px-2.5 py-1 rounded-lg border transition-all uppercase tracking-wider",
+                viewAll ? "bg-fpl-purple/20 text-fpl-purple border-fpl-purple/40" : "bg-slate-900 text-slate-400 border-slate-800 hover:text-white"
+              )}
+            >
+              {viewAll ? "Single GW" : "View All"}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Main AI Chat & Dialogue Box for Selected Gameweek */}
+      <div className="bg-slate-950/80 border border-fpl-border rounded-2xl p-4 sm:p-5 flex flex-col gap-4 shadow-lg">
+        <div className="flex items-center justify-between border-b border-fpl-border pb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 bg-fpl-green/10 rounded-full flex items-center justify-center border border-fpl-green/30">
+              <Bot className="w-4 h-4 text-fpl-green" />
+            </div>
+            <div>
+              <h3 className="text-white text-xs sm:text-sm font-bold flex items-center gap-2">
+                <span>FPL AI Intelligence</span>
+                <span className="text-[9px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">GW {activeGw}</span>
+              </h3>
+              <p className="text-[9px] text-fpl-green uppercase tracking-widest font-black">Online & Context Synced</p>
+            </div>
+          </div>
+
+          {activeMessages.length > 0 && (
+            <span className="text-[9px] font-mono text-slate-400 bg-slate-900 px-2 py-0.5 rounded-full border border-slate-800">
+              {activeMessages.length} message{activeMessages.length !== 1 ? 's' : ''}
+            </span>
+          )}
         </div>
         
         {error && (
-          <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-3 rounded-lg text-xs">
+          <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-3 rounded-lg text-xs font-mono">
             {error}
           </div>
         )}
 
-        {response && (
-          <div className="flex flex-col gap-3">
-            {lastPrompt && lastPrompt.trim() !== '' && (
-              <div className="self-end bg-fpl-green/10 border border-fpl-green/20 rounded-xl p-3 max-w-[85%]">
-                <p className="text-sm text-fpl-green leading-relaxed text-right italic">"{lastPrompt}"</p>
-              </div>
-            )}
-            <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 self-start max-w-[95%]">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-slate-300">Action: <span className="text-fpl-green">{response.action}</span></span>
-                <span className="text-[10px] bg-slate-800 px-2 py-1 rounded text-slate-400">Confidence: {response.confidence}%</span>
-              </div>
-              <p className="text-sm text-slate-300 leading-relaxed">{response.reasoning}</p>
+        {/* Dynamic Chat Message Exchange */}
+        <div className="flex flex-col gap-3 max-h-[380px] overflow-y-auto pr-1 custom-scrollbar">
+          {activeMessages.length === 0 ? (
+            <div className="text-center py-6 bg-slate-900/40 rounded-xl border border-slate-800/60 p-4">
+              <Sparkles className="w-6 h-6 text-fpl-green/60 mx-auto mb-2" />
+              <p className="text-xs text-slate-300 font-medium">Ready to assist for Gameweek {activeGw}</p>
+              <p className="text-[10px] text-slate-500 mt-1 max-w-sm mx-auto">
+                Ask about recommended captaincy, optimal transfers, press conference news, or chip timing.
+              </p>
             </div>
-          </div>
-        )}
+          ) : (
+            activeMessages.map((msg) => (
+              <div key={msg.id} className="flex flex-col gap-2.5">
+                {/* User Message Bubble */}
+                {msg.prompt && (
+                  <div className="self-end bg-fpl-green/10 border border-fpl-green/30 rounded-xl p-3 max-w-[85%] shadow-sm">
+                    <p className="text-xs sm:text-sm text-fpl-green leading-relaxed text-right italic font-medium">
+                      "{msg.prompt}"
+                    </p>
+                  </div>
+                )}
 
-        <div className="flex items-end gap-2 mt-2">
+                {/* AI Agent Response Card */}
+                {msg.response && (
+                  <div className="bg-slate-900 border border-slate-700 rounded-xl p-3.5 sm:p-4 self-start max-w-[95%] shadow-md">
+                    <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-slate-800">
+                      <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                        <Bot className="w-3.5 h-3.5 text-fpl-green" />
+                        Action: <span className="text-fpl-green font-black">{msg.response.action}</span>
+                      </span>
+                      <span className="text-[9px] bg-slate-800 px-2 py-0.5 rounded text-slate-300 font-mono font-bold">
+                        Confidence: {msg.response.confidence}%
+                      </span>
+                    </div>
+                    <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">{msg.response.reasoning}</p>
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Input Bar */}
+        <div className="flex items-end gap-2 mt-1 pt-2 border-t border-slate-800">
           <div className="flex-grow">
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="E.g. What should I do this week based on the latest press conferences?"
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-fpl-green resize-none h-24"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleAskAgent();
+                }
+              }}
+              placeholder={`Ask AI Agent about Gameweek ${activeGw} (e.g. "Who should I captain or transfer in?")...`}
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs sm:text-sm text-white focus:outline-none focus:border-fpl-green resize-none h-20 placeholder:text-slate-500 font-sans"
             />
           </div>
           <button 
             onClick={handleAskAgent}
             disabled={asking || prompt.trim() === ''}
-            className="bg-fpl-green text-slate-950 hover:bg-fpl-green/90 disabled:opacity-50 disabled:cursor-not-allowed p-3 rounded-xl transition-colors h-12 flex items-center justify-center shrink-0"
+            className="bg-fpl-green text-slate-950 hover:bg-fpl-green/90 disabled:opacity-50 disabled:cursor-not-allowed p-3 rounded-xl transition-all h-20 w-14 flex items-center justify-center shrink-0 shadow-md font-bold"
+            title="Send prompt"
           >
             {asking ? <div className="w-5 h-5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" /> : <Send className="w-5 h-5" />}
           </button>
@@ -258,7 +453,6 @@ export const AIAgentView = ({ syncedData, optimalData, tier, userId, riskMode, f
                       <button 
                         onClick={() => {
                           navigator.clipboard.writeText(tweet);
-                          // Optional: show a small copied toast
                         }}
                         className="text-xs text-slate-400 hover:text-blue-400 flex items-center gap-1 transition-colors"
                       >
@@ -284,8 +478,13 @@ export const AIAgentView = ({ syncedData, optimalData, tier, userId, riskMode, f
       )}
 
       {/* Embedded Decision Log History */}
-      <div className="flex-grow overflow-auto bg-slate-950/50 rounded-2xl border border-fpl-border p-5">
-        <AIDecisionLog userId={userId} refreshTrigger={response ? response.reasoning : ''} />
+      <div className="flex-grow overflow-auto bg-slate-950/50 rounded-2xl border border-fpl-border p-4 sm:p-5">
+        <AIDecisionLog 
+          userId={userId} 
+          refreshTrigger={activeMessages.length.toString()} 
+          selectedGw={activeGw}
+          viewAll={viewAll}
+        />
       </div>
     </motion.div>
   );
