@@ -229,6 +229,7 @@ function FPLApp() {
               ) : tab === 'pitch' ? (
                 <PitchView 
                   data={data} 
+                  syncedData={syncedData}
                   formation={formation} 
                   activeScenario={activeScenario}
                   onSelectScenario={setActiveScenario}

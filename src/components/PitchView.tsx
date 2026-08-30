@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { PlayerCard } from './PlayerCard';
-import { RecommendationResponse, ScoredPlayer } from '../types';
-import { Zap, Shield, Lock, Ban, X, ArrowRightLeft, Calendar, Eye, EyeOff } from 'lucide-react';
+import { RecommendationResponse, ScoredPlayer, TeamSyncResponse } from '../types';
+import { Zap, Shield, Lock, Ban, X, ArrowRightLeft, Calendar, Eye, EyeOff, Activity, Trophy, Coins, Users } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface PitchViewProps {
   data: RecommendationResponse | null;
+  syncedData?: TeamSyncResponse | null;
   formation: {
     gkp: ScoredPlayer[];
     def: ScoredPlayer[];
@@ -24,6 +25,7 @@ interface PitchViewProps {
 
 export const PitchView = ({ 
   data, 
+  syncedData,
   formation,
   activeScenario = 'quant',
   onSelectScenario,
@@ -48,17 +50,31 @@ export const PitchView = ({
   const hasConstraints = lockedPlayerIds.length > 0 || excludedPlayerIds.length > 0;
   const benchPlayers = data?.bench?.filter(Boolean) || [];
 
+  // Matchday & Squad Diagnostics Calculations
+  const nextGw = data?.nextEventId || 2;
+  const expectedPoints = data?.expectedPoints || data?.startingXI?.reduce((s, p) => s + (p.xP || 0), 0) || 0;
+  const avgEo = data?.engineDiagnostics?.metrics?.averageXiEo ?? (
+    data?.startingXI && data.startingXI.length > 0 
+      ? Math.round(data.startingXI.reduce((s, p) => s + (p.eo || 0), 0) / data.startingXI.length) 
+      : 0
+  );
+  const totalCost = data?.totalCost ? (data.totalCost / 10).toFixed(1) : '100.0';
+  const bank = syncedData?.bank !== undefined ? (syncedData.bank / 10).toFixed(1) : '0.0';
+  const captain = data?.captain?.web_name || data?.startingXI?.find(p => p.isCaptain)?.web_name || 'TBD';
+  const entryHistory = syncedData?.entryHistory;
+  const managerInfo = syncedData?.managerInfo;
+
   return (
     <motion.div 
       key="pitch-view"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex-grow flex flex-col justify-between py-2 w-full max-w-5xl mx-auto"
+      className="flex-grow flex flex-col justify-between py-1 sm:py-2 w-full max-w-5xl mx-auto"
     >
       {/* Top Controls: Scenario Switcher & Delta Comparison Bar (Only rendered when onSelectScenario is provided) */}
       {onSelectScenario && (
-        <div className="space-y-2 mb-3">
+        <div className="space-y-2 mb-2">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2 bg-slate-950/90 p-2 rounded-xl border border-fpl-border/80 backdrop-blur-md shadow-lg">
             
             {/* Left: Scenario Switcher */}
@@ -123,6 +139,99 @@ export const PitchView = ({
           </div>
         </div>
       )}
+
+      {/* 📊 Premier League Matchday & Squad Diagnostics Stats Ribbon */}
+      <div className="bg-slate-950/85 border border-fpl-border/70 rounded-xl p-2 sm:p-2.5 mb-2 backdrop-blur-md shadow-md">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-1.5 border-b border-slate-800/80 pb-1.5 mb-2">
+          
+          {/* Gameweek Badge & Team Identifier */}
+          <div className="flex items-center gap-2">
+            <span className="bg-fpl-green/10 border border-fpl-green/30 text-fpl-green font-mono font-black text-[9.5px] sm:text-xs px-2.5 py-0.5 rounded-md uppercase tracking-wider flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-fpl-green animate-pulse" />
+              Gameweek {nextGw}
+            </span>
+            <span className="text-[10px] sm:text-xs font-bold text-white truncate">
+              {managerInfo?.teamName ? managerInfo.teamName : (activeScenario === 'template' ? 'Risky Template Shield' : 'Quant Optimal Lineup')}
+            </span>
+          </div>
+
+          {/* Captain & Status Banner */}
+          <div className="flex items-center justify-between sm:justify-end gap-1.5 text-[9px] font-mono">
+            {managerInfo?.managerName && (
+              <span className="bg-slate-900 border border-slate-800 px-2 py-0.5 rounded text-slate-300 hidden md:inline-block">
+                {managerInfo.managerName}
+              </span>
+            )}
+            <span className="bg-slate-900/90 border border-slate-800 px-2 py-0.5 rounded text-emerald-400 font-bold flex items-center gap-1">
+              <span className="w-3.5 h-3.5 rounded-full bg-[#37003c] text-white flex items-center justify-center text-[7.5px] font-black border border-white/60">C</span>
+              {captain}
+            </span>
+          </div>
+        </div>
+
+        {/* 6-Metric Matchday Grid (1:1 Relatable to Official FPL Pitch Header) */}
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 text-center">
+          {/* 1. Expected Points (xP) */}
+          <div className="bg-slate-900/90 border border-slate-800/80 rounded-lg p-1.5 flex flex-col justify-center shadow-inner">
+            <span className="text-xs sm:text-sm font-black font-mono text-fpl-green leading-none">
+              {expectedPoints.toFixed(1)}
+            </span>
+            <span className="text-[8px] font-mono uppercase text-slate-400 mt-1 tracking-tight">
+              Expected xP
+            </span>
+          </div>
+
+          {/* 2. Avg Squad EO */}
+          <div className="bg-slate-900/90 border border-slate-800/80 rounded-lg p-1.5 flex flex-col justify-center shadow-inner">
+            <span className="text-xs sm:text-sm font-black font-mono text-cyan-400 leading-none">
+              {avgEo}%
+            </span>
+            <span className="text-[8px] font-mono uppercase text-slate-400 mt-1 tracking-tight">
+              Avg XI EO
+            </span>
+          </div>
+
+          {/* 3. Squad Value */}
+          <div className="bg-slate-900/90 border border-slate-800/80 rounded-lg p-1.5 flex flex-col justify-center shadow-inner">
+            <span className="text-xs sm:text-sm font-black font-mono text-slate-200 leading-none">
+              £{totalCost}M
+            </span>
+            <span className="text-[8px] font-mono uppercase text-slate-400 mt-1 tracking-tight">
+              Squad Value
+            </span>
+          </div>
+
+          {/* 4. Latest Points (or Bank) */}
+          <div className="bg-slate-900/90 border border-slate-800/80 rounded-lg p-1.5 flex flex-col justify-center shadow-inner">
+            <span className="text-xs sm:text-sm font-black font-mono text-amber-400 leading-none">
+              {entryHistory ? `${entryHistory.points} pts` : `£${bank}M`}
+            </span>
+            <span className="text-[8px] font-mono uppercase text-slate-400 mt-1 tracking-tight">
+              {entryHistory ? 'Latest Points' : 'In The Bank'}
+            </span>
+          </div>
+
+          {/* 5. Overall Rank (or Starters) */}
+          <div className="bg-slate-900/90 border border-slate-800/80 rounded-lg p-1.5 flex flex-col justify-center shadow-inner">
+            <span className="text-xs sm:text-sm font-black font-mono text-purple-300 leading-none truncate px-0.5">
+              {entryHistory ? `#${entryHistory.overall_rank.toLocaleString()}` : `${data?.startingXI?.length || 11} Starters`}
+            </span>
+            <span className="text-[8px] font-mono uppercase text-slate-400 mt-1 tracking-tight">
+              {entryHistory ? 'Overall Rank' : 'Active XI'}
+            </span>
+          </div>
+
+          {/* 6. Total Season Points (or Subs) */}
+          <div className="bg-slate-900/90 border border-slate-800/80 rounded-lg p-1.5 flex flex-col justify-center shadow-inner">
+            <span className="text-xs sm:text-sm font-black font-mono text-emerald-400 leading-none">
+              {entryHistory ? `${entryHistory.total_points}` : `${data?.bench?.length || 4} Subs`}
+            </span>
+            <span className="text-[8px] font-mono uppercase text-slate-400 mt-1 tracking-tight">
+              {entryHistory ? 'Total Points' : 'Bench Dugout'}
+            </span>
+          </div>
+        </div>
+      </div>
 
       {/* Active Constraints (Locks & Excludes) Pill Bar */}
       {hasConstraints && (
