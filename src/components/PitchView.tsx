@@ -168,8 +168,8 @@ export const PitchView = ({
       )}
 
       {/* 🌟 Authentic Football Pitch Container (1:1 Proportional Match with Official FPL) */}
-      <div className="relative mx-auto w-full max-w-2xl py-1">
-        <div className="relative rounded-2xl shadow-2xl border-2 border-slate-800 bg-[#00a350] p-2 sm:p-4">
+      <div className="relative mx-auto w-full max-w-2xl py-0.5 sm:py-1">
+        <div className="relative rounded-2xl shadow-2xl border-2 border-slate-800 bg-[#00a350] p-1.5 sm:p-3">
           
           {/* 🌿 Clipped Stadium Turf & Diagram Underlay (Keeps Rounded Corners without Clipping Tooltips) */}
           <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
@@ -180,9 +180,9 @@ export const PitchView = ({
                 background: `repeating-linear-gradient(
                   to bottom,
                   #00a350,
-                  #00a350 48px,
-                  #009b4d 48px,
-                  #009b4d 96px
+                  #00a350 40px,
+                  #009b4d 40px,
+                  #009b4d 80px
                 )`
               }}
             />
@@ -191,95 +191,95 @@ export const PitchView = ({
             <svg 
               className="absolute inset-0 w-full h-full stroke-white/80 fill-none" 
               preserveAspectRatio="none" 
-              viewBox="0 0 800 840"
+              viewBox="0 0 800 680"
             >
               {/* 🏟️ Stadium Outer Flanks (#0f172a Dark Surround Outside Pitch & Billboard Headers) */}
               <polygon 
-                points="-10,-10 105,-10 105,6 0,295 -10,295 -10,-10" 
+                points="-10,-10 105,-10 105,4 0,240 -10,240 -10,-10" 
                 className="fill-[#0f172a] stroke-[#0f172a]" 
                 strokeWidth="2"
               />
               <polygon 
-                points="810,-10 695,-10 695,6 800,295 810,295 810,-10" 
+                points="810,-10 695,-10 695,4 800,240 810,240 810,-10" 
                 className="fill-[#0f172a] stroke-[#0f172a]" 
                 strokeWidth="2"
               />
               <polygon 
-                points="105,-10 695,-10 695,6 105,6" 
+                points="105,-10 695,-10 695,4 105,4" 
                 className="fill-[#0f172a] stroke-[#0f172a]" 
                 strokeWidth="2"
               />
 
-              {/* 🏟️ Straight Continuous Parallel Outer Pitch Boundary (From Top Corners at y=6 to Outer Edges at y=295) */}
-              <line x1="105" y1="6" x2="0" y2="295" strokeWidth="2" className="stroke-white/70" />
-              <line x1="695" y1="6" x2="800" y2="295" strokeWidth="2" className="stroke-white/70" />
-              <line x1="105" y1="6" x2="695" y2="6" strokeWidth="2" className="stroke-white/70" />
+              {/* 🏟️ Straight Continuous Parallel Outer Pitch Boundary (From Top Corners at y=4 to Outer Edges at y=240) */}
+              <line x1="105" y1="4" x2="0" y2="240" strokeWidth="2" className="stroke-white/70" />
+              <line x1="695" y1="4" x2="800" y2="240" strokeWidth="2" className="stroke-white/70" />
+              <line x1="105" y1="4" x2="695" y2="4" strokeWidth="2" className="stroke-white/70" />
 
               {/* 🌟 Left Billboard: Vibrant Cyan "Fantasy" with Premier League Crown Lion */}
-              <rect x="125" y="6" width="215" height="24" rx="4" className="fill-[#00e5ff] stroke-none" />
-              <g transform="translate(170, 9)">
+              <rect x="125" y="4" width="215" height="20" rx="4" className="fill-[#00e5ff] stroke-none" />
+              <g transform="translate(170, 6)">
                 {/* Crowned Lion Head Vector */}
                 <path d="M12 2L14.5 5.5L18 4L16.5 8L20 9.5L17.5 12.5L18.5 16L15 14.5L13 18L11 14.5L7.5 16L8.5 12.5L6 9.5L9.5 8L8 4L11.5 5.5Z" fill="#37003c" />
-                <text x="24" y="14" fill="#37003c" fontSize="14" fontWeight="900" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="0.4">Fantasy</text>
+                <text x="24" y="13" fill="#37003c" fontSize="13" fontWeight="900" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="0.4">Fantasy</text>
               </g>
 
               {/* 🌟 Center Goal Net (Neat & Straight Rectangular Frame with Crisp Grid) */}
-              <rect x="340" y="6" width="120" height="24" className="fill-[#00b4d8]/25 stroke-white" strokeWidth="2.5" />
-              <line x1="364" y1="6" x2="364" y2="30" strokeWidth="1" className="stroke-white/50" />
-              <line x1="388" y1="6" x2="388" y2="30" strokeWidth="1" className="stroke-white/50" />
-              <line x1="412" y1="6" x2="412" y2="30" strokeWidth="1" className="stroke-white/50" />
-              <line x1="436" y1="6" x2="436" y2="30" strokeWidth="1" className="stroke-white/50" />
-              <line x1="340" y1="14" x2="460" y2="14" strokeWidth="1" className="stroke-white/50" />
-              <line x1="340" y1="22" x2="460" y2="22" strokeWidth="1" className="stroke-white/50" />
+              <rect x="340" y="4" width="120" height="20" className="fill-[#00b4d8]/25 stroke-white" strokeWidth="2" />
+              <line x1="364" y1="4" x2="364" y2="24" strokeWidth="1" className="stroke-white/50" />
+              <line x1="388" y1="4" x2="388" y2="24" strokeWidth="1" className="stroke-white/50" />
+              <line x1="412" y1="4" x2="412" y2="24" strokeWidth="1" className="stroke-white/50" />
+              <line x1="436" y1="4" x2="436" y2="24" strokeWidth="1" className="stroke-white/50" />
+              <line x1="340" y1="10" x2="460" y2="10" strokeWidth="1" className="stroke-white/50" />
+              <line x1="340" y1="17" x2="460" y2="17" strokeWidth="1" className="stroke-white/50" />
 
               {/* 🌟 Right Billboard: Vibrant Violet "Fantasy" with Premier League Crown Lion */}
-              <rect x="460" y="6" width="215" height="24" rx="4" className="fill-[#6366f1] stroke-none" />
-              <g transform="translate(505, 9)">
+              <rect x="460" y="4" width="215" height="20" rx="4" className="fill-[#6366f1] stroke-none" />
+              <g transform="translate(505, 6)">
                 {/* Crowned Lion Head Vector */}
                 <path d="M12 2L14.5 5.5L18 4L16.5 8L20 9.5L17.5 12.5L18.5 16L15 14.5L13 18L11 14.5L7.5 16L8.5 12.5L6 9.5L9.5 8L8 4L11.5 5.5Z" fill="#1e1b4b" />
-                <text x="24" y="14" fill="#1e1b4b" fontSize="14" fontWeight="900" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="0.4">Fantasy</text>
+                <text x="24" y="13" fill="#1e1b4b" fontSize="13" fontWeight="900" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="0.4">Fantasy</text>
               </g>
 
               {/* Top Goal Line */}
-              <line x1="125" y1="30" x2="675" y2="30" strokeWidth="3" />
+              <line x1="125" y1="24" x2="675" y2="24" strokeWidth="2.5" />
 
-              {/* Slanted Sideline Touchlines (Tapering from Top Inward to Edge at Defenders y=365) */}
-              <line x1="125" y1="30" x2="0" y2="365" strokeWidth="3.5" />
-              <line x1="0" y1="365" x2="0" y2="560" strokeWidth="3.5" />
-              <line x1="675" y1="30" x2="800" y2="365" strokeWidth="3.5" />
-              <line x1="800" y1="365" x2="800" y2="560" strokeWidth="3.5" />
+              {/* Slanted Sideline Touchlines */}
+              <line x1="125" y1="24" x2="0" y2="290" strokeWidth="3" />
+              <line x1="0" y1="290" x2="0" y2="450" strokeWidth="3" />
+              <line x1="675" y1="24" x2="800" y2="290" strokeWidth="3" />
+              <line x1="800" y1="290" x2="800" y2="450" strokeWidth="3" />
 
               {/* Top 6-Yard Goal Area */}
-              <polygon points="295,30 505,30 512,75 288,75" strokeWidth="2.2" />
+              <polygon points="295,24 505,24 512,62 288,62" strokeWidth="2" />
 
               {/* Top 18-Yard Penalty Area in Perspective */}
-              <polygon points="200,30 600,30 618,150 182,150" strokeWidth="2.8" />
+              <polygon points="200,24 600,24 618,125 182,125" strokeWidth="2.5" />
               
               {/* Penalty Spot */}
-              <circle cx="400" cy="110" r="4.5" className="fill-white" stroke="none" />
+              <circle cx="400" cy="90" r="4" className="fill-white" stroke="none" />
               
               {/* Penalty Arc ('D' Curving Downwards from 18-Yard Box) */}
-              <path d="M 325,150 A 85,45 0 0,0 475,150" strokeWidth="2.5" />
+              <path d="M 325,125 A 85,38 0 0,0 475,125" strokeWidth="2.2" />
 
-              {/* Top Corner Arcs (Curving Inwards and Touching Both Goal Line & Slanted Sideline) */}
-              <path d="M 117.0,56.8 A 28,28 0 0,0 153,30" strokeWidth="2.5" />
-              <path d="M 647,30 A 28,28 0 0,0 683.0,56.8" strokeWidth="2.5" />
+              {/* Top Corner Arcs */}
+              <path d="M 117.0,46.8 A 24,24 0 0,0 149,24" strokeWidth="2.2" />
+              <path d="M 651,24 A 24,24 0 0,0 683.0,46.8" strokeWidth="2.2" />
 
               {/* Halfway Line (Cutting horizontally through the center of the Forwards row) */}
-              <line x1="0" y1="560" x2="800" y2="560" strokeWidth="4" />
+              <line x1="0" y1="450" x2="800" y2="450" strokeWidth="3.5" />
               
-              {/* Huge Center Circle (Encircling Forwards, bottom touches y=665 at Bench Shelf Intersection) */}
-              <ellipse cx="400" cy="560" rx="170" ry="105" strokeWidth="3.2" />
-              <circle cx="400" cy="560" r="5" className="fill-white" stroke="none" />
+              {/* Center Circle (Encircling Forwards, bottom touches at Bench Shelf Intersection) */}
+              <ellipse cx="400" cy="450" rx="160" ry="85" strokeWidth="2.8" />
+              <circle cx="400" cy="450" r="4.5" className="fill-white" stroke="none" />
             </svg>
           </div>
 
           {/* 🎛️ Pitch Stadium HUD: Floating Fixture Ticker Toggle */}
-          <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-30">
+          <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-30">
             <button
               onClick={() => setShowFixtures(!showFixtures)}
               className={cn(
-                "flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider backdrop-blur-md transition-all shadow-lg select-none",
+                "flex items-center gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg border text-[8.5px] sm:text-[9.5px] font-extrabold uppercase tracking-wider backdrop-blur-md transition-all shadow-lg select-none",
                 showFixtures 
                   ? "bg-black/70 border-emerald-400/50 text-[#00ff85] hover:bg-black/90 hover:border-emerald-400" 
                   : "bg-black/40 border-white/20 text-white/70 hover:bg-black/70 hover:text-white"
@@ -288,23 +288,23 @@ export const PitchView = ({
             >
               {showFixtures ? (
                 <>
-                  <Eye className="w-3 h-3 text-[#00ff85]" />
+                  <Eye className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#00ff85]" />
                   <span>3-Match FDR: On</span>
                 </>
               ) : (
                 <>
-                  <EyeOff className="w-3 h-3 text-white/50" />
+                  <EyeOff className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white/50" />
                   <span>3-Match FDR: Off</span>
                 </>
               )}
             </button>
           </div>
 
-          {/* 🏟️ Starting XI Lines on the Pitch (Compact Responsive Row Proportions) */}
-          <div className="relative z-10 flex flex-col justify-between min-h-[460px] sm:min-h-[520px] md:min-h-[580px] pt-7 pb-1 sm:pt-9 sm:pb-2">
+          {/* 🏟️ Starting XI Lines on the Pitch (Ultra-Compact Responsive Row Proportions for Mobile) */}
+          <div className="relative z-10 flex flex-col justify-between min-h-[360px] sm:min-h-[420px] md:min-h-[490px] pt-4 pb-0.5 sm:pt-6 sm:pb-1.5">
             
             {/* Row 1: Goalkeeper (Inside Goalmouth & 18-Yard Box) */}
-            <div className="flex justify-center items-center w-full my-0.5 sm:my-1">
+            <div className="flex justify-center items-center w-full my-0 sm:my-0.5">
               {formation.gkp.map(p => (
                 <PlayerCard 
                   key={p.id} 
@@ -321,7 +321,7 @@ export const PitchView = ({
             </div>
 
             {/* Row 2: Defenders (Upper Pitch between Penalty Box & Midfield) */}
-            <div className="flex justify-around items-center w-full max-w-[86%] mx-auto my-0.5 sm:my-1.5">
+            <div className="flex justify-around items-center w-full max-w-[88%] mx-auto my-0 sm:my-0.5">
               {formation.def.map(p => (
                 <PlayerCard 
                   key={p.id} 
@@ -338,7 +338,7 @@ export const PitchView = ({
             </div>
 
             {/* Row 3: Midfielders (Wider Middle Pitch above Halfway Line) */}
-            <div className="flex justify-around items-center w-full max-w-[96%] mx-auto my-0.5 sm:my-1.5">
+            <div className="flex justify-around items-center w-full max-w-[98%] mx-auto my-0 sm:my-0.5">
               {formation.mid.map(p => (
                 <PlayerCard 
                   key={p.id} 
@@ -355,7 +355,7 @@ export const PitchView = ({
             </div>
 
             {/* Row 4: Forwards (Inside the Center Circle & Over Halfway Line) */}
-            <div className="flex justify-around items-center w-full max-w-[78%] mx-auto my-0.5 sm:my-1.5">
+            <div className="flex justify-around items-center w-full max-w-[80%] mx-auto my-0 sm:my-0.5">
               {formation.fwd.map(p => (
                 <PlayerCard 
                   key={p.id} 
@@ -373,19 +373,19 @@ export const PitchView = ({
           </div>
 
           {/* 🌿 Smooth Bottom Grass-to-App Background Fade (#0f172a at Bench Nameplates) */}
-          <div className="absolute inset-x-0 bottom-0 h-24 sm:h-32 bg-gradient-to-b from-transparent via-[#0f172a]/70 to-[#0f172a] pointer-events-none z-10" />
+          <div className="absolute inset-x-0 bottom-0 h-20 sm:h-28 bg-gradient-to-b from-transparent via-[#0f172a]/70 to-[#0f172a] pointer-events-none z-10" />
 
           {/* 🪑 Official Substitutes Bench Dugout Shelf (Proportional Frosted Shelf at Pitch Bottom intersecting Center Circle) */}
-          <div className="relative z-20 w-full max-w-[92%] mx-auto mt-1 sm:mt-3 rounded-xl border border-white/15 bg-[#0f172a]/40 backdrop-blur-md p-2 sm:p-3 shadow-2xl">
-            <div className="flex justify-around items-end gap-1 sm:gap-2 px-1">
+          <div className="relative z-20 w-full max-w-[94%] mx-auto mt-0.5 sm:mt-1.5 rounded-xl border border-white/15 bg-[#0f172a]/40 backdrop-blur-md p-1.5 sm:p-2.5 shadow-2xl">
+            <div className="flex justify-around items-end gap-0.5 sm:gap-1.5 px-0.5 sm:px-1">
               {benchPlayers.map((p, idx) => {
                 const isGkp = idx === 0 || p.element_type === 1 || p.position === 'GKP';
                 const subLabel = isGkp ? 'GKP' : `${idx}. ${p.position || 'SUB'}`;
 
                 return (
-                  <div key={p.id} className="flex flex-col items-center gap-1">
+                  <div key={p.id} className="flex flex-col items-center gap-0.5">
                     {/* Official Position / Auto-Sub Priority Header Label */}
-                    <div className="text-[8.5px] sm:text-[9.5px] font-mono font-extrabold uppercase tracking-wider text-emerald-100 border-b border-dotted border-white/40 pb-0.5 px-1">
+                    <div className="text-[8px] sm:text-[9px] font-mono font-extrabold uppercase tracking-wider text-emerald-100 border-b border-dotted border-white/40 pb-0.5 px-0.5">
                       {subLabel}
                     </div>
 
@@ -408,7 +408,7 @@ export const PitchView = ({
             </div>
             
             {/* 🪑 Official Substitutes Header Label */}
-            <p className="text-center text-white font-extrabold text-[11px] sm:text-xs tracking-wider mt-2 drop-shadow-md">
+            <p className="text-center text-white font-extrabold text-[10px] sm:text-[11px] tracking-wider mt-1 drop-shadow-md">
               Substitutes
             </p>
           </div>
