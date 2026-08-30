@@ -84,7 +84,23 @@ export const PlayerCard = ({
 }: PlayerCardProps) => {
   const [imgError, setImgError] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
+  const [tooltipAlignment, setTooltipAlignment] = useState<'center' | 'left' | 'right'>('center');
   const cardRef = useRef<HTMLDivElement>(null);
+
+  const updateAlignment = () => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const cardCenter = rect.left + rect.width / 2;
+    const screenWidth = window.innerWidth;
+    
+    if (cardCenter < 110) {
+      setTooltipAlignment('left');
+    } else if (screenWidth - cardCenter < 110) {
+      setTooltipAlignment('right');
+    } else {
+      setTooltipAlignment('center');
+    }
+  };
 
   // Close tooltip when clicking or tapping outside on mobile/desktop
   useEffect(() => {
@@ -115,13 +131,22 @@ export const PlayerCard = ({
   const colors = TEAM_COLORS[teamShort] || { primary: '#37003c', secondary: '#00ff85' };
 
   const handleCardClick = () => {
+    updateAlignment();
     setShowTooltip(prev => !prev);
   };
+
+  const alignmentClasses = {
+    center: "left-1/2 -translate-x-1/2",
+    left: "left-0 translate-x-0 sm:left-1/2 sm:-translate-x-1/2",
+    right: "right-0 left-auto translate-x-0 sm:left-1/2 sm:-translate-x-1/2"
+  }[tooltipAlignment];
 
   return (
     <div 
       ref={cardRef}
       onClick={handleCardClick}
+      onMouseEnter={updateAlignment}
+      onTouchStart={updateAlignment}
       className={cn(
         "group relative flex flex-col items-center justify-start transition-all duration-200 hover:scale-105 select-none cursor-pointer",
         compact ? "w-[52px] sm:w-[68px] md:w-[76px]" : "w-[56px] sm:w-[72px] md:w-[82px] lg:w-[88px]",
@@ -291,7 +316,8 @@ export const PlayerCard = ({
       <div 
         onClick={(e) => e.stopPropagation()}
         className={cn(
-          "absolute z-50 bg-slate-950/98 backdrop-blur-md border border-slate-700 text-slate-300 text-[9px] p-2.5 rounded-xl shadow-2xl w-44 bottom-full mb-2 left-1/2 -translate-x-1/2 transition-all duration-200",
+          "absolute z-50 bg-slate-950/98 backdrop-blur-md border border-slate-700 text-slate-300 text-[9px] p-2.5 rounded-xl shadow-2xl w-40 sm:w-44 max-w-[calc(100vw-24px)] bottom-full mb-2 transition-all duration-200",
+          alignmentClasses,
           showTooltip 
             ? "opacity-100 pointer-events-auto scale-100 ring-2 ring-fpl-green/30" 
             : "opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-hover:scale-100 scale-95"
