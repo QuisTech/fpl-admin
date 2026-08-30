@@ -66,6 +66,29 @@ export class FPLService {
           // Exponential backoff: 1s, 2s, 4s
           await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000)); 
         } else {
+          // If official FPL API returns 403 on bootstrap-static, fallback to reliable GitHub mirror
+          if (url.includes('bootstrap-static')) {
+            try {
+              console.log("[FPL API] Falling back to GitHub bootstrap-static mirror...");
+              const fallbackRes = await axios.get('https://raw.githubusercontent.com/vaastav/Fantasy-Premier-League/master/data/2024-25/bootstrap-static.json', { timeout: 10000 });
+              return fallbackRes;
+            } catch (fallbackErr: any) {
+              console.error("[FPL API] Mirror fallback failed:", fallbackErr.message);
+            }
+          }
+          if (url.includes('fixtures')) {
+            try {
+              console.log("[FPL API] Falling back to GitHub fixtures mirror...");
+              const fallbackRes = await axios.get('https://raw.githubusercontent.com/vaastav/Fantasy-Premier-League/master/data/2024-25/fixtures.json', { timeout: 10000 });
+              return fallbackRes;
+            } catch (fallbackErr: any) {
+              console.error("[FPL API] Fixtures mirror fallback failed:", fallbackErr.message);
+            }
+          }
+          if (this.cache?.data) {
+            console.warn("[FPL API] Serving stale cache due to API block.");
+            return { data: this.cache.data };
+          }
           throw err;
         }
       }
