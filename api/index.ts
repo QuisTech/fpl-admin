@@ -78,9 +78,42 @@ export class FPLService {
           }
           if (url.includes('fixtures')) {
             try {
-              console.log("[FPL API] Falling back to GitHub fixtures mirror...");
-              const fallbackRes = await axios.get('https://raw.githubusercontent.com/vaastav/Fantasy-Premier-League/master/data/2024-25/fixtures.json', { timeout: 10000 });
-              return fallbackRes;
+              console.log("[FPL API] Falling back to GitHub fixtures.csv mirror...");
+              const fallbackRes = await axios.get('https://raw.githubusercontent.com/vaastav/Fantasy-Premier-League/master/data/2024-25/fixtures.csv', { timeout: 10000 });
+              const lines: string[] = fallbackRes.data.split('\n');
+              const header = lines[0].split(',').map((h: string) => h.trim());
+              const idIdx = header.indexOf('id');
+              const teamHIdx = header.indexOf('team_h');
+              const teamAIdx = header.indexOf('team_a');
+              const teamHDiffIdx = header.indexOf('team_h_difficulty');
+              const teamADiffIdx = header.indexOf('team_a_difficulty');
+              const eventIdx = header.indexOf('event');
+              const finishedIdx = header.indexOf('finished');
+
+              const fixtures = [];
+              for (let j = 1; j < lines.length; j++) {
+                const line = lines[j].trim();
+                if (!line) continue;
+                const cols = line.split(',');
+                if (cols.length >= header.length) {
+                  const idVal = parseInt(cols[idIdx]);
+                  const teamHVal = parseInt(cols[teamHIdx]);
+                  const teamAVal = parseInt(cols[teamAIdx]);
+                  if (!isNaN(idVal) && !isNaN(teamHVal) && !isNaN(teamAVal)) {
+                    fixtures.push({
+                      id: idVal,
+                      team_h: teamHVal,
+                      team_a: teamAVal,
+                      team_h_difficulty: parseInt(cols[teamHDiffIdx]) || 3,
+                      team_a_difficulty: parseInt(cols[teamADiffIdx]) || 3,
+                      event: cols[eventIdx] && cols[eventIdx] !== '' && !isNaN(parseInt(cols[eventIdx])) ? parseInt(cols[eventIdx]) : null,
+                      finished: cols[finishedIdx]?.toLowerCase() === 'true'
+                    });
+                  }
+                }
+              }
+              console.log(`[FPL API] Successfully parsed ${fixtures.length} fixtures from GitHub mirror.`);
+              return { data: fixtures };
             } catch (fallbackErr: any) {
               console.error("[FPL API] Fixtures mirror fallback failed:", fallbackErr.message);
             }
