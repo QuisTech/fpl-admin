@@ -54,6 +54,38 @@ export class FPLService {
     };
   }
 
+  private static parseCsvRows(text: string): Record<string, string>[] {
+    const lines = text.split('\n');
+    if (lines.length === 0) return [];
+    const header = lines[0].split(',').map(h => h.trim());
+    const rows: Record<string, string>[] = [];
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+      let cols: string[] = [];
+      let inQuotes = false;
+      let cur = '';
+      for (let c = 0; c < line.length; c++) {
+        const char = line[c];
+        if (char === '"') inQuotes = !inQuotes;
+        else if (char === ',' && !inQuotes) {
+          cols.push(cur.trim());
+          cur = '';
+        } else cur += char;
+      }
+      cols.push(cur.trim());
+      if (cols.length >= header.length) {
+        const row: Record<string, string> = {};
+        header.forEach((h, idx) => {
+          let val = cols[idx] ? cols[idx].replace(/^"|"$/g, '') : '';
+          row[h] = val;
+        });
+        rows.push(row);
+      }
+    }
+    return rows;
+  }
+
   private static async fetchWithRetry(url: string, retries = 3): Promise<any> {
     for (let i = 0; i < retries; i++) {
       try {
@@ -63,61 +95,95 @@ export class FPLService {
       } catch (err: any) {
         console.warn(`[FPL API] Attempt ${i + 1}/${retries} failed for ${url}: ${err.response?.status || err.message}`);
         if (i < retries - 1) {
-          // Exponential backoff: 1s, 2s, 4s
-          await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000)); 
+          await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
         } else {
-          // If official FPL API returns 403 on bootstrap-static, fallback to reliable GitHub mirror
+          // If official FPL API returns 403, fallback to GitHub CSV mirrors
           if (url.includes('bootstrap-static')) {
             try {
-              console.log("[FPL API] Falling back to GitHub bootstrap-static mirror...");
-              const fallbackRes = await axios.get('https://raw.githubusercontent.com/vaastav/Fantasy-Premier-League/master/data/2024-25/bootstrap-static.json', { timeout: 10000 });
-              return fallbackRes;
+              console.log("[FPL API] Falling back to GitHub players_raw & teams CSV mirror...");
+              const [pRes, tRes] = await Promise.all([
+                axios.get('https://raw.githubusercontent.com/vaastav/Fantasy-Premier-League/master/data/2024-25/players_raw.csv', { timeout: 10000 }),
+                axios.get('https://raw.githubusercontent.com/vaastav/Fantasy-Premier-League/master/data/2024-25/teams.csv', { timeout: 10000 })
+              ]);
+              const rawPlayers = this.parseCsvRows(pRes.data);
+              const rawTeams = this.parseCsvRows(tRes.data);
+
+              const elements = rawPlayers.map(p => ({
+                id: parseInt(p.id),
+                web_name: p.web_name || '',
+                first_name: p.first_name || '',
+                second_name: p.second_name || '',
+                now_cost: parseInt(p.now_cost) || 50,
+                element_type: parseInt(p.element_type) || 3,
+                team: parseInt(p.team) || 1,
+                total_points: parseInt(p.total_points) || 0,
+                form: p.form || '0.0',
+                points_per_game: p.points_per_game || '0.0',
+                selected_by_percent: p.selected_by_percent || '0.0',
+                minutes: parseInt(p.minutes) || 0,
+                goals_scored: parseInt(p.goals_scored) || 0,
+                assists: parseInt(p.assists) || 0,
+                clean_sheets: parseInt(p.clean_sheets) || 0,
+                status: p.status || 'a',
+                news: p.news || '',
+                ep_this: p.ep_this || '0.0',
+                ep_next: p.ep_next || '0.0',
+                chance_of_playing_this_round: p.chance_of_playing_this_round && !isNaN(parseInt(p.chance_of_playing_this_round)) ? parseInt(p.chance_of_playing_this_round) : null,
+                chance_of_playing_next_round: p.chance_of_playing_next_round && !isNaN(parseInt(p.chance_of_playing_next_round)) ? parseInt(p.chance_of_playing_next_round) : null,
+                expected_goals: p.expected_goals || '0.0',
+                expected_assists: p.expected_assists || '0.0',
+                expected_goal_involvements: p.expected_goal_involvements || '0.0',
+                expected_conceded: p.expected_goals_conceded || '0.0',
+                influence: p.influence || '0.0',
+                creativity: p.creativity || '0.0',
+                threat: p.threat || '0.0',
+                ict_index: p.ict_index || '0.0'
+              }));
+
+              const teams = rawTeams.map(t => ({
+                id: parseInt(t.id),
+                name: t.name || '',
+                short_name: t.short_name || '',
+                strength: parseInt(t.strength) || 3,
+                strength_overall_home: parseInt(t.strength_overall_home) || 1000,
+                strength_overall_away: parseInt(t.strength_overall_away) || 1000,
+                strength_attack_home: parseInt(t.strength_attack_home) || 1000,
+                strength_attack_away: parseInt(t.strength_attack_away) || 1000,
+                strength_defence_home: parseInt(t.strength_defence_home) || 1000,
+                strength_defence_away: parseInt(t.strength_defence_away) || 1000
+              }));
+
+              const events = [{ id: 1, is_current: false, is_next: false, deadline_time: '2026-08-15T10:00:00Z' }, { id: 2, is_current: false, is_next: true, deadline_time: '2026-08-30T10:00:00Z' }];
+
+              console.log(`[FPL API] Successfully parsed ${elements.length} players & ${teams.length} teams from CSV mirror.`);
+              return { data: { elements, teams, events } };
             } catch (fallbackErr: any) {
-              console.error("[FPL API] Mirror fallback failed:", fallbackErr.message);
+              console.error("[FPL API] Bootstrap CSV mirror fallback failed:", fallbackErr.message);
             }
           }
+
           if (url.includes('fixtures')) {
             try {
               console.log("[FPL API] Falling back to GitHub fixtures.csv mirror...");
-              const fallbackRes = await axios.get('https://raw.githubusercontent.com/vaastav/Fantasy-Premier-League/master/data/2024-25/fixtures.csv', { timeout: 10000 });
-              const lines: string[] = fallbackRes.data.split('\n');
-              const header = lines[0].split(',').map((h: string) => h.trim());
-              const idIdx = header.indexOf('id');
-              const teamHIdx = header.indexOf('team_h');
-              const teamAIdx = header.indexOf('team_a');
-              const teamHDiffIdx = header.indexOf('team_h_difficulty');
-              const teamADiffIdx = header.indexOf('team_a_difficulty');
-              const eventIdx = header.indexOf('event');
-              const finishedIdx = header.indexOf('finished');
+              const fRes = await axios.get('https://raw.githubusercontent.com/vaastav/Fantasy-Premier-League/master/data/2024-25/fixtures.csv', { timeout: 10000 });
+              const rawFixtures = this.parseCsvRows(fRes.data);
+              const fixtures = rawFixtures.map(f => ({
+                id: parseInt(f.id),
+                team_h: parseInt(f.team_h),
+                team_a: parseInt(f.team_a),
+                team_h_difficulty: parseInt(f.team_h_difficulty) || 3,
+                team_a_difficulty: parseInt(f.team_a_difficulty) || 3,
+                event: f.event && f.event !== '' && !isNaN(parseInt(f.event)) ? parseInt(f.event) : null,
+                finished: f.finished?.toLowerCase() === 'true'
+              })).filter(f => !isNaN(f.id) && !isNaN(f.team_h) && !isNaN(f.team_a));
 
-              const fixtures = [];
-              for (let j = 1; j < lines.length; j++) {
-                const line = lines[j].trim();
-                if (!line) continue;
-                const cols = line.split(',');
-                if (cols.length >= header.length) {
-                  const idVal = parseInt(cols[idIdx]);
-                  const teamHVal = parseInt(cols[teamHIdx]);
-                  const teamAVal = parseInt(cols[teamAIdx]);
-                  if (!isNaN(idVal) && !isNaN(teamHVal) && !isNaN(teamAVal)) {
-                    fixtures.push({
-                      id: idVal,
-                      team_h: teamHVal,
-                      team_a: teamAVal,
-                      team_h_difficulty: parseInt(cols[teamHDiffIdx]) || 3,
-                      team_a_difficulty: parseInt(cols[teamADiffIdx]) || 3,
-                      event: cols[eventIdx] && cols[eventIdx] !== '' && !isNaN(parseInt(cols[eventIdx])) ? parseInt(cols[eventIdx]) : null,
-                      finished: cols[finishedIdx]?.toLowerCase() === 'true'
-                    });
-                  }
-                }
-              }
-              console.log(`[FPL API] Successfully parsed ${fixtures.length} fixtures from GitHub mirror.`);
+              console.log(`[FPL API] Successfully parsed ${fixtures.length} fixtures from CSV mirror.`);
               return { data: fixtures };
             } catch (fallbackErr: any) {
-              console.error("[FPL API] Fixtures mirror fallback failed:", fallbackErr.message);
+              console.error("[FPL API] Fixtures CSV mirror fallback failed:", fallbackErr.message);
             }
           }
+
           if (this.cache?.data) {
             console.warn("[FPL API] Serving stale cache due to API block.");
             return { data: this.cache.data };
