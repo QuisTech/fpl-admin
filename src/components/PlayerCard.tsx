@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { cn } from '../lib/utils';
 import { ScoredPlayer } from '../types';
-import { Lock, Ban } from 'lucide-react';
+import { Lock, Ban, X } from 'lucide-react';
 
 interface PlayerCardProps {
   player: ScoredPlayer;
@@ -83,6 +83,24 @@ export const PlayerCard = ({
   benchIndex
 }: PlayerCardProps) => {
   const [imgError, setImgError] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Close tooltip when clicking or tapping outside on mobile/desktop
+  useEffect(() => {
+    if (!showTooltip) return;
+    const handleOutsideClick = (e: MouseEvent | TouchEvent) => {
+      if (cardRef.current && !cardRef.current.contains(e.target as Node)) {
+        setShowTooltip(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    document.addEventListener('touchstart', handleOutsideClick);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener('touchstart', handleOutsideClick);
+    };
+  }, [showTooltip]);
 
   if (!player) return null;
 
@@ -96,12 +114,20 @@ export const PlayerCard = ({
   const nextFixture = player.next_fixtures?.[0];
   const colors = TEAM_COLORS[teamShort] || { primary: '#37003c', secondary: '#00ff85' };
 
+  const handleCardClick = () => {
+    setShowTooltip(prev => !prev);
+  };
+
   return (
-    <div className={cn(
-      "group relative flex flex-col items-center justify-start transition-all duration-200 hover:scale-105 select-none",
-      compact ? "w-[52px] sm:w-[68px] md:w-[76px]" : "w-[56px] sm:w-[72px] md:w-[82px] lg:w-[88px]",
-      isExcluded && "opacity-35 grayscale"
-    )}>
+    <div 
+      ref={cardRef}
+      onClick={handleCardClick}
+      className={cn(
+        "group relative flex flex-col items-center justify-start transition-all duration-200 hover:scale-105 select-none cursor-pointer",
+        compact ? "w-[52px] sm:w-[68px] md:w-[76px]" : "w-[56px] sm:w-[72px] md:w-[82px] lg:w-[88px]",
+        isExcluded && "opacity-35 grayscale"
+      )}
+    >
 
       {/* Official Captain / Vice-Captain Circular Badge */}
       {isCaptain && (
@@ -261,27 +287,51 @@ export const PlayerCard = ({
         </div>
       )}
 
-      {/* 4. Engine Math Hover Tooltip */}
-      <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity z-50 bg-slate-950/95 backdrop-blur-md border border-slate-700 text-slate-300 text-[9px] p-2.5 rounded-lg shadow-2xl w-40 bottom-full mb-2 left-1/2 -translate-x-1/2 pointer-events-none">
+      {/* 4. Engine Math Tooltip (Interactive: Mouse hover on desktop + Tap-to-toggle on smartphones) */}
+      <div 
+        onClick={(e) => e.stopPropagation()}
+        className={cn(
+          "absolute z-50 bg-slate-950/98 backdrop-blur-md border border-slate-700 text-slate-300 text-[9px] p-2.5 rounded-xl shadow-2xl w-44 bottom-full mb-2 left-1/2 -translate-x-1/2 transition-all duration-200",
+          showTooltip 
+            ? "opacity-100 pointer-events-auto scale-100 ring-2 ring-fpl-green/30" 
+            : "opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-hover:scale-100 scale-95"
+        )}
+      >
+        {/* Tooltip Header with Name and Mobile Close X */}
         <div className="font-bold border-b border-slate-800 pb-1 mb-1.5 text-white flex justify-between items-center">
-          <span>{player.web_name}</span>
-          <span className="text-[8px] font-mono text-slate-400">{teamShort} • {player.position}</span>
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black text-white leading-tight">{player.web_name}</span>
+            <span className="text-[7.5px] font-mono text-slate-400 mt-0.5">{teamShort} • {player.position}</span>
+          </div>
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowTooltip(false);
+            }}
+            className="p-1 text-slate-400 hover:text-white rounded-md bg-slate-900 border border-slate-800 transition-colors"
+            title="Close"
+          >
+            <X className="w-2.5 h-2.5" />
+          </button>
         </div>
-        <div className="flex justify-between py-0.5">
-          <span className="text-slate-400">Model xP:</span>
-          <span className="text-fpl-green font-mono font-bold">{player.xP?.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between py-0.5">
-          <span className="text-slate-400">Price:</span>
-          <span className="font-mono text-slate-200">£{(player.now_cost/10).toFixed(1)}M</span>
-        </div>
-        <div className="flex justify-between py-0.5">
-          <span className="text-slate-400">Est. EO:</span>
-          <span className="font-mono text-cyan-400">{player.eo ? `${player.eo.toFixed(1)}%` : 'Differential'}</span>
-        </div>
-        <div className="flex justify-between font-bold border-t border-slate-800 pt-1 mt-1">
-          <span className="text-slate-400">ROI:</span>
-          <span className="text-amber-400 font-mono">{((player.xP || 0) / (player.now_cost / 10)).toFixed(2)} xP/£M</span>
+
+        <div className="space-y-1">
+          <div className="flex justify-between py-0.2">
+            <span className="text-slate-400">Model Expected (xP):</span>
+            <span className="text-fpl-green font-mono font-black">{player.xP?.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between py-0.2">
+            <span className="text-slate-400">Price:</span>
+            <span className="font-mono font-bold text-slate-200">£{(player.now_cost/10).toFixed(1)}M</span>
+          </div>
+          <div className="flex justify-between py-0.2">
+            <span className="text-slate-400">Est. EO:</span>
+            <span className="font-mono text-cyan-400 font-bold">{player.eo ? `${player.eo.toFixed(1)}%` : 'Differential'}</span>
+          </div>
+          <div className="flex justify-between font-bold border-t border-slate-800/80 pt-1 mt-1">
+            <span className="text-slate-400">Value Efficiency:</span>
+            <span className="text-amber-400 font-mono">{((player.xP || 0) / (player.now_cost / 10)).toFixed(2)} xP/£M</span>
+          </div>
         </div>
       </div>
 
