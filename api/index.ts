@@ -996,22 +996,22 @@ export class FPLService {
       {
         chip: "Wildcard",
         recommendation: optimalFirstMove === 'WC' ? "STRONG BUY" : "HOLD",
-        reason: optimalFirstMove === 'WC' ? "V3 Engine highly recommends playing Wildcard to maximize multi-horizon EV." : "V3 Engine suggests holding."
+        reason: optimalFirstMove === 'WC' ? "V3 Engine recommends activating Wildcard to restructure your squad." : "Hold for upcoming major fixture swings or injury crises."
       },
       {
         chip: "Free Hit",
         recommendation: optimalFirstMove === 'FH' ? "STRONG BUY" : "HOLD",
-        reason: optimalFirstMove === 'FH' ? "V3 Engine highly recommends a Free Hit this week." : "V3 Engine suggests holding."
+        reason: optimalFirstMove === 'FH' ? "V3 Engine recommends a Free Hit this week." : "Hold for future Blank or Double Gameweeks."
       },
       {
         chip: "Bench Boost",
         recommendation: optimalFirstMove === 'BB' ? "STRONG BUY" : "HOLD",
-        reason: optimalFirstMove === 'BB' ? "V3 Engine confirms your bench has massive EV this week." : "V3 Engine suggests holding."
+        reason: optimalFirstMove === 'BB' ? "V3 Engine detects extraordinary bench expected points (>= 16.0 xP)." : "Hold for a Double Gameweek where your 4 bench players play multiple fixtures."
       },
       {
         chip: "Triple Captain",
         recommendation: optimalFirstMove === 'TC' ? "STRONG BUY" : "HOLD",
-        reason: optimalFirstMove === 'TC' ? "V3 Engine detects a massive outlier fixture. Play it." : "V3 Engine suggests holding."
+        reason: optimalFirstMove === 'TC' ? "V3 Engine detects an elite captaincy matchup (>= 9.5 xP)." : "Hold for a premier captain in a favorable Double Gameweek."
       }
     ];
 

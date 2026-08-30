@@ -79,8 +79,20 @@ export async function getLLMTransferDecision(
     CRITICAL FPL TRANSFER RULES:
     1. If suggesting a single transfer, the incoming player MUST have the EXACT SAME POSITION (e.g., DEF for DEF, MID for MID) as the outgoing player. Do not suggest swapping a Midfielder for a Defender.
 
+    CRITICAL FPL CHIP STRATEGY RULES (NEVER VIOLATE):
+    1. BENCH BOOST (BB): 
+       - NEVER recommend Bench Boost in standard Single Gameweeks (especially GW1-GW25) when the bench consists of typical low-cost enablers (£4.0M-£4.5M players with 1.5-3.5 xP).
+       - Bench Boost is exclusively reserved for Double Gameweeks (DGW) where bench players play two games each (yielding 20-35+ points), or when total bench xP exceeds 18.0+.
+       - A bench with players like Dubravka, Mitchell, Bassey, Hughes (~10.5 total xP) is a standard budget bench—NEVER waste Bench Boost on this. Recommend ROLL or TRANSFER instead.
+    2. TRIPLE CAPTAIN (TC): 
+       - Save for Double Gameweeks (DGW) with elite assets (Haaland, Salah, Palmer) or rare extreme outlier single fixtures (xP >= 10.5+).
+    3. FREE HIT (FH): 
+       - Save for Blank Gameweeks (BGW) or high-upside Double Gameweeks.
+    4. WILDCARD (WC): 
+       - Only recommend if squad has multiple long-term injuries or structural defects requiring 4+ transfers.
+
     CRITICAL RISK MODE INSTRUCTIONS:
-    ${riskMode === 'safe' ? '- You are in SAFE mode. You MUST prioritize highly-owned "template" players to defend rank. Avoid wild punts.' : ''}
+    ${riskMode === 'safe' ? '- You are in SAFE mode. You MUST prioritize highly-owned "template" players to defend rank. Avoid wild punts. Do NOT burn chips prematurely.' : ''}
     ${riskMode === 'aggressive' ? '- You are in AGGRESSIVE mode. You MUST prioritize low-ownership "differential" players (under 10% ownership) to catch up in rank. HOWEVER, you must PROTECT premium players (£10.0M+). Do NOT suggest transferring out a premium captaincy option just because they are highly owned.' : ''}
     ${riskMode === 'value' ? '- You are in VALUE mode. Prioritize cheap enablers and players with the highest expected points per million (PPM). Build long-term budget.' : ''}
     
@@ -149,6 +161,12 @@ export async function getLLMChipAdvice(
     
     Squad strength: Avg xP ${(squad.reduce((s,p)=>s+p.xP,0)/15).toFixed(1)}
     Chips available: ${Object.entries(chips).filter(([_,a]) => a).map(([c]) => c).join(', ')}
+    
+    CRITICAL FPL CHIP STRATEGY RULES:
+    1. BENCH BOOST (BB): MUST HOLD in normal single gameweeks (especially GW1-GW25) when bench has standard cheap players (1-3 xP each). Only recommend BB in Double Gameweeks (DGW) or if total bench xP >= 18.0.
+    2. TRIPLE CAPTAIN (TC): MUST HOLD unless a premier asset has a Double Gameweek or extreme fixture outlier (xP >= 10.5).
+    3. FREE HIT (FH): Save for Blank Gameweeks (BGW) or massive DGWs.
+    4. WILDCARD (WC): Save for major fixture swings or 4+ injured starters.
     
     Recommend: WC, FH, BB, TC, or HOLD.
     Respond with VALID JSON OBJECT: {"recommendation": "WC/HOLD/etc", "reasoning": "...", "confidence": 0-100}

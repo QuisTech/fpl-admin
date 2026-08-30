@@ -190,11 +190,12 @@ export class Simulator {
 
   private getChipResidual(chip: string, gw: number): number {
     const remaining = Math.max(0, 38 - gw);
-    // Linear decay of chip value based on remaining opportunity horizon
-    if (chip === 'WC') return 25.0 * (remaining / 38);
-    if (chip === 'FH') return 18.0 * (remaining / 38);
-    if (chip === 'BB') return 14.0 * (remaining / 38);
-    if (chip === 'TC') return 10.0 * (remaining / 38);
+    // Residual valuations calibrated to realistic Double Gameweek & late-season chip power
+    if (chip === 'WC') return 28.0 * (0.4 + 0.6 * (remaining / 38));
+    if (chip === 'FH') return 22.0 * (0.4 + 0.6 * (remaining / 38));
+    // BB in a Double Gameweek typically delivers 25-35+ points; early single GW use must carry high opportunity cost
+    if (chip === 'BB') return 26.0 * (0.5 + 0.5 * (remaining / 38));
+    if (chip === 'TC') return 18.0 * (0.5 + 0.5 * (remaining / 38));
     return 0;
   }
 
@@ -240,8 +241,27 @@ export class Simulator {
     if (step === 0) {
       if (state.chipState['WC'] > 0) actions.push({ type: 'CHIP', chipName: 'WC', hitCost: 0 });
       if (state.chipState['FH'] > 0) actions.push({ type: 'CHIP', chipName: 'FH', hitCost: 0 });
-      if (state.chipState['BB'] > 0) actions.push({ type: 'CHIP', chipName: 'BB', hitCost: 0 });
-      if (state.chipState['TC'] > 0) actions.push({ type: 'CHIP', chipName: 'TC', hitCost: 0 });
+      
+      const xiIds = solveStartingXI(oracle, gw, state.squad, params);
+      const xiSet = new Set(xiIds);
+      let benchXP = 0;
+      state.squad.forEach(id => {
+        if (!xiSet.has(id)) {
+          benchXP += oracle.getXP(id, gw);
+        }
+      });
+
+      // Only evaluate Bench Boost if bench has genuine explosive EV (e.g. Double Gameweek or deep bench >= 16.0 xP)
+      if (state.chipState['BB'] > 0 && benchXP >= 16.0) {
+        actions.push({ type: 'CHIP', chipName: 'BB', hitCost: 0 });
+      }
+
+      // Only evaluate Triple Captain if top captaincy option has massive EV (>= 9.5 xP or DGW)
+      const { captain } = solveCaptain(oracle, gw, xiIds, params);
+      const capXP = oracle.getXP(captain, gw);
+      if (state.chipState['TC'] > 0 && capXP >= 9.5) {
+        actions.push({ type: 'CHIP', chipName: 'TC', hitCost: 0 });
+      }
     }
     
     const squadSet = new Set(state.squad);
