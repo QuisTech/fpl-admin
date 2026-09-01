@@ -54,6 +54,14 @@ export const TransferView = ({ syncedData, tier = 'ai-agent', setTab, userId }: 
   const startingXI = squad.filter(p => (p.position_in_squad ?? 0) <= 11);
   const bench = squad.filter(p => (p.position_in_squad ?? 0) >= 12);
 
+  // Projected Expected Points calculations (including 2x Captain multiplier)
+  const captain = squad.find(p => p.isCaptain || p.is_captain) || (startingXI.length > 0 ? startingXI[0] : null);
+  const captainBonus = captain ? (captain.xP || 0) : 0;
+  const startingBaseXp = startingXI.reduce((sum, p) => sum + (p.xP || 0), 0);
+  const startingTotalXp = startingBaseXp + captainBonus;
+  const benchTotalXp = bench.reduce((sum, p) => sum + (p.xP || 0), 0);
+  const fullSquadXp = startingTotalXp + benchTotalXp;
+
   // Position ordering for beautiful sorting
   const posOrder: Record<string, number> = { 'GKP': 1, 'DEF': 2, 'MID': 3, 'FWD': 4 };
   const sortedStarting = [...startingXI].sort((a, b) => (posOrder[a.position] || 0) - (posOrder[b.position] || 0));
@@ -130,9 +138,27 @@ export const TransferView = ({ syncedData, tier = 'ai-agent', setTab, userId }: 
           </div>
         </div>
 
-        {/* Metrics Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          {/* Metric 1: Latest GW Points */}
+        {/* Metrics Grid (5 Responsive Metric Cards) */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+          {/* Metric 1: Projected Matchday xP */}
+          <div className="bg-slate-950/80 border border-fpl-green/40 rounded-xl p-2.5 flex flex-col justify-between shadow-sm relative overflow-hidden">
+            <div className="flex items-center justify-between text-fpl-green mb-1">
+              <span className="text-[9px] font-black uppercase tracking-wider">Projected xP</span>
+              <Sparkles className="w-3 h-3 text-fpl-green animate-pulse" />
+            </div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-lg font-black text-fpl-green font-mono">
+                {startingTotalXp.toFixed(1)}
+              </span>
+              <span className="text-[9px] text-slate-400 font-bold uppercase">pts</span>
+            </div>
+            <div className="flex items-center justify-between text-[8px] font-mono text-slate-400 mt-0.5 pt-1 border-t border-fpl-border/30">
+              <span>Active XI (w/ C)</span>
+              <span className="text-slate-500">Bench: {benchTotalXp.toFixed(1)}</span>
+            </div>
+          </div>
+
+          {/* Metric 2: Latest GW Points */}
           <div className="bg-slate-950/60 border border-fpl-border/40 rounded-xl p-2.5 flex flex-col justify-between">
             <div className="flex items-center justify-between text-slate-400 mb-1">
               <span className="text-[9px] font-bold uppercase tracking-wider">Latest GW</span>
@@ -153,7 +179,7 @@ export const TransferView = ({ syncedData, tier = 'ai-agent', setTab, userId }: 
             )}
           </div>
 
-          {/* Metric 2: Overall Points */}
+          {/* Metric 3: Overall Points */}
           <div className="bg-slate-950/60 border border-fpl-border/40 rounded-xl p-2.5 flex flex-col justify-between">
             <div className="flex items-center justify-between text-slate-400 mb-1">
               <span className="text-[9px] font-bold uppercase tracking-wider">Overall Points</span>
@@ -170,7 +196,7 @@ export const TransferView = ({ syncedData, tier = 'ai-agent', setTab, userId }: 
             </span>
           </div>
 
-          {/* Metric 3: Overall Rank */}
+          {/* Metric 4: Overall Rank */}
           <div className="bg-slate-950/60 border border-fpl-border/40 rounded-xl p-2.5 flex flex-col justify-between">
             <div className="flex items-center justify-between text-slate-400 mb-1">
               <span className="text-[9px] font-bold uppercase tracking-wider">Overall Rank</span>
@@ -186,7 +212,7 @@ export const TransferView = ({ syncedData, tier = 'ai-agent', setTab, userId }: 
             </span>
           </div>
 
-          {/* Metric 4: Squad Value & Bank */}
+          {/* Metric 5: Squad Value & Bank */}
           <div className="bg-slate-950/60 border border-fpl-border/40 rounded-xl p-2.5 flex flex-col justify-between">
             <div className="flex items-center justify-between text-slate-400 mb-1">
               <span className="text-[9px] font-bold uppercase tracking-wider">Squad Value</span>
@@ -296,7 +322,6 @@ export const TransferView = ({ syncedData, tier = 'ai-agent', setTab, userId }: 
                   const isHovered = hoveredSwapIndex === i;
 
                   // Strategic starting check:
-                  // If replacing a benched player, check if incoming player out-performs any starting player in the same position
                   const startersInPosition = startingXI.filter(p => p.position === rec.in.position);
                   const lowestStarter = startersInPosition.length > 0 
                     ? [...startersInPosition].sort((a, b) => (a.xP || 0) - (b.xP || 0))[0] 
@@ -321,61 +346,46 @@ export const TransferView = ({ syncedData, tier = 'ai-agent', setTab, userId }: 
                       onMouseEnter={() => setHoveredSwapIndex(i)}
                       onMouseLeave={() => setHoveredSwapIndex(null)}
                       className={cn(
-                        "flex flex-col bg-slate-950/40 border rounded-2xl p-4 transition-all duration-300 relative overflow-hidden group",
-                        isHovered ? "border-fpl-green/50 bg-slate-950/60 shadow-lg shadow-fpl-green/5" : "border-fpl-border"
+                        "p-3 rounded-2xl border transition-all duration-300 shadow-sm relative overflow-hidden",
+                        isHovered 
+                          ? "bg-slate-900 border-fpl-green/50 shadow-md shadow-fpl-green/5 translate-x-1" 
+                          : "bg-slate-950/40 border-fpl-border/60 hover:border-slate-700"
                       )}
                     >
-                      {/* Premium Top glow / accent line */}
-                      <div className={cn(
-                        "absolute top-0 left-0 right-0 h-[2px] transition-all",
-                        i === 0 ? "bg-gradient-to-r from-fpl-green to-fpl-purple" : "bg-transparent group-hover:bg-slate-800"
-                      )} />
-
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-                        {/* Left/Main Side: The Swap */}
-                        <div className="flex items-center justify-between flex-grow gap-2">
-                          {/* Outgoing Player */}
-                          <div className="flex items-center gap-2 max-w-[45%]">
-                            <div className="w-7 h-7 rounded-lg bg-rose-950/20 border border-rose-500/30 flex items-center justify-center text-rose-500 shrink-0">
-                              <UserMinus className="w-3.5 h-3.5" />
-                            </div>
-                            <div className="flex flex-col min-w-0">
-                              <span className="text-[8px] text-rose-500 font-bold uppercase tracking-wider">Out</span>
-                              <span className="text-xs font-black text-slate-200 truncate">{rec.out.web_name}</span>
-                              <span className="text-[9px] text-slate-500 uppercase truncate">{rec.out.team_short_name} • £{(rec.out.now_cost/10).toFixed(1)}m</span>
-                            </div>
+                      <div className="flex items-center justify-between gap-2">
+                        {/* Out Player */}
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <div className="w-6 h-6 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 shrink-0">
+                            <UserMinus className="w-3.5 h-3.5" />
                           </div>
-
-                          {/* Arrow Icon */}
-                          <div className="flex items-center justify-center shrink-0">
-                            <ArrowRightCircle className={cn(
-                              "w-4 h-4 transition-all duration-300",
-                              isHovered ? "text-fpl-green scale-110" : "text-slate-700"
-                            )} />
-                          </div>
-
-                          {/* Incoming Player */}
-                          <div className="flex items-center justify-end gap-2 max-w-[45%] text-right">
-                            <div className="flex flex-col min-w-0">
-                              <span className="text-[8px] text-fpl-green font-bold uppercase tracking-wider">In</span>
-                              <span className="text-xs font-black text-slate-200 truncate">{rec.in.web_name}</span>
-                              <span className="text-[9px] text-slate-500 uppercase truncate">£{(rec.in.now_cost/10).toFixed(1)}m • {rec.in.team_short_name}</span>
-                            </div>
-                            <div className="w-7 h-7 rounded-lg bg-fpl-green/10 border border-fpl-green/30 flex items-center justify-center text-fpl-green shrink-0">
-                              <UserPlus className="w-3.5 h-3.5" />
-                            </div>
+                          <div className="flex flex-col min-w-0">
+                            <span className="text-[8px] text-slate-500 font-bold uppercase">Out</span>
+                            <span className="text-xs font-bold text-slate-200 truncate">{rec.out.web_name}</span>
+                            <span className="text-[8px] text-slate-500 font-mono truncate">{rec.out.team_short_name} • £{(rec.out.now_cost/10).toFixed(1)}m</span>
                           </div>
                         </div>
 
-                        {/* Right/Info Side: Role and xP Gain */}
-                        <div className="flex items-center justify-between sm:justify-end gap-4 border-t border-slate-900 pt-2 sm:pt-0 sm:border-0 shrink-0">
-                          {/* Role Badge */}
-                          <span className={cn(
-                            "text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full text-center truncate",
-                            roleStyle
-                          )}>
+                        {/* Transition Arrow / Badge */}
+                        <div className="flex flex-col items-center justify-center px-1">
+                          <ArrowRightCircle className={cn(
+                            "w-4 h-4 transition-colors",
+                            isHovered ? "text-fpl-green animate-pulse" : "text-slate-600"
+                          )} />
+                          <span className={cn("text-[7px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded-full mt-1 whitespace-nowrap", roleStyle)}>
                             {roleText}
                           </span>
+                        </div>
+
+                        {/* In Player */}
+                        <div className="flex items-center gap-2 flex-1 min-w-0 justify-end text-right">
+                          <div className="flex flex-col min-w-0">
+                            <span className="text-[8px] text-slate-500 font-bold uppercase">In</span>
+                            <span className="text-xs font-bold text-fpl-green truncate">{rec.in.web_name}</span>
+                            <span className="text-[8px] text-slate-500 font-mono truncate">£{(rec.in.now_cost/10).toFixed(1)}m • {rec.in.team_short_name}</span>
+                          </div>
+                          <div className="w-6 h-6 rounded-lg bg-fpl-green/10 border border-fpl-green/20 flex items-center justify-center text-fpl-green shrink-0">
+                            <UserPlus className="w-3.5 h-3.5" />
+                          </div>
 
                           <div className="flex items-center gap-3">
                             <div className="w-px h-8 bg-slate-800/80 hidden sm:block"></div>
@@ -457,8 +467,16 @@ export const TransferView = ({ syncedData, tier = 'ai-agent', setTab, userId }: 
               {/* Starting XI List */}
               <div className="bg-slate-950/30 border border-fpl-border/80 rounded-2xl p-4 space-y-3">
                 <div className="flex justify-between items-center border-b border-fpl-border/40 pb-2">
-                  <span className="text-[10px] font-black text-white uppercase tracking-wider">Starting XI</span>
-                  <span className="text-[9px] font-mono text-fpl-green font-bold">11 Players</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black text-white uppercase tracking-wider">Starting XI</span>
+                    <span className="text-[8px] font-mono text-slate-400 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">11 Players</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[8px] text-slate-400 uppercase font-bold">Matchday xP:</span>
+                    <span className="text-[10px] font-mono font-black text-fpl-green bg-fpl-green/10 border border-fpl-green/30 px-2 py-0.5 rounded">
+                      {startingTotalXp.toFixed(1)} pts
+                    </span>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   {sortedStarting.map((player) => {
@@ -519,8 +537,16 @@ export const TransferView = ({ syncedData, tier = 'ai-agent', setTab, userId }: 
               {/* Bench List */}
               <div className="bg-slate-950/30 border border-fpl-border/80 rounded-2xl p-4 space-y-3">
                 <div className="flex justify-between items-center border-b border-fpl-border/40 pb-2">
-                  <span className="text-[10px] font-black text-white uppercase tracking-wider">Substitutes / Bench</span>
-                  <span className="text-[9px] font-mono text-slate-400">4 Players</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black text-slate-300 uppercase tracking-wider">Substitutes / Bench</span>
+                    <span className="text-[8px] font-mono text-slate-400 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">4 Players</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[8px] text-slate-400 uppercase font-bold">Dugout xP:</span>
+                    <span className="text-[10px] font-mono font-black text-slate-300 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded">
+                      {benchTotalXp.toFixed(1)} pts
+                    </span>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   {sortedBench.map((player) => {
@@ -548,7 +574,11 @@ export const TransferView = ({ syncedData, tier = 'ai-agent', setTab, userId }: 
                             {player.position}
                           </span>
                           <div className="flex flex-col">
-                            <span className="text-[11px] font-bold text-slate-200">{player.web_name}</span>
+                            <div className="flex items-center gap-1">
+                              <span className="text-[11px] font-bold text-slate-300">{player.web_name}</span>
+                              {player.isCaptain && <span className="text-[8px] font-black bg-fpl-purple px-1 rounded text-white scale-90">C</span>}
+                              {player.isViceCaptain && <span className="text-[8px] font-black bg-slate-700 px-1 rounded text-slate-300 scale-90">V</span>}
+                            </div>
                             <span className="text-[8px] text-slate-500 uppercase">{player.team_short_name} • £{(player.now_cost/10).toFixed(1)}m</span>
                           </div>
                         </div>
