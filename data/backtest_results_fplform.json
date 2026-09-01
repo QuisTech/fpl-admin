@@ -1,24 +1,24 @@
 {
-  "generatedAt": "2026-08-28T23:00:16.344Z",
+  "generatedAt": "2026-09-01T15:18:46.486Z",
   "fuel": "fplform",
   "startGw": 1,
-  "endGw": 1,
+  "endGw": 2,
   "hasLivePoints": true,
   "totals": {
     "safe": {
-      "totalPoints": 67,
-      "alphaVsTemplate": 52.9
+      "totalPoints": 173,
+      "alphaVsTemplate": 48.1
     },
     "risky": {
-      "totalPoints": 77,
-      "alphaVsTemplate": 62.9
+      "totalPoints": 117,
+      "alphaVsTemplate": -7.9
     },
     "value": {
-      "totalPoints": 59,
-      "alphaVsTemplate": 44.9
+      "totalPoints": 120,
+      "alphaVsTemplate": -4.9
     },
     "template": {
-      "totalPoints": 14.1
+      "totalPoints": 124.89999999999999
     }
   },
   "gameweeks": [
@@ -30,69 +30,142 @@
         "startingXI": [
           "Raya (ARS)",
           "Gabriel (ARS)",
-          "Virgil (LIV)",
           "Guéhi (MCI)",
+          "Muharemović (LEE)",
           "B.Fernandes (MUN)",
           "Szoboszlai (LIV)",
           "Thiago (BRE)",
-          "Tavernier (BOU)",
-          "Anderson (MCI)",
+          "Mbeumo (MUN)",
           "João Pedro (CHE)",
-          "Ndiaye (EVE)"
+          "Tavernier (BOU)",
+          "M.Sangaré (BRE)"
         ],
         "captain": "B.Fernandes (C)",
-        "projectedGwXp": 56.4,
-        "projected8GwXp": 285.7,
-        "actualPoints": 67,
-        "averageXiEo": 34.1,
-        "alphaVsTemplate": 52.9
+        "projectedGwXp": 57.4,
+        "projected8GwXp": 289,
+        "actualPoints": 76,
+        "averageXiEo": 40.8,
+        "alphaVsTemplate": 61.9
       },
       "risky": {
         "mode": "RISKY",
         "startingXI": [
           "Raya (ARS)",
-          "Virgil (LIV)",
           "Guéhi (MCI)",
           "Senesi (TOT)",
-          "Palmer (CHE)",
+          "Lacroix (CHE)",
           "Saka (ARS)",
+          "Palmer (CHE)",
           "Thiago (BRE)",
           "Tavernier (BOU)",
           "Rice (ARS)",
-          "Anderson (MCI)",
-          "Lacroix (CHE)"
+          "Enzo (CHE)",
+          "Pedro Porro (TOT)"
         ],
-        "captain": "Palmer (C)",
-        "projectedGwXp": 54,
-        "projected8GwXp": 278.1,
-        "actualPoints": 77,
-        "averageXiEo": 1.9,
-        "alphaVsTemplate": 62.9
+        "captain": "Saka (C)",
+        "projectedGwXp": 53.7,
+        "projected8GwXp": 276.1,
+        "actualPoints": 70,
+        "averageXiEo": 1.4,
+        "alphaVsTemplate": 55.9
       },
       "value": {
         "mode": "VALUE",
         "startingXI": [
           "Leno (FUL)",
-          "Guéhi (MCI)",
-          "Pedro Porro (TOT)",
+          "Van Hecke (TOT)",
           "Thiaw (NEW)",
+          "Muharemović (LEE)",
           "Szoboszlai (LIV)",
           "Tavernier (BOU)",
           "Thiago (BRE)",
-          "E.Le Fée (SUN)",
+          "João Pedro (CHE)",
           "Stach (LEE)",
-          "Groß (BHA)",
-          "Van Hecke (TOT)"
+          "E.Le Fée (SUN)",
+          "Groß (BHA)"
         ],
         "captain": "Szoboszlai (C)",
-        "projectedGwXp": 50,
-        "projected8GwXp": 257.3,
-        "actualPoints": 59,
-        "averageXiEo": 8.4,
-        "alphaVsTemplate": 44.9
+        "projectedGwXp": 50.4,
+        "projected8GwXp": 258.5,
+        "actualPoints": 66,
+        "averageXiEo": 19.8,
+        "alphaVsTemplate": 51.9
       },
-      "riskySwapCount": 5,
-      "riskyAvgSwapCost": 0.19,
+      "riskySwapCount": 7,
+      "riskyAvgSwapCost": 0.23,
+      "riskyQuality": "WARNING"
+    },
+    {
+      "gameweek": 2,
+      "templateScore": 110.8,
+      "safe": {
+        "mode": "SAFE",
+        "startingXI": [
+          "Raya (ARS)",
+          "Gabriel (ARS)",
+          "Guéhi (MCI)",
+          "Muharemović (LEE)",
+          "B.Fernandes (MUN)",
+          "Szoboszlai (LIV)",
+          "Thiago (BRE)",
+          "Mbeumo (MUN)",
+          "João Pedro (CHE)",
+          "Tavernier (BOU)",
+          "M.Sangaré (BRE)"
+        ],
+        "captain": "B.Fernandes (C)",
+        "projectedGwXp": 57.4,
+        "projected8GwXp": 289,
+        "actualPoints": 97,
+        "averageXiEo": 40.8,
+        "alphaVsTemplate": -13.8
+      },
+      "risky": {
+        "mode": "RISKY",
+        "startingXI": [
+          "Raya (ARS)",
+          "Guéhi (MCI)",
+          "Senesi (TOT)",
+          "Lacroix (CHE)",
+          "Saka (ARS)",
+          "Palmer (CHE)",
+          "Thiago (BRE)",
+          "Tavernier (BOU)",
+          "Rice (ARS)",
+          "Enzo (CHE)",
+          "Pedro Porro (TOT)"
+        ],
+        "captain": "Saka (C)",
+        "projectedGwXp": 53.7,
+        "projected8GwXp": 276.1,
+        "actualPoints": 47,
+        "averageXiEo": 1.4,
+        "alphaVsTemplate": -63.8
+      },
+      "value": {
+        "mode": "VALUE",
+        "startingXI": [
+          "Leno (FUL)",
+          "Van Hecke (TOT)",
+          "Thiaw (NEW)",
+          "Muharemović (LEE)",
+          "Szoboszlai (LIV)",
+          "Tavernier (BOU)",
+          "Thiago (BRE)",
+          "João Pedro (CHE)",
+          "Stach (LEE)",
+          "E.Le Fée (SUN)",
+          "Groß (BHA)"
+        ],
+        "captain": "Szoboszlai (C)",
+        "projectedGwXp": 50.4,
+        "projected8GwXp": 258.5,
+        "actualPoints": 54,
+        "averageXiEo": 19.8,
+        "alphaVsTemplate": -56.8
+      },
+      "riskySwapCount": 7,
+      "riskyAvgSwapCost": 0.23,
       "riskyQuality": "WARNING"
     }
   ]
