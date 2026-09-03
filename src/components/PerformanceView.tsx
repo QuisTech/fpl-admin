@@ -1,27 +1,35 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { cn } from '../lib/utils';
 import { TrendingUp, Award, Clock, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Trophy, Filter, BarChart3, Sparkles } from 'lucide-react';
 
 interface PerformanceViewProps {
   history: any;
   fetchLivePoints: (gwId: number) => Promise<any>;
+  activeFuel?: 'fplform' | 'native' | 'eye-test';
 }
 
 type SortField = 'actual' | 'diff' | 'xp' | 'time';
 type SortOrder = 'desc' | 'asc';
 
-export const PerformanceView = ({ history, fetchLivePoints }: PerformanceViewProps) => {
+export const PerformanceView = ({ history, fetchLivePoints, activeFuel }: PerformanceViewProps) => {
   const [actualScores, setActualScores] = useState<Record<number, Record<number, { points: number; minutes: number }>>>({});
   const [loading, setLoading] = useState<Record<number, boolean>>({});
   const [selectedGwIndex, setSelectedGwIndex] = useState<number>(0);
   const [viewAll, setViewAll] = useState<boolean>(false);
 
-  // Sorting & Filtering state
+  // Sorting & Filtering state (default to activeFuel if provided)
   const [sortBy, setSortBy] = useState<SortField>('actual');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
-  const [fuelFilter, setFuelFilter] = useState<string>('all');
+  const [fuelFilter, setFuelFilter] = useState<string>(activeFuel || 'all');
   const [scenarioFilter, setScenarioFilter] = useState<string>('all');
   const [riskFilter, setRiskFilter] = useState<string>('all');
+
+  // Synchronize fuel filter when top Fuel Source toggle changes
+  useEffect(() => {
+    if (activeFuel) {
+      setFuelFilter(activeFuel);
+    }
+  }, [activeFuel]);
 
   const gws = Object.keys(history).map(Number).sort((a, b) => b - a);
 
@@ -64,17 +72,21 @@ export const PerformanceView = ({ history, fetchLivePoints }: PerformanceViewPro
       const item = gwData[key];
       if (!item || typeof item !== 'object' || !item.players) return;
 
-      // Special handling for the user's real synced squad
-      if (key === 'user_synced_squad' || item.isUserSquad || item.key === 'user_synced_squad') {
-        const userKey = 'user_synced_squad';
+      // Special handling for the user's real synced squad (stored per fuel e.g. user_synced_squad_native)
+      if (key.startsWith('user_synced_squad') || item.isUserSquad) {
+        const itemFuel = item.fuel && item.fuel !== 'user' 
+          ? item.fuel 
+          : key.includes('native') ? 'native' : key.includes('eye-test') ? 'eye-test' : 'fplform';
+        const userKey = `user_synced_squad_${itemFuel}`;
+        const fuelName = itemFuel === 'eye-test' ? 'Eye Test' : itemFuel === 'native' ? 'Native FPL' : 'FPLForm';
         const formattedUserItem = {
           ...item,
           uniqueId: userKey,
           key: userKey,
-          fuel: 'user',
+          fuel: itemFuel,
           scenario: 'user',
           riskMode: 'user',
-          fuelLabel: 'My Team',
+          fuelLabel: `My Team (${fuelName})`,
           scenarioLabel: item.scenarioLabel || 'Synced FPL Squad',
           riskLabel: 'HUMAN',
           isUserSquad: true
@@ -564,7 +576,7 @@ export const PerformanceView = ({ history, fetchLivePoints }: PerformanceViewPro
                             data.fuel === 'native' ? "bg-blue-500/10 text-blue-400 border-blue-500/30" :
                             "bg-fpl-purple text-white border-fpl-purple/50 shadow-sm"
                           )}>
-                            {data.isUserSquad ? '👤 My Team' : data.fuelLabel}
+                            {data.fuelLabel}
                           </span>
 
                           {/* Scenario Strategy Badge */}

@@ -255,35 +255,59 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
       }
     });
 
-    // Record user's real synced squad if team is synced
+    // Record user's real synced squad across all 3 fuels (fplform, native, eye-test)
     if (syncedData && syncedData.squad && syncedData.squad.length >= 11) {
-      const startingXI = syncedData.squad.filter(p => (p.position_in_squad ?? 0) <= 11);
-      const captain = syncedData.squad.find(p => p.isCaptain || p.is_captain) || (startingXI.length > 0 ? startingXI[0] : null);
-      const viceCaptain = syncedData.squad.find(p => p.isViceCaptain || p.is_vice_captain);
-      const captainBonus = captain ? (captain.xP || 0) : 0;
-      const startingTotalXp = startingXI.reduce((sum, p) => sum + (p.xP || 0), 0) + captainBonus;
+      const fuelsToEval: Array<'fplform' | 'native' | 'eye-test'> = ['fplform', 'native', 'eye-test'];
+      
+      const syncFuelPromises = fuelsToEval.map(f => {
+        if (f === currentFuel && syncedData) {
+          return Promise.resolve({ fuel: f, squad: syncedData.squad, managerInfo: syncedData.managerInfo });
+        }
+        if (!teamId) {
+          return Promise.resolve({ fuel: f, squad: syncedData.squad, managerInfo: syncedData.managerInfo });
+        }
+        return axios.get(`/api/sync/${teamId}?riskMode=${mode}&fuel=${f}&userId=${userId}&tier=${tier}`)
+          .then(res => ({ fuel: f, squad: res.data?.squad, managerInfo: res.data?.managerInfo }))
+          .catch(err => {
+            console.warn(`[Snapshot] Notice syncing squad for ${f}:`, err.message);
+            return { fuel: f, squad: syncedData.squad, managerInfo: syncedData.managerInfo };
+          });
+      });
 
-      const userSquadItem = {
-        key: 'user_synced_squad',
-        fuel: 'user',
-        scenario: 'user',
-        riskMode: 'user',
-        fuelLabel: 'My Team',
-        scenarioLabel: syncedData.managerInfo?.teamName || 'Synced FPL Squad',
-        riskLabel: 'HUMAN',
-        isUserSquad: true,
-        players: startingXI.map(p => ({
-          id: p.id,
-          web_name: p.web_name,
-          score: p.xP || p.score || 0,
-          position: p.position
-        })),
-        xP: Math.round(startingTotalXp * 10) / 10,
-        captainId: captain?.id,
-        viceCaptainId: viceCaptain?.id,
-        timestamp: now
-      };
-      gwHistory['user_synced_squad'] = userSquadItem;
+      const syncedResults = await Promise.all(syncFuelPromises);
+
+      syncedResults.forEach(({ fuel: f, squad, managerInfo }) => {
+        if (!squad || squad.length < 11) return;
+        const startingXI = squad.filter((p: any) => (p.position_in_squad ?? 0) <= 11);
+        const captain = squad.find((p: any) => p.isCaptain || p.is_captain) || (startingXI.length > 0 ? startingXI[0] : null);
+        const viceCaptain = squad.find((p: any) => p.isViceCaptain || p.is_vice_captain);
+        const captainBonus = captain ? (captain.xP || 0) : 0;
+        const startingTotalXp = startingXI.reduce((sum: number, p: any) => sum + (p.xP || 0), 0) + captainBonus;
+
+        const userKey = `user_synced_squad_${f}`;
+        gwHistory[userKey] = {
+          key: userKey,
+          fuel: f,
+          fuelLabel: f === 'eye-test' ? 'Eye Test' : f === 'native' ? 'Native FPL' : 'FPLForm',
+          scenario: 'user',
+          scenarioLabel: managerInfo?.teamName || syncedData.managerInfo?.teamName || 'Synced FPL Squad',
+          riskLabel: 'HUMAN',
+          isUserSquad: true,
+          players: startingXI.map((p: any) => ({
+            id: p.id,
+            web_name: p.web_name,
+            score: p.xP || p.score || 0,
+            position: p.position
+          })),
+          xP: Math.round(startingTotalXp * 10) / 10,
+          captainId: captain?.id,
+          viceCaptainId: viceCaptain?.id,
+          timestamp: now
+        };
+      });
+
+      // Remove any legacy un-suffixed key
+      delete gwHistory['user_synced_squad'];
     }
 
     // Purge legacy single-mode keys so they do not pollute Firestore or localStorage

@@ -250,7 +250,7 @@ function FPLApp() {
               ) : tab === 'transfers' ? (
                 <TransferView syncedData={syncedData} tier={tier} setTab={setTab} userId={activeUserId} />
               ) : tab === 'performance' ? (
-                <PerformanceView history={history} fetchLivePoints={fetchLivePoints} />
+                <PerformanceView history={history} fetchLivePoints={fetchLivePoints} activeFuel={fuel} />
               ) : tab === 'backtest' ? (
                 <BacktestDashboard initialFuel={fuel} />
               ) : tab === 'chips' ? (
