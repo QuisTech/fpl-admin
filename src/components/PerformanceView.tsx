@@ -6,12 +6,13 @@ interface PerformanceViewProps {
   history: any;
   fetchLivePoints: (gwId: number) => Promise<any>;
   activeFuel?: 'fplform' | 'native' | 'eye-test';
+  onFuelChange?: (fuel: 'fplform' | 'native' | 'eye-test') => void;
 }
 
 type SortField = 'actual' | 'diff' | 'xp' | 'time';
 type SortOrder = 'desc' | 'asc';
 
-export const PerformanceView = ({ history, fetchLivePoints, activeFuel }: PerformanceViewProps) => {
+export const PerformanceView = ({ history, fetchLivePoints, activeFuel, onFuelChange }: PerformanceViewProps) => {
   const [actualScores, setActualScores] = useState<Record<number, Record<number, { points: number; minutes: number }>>>({});
   const [loading, setLoading] = useState<Record<number, boolean>>({});
   const [selectedGwIndex, setSelectedGwIndex] = useState<number>(0);
@@ -125,6 +126,54 @@ export const PerformanceView = ({ history, fetchLivePoints, activeFuel }: Perfor
         combinationMap.set(comboKey, formattedItem);
       }
     });
+
+    // Ensure all 3 fuel evaluations (FPLForm, Native FPL, Eye Test) exist for the user squad if any user squad was captured
+    const allItems = Array.from(combinationMap.values());
+    const existingUser = allItems.find(i => i.isUserSquad);
+    
+    if (existingUser) {
+      const fplformAi = allItems.filter(i => !i.isUserSquad && i.fuel === 'fplform');
+      const nativeAi = allItems.filter(i => !i.isUserSquad && i.fuel === 'native');
+      const eyeTestAi = allItems.filter(i => !i.isUserSquad && i.fuel === 'eye-test');
+
+      const fplformAvg = fplformAi.length > 0 ? fplformAi.reduce((s, i) => s + (i.xP || 0), 0) / fplformAi.length : 54;
+      const nativeAvg = nativeAi.length > 0 ? nativeAi.reduce((s, i) => s + (i.xP || 0), 0) / nativeAi.length : 116;
+      const eyeTestAvg = eyeTestAi.length > 0 ? eyeTestAi.reduce((s, i) => s + (i.xP || 0), 0) / eyeTestAi.length : 84;
+
+      const baseFuel = existingUser.fuel || 'fplform';
+      const baseExpected = existingUser.xP || 53.2;
+
+      // Normalize base expected points to FPLForm scale
+      const baseFplformValue = baseFuel === 'native' 
+        ? baseExpected / (nativeAvg / (fplformAvg || 1))
+        : baseFuel === 'eye-test'
+        ? baseExpected / (eyeTestAvg / (fplformAvg || 1))
+        : baseExpected;
+
+      const fuelsToEnsure = [
+        { f: 'fplform', label: 'FPLForm', mult: 1.0 },
+        { f: 'native', label: 'Native FPL', mult: nativeAvg / (fplformAvg || 1) },
+        { f: 'eye-test', label: 'Eye Test', mult: eyeTestAvg / (fplformAvg || 1) }
+      ] as const;
+
+      fuelsToEnsure.forEach(({ f, label, mult }) => {
+        const uKey = `user_synced_squad_${f}`;
+        if (!combinationMap.has(uKey)) {
+          const scaledXp = Math.round(baseFplformValue * mult * 10) / 10;
+          combinationMap.set(uKey, {
+            ...existingUser,
+            uniqueId: uKey,
+            key: uKey,
+            fuel: f,
+            scenario: 'user',
+            riskMode: 'user',
+            fuelLabel: `My Team (${label})`,
+            xP: scaledXp,
+            isUserSquad: true
+          });
+        }
+      });
+    }
 
     return Array.from(combinationMap.values()).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
   };
@@ -446,19 +495,75 @@ export const PerformanceView = ({ history, fetchLivePoints, activeFuel }: Perfor
                   <Filter className="w-3 h-3 text-slate-400" /> Filter:
                 </span>
 
-                {/* Model Filter */}
-                <select
-                  value={fuelFilter}
-                  onChange={(e) => setFuelFilter(e.target.value)}
-                  aria-label="Filter by model"
-                  className="bg-slate-950 text-slate-200 border border-slate-800 text-[9px] font-mono font-bold rounded-lg px-2 py-1 focus:outline-none focus:border-fpl-green transition-colors cursor-pointer"
-                >
-                  <option value="all">All Models</option>
-                  <option value="user">👤 My Team (Human)</option>
-                  <option value="eye-test">Eye Test</option>
-                  <option value="fplform">FPLForm</option>
-                  <option value="native">Native FPL</option>
-                </select>
+                {/* Fuel Quick Pills */}
+                <div className="flex items-center gap-1 bg-slate-950 p-0.5 rounded-lg border border-slate-800">
+                  <button
+                    onClick={() => setFuelFilter('all')}
+                    className={cn(
+                      "px-2 py-0.5 rounded text-[8.5px] font-mono font-bold transition-all",
+                      fuelFilter === 'all'
+                        ? "bg-slate-700 text-white shadow-sm"
+                        : "text-slate-400 hover:text-white"
+                    )}
+                  >
+                    ALL
+                  </button>
+                  <button
+                    onClick={() => {
+                      setFuelFilter('fplform');
+                      onFuelChange?.('fplform');
+                    }}
+                    className={cn(
+                      "px-2 py-0.5 rounded text-[8.5px] font-mono font-bold transition-all",
+                      fuelFilter === 'fplform'
+                        ? "bg-fpl-purple text-white shadow-sm"
+                        : "text-slate-400 hover:text-white"
+                    )}
+                  >
+                    FPLFORM
+                  </button>
+                  <button
+                    onClick={() => {
+                      setFuelFilter('native');
+                      onFuelChange?.('native');
+                    }}
+                    className={cn(
+                      "px-2 py-0.5 rounded text-[8.5px] font-mono font-bold transition-all",
+                      fuelFilter === 'native'
+                        ? "bg-fpl-pink text-white shadow-sm"
+                        : "text-slate-400 hover:text-white"
+                    )}
+                  >
+                    NATIVE
+                  </button>
+                  <button
+                    onClick={() => {
+                      setFuelFilter('eye-test');
+                      onFuelChange?.('eye-test');
+                    }}
+                    className={cn(
+                      "px-2 py-0.5 rounded text-[8.5px] font-mono font-bold transition-all",
+                      fuelFilter === 'eye-test'
+                        ? "bg-amber-400 text-slate-950 shadow-sm font-black"
+                        : "text-slate-400 hover:text-white"
+                    )}
+                  >
+                    EYE-TEST
+                  </button>
+                  <button
+                    onClick={() => setFuelFilter('user')}
+                    className={cn(
+                      "px-2 py-0.5 rounded text-[8.5px] font-mono font-bold transition-all flex items-center gap-0.5",
+                      fuelFilter === 'user'
+                        ? "bg-emerald-500 text-slate-950 shadow-sm font-black"
+                        : "text-emerald-400 hover:text-emerald-300"
+                    )}
+                  >
+                    👤 MY TEAM
+                  </button>
+                </div>
+
+                {/* Scenario Filter */}
 
                 {/* Scenario Filter */}
                 <select
