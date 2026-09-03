@@ -184,7 +184,7 @@ export class FPLService {
             }
           }
 
-          if (this.cache?.data) {
+          if (url.includes('bootstrap-static') && this.cache?.data) {
             console.warn("[FPL API] Serving stale cache due to API block.");
             return { data: this.cache.data };
           }
@@ -911,14 +911,18 @@ export class FPLService {
           this.fetchWithRetry(`${FPL_BASE_URL}/entry/${teamId}/`)
         ]);
 
-        if (picksRes.status === 'fulfilled' && picksRes.value?.data) {
+        if (picksRes.status === 'fulfilled' && picksRes.value?.data?.picks && Array.isArray(picksRes.value.data.picks)) {
           teamRes = picksRes.value;
         } else {
-          const err: any = (picksRes as any).reason;
-          if (err?.response?.status === 404) {
+          const err: any = (picksRes as any).reason || (picksRes as any).value?.data;
+          const status = err?.response?.status || err?.status;
+          if (status === 404) {
             throw new Error(`FPL API Error: Team ID ${teamId} not found, or squads are currently locked and hidden by FPL until the Gameweek 1 deadline.`);
           }
-          throw err || new Error("Failed to fetch team picks");
+          if (status === 403) {
+            throw new Error(`FPL API Error: The official Fantasy Premier League API is temporarily rate-limiting requests (403 Forbidden). Please wait a moment and try again.`);
+          }
+          throw new Error(`FPL API Error: Could not retrieve team picks for Team ID ${teamId}. ${err?.message || 'Please try again shortly.'}`);
         }
 
         if (entryRes.status === 'fulfilled' && entryRes.value?.data) {
@@ -946,6 +950,10 @@ export class FPLService {
         }
         throw new Error(`FPL Sync Error: ${err.message || 'Could not retrieve team data'}`);
       }
+    }
+
+    if (!teamRes?.data?.picks || !Array.isArray(teamRes.data.picks)) {
+      throw new Error(`FPL Sync Error: No squad picks available for Team ID ${teamId}. Please verify your Team ID or try syncing again.`);
     }
 
     const myPicks = teamRes.data.picks.map((p: any) => {
