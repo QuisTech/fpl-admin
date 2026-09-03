@@ -51,34 +51,47 @@ export const PerformanceView = ({ history, fetchLivePoints }: PerformanceViewPro
 
   const getSnapshotsForGW = (gwData: Record<string, any>) => {
     if (!gwData || typeof gwData !== 'object') return [];
-    const list: any[] = [];
-    const seenKeys = new Set<string>();
 
-    Object.keys(gwData).forEach(key => {
+    // Check if any composite full-matrix keys exist (e.g. 'fplform_quant_value')
+    const keys = Object.keys(gwData);
+    const hasCompositeKeys = keys.some(k => k.includes('_'));
+    const legacyKeys = new Set(['safe', 'aggressive', 'value']);
+
+    // Strategy combination map to hold the most recent snapshot per combination
+    const combinationMap = new Map<string, any>();
+
+    keys.forEach(key => {
+      // If full matrix composite keys exist, ignore redundant legacy keys
+      if (hasCompositeKeys && legacyKeys.has(key)) return;
+
       const item = gwData[key];
       if (!item || typeof item !== 'object' || !item.players) return;
 
       const fuel = item.fuel || 'fplform';
       const scenario = item.scenario || 'quant';
-      const riskMode = item.riskMode || (['safe', 'aggressive', 'value'].includes(key) ? key : 'safe');
-      const uniqueId = item.key || `${fuel}_${scenario}_${riskMode}_${item.timestamp || key}`;
+      const riskMode = item.riskMode || (legacyKeys.has(key) ? key : 'safe');
+      const comboKey = `${fuel}_${scenario}_${riskMode}`;
 
-      if (!seenKeys.has(uniqueId)) {
-        seenKeys.add(uniqueId);
-        list.push({
-          ...item,
-          uniqueId,
-          fuel,
-          scenario,
-          riskMode,
-          fuelLabel: item.fuelLabel || (fuel === 'eye-test' ? 'Eye Test' : fuel === 'native' ? 'Native FPL' : 'FPLForm'),
-          scenarioLabel: item.scenarioLabel || (scenario === 'quant' ? 'Quant Optimal' : 'Risky Template Shield'),
-          riskLabel: item.riskLabel || riskMode.toUpperCase()
-        });
+      const formattedItem = {
+        ...item,
+        uniqueId: comboKey,
+        key: comboKey,
+        fuel,
+        scenario,
+        riskMode,
+        fuelLabel: item.fuelLabel || (fuel === 'eye-test' ? 'Eye Test' : fuel === 'native' ? 'Native FPL' : 'FPLForm'),
+        scenarioLabel: item.scenarioLabel || (scenario === 'quant' ? 'Quant Optimal' : 'Risky Template Shield'),
+        riskLabel: item.riskLabel || riskMode.toUpperCase()
+      };
+
+      // Keep the most recent snapshot for this combination
+      const existing = combinationMap.get(comboKey);
+      if (!existing || (item.timestamp || 0) > (existing.timestamp || 0)) {
+        combinationMap.set(comboKey, formattedItem);
       }
     });
 
-    return list.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    return Array.from(combinationMap.values()).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
   };
 
   const [expandedModes, setExpandedModes] = useState<Record<string, boolean>>({});
@@ -237,11 +250,24 @@ export const PerformanceView = ({ history, fetchLivePoints }: PerformanceViewPro
           let res = 0;
           if (sortBy === 'actual') {
             res = b.actual - a.actual;
-            if (res === 0) res = b.diff - a.diff; // tiebreak by beat
-            if (res === 0) res = b.normalizedXP - a.normalizedXP; // tiebreak by xP
+            if (res === 0) {
+              if (b.actual === 0 && a.actual === 0) {
+                // Pre-match: neither team has played yet, rank by highest expected points
+                res = b.normalizedXP - a.normalizedXP;
+              } else {
+                // Post-kickoff: tiebreak by who outperformed their projection the most
+                res = b.diff - a.diff;
+                if (res === 0) res = b.normalizedXP - a.normalizedXP;
+              }
+            }
           } else if (sortBy === 'diff') {
-            res = b.diff - a.diff;
-            if (res === 0) res = b.actual - a.actual;
+            if (b.actual === 0 && a.actual === 0) {
+              // Pre-match fallback: rank by highest expected points
+              res = b.normalizedXP - a.normalizedXP;
+            } else {
+              res = b.diff - a.diff;
+              if (res === 0) res = b.actual - a.actual;
+            }
           } else if (sortBy === 'xp') {
             res = b.normalizedXP - a.normalizedXP;
             if (res === 0) res = b.actual - a.actual;

@@ -2,6 +2,30 @@ import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { RecommendationResponse, TeamSyncResponse, ScoredPlayer } from '../types';
 
+export const sanitizeHistory = (raw: any): Record<string, any> => {
+  if (!raw || typeof raw !== 'object') return {};
+  const cleanHistory: Record<string, any> = {};
+  Object.keys(raw).forEach(gw => {
+    const gwObj = raw[gw];
+    if (gwObj && typeof gwObj === 'object') {
+      const keys = Object.keys(gwObj);
+      const hasComposite = keys.some(k => k.includes('_'));
+      if (hasComposite) {
+        const cleanGw: Record<string, any> = {};
+        keys.forEach(k => {
+          if (!['safe', 'aggressive', 'value'].includes(k)) {
+            cleanGw[k] = gwObj[k];
+          }
+        });
+        cleanHistory[gw] = cleanGw;
+      } else {
+        cleanHistory[gw] = gwObj;
+      }
+    }
+  });
+  return cleanHistory;
+};
+
 export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fplform' | 'native' | 'eye-test', userId: string, authInitialized: boolean) => {
   const [data, setData] = useState<RecommendationResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -16,8 +40,12 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
   const [excludedPlayerIds, setExcludedPlayerIds] = useState<number[]>([]);
 
   const [history, setHistory] = useState<any>(() => {
-    const saved = localStorage.getItem('fpl_optimizer_history');
-    return saved ? JSON.parse(saved) : {};
+    try {
+      const saved = localStorage.getItem('fpl_optimizer_history');
+      return saved ? sanitizeHistory(JSON.parse(saved)) : {};
+    } catch {
+      return {};
+    }
   });
 
   const [profileLoaded, setProfileLoaded] = useState(false);
@@ -71,9 +99,10 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
       const keyToFetch = teamId ? `team_${teamId.trim()}` : userId;
       axios.get(`/api/snapshots?userId=${keyToFetch}`)
         .then(res => {
-          const fetchedHistory = (res.data?.history && typeof res.data.history === 'object') ? res.data.history : {};
-          setHistory(fetchedHistory);
-          localStorage.setItem('fpl_optimizer_history', JSON.stringify(fetchedHistory));
+          const rawHistory = (res.data?.history && typeof res.data.history === 'object') ? res.data.history : {};
+          const sanitized = sanitizeHistory(rawHistory);
+          setHistory(sanitized);
+          localStorage.setItem('fpl_optimizer_history', JSON.stringify(sanitized));
         })
         .catch(err => console.warn("[Snapshots API] Backend fetch notice:", err));
     }
@@ -173,7 +202,6 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
     };
 
     gwHistory[activeSnapshotKey] = activeSnapshotItem;
-    gwHistory[mode] = activeSnapshotItem;
 
     // 2. Fetch & record all 18 combinations in concurrent batches (accelerated by backend memoization)
     const tasks: (() => Promise<any>)[] = [];
@@ -227,15 +255,21 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
       }
     });
 
-    newHistory[gwId] = gwHistory;
+    // Purge legacy single-mode keys so they do not pollute Firestore or localStorage
+    delete gwHistory['safe'];
+    delete gwHistory['aggressive'];
+    delete gwHistory['value'];
 
-    setHistory(newHistory);
-    localStorage.setItem('fpl_optimizer_history', JSON.stringify(newHistory));
+    newHistory[gwId] = gwHistory;
+    const sanitizedHistory = sanitizeHistory(newHistory);
+
+    setHistory(sanitizedHistory);
+    localStorage.setItem('fpl_optimizer_history', JSON.stringify(sanitizedHistory));
 
     // Persist to backend Firestore endpoint for cross-device access
     const keyToSave = teamId ? `team_${teamId.trim()}` : userId;
     if (keyToSave) {
-      axios.post('/api/snapshots', { userId: keyToSave, history: newHistory, season: '2026/27' })
+      axios.post('/api/snapshots', { userId: keyToSave, history: sanitizedHistory, season: '2026/27' })
         .catch(err => console.warn("[Snapshots API] Backend save notice:", err));
     }
 
@@ -264,9 +298,10 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
       // Fetch performance snapshots for the target teamId (allows Super Admin to inspect any team's history)
       axios.get(`/api/snapshots?userId=team_${teamId.trim()}`)
         .then(snapRes => {
-          const fetchedHistory = (snapRes.data?.history && typeof snapRes.data.history === 'object') ? snapRes.data.history : {};
-          setHistory(fetchedHistory);
-          localStorage.setItem('fpl_optimizer_history', JSON.stringify(fetchedHistory));
+          const rawHistory = (snapRes.data?.history && typeof snapRes.data.history === 'object') ? snapRes.data.history : {};
+          const sanitized = sanitizeHistory(rawHistory);
+          setHistory(sanitized);
+          localStorage.setItem('fpl_optimizer_history', JSON.stringify(sanitized));
         })
         .catch(err => console.warn("[Snapshots API] Fetch notice on sync:", err));
 
