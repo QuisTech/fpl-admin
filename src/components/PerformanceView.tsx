@@ -61,11 +61,33 @@ export const PerformanceView = ({ history, fetchLivePoints }: PerformanceViewPro
     const combinationMap = new Map<string, any>();
 
     keys.forEach(key => {
-      // If full matrix composite keys exist, ignore redundant legacy keys
-      if (hasCompositeKeys && legacyKeys.has(key)) return;
-
       const item = gwData[key];
       if (!item || typeof item !== 'object' || !item.players) return;
+
+      // Special handling for the user's real synced squad
+      if (key === 'user_synced_squad' || item.isUserSquad || item.key === 'user_synced_squad') {
+        const userKey = 'user_synced_squad';
+        const formattedUserItem = {
+          ...item,
+          uniqueId: userKey,
+          key: userKey,
+          fuel: 'user',
+          scenario: 'user',
+          riskMode: 'user',
+          fuelLabel: 'My Team',
+          scenarioLabel: item.scenarioLabel || 'Synced FPL Squad',
+          riskLabel: 'HUMAN',
+          isUserSquad: true
+        };
+        const existing = combinationMap.get(userKey);
+        if (!existing || (item.timestamp || 0) > (existing.timestamp || 0)) {
+          combinationMap.set(userKey, formattedUserItem);
+        }
+        return;
+      }
+
+      // If full matrix composite keys exist, ignore redundant legacy keys
+      if (hasCompositeKeys && legacyKeys.has(key)) return;
 
       const fuel = item.fuel || 'fplform';
       const scenario = item.scenario || 'quant';
@@ -81,7 +103,8 @@ export const PerformanceView = ({ history, fetchLivePoints }: PerformanceViewPro
         riskMode,
         fuelLabel: item.fuelLabel || (fuel === 'eye-test' ? 'Eye Test' : fuel === 'native' ? 'Native FPL' : 'FPLForm'),
         scenarioLabel: item.scenarioLabel || (scenario === 'quant' ? 'Quant Optimal' : 'Risky Template Shield'),
-        riskLabel: item.riskLabel || riskMode.toUpperCase()
+        riskLabel: item.riskLabel || riskMode.toUpperCase(),
+        isUserSquad: false
       };
 
       // Keep the most recent snapshot for this combination
@@ -239,9 +262,15 @@ export const PerformanceView = ({ history, fetchLivePoints }: PerformanceViewPro
 
         // Filter
         const filteredSnapshots = enrichedSnapshots.filter(data => {
-          if (fuelFilter !== 'all' && data.fuel !== fuelFilter) return false;
-          if (scenarioFilter !== 'all' && data.scenario !== scenarioFilter) return false;
-          if (riskFilter !== 'all' && data.riskMode !== riskFilter) return false;
+          if (fuelFilter !== 'all') {
+            if (fuelFilter === 'user') {
+              if (!data.isUserSquad) return false;
+            } else if (data.fuel !== fuelFilter) {
+              return false;
+            }
+          }
+          if (scenarioFilter !== 'all' && data.scenario !== scenarioFilter && !data.isUserSquad) return false;
+          if (riskFilter !== 'all' && data.riskMode !== riskFilter && !data.isUserSquad) return false;
           return true;
         });
 
@@ -413,6 +442,7 @@ export const PerformanceView = ({ history, fetchLivePoints }: PerformanceViewPro
                   className="bg-slate-950 text-slate-200 border border-slate-800 text-[9px] font-mono font-bold rounded-lg px-2 py-1 focus:outline-none focus:border-fpl-green transition-colors cursor-pointer"
                 >
                   <option value="all">All Models</option>
+                  <option value="user">👤 My Team (Human)</option>
                   <option value="eye-test">Eye Test</option>
                   <option value="fplform">FPLForm</option>
                   <option value="native">Native FPL</option>
@@ -490,18 +520,27 @@ export const PerformanceView = ({ history, fetchLivePoints }: PerformanceViewPro
                       key={data.uniqueId} 
                       className={cn(
                         "relative bg-card-bg border rounded-xl p-4 transition-all duration-200 shadow-sm",
-                        isTopOne 
-                          ? "border-amber-400/60 bg-gradient-to-r from-amber-500/[0.06] via-card-bg to-card-bg shadow-[0_0_20px_rgba(251,191,36,0.12)]" 
-                          : "border-fpl-border hover:border-slate-700"
+                        data.isUserSquad
+                          ? "border-emerald-500/70 bg-gradient-to-r from-emerald-500/[0.08] via-card-bg to-card-bg shadow-[0_0_25px_rgba(16,185,129,0.15)] ring-1 ring-emerald-400/30"
+                          : isTopOne 
+                            ? "border-amber-400/60 bg-gradient-to-r from-amber-500/[0.06] via-card-bg to-card-bg shadow-[0_0_20px_rgba(251,191,36,0.12)]" 
+                            : "border-fpl-border hover:border-slate-700"
                       )}
                     >
-                      {/* Top Performer Badge */}
-                      {isTopOne && (
-                        <div className="absolute -top-2.5 right-4 z-10 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black text-[8px] sm:text-[9px] px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-md flex items-center gap-1">
-                          <Trophy className="w-2.5 h-2.5 fill-slate-950" />
-                          <span>#1 Top Performer</span>
-                        </div>
-                      )}
+                      {/* Top Badges */}
+                      <div className="absolute -top-2.5 right-4 z-10 flex items-center gap-1.5">
+                        {data.isUserSquad && (
+                          <div className="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 text-slate-950 font-black text-[8px] sm:text-[9px] px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-md flex items-center gap-1">
+                            <span>👤 MY SYNCED SQUAD</span>
+                          </div>
+                        )}
+                        {isTopOne && (
+                          <div className="bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black text-[8px] sm:text-[9px] px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-md flex items-center gap-1">
+                            <Trophy className="w-2.5 h-2.5 fill-slate-950" />
+                            <span>#1 Top Performer</span>
+                          </div>
+                        )}
+                      </div>
 
                       <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                         <div className="flex flex-wrap items-center gap-1.5">
@@ -520,16 +559,18 @@ export const PerformanceView = ({ history, fetchLivePoints }: PerformanceViewPro
                           {/* Fuel Source Badge */}
                           <span className={cn(
                             "text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border",
+                            data.isUserSquad ? "bg-emerald-500 text-slate-950 border-emerald-400 font-black shadow-sm" :
                             data.fuel === 'eye-test' ? "bg-amber-500/10 text-amber-400 border-amber-500/30" :
                             data.fuel === 'native' ? "bg-blue-500/10 text-blue-400 border-blue-500/30" :
                             "bg-fpl-purple text-white border-fpl-purple/50 shadow-sm"
                           )}>
-                            {data.fuelLabel}
+                            {data.isUserSquad ? '👤 My Team' : data.fuelLabel}
                           </span>
 
                           {/* Scenario Strategy Badge */}
                           <span className={cn(
                             "text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded border",
+                            data.isUserSquad ? "bg-slate-900 text-emerald-300 border-emerald-500/40" :
                             data.scenario === 'template' ? "bg-rose-500/10 text-rose-400 border-rose-500/30" :
                             "bg-fpl-green/10 text-fpl-green border-fpl-green/30"
                           )}>
@@ -539,11 +580,12 @@ export const PerformanceView = ({ history, fetchLivePoints }: PerformanceViewPro
                           {/* Risk Tier Badge */}
                           <span className={cn(
                             "text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded",
+                            data.isUserSquad ? "bg-purple-500/20 text-purple-300 border border-purple-500/30 font-bold" :
                             data.riskMode === 'aggressive' ? "bg-orange-500/20 text-orange-400" : 
                             data.riskMode === 'value' ? "bg-cyan-500/20 text-cyan-400" : 
                             "bg-slate-800 text-slate-300"
                           )}>
-                            {data.riskLabel}
+                            {data.isUserSquad ? 'HUMAN MANAGER' : data.riskLabel}
                           </span>
                         </div>
                         

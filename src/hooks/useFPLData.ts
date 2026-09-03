@@ -255,6 +255,37 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
       }
     });
 
+    // Record user's real synced squad if team is synced
+    if (syncedData && syncedData.squad && syncedData.squad.length >= 11) {
+      const startingXI = syncedData.squad.filter(p => (p.position_in_squad ?? 0) <= 11);
+      const captain = syncedData.squad.find(p => p.isCaptain || p.is_captain) || (startingXI.length > 0 ? startingXI[0] : null);
+      const viceCaptain = syncedData.squad.find(p => p.isViceCaptain || p.is_vice_captain);
+      const captainBonus = captain ? (captain.xP || 0) : 0;
+      const startingTotalXp = startingXI.reduce((sum, p) => sum + (p.xP || 0), 0) + captainBonus;
+
+      const userSquadItem = {
+        key: 'user_synced_squad',
+        fuel: 'user',
+        scenario: 'user',
+        riskMode: 'user',
+        fuelLabel: 'My Team',
+        scenarioLabel: syncedData.managerInfo?.teamName || 'Synced FPL Squad',
+        riskLabel: 'HUMAN',
+        isUserSquad: true,
+        players: startingXI.map(p => ({
+          id: p.id,
+          web_name: p.web_name,
+          score: p.xP || p.score || 0,
+          position: p.position
+        })),
+        xP: Math.round(startingTotalXp * 10) / 10,
+        captainId: captain?.id,
+        viceCaptainId: viceCaptain?.id,
+        timestamp: now
+      };
+      gwHistory['user_synced_squad'] = userSquadItem;
+    }
+
     // Purge legacy single-mode keys so they do not pollute Firestore or localStorage
     delete gwHistory['safe'];
     delete gwHistory['aggressive'];
