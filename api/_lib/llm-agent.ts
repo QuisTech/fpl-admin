@@ -42,12 +42,22 @@ export async function getLLMTransferDecision(
   validTargets?: any[]
 ): Promise<TransferDecision> {
   
-  // Build context for LLM
-  const squadSummary = squad.map(p => 
-    `${p.name || p.web_name || 'Unknown'} (ID: ${p.id || p.element || 'Unknown'}) (${p.position}) - £${((p.cost || p.now_cost || p.selling_price || 0)/10).toFixed(1)}M - xP: ${(p.xP || 0).toFixed(1)}`
-  ).join('\n');
+  // Build context for LLM with explicit team and upcoming fixture tagging
+  const squadSummary = squad.map(p => {
+    const nextFix = p.next_fixtures?.[0];
+    const fixStr = nextFix 
+      ? ` | Next: ${nextFix.is_home ? 'vs' : '@'} ${nextFix.opponent} (GW${nextFix.event}, FDR: ${nextFix.difficulty})` 
+      : '';
+    const teamStr = p.team_name || p.team_short_name ? ` (${p.team_name || p.team_short_name})` : '';
+    return `${p.name || p.web_name || 'Unknown'} (ID: ${p.id || p.element || 'Unknown'}, ${p.position}${teamStr}) - £${((p.cost || p.now_cost || p.selling_price || 0)/10).toFixed(1)}M - xP: ${(p.xP || 0).toFixed(1)}${fixStr}`;
+  }).join('\n');
   
-  const fixturesSummary = fixtures.slice(0, 5).map(f => 
+  // Group all fixtures for the target gameweek plus upcoming horizon
+  const currentGwFixtures = fixtures.filter(f => f.gw === gameweek || f.gw === Number(gameweek) || String(f.gw) === String(gameweek));
+  const upcomingFixtures = fixtures.filter(f => f.gw !== gameweek && f.gw !== Number(gameweek) && String(f.gw) !== String(gameweek)).slice(0, 10);
+  const displayFixtures = currentGwFixtures.length > 0 ? [...currentGwFixtures, ...upcomingFixtures] : fixtures.slice(0, 15);
+
+  const fixturesSummary = displayFixtures.map(f => 
     `GW${f.gw}: ${f.team} vs ${f.opponent} (FDR: ${f.difficulty})`
   ).join('\n');
   
@@ -65,7 +75,14 @@ export async function getLLMTransferDecision(
 
   let targetsSummary = '';
   if (validTargets && validTargets.length > 0) {
-    targetsSummary = `\nTOP TRANSFER TARGETS (Filtered & Valid):\n${validTargets.map(t => `${t.name} (ID: ${t.id}, Pos: ${t.position || 'Unknown'}) - £${(t.price/10).toFixed(1)}M - riskAdjXP: ${(t.riskAdjustedScore || t.xP || 0).toFixed(2)} - Own: ${t.ownership}% - Form: ${t.form}`).join('\n')}\n`;
+    targetsSummary = `\nTOP TRANSFER TARGETS (Filtered & Valid):\n${validTargets.map(t => {
+      const nextFix = t.next_fixtures?.[0];
+      const fixStr = nextFix 
+        ? ` | Next: ${nextFix.is_home ? 'vs' : '@'} ${nextFix.opponent} (FDR: ${nextFix.difficulty})` 
+        : '';
+      const teamStr = t.team_name || t.team_short_name ? ` (${t.team_name || t.team_short_name})` : '';
+      return `${t.name} (ID: ${t.id}, Pos: ${t.position || 'Unknown'}${teamStr}) - £${(t.price/10).toFixed(1)}M - riskAdjXP: ${(t.riskAdjustedScore || t.xP || 0).toFixed(2)} - Own: ${t.ownership}% - Form: ${t.form}${fixStr}`;
+    }).join('\n')}\n`;
   }
 
   const prompt = `
@@ -75,6 +92,10 @@ export async function getLLMTransferDecision(
     RISK MODE: ${riskMode.toUpperCase()}
     FREE TRANSFERS: ${freeTransfers}
     BANK: £${(bank/10).toFixed(1)}M
+    
+    CRITICAL FIXTURE ACCURACY RULES (DO NOT HALLUCINATE OPPONENTS):
+    1. Each player's exact upcoming fixture is tagged directly in their profile (e.g. "| Next: vs COV (GW3, FDR: 2)"). That is their TRUE opponent and venue.
+    2. NEVER invent, swap, or assume an opponent. Cross-check each player's club and their tagged fixture.
     
     CRITICAL FPL TRANSFER RULES:
     1. If suggesting a single transfer, the incoming player MUST have the EXACT SAME POSITION (e.g., DEF for DEF, MID for MID) as the outgoing player. Do not suggest swapping a Midfielder for a Defender.
@@ -99,7 +120,7 @@ export async function getLLMTransferDecision(
     CURRENT SQUAD:
     ${squadSummary}
     
-    UPCOMING FIXTURES (next 5 GWs):
+    MATCHDAY FIXTURES:
     ${fixturesSummary}
     
     CHIPS AVAILABLE:

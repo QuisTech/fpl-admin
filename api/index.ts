@@ -1483,11 +1483,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         id: p.id,
         name: p.web_name,
         position: p.position,
+        team_name: p.team_name,
+        team_short_name: p.team_short_name,
         price: p.now_cost,
         xP: p.xP,
         riskAdjustedScore: p.score,
         ownership: p.ownership,
-        form: p.form
+        form: p.form,
+        next_fixtures: p.next_fixtures
       }));
 
       const decision = await getLLMTransferDecision(
