@@ -153,7 +153,25 @@ export class FPLService {
                 strength_defence_away: parseInt(t.strength_defence_away) || 1000
               }));
 
-              const events = [{ id: 1, is_current: false, is_next: false, deadline_time: '2026-08-15T10:00:00Z' }, { id: 2, is_current: false, is_next: true, deadline_time: '2026-08-30T10:00:00Z' }];
+              const now = new Date();
+              const seasonStart = new Date('2026-08-15T17:30:00Z');
+              const events = Array.from({ length: 38 }, (_, idx) => {
+                const id = idx + 1;
+                const deadline = new Date(seasonStart.getTime() + (idx * 7 * 24 * 60 * 60 * 1000));
+                return {
+                  id,
+                  name: `Gameweek ${id}`,
+                  is_current: false,
+                  is_next: false,
+                  deadline_time: deadline.toISOString()
+                };
+              });
+              const upcomingEvent = events.find(e => new Date(e.deadline_time) > now) || events[0];
+              upcomingEvent.is_next = true;
+              const currentEventIdx = events.indexOf(upcomingEvent) - 1;
+              if (currentEventIdx >= 0) {
+                events[currentEventIdx].is_current = true;
+              }
 
               console.log(`[FPL API] Successfully parsed ${elements.length} players & ${teams.length} teams from CSV mirror.`);
               return { data: { elements, teams, events } };
@@ -223,7 +241,9 @@ export class FPLService {
       const currentEvent = staticRes.data.events.find((e: any) => e.is_current) || 
                            staticRes.data.events.find((e: any) => e.is_previous) || 
                            { id: 1 };
-      const nextEvent = staticRes.data.events.find((e: any) => new Date(e.deadline_time) > new Date()) || { id: 1 };
+      const nextEvent = staticRes.data.events.find((e: any) => e.is_next) ||
+                        staticRes.data.events.find((e: any) => new Date(e.deadline_time) > new Date()) || 
+                        { id: (currentEvent?.id || 2) + 1 };
       
       const result = { players, teams, fixtures, nextEventId: nextEvent.id, currentEventId: currentEvent.id };
       this.cache = { data: result, timestamp: Date.now() };
@@ -1143,7 +1163,8 @@ export class FPLService {
       bank,
       totalCost,
       entryHistory,
-      managerInfo
+      managerInfo,
+      gameweek: baseData.nextEventId
     };
   }
 }
@@ -1426,12 +1447,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
       // -------------------------------------
 
-      // Fetch fixtures
+      // Fetch fixtures & upcoming gameweek context
       const baseData = await FPLService.getBaseData();
       const teamsList = baseData.teams || [];
-      const fixturesRes = await axios.get(`${FPL_BASE_URL}/fixtures/`, { headers: (FPLService as any).getHeaders() });
-      let rawUpcoming = fixturesRes.data.filter((f: any) => f.event >= (gameweek || 1) && f.event < (gameweek || 1) + 5);
-      if (rawUpcoming.length === 0) rawUpcoming = fixturesRes.data.slice(0, 5); // Fallback if no exact match
+      const effectiveGw = gameweek || baseData.nextEventId || 3;
+      const allFixtures = (baseData.fixtures && baseData.fixtures.length > 0) ? baseData.fixtures : [];
+      let rawUpcoming = allFixtures.filter((f: any) => f.event >= effectiveGw && f.event < effectiveGw + 5);
+      if (rawUpcoming.length === 0) rawUpcoming = allFixtures.slice(0, 5); // Fallback if no exact match
       
       const upcoming = rawUpcoming.map((f: any) => {
         const homeTeam = teamsList.find((t: any) => t.id === f.team_h)?.name || `Team ${f.team_h}`;
@@ -1469,7 +1491,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }));
 
       const decision = await getLLMTransferDecision(
-        uid, squad, gameweek, upcoming, bank, freeTransfers, chips, riskMode, userPrompt, fplContext, validTargets
+        uid, squad, effectiveGw, upcoming, bank, freeTransfers, chips, riskMode, userPrompt, fplContext, validTargets
       );
       
       return res.status(200).json({ decision });

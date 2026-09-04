@@ -51,7 +51,7 @@ export const PitchView = ({
   const benchPlayers = data?.bench?.filter(Boolean) || [];
 
   // Matchday & Squad Diagnostics Calculations
-  const nextGw = data?.nextEventId || 2;
+  const nextGw = data?.nextEventId || syncedData?.gameweek || 3;
   const expectedPoints = data?.expectedPoints || data?.startingXI?.reduce((s, p) => s + (p.xP || 0), 0) || 0;
   const avgEo = data?.engineDiagnostics?.metrics?.averageXiEo ?? (
     data?.startingXI && data.startingXI.length > 0 

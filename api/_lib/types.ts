@@ -236,5 +236,6 @@ export interface TeamSyncResponse {
   totalCost?: number;
   entryHistory?: EntryHistory | null;
   managerInfo?: ManagerInfo | null;
+  gameweek?: number;
 }
 

@@ -35,8 +35,15 @@ export const AIAgentView = ({ syncedData, optimalData, tier, userId, riskMode, f
   const [isAdmin, setIsAdmin] = useState(false);
 
   // 🤖 Gameweek Enveloped Chevron Navigator & Chat History State
-  const currentLiveGw = (syncedData as any)?.gameweek || 2;
-  const [gwsList, setGwsList] = useState<number[]>([currentLiveGw, Math.max(1, currentLiveGw - 1)]);
+  const liveGw = syncedData?.gameweek || optimalData?.nextEventId || 3;
+  const [gwsList, setGwsList] = useState<number[]>(() => {
+    const initGw = syncedData?.gameweek || optimalData?.nextEventId || 3;
+    const list: number[] = [];
+    for (let g = initGw; g >= 1; g--) {
+      list.push(g);
+    }
+    return list.length > 0 ? list : [3, 2, 1];
+  });
   const [selectedGwIndex, setSelectedGwIndex] = useState<number>(0);
   const [viewAll, setViewAll] = useState<boolean>(false);
 
@@ -79,19 +86,22 @@ export const AIAgentView = ({ syncedData, optimalData, tier, userId, riskMode, f
     checkAdmin();
   }, [auth.currentUser]);
 
-  // Ensure current sync gameweek is in list
+  // Synchronize gameweeks list when live gameweek is available from syncedData or optimalData
   useEffect(() => {
-    if (syncedData) {
-      const gw = (syncedData as any).gameweek || 2;
+    const targetGw = syncedData?.gameweek || optimalData?.nextEventId;
+    if (targetGw) {
       setGwsList(prev => {
-        const set = new Set([...prev, gw, Math.max(1, gw - 1)]);
+        const set = new Set([...prev]);
+        for (let g = 1; g <= targetGw; g++) {
+          set.add(g);
+        }
         return Array.from(set).sort((a, b) => b - a);
       });
     }
-  }, [syncedData]);
+  }, [syncedData?.gameweek, optimalData?.nextEventId]);
 
   const activeGwIndex = Math.min(selectedGwIndex, gwsList.length - 1);
-  const activeGw = gwsList[activeGwIndex] || currentLiveGw;
+  const activeGw = gwsList[activeGwIndex] || liveGw;
 
   const handleAskAgent = async () => {
     if (!syncedData || prompt.trim() === '') return;
