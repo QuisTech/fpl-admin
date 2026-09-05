@@ -199,7 +199,15 @@ export class ProjectionEngine {
         + (this.params.betaCsFixture || -0.08) * diffOffset
         + (this.params.betaCsHome || 0.05) * isHome;
 
-      expectedCsProb = Math.max(0.02, Math.min(0.70, expectedCsProb)) * minuteFraction;
+      // Smooth FPL 60-minute clean sheet and appearance probability curve:
+      // Replaces binary step function with realistic probability of reaching 60 minutes
+      const prob60Plus = expectedMinutes >= 75
+        ? 1.0
+        : expectedMinutes <= 30
+          ? 0.0
+          : Math.min(1.0, Math.max(0.0, (expectedMinutes - 30) / 45));
+
+      expectedCsProb = Math.max(0.02, Math.min(0.70, expectedCsProb)) * prob60Plus;
       const expectedCS = expectedCsProb * csMultiplier;
 
       // Sub-model 3: Saves (Goalkeepers only)
@@ -208,9 +216,8 @@ export class ProjectionEngine {
       // Sub-model 4: Bonus
       let expectedBonus = Math.max(0, 0.05 + 0.25 * expectedAttack + (expectedCS > 1.5 ? 0.35 : 0));
 
-      // Sub-model 4: Appearance
-      // Roughly 2 points if > 60 mins, 1 pt if < 60 mins
-      const expectedAppearance = expectedMinutes > 60 ? 2 : (expectedMinutes > 0 ? 1 : 0);
+      // Sub-model 5: Appearance (1 pt for playing, +1 pt scaled by probability of 60+ mins)
+      const expectedAppearance = expectedMinutes > 0 ? (1 + prob60Plus) : 0;
 
       // Appearance variance (Binomial)
       const pApp = Math.min(1, Math.max(0, expectedMinutes / 90));

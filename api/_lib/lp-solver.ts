@@ -125,8 +125,8 @@ export function solveOptimalSquad(
     sortedByScore.slice(0, limit).forEach(c => selectedIds.add(c.id));
     // Top value-for-money
     sortedByVFM.slice(0, limit).forEach(c => selectedIds.add(c.id));
-    // Cheapest budget enablers (top 5 cheapest per position)
-    sortedByCost.slice(0, 5).forEach(c => selectedIds.add(c.id));
+    // Cheapest budget enablers (top 8 cheapest per position to guarantee knapsack feasibility with expensive anchors)
+    sortedByCost.slice(0, 8).forEach(c => selectedIds.add(c.id));
     // Any locked player
     posList.filter(c => c.isLocked).forEach(c => selectedIds.add(c.id));
 
@@ -180,10 +180,15 @@ export function solveOptimalSquad(
     model.constraints[v] = c.isLocked ? { equal: 1 } : { max: 1 };
     model.ints[v] = 1;
 
-    // Captaincy 2x decision variable: adds the extra 1x points for top contenders
+    // Captaincy 2x decision variable: scales captain bonus across the multi-gameweek horizon
     if (hasCapOption && c.capScore > 0) {
+      // An elite captain is retained across ~70% of gameweeks over a multi-week block.
+      // Scaling by horizon ensures ultra-premiums (Haaland, Salah) are credited with their true 2x ceiling
+      // against their multi-week price tag, preventing knapsack PPM distortion.
+      const horizonCaptainBonus = Math.round(c.capScore * (1 + (horizon - 1) * 0.70) * 10) / 10;
+
       model.variables[capVar] = {
-        score: c.capScore,
+        score: horizonCaptainBonus,
         total_cap: 1,
         [`cap_link_${c.id}`]: 1,
         [capVar]: 1

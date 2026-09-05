@@ -528,10 +528,14 @@ export class FPLService {
       }
       squad = scored.filter(p => optimalIds.includes(p.id));
     } catch (err: any) {
-      console.warn("[FPLService] LP Solver failed with full template anchors, retrying with core locks:", err.message);
+      console.warn("[FPLService] LP Solver failed with full template anchors, attempting progressive fallback:", err.message);
       try {
-        // Retry LP solver with core user locks only if template anchors caused budget/team-limit infeasibility
-        const fallbackIds = solveOptimalSquad(oracle, nextEventId, budget, 8, params, availableIds, lockedSet, excludedSet);
+        // Progressive fallback: Retain top 2 anchors (highest EO captaincy anchors like Haaland/Bruno) before discarding all
+        const top2Anchors = new Set([...Array.from(activeLockedSet).slice(0, Math.min(activeLockedSet.size, 2)), ...Array.from(lockedSet)]);
+        let fallbackIds = solveOptimalSquad(oracle, nextEventId, budget, 8, params, availableIds, top2Anchors, excludedSet);
+        if (!fallbackIds || fallbackIds.length === 0) {
+          fallbackIds = solveOptimalSquad(oracle, nextEventId, budget, 8, params, availableIds, lockedSet, excludedSet);
+        }
         if (!fallbackIds || fallbackIds.length === 0) throw new Error("Fallback LP solver also infeasible");
         squad = scored.filter(p => fallbackIds.includes(p.id));
       } catch (fallbackErr) {

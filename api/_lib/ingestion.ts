@@ -202,10 +202,18 @@ export abstract class BaseOracle implements XPOracle {
       const priorXG = (pos === 'FWD' ? 0.35 : pos === 'MID' ? 0.18 : pos === 'DEF' ? 0.04 : 0.0) * priceScale;
       const priorXA = (pos === 'MID' ? 0.18 : pos === 'FWD' ? 0.12 : pos === 'DEF' ? 0.06 : 0.0) * priceScale;
 
-      let xG90 = Math.min(1.0, (expectedGoalsPer90 * 0.25) + (priorXG * 0.75));
-      let xA90 = Math.min(0.7, (expectedAssistsPer90 * 0.25) + (priorXA * 0.75));
-
       const completedGws = Math.max(1, nextEventId - 1);
+
+      // Dynamic Bayesian weight scaling with sample size (completedGws)
+      // GW1-3: ~25-35% live stats, firmly anchored to multi-season prior
+      // GW5-8: ~55-70% live stats, rolling sample surge (Phase 2 2K resolution)
+      // GW10+: ~85-90% live stats, peak predictive empirical power
+      const liveWeight = Math.min(0.90, Math.max(0.25, 0.15 + completedGws * 0.08));
+      const priorWeight = 1 - liveWeight;
+
+      let xG90 = Math.min(1.0, (expectedGoalsPer90 * liveWeight) + (priorXG * priorWeight));
+      let xA90 = Math.min(0.7, (expectedAssistsPer90 * liveWeight) + (priorXA * priorWeight));
+
       const rawMinutes = p.minutes || 0;
       const starts = p.starts || 0;
       const avgMins = rawMinutes / completedGws;
@@ -323,6 +331,46 @@ export abstract class BaseOracle implements XPOracle {
   getCost(playerId: number): number { return this.playerCosts[playerId]; }
   getTeam(playerId: number): string { return this.playerTeams[playerId]; }
   getAllPlayerIds(): number[] { return this.allIds; }
+
+  /**
+   * Fixture-aware forward projection scaling for multi-GW horizons.
+   * Replaces unconditional 0.9^step exponential decay with empirical FDR, home/away, and team strength adjustments.
+   */
+  protected getFixtureAdjustedXP(baseXP: number, playerId: number, gameweek: number): number {
+    if (baseXP <= 0) return 0;
+    const features = this.featuresMatrix[playerId];
+    if (!features) return baseXP;
+    const fixtures = features.fixturesByGw?.[gameweek] || [];
+    if (fixtures.length === 0) return 0; // Blank gameweek: 0 fixtures = 0 points
+
+    let totalXp = 0;
+    for (const fix of fixtures) {
+      const difficulty = fix.difficulty ?? 3;
+      const isHome = fix.isHome ? 1 : 0;
+      
+      // Neutral FDR 3 = 1.0. FDR 1 or 2 = +6% to +12%. FDR 4 or 5 = -6% to -12%.
+      const diffMultiplier = 1 + (3 - difficulty) * 0.06;
+      // Conservative home advantage (+3% home, -3% away)
+      const homeMultiplier = isHome ? 1.03 : 0.97;
+      
+      // Attack vs Defense strength adjustment
+      let ratingMultiplier = 1.0;
+      if (features.position === 'DEF' || features.position === 'GKP') {
+        const oppAttack = fix.opponentAttackRating ?? 1.5;
+        ratingMultiplier -= (oppAttack - 1.5) * 0.05;
+      } else {
+        const oppDefense = fix.opponentDefenseRating ?? 1.5;
+        ratingMultiplier -= (oppDefense - 1.5) * 0.05;
+      }
+
+      const combinedMultiplier = diffMultiplier * homeMultiplier * ratingMultiplier;
+      // Conservative guardrails: prevent fixture adjustment from exceeding ±25% of baseline
+      const boundedMultiplier = Math.max(0.75, Math.min(1.25, combinedMultiplier));
+      totalXp += baseXP * boundedMultiplier;
+    }
+
+    return Math.min(25.0, Math.max(0, Math.round(totalXp * 10) / 10));
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -409,13 +457,11 @@ export class FplformOracle extends BaseOracle {
         if (matchedPlayer) {
           const fplId = matchedPlayer.id;
           
-          // Populate multi-gw expected points using decayed merit score
+          // Populate multi-gw expected points using fixture-adjusted merit score
           this.xpMatrix[fplId] = {};
           for (let step = 0; step < 15; step++) {
             const gw = nextEventId + step;
-            // meritScore decays across future gameweeks
-            const projectedXp = Math.min(25.0, Math.max(0, meritScore * Math.pow(0.9, step)));
-            this.xpMatrix[fplId][gw] = projectedXp;
+            this.xpMatrix[fplId][gw] = this.getFixtureAdjustedXP(meritScore, fplId, gw);
           }
           
           // Override position and team from CSV if they were defaults
@@ -474,7 +520,7 @@ export class NativeOracle extends BaseOracle {
     // Populate metadata and features from live API
     this.populateMetadataAndFeatures(players, fixtures, teams, nextEventId);
 
-    // Populate xpMatrix directly from official API's ep_next, with decay for future weeks
+    // Populate xpMatrix directly from official API's ep_next, with fixture-adjusted scaling for future weeks
     players.forEach(p => {
       const fplId = p.id;
       const meritScore = parseFloat(p.ep_next) || 0;
@@ -482,8 +528,7 @@ export class NativeOracle extends BaseOracle {
       this.xpMatrix[fplId] = {};
       for (let step = 0; step < 15; step++) {
         const gw = nextEventId + step;
-        const decayFactor = Math.pow(0.9, step);
-        this.xpMatrix[fplId][gw] = meritScore * decayFactor;
+        this.xpMatrix[fplId][gw] = this.getFixtureAdjustedXP(meritScore, fplId, gw);
       }
     });
 
