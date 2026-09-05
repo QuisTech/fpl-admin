@@ -331,46 +331,6 @@ export abstract class BaseOracle implements XPOracle {
   getCost(playerId: number): number { return this.playerCosts[playerId]; }
   getTeam(playerId: number): string { return this.playerTeams[playerId]; }
   getAllPlayerIds(): number[] { return this.allIds; }
-
-  /**
-   * Fixture-aware forward projection scaling for multi-GW horizons.
-   * Replaces unconditional 0.9^step exponential decay with empirical FDR, home/away, and team strength adjustments.
-   */
-  protected getFixtureAdjustedXP(baseXP: number, playerId: number, gameweek: number): number {
-    if (baseXP <= 0) return 0;
-    const features = this.featuresMatrix[playerId];
-    if (!features) return baseXP;
-    const fixtures = features.fixturesByGw?.[gameweek] || [];
-    if (fixtures.length === 0) return 0; // Blank gameweek: 0 fixtures = 0 points
-
-    let totalXp = 0;
-    for (const fix of fixtures) {
-      const difficulty = fix.difficulty ?? 3;
-      const isHome = fix.isHome ? 1 : 0;
-      
-      // Neutral FDR 3 = 1.0. FDR 1 or 2 = +6% to +12%. FDR 4 or 5 = -6% to -12%.
-      const diffMultiplier = 1 + (3 - difficulty) * 0.06;
-      // Conservative home advantage (+3% home, -3% away)
-      const homeMultiplier = isHome ? 1.03 : 0.97;
-      
-      // Attack vs Defense strength adjustment
-      let ratingMultiplier = 1.0;
-      if (features.position === 'DEF' || features.position === 'GKP') {
-        const oppAttack = fix.opponentAttackRating ?? 1.5;
-        ratingMultiplier -= (oppAttack - 1.5) * 0.05;
-      } else {
-        const oppDefense = fix.opponentDefenseRating ?? 1.5;
-        ratingMultiplier -= (oppDefense - 1.5) * 0.05;
-      }
-
-      const combinedMultiplier = diffMultiplier * homeMultiplier * ratingMultiplier;
-      // Conservative guardrails: prevent fixture adjustment from exceeding ±25% of baseline
-      const boundedMultiplier = Math.max(0.75, Math.min(1.25, combinedMultiplier));
-      totalXp += baseXP * boundedMultiplier;
-    }
-
-    return Math.min(25.0, Math.max(0, Math.round(totalXp * 10) / 10));
-  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -406,31 +366,49 @@ export class FplformOracle extends BaseOracle {
       teams.forEach(t => teamShortMap[t.short_name.toLowerCase()] = t.id);
     }
 
+    // Helper to parse CSV row handling quotes
+    const parseCsvLine = (line: string): string[] => {
+      const cols: string[] = [];
+      let inQuotes = false;
+      let current = '';
+      for (let j = 0; j < line.length; j++) {
+        const char = line[j];
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          cols.push(current.trim());
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      cols.push(current.trim());
+      return cols.map(c => c.replace(/^"|"$/g, ''));
+    };
+
+    // Dynamically map per-gameweek columns (e.g. PtsGW4, PtsGW5, ...) and Rest of Season
+    const gwColMap: Record<number, number> = {};
+    let restOfSeasonCol = -1;
+    for (let h = 0; h < Math.min(5, lines.length); h++) {
+      const headerCols = parseCsvLine(lines[h]);
+      headerCols.forEach((col, idx) => {
+        const match = col.match(/^PtsGW(\d+)/i);
+        if (match) {
+          gwColMap[parseInt(match[1], 10)] = idx;
+        }
+        if (/^PtsRest\s*OfSeason/i.test(col)) {
+          restOfSeasonCol = idx;
+        }
+      });
+      if (Object.keys(gwColMap).length > 0) break;
+    }
+
     let parsedCount = 0;
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
       if (!line) continue;
       
-      let cols: string[] = [];
-      try {
-        let inQuotes = false;
-        let current = '';
-        for (let j = 0; j < line.length; j++) {
-          const char = line[j];
-          if (char === '"') {
-            inQuotes = !inQuotes;
-          } else if (char === ',' && !inQuotes) {
-            cols.push(current);
-            current = '';
-          } else {
-            current += char;
-          }
-        }
-        cols.push(current);
-        cols = cols.map(c => c.trim().replace(/^"|"$/g, ''));
-      } catch (err) {
-        continue;
-      }
+      const cols = parseCsvLine(line);
 
       if (cols.length >= 7 && cols[3]) {
         const playerName = cols[1];
@@ -457,11 +435,36 @@ export class FplformOracle extends BaseOracle {
         if (matchedPlayer) {
           const fplId = matchedPlayer.id;
           
-          // Populate multi-gw expected points using fixture-adjusted merit score
+          // Probability of appearance (0.0 to 1.0)
+          let probPlay = parseFloat(cols[8]);
+          if (!isNaN(probPlay)) {
+            if (probPlay > 1.0) {
+              probPlay = probPlay / 100;
+            }
+            probPlay = Math.max(0, Math.min(1.0, probPlay));
+          } else {
+            probPlay = 1.0;
+          }
+
+          // Populate multi-gw expected points directly from FPLForm's per-gameweek columns
           this.xpMatrix[fplId] = {};
+          const remainingGws = Math.max(1, 38 - nextEventId + 1);
+          const restOfSeasonPts = restOfSeasonCol !== -1 ? (parseFloat(cols[restOfSeasonCol]) || 0) : 0;
+          const rosPerMatch = restOfSeasonPts > 0 ? (restOfSeasonPts / remainingGws) : meritScore;
+
           for (let step = 0; step < 15; step++) {
             const gw = nextEventId + step;
-            this.xpMatrix[fplId][gw] = this.getFixtureAdjustedXP(meritScore, fplId, gw);
+            let rawXp = 0;
+            if (gwColMap[gw] !== undefined) {
+              rawXp = parseFloat(cols[gwColMap[gw]]) || 0;
+            } else if (rosPerMatch > 0) {
+              rawXp = rosPerMatch;
+            } else {
+              rawXp = meritScore;
+            }
+            // Standard Expected Value = P(appear) * Points(if appear)
+            const ev = rawXp * probPlay;
+            this.xpMatrix[fplId][gw] = Math.min(25.0, Math.max(0, Math.round(ev * 10) / 10));
           }
           
           // Override position and team from CSV if they were defaults
@@ -470,28 +473,19 @@ export class FplformOracle extends BaseOracle {
           this.playerCosts[fplId] = matchedPlayer.now_cost ?? csvCost;
 
           // Override probability-dependent features from CSV if available
-          let probPlay = parseFloat(cols[8]);
-          if (!isNaN(probPlay)) {
-            // CSV might hold probability as percentage (e.g. 95) or fraction (e.g. 0.95)
-            if (probPlay > 1.0) {
-              probPlay = probPlay / 100;
-            }
-            probPlay = Math.max(0, Math.min(1.0, probPlay));
-
-            const features = this.featuresMatrix[fplId];
-            if (features) {
-              features.chanceOfPlayingThisRound = probPlay * 100;
-              features.predictedMinutes = probPlay * 90;
-              features.minutesLast4 = probPlay * 90 * 4;
-              features.startsLast4 = probPlay * 4;
-              features.minutesLast1 = probPlay * 90;
-              features.minutesLast3 = probPlay * 90 * 3;
-              features.minutesLast5 = probPlay * 90 * 5;
-              features.minutesEWMA = probPlay * 90;
-              features.startsLast5 = probPlay * 5;
-              features.seasonMinutesPercent = probPlay;
-              features.injuryStatus = probPlay < 1.0 ? 'Injured/Doubtful' : null;
-            }
+          const features = this.featuresMatrix[fplId];
+          if (features) {
+            features.chanceOfPlayingThisRound = probPlay * 100;
+            features.predictedMinutes = probPlay * 90;
+            features.minutesLast4 = probPlay * 90 * 4;
+            features.startsLast4 = probPlay * 4;
+            features.minutesLast1 = probPlay * 90;
+            features.minutesLast3 = probPlay * 90 * 3;
+            features.minutesLast5 = probPlay * 90 * 5;
+            features.minutesEWMA = probPlay * 90;
+            features.startsLast5 = probPlay * 5;
+            features.seasonMinutesPercent = probPlay;
+            features.injuryStatus = probPlay < 1.0 ? 'Injured/Doubtful' : null;
           }
           parsedCount++;
         }
@@ -520,15 +514,53 @@ export class NativeOracle extends BaseOracle {
     // Populate metadata and features from live API
     this.populateMetadataAndFeatures(players, fixtures, teams, nextEventId);
 
-    // Populate xpMatrix directly from official API's ep_next, with fixture-adjusted scaling for future weeks
+    // Populate xpMatrix using official FPL ep_next for nextEventId,
+    // and calibrating multi-week forward projections (GW+1 through GW+14)
+    // using the structural projection engine.
     players.forEach(p => {
       const fplId = p.id;
-      const meritScore = parseFloat(p.ep_next) || 0;
-      
+      const epNext = parseFloat(p.ep_next) || 0;
+      const features = this.featuresMatrix[fplId];
+
       this.xpMatrix[fplId] = {};
-      for (let step = 0; step < 15; step++) {
+
+      // GW nextEventId: Lock in official FPL API projection directly
+      this.xpMatrix[fplId][nextEventId] = epNext;
+
+      if (!features) {
+        for (let step = 1; step < 15; step++) {
+          this.xpMatrix[fplId][nextEventId + step] = epNext;
+        }
+        return;
+      }
+
+      // Calculate baseline engine prediction for nextEventId
+      const engineNext = this.projectionEngine.predict(
+        { source: 'EYE_TEST', features, playerId: fplId },
+        nextEventId
+      ).expected;
+
+      // Calibration ratio between official FPL perspective and underlying engine
+      // Bounded safely between 0.5 and 2.0 to avoid runaway ratios
+      const calibrationRatio = (engineNext > 0 && epNext > 0)
+        ? Math.max(0.5, Math.min(2.0, epNext / engineNext))
+        : 1.0;
+
+      // Project forward gameweeks (GW+1 to GW+14) using the calibrated structural engine
+      for (let step = 1; step < 15; step++) {
         const gw = nextEventId + step;
-        this.xpMatrix[fplId][gw] = this.getFixtureAdjustedXP(meritScore, fplId, gw);
+        const engineFuture = this.projectionEngine.predict(
+          { source: 'EYE_TEST', features, playerId: fplId },
+          gw
+        ).expected;
+
+        // If player has official epNext, scale future weeks by the calibration ratio.
+        // If epNext was 0 (e.g. short-term suspension/doubt for next match), engineFuture models their return naturally.
+        const projectedXp = epNext > 0
+          ? Math.round(engineFuture * calibrationRatio * 10) / 10
+          : engineFuture;
+
+        this.xpMatrix[fplId][gw] = Math.min(25.0, Math.max(0, projectedXp));
       }
     });
 
