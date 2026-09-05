@@ -5,6 +5,7 @@ import { TrendingUp, Award, Clock, ChevronLeft, ChevronRight, ArrowUpDown, Arrow
 interface PerformanceViewProps {
   history: any;
   fetchLivePoints: (gwId: number) => Promise<any>;
+  reconcileUserSquad?: (gwId: number) => Promise<boolean>;
   activeFuel?: 'fplform' | 'native' | 'eye-test';
   onFuelChange?: (fuel: 'fplform' | 'native' | 'eye-test') => void;
 }
@@ -12,7 +13,7 @@ interface PerformanceViewProps {
 type SortField = 'actual' | 'diff' | 'xp' | 'time';
 type SortOrder = 'desc' | 'asc';
 
-export const PerformanceView = ({ history, fetchLivePoints, activeFuel, onFuelChange }: PerformanceViewProps) => {
+export const PerformanceView = ({ history, fetchLivePoints, reconcileUserSquad, activeFuel, onFuelChange }: PerformanceViewProps) => {
   const [actualScores, setActualScores] = useState<Record<number, Record<number, { points: number; minutes: number }>>>({});
   const [loading, setLoading] = useState<Record<number, boolean>>({});
   const [selectedGwIndex, setSelectedGwIndex] = useState<number>(0);
@@ -34,12 +35,21 @@ export const PerformanceView = ({ history, fetchLivePoints, activeFuel, onFuelCh
 
   const gws = Object.keys(history).map(Number).sort((a, b) => b - a);
 
+  // Automatically attempt official reconciliation for the latest gameweek on load
+  useEffect(() => {
+    if (gws.length > 0 && reconcileUserSquad) {
+      const latestGw = gws[0];
+      reconcileUserSquad(latestGw);
+    }
+  }, [gws.length]);
+
   const calculateActual = (gwId: number, snapshot: any) => {
     if (!actualScores[gwId]) return 0;
     let total = 0;
     
     // Support both old 'ids' format and new 'players' metadata format
-    const playerIds = snapshot.players ? snapshot.players.map((p: any) => p.id) : (snapshot.ids || []);
+    const players = snapshot.players || [];
+    const playerIds = players.length > 0 ? players.map((p: any) => p.id) : (snapshot.ids || []);
     const captainId = snapshot.captainId;
     const viceCaptainId = snapshot.viceCaptainId;
 
@@ -48,9 +58,31 @@ export const PerformanceView = ({ history, fetchLivePoints, activeFuel, onFuelCh
       activeCaptainId = viceCaptainId;
     }
 
+    const benchPlayers = snapshot.benchPlayers || [];
+    const usedBenchIds = new Set<number>();
+
     playerIds.forEach((id: number) => {
       const pData = actualScores[gwId][id];
       if (pData !== undefined) {
+        // Official FPL Auto-sub: if starter played 0 minutes and bench is available
+        if (pData.minutes === 0 && benchPlayers.length > 0) {
+          const originalPlayer = players.find((p: any) => p.id === id);
+          const sub = benchPlayers.find((b: any) => {
+            if (usedBenchIds.has(b.id)) return false;
+            if (originalPlayer?.position === 'GKP') return b.position === 'GKP';
+            if (b.position === 'GKP') return false;
+            return true;
+          });
+
+          if (sub && actualScores[gwId][sub.id] && actualScores[gwId][sub.id].minutes > 0) {
+            usedBenchIds.add(sub.id);
+            const subData = actualScores[gwId][sub.id];
+            total += subData.points;
+            if (id === activeCaptainId) total += subData.points;
+            return;
+          }
+        }
+
         total += pData.points;
         if (id === activeCaptainId) total += pData.points; // Active Captain gets double
       }
@@ -187,15 +219,23 @@ export const PerformanceView = ({ history, fetchLivePoints, activeFuel, onFuelCh
 
   const refreshActuals = async (gwId: number) => {
     setLoading(prev => ({ ...prev, [gwId]: true }));
-    const elements = await fetchLivePoints(gwId);
-    if (elements) {
-      const scores: Record<number, { points: number; minutes: number }> = {};
-      elements.forEach((el: any) => {
-        scores[el.id] = { points: el.stats.total_points, minutes: el.stats.minutes };
-      });
-      setActualScores(prev => ({ ...prev, [gwId]: scores }));
+    try {
+      // 1. Reconcile official post-deadline user squad if available
+      if (reconcileUserSquad) {
+        await reconcileUserSquad(gwId);
+      }
+      // 2. Fetch live actual points for this gameweek
+      const elements = await fetchLivePoints(gwId);
+      if (elements) {
+        const scores: Record<number, { points: number; minutes: number }> = {};
+        elements.forEach((el: any) => {
+          scores[el.id] = { points: el.stats.total_points, minutes: el.stats.minutes };
+        });
+        setActualScores(prev => ({ ...prev, [gwId]: scores }));
+      }
+    } finally {
+      setLoading(prev => ({ ...prev, [gwId]: false }));
     }
-    setLoading(prev => ({ ...prev, [gwId]: false }));
   };
 
   if (gws.length === 0) {
@@ -648,7 +688,7 @@ export const PerformanceView = ({ history, fetchLivePoints, activeFuel, onFuelCh
                       <div className="absolute -top-2.5 right-4 z-10 flex items-center gap-1.5">
                         {data.isUserSquad && (
                           <div className="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 text-slate-950 font-black text-[8px] sm:text-[9px] px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-md flex items-center gap-1">
-                            <span>👤 MY SYNCED SQUAD</span>
+                            <span>{data.isReconciled ? '✓ OFFICIAL FPL SQUAD' : '👤 MY SYNCED SQUAD'}</span>
                           </div>
                         )}
                         {isTopOne && (

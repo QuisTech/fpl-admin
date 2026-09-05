@@ -911,9 +911,9 @@ export class FPLService {
     ];
   }
 
-  static async syncTeam(teamId: string, riskMode: string, tier: string = 'free', fuel: string = 'fplform'): Promise<TeamSyncResponse> {
+  static async syncTeam(teamId: string, riskMode: string, tier: string = 'free', fuel: string = 'fplform', targetGw?: number): Promise<TeamSyncResponse> {
     const baseData = await this.getBaseData();
-    const currentEvent = baseData.currentEventId || Math.max(1, baseData.nextEventId - 1);
+    const currentEvent = targetGw ? targetGw : (baseData.currentEventId || Math.max(1, baseData.nextEventId - 1));
     
     // 1. Initialize the V3 Engine Oracle first based on selected fuel
     const csvFileName = fuel === 'native' ? 'fpl_native.csv' : 'fplform.csv';
@@ -1391,7 +1391,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       }
 
-      const result = await FPLService.syncTeam(teamId, riskMode, tier, fuel);
+      const targetGw = req.query?.gw ? parseInt(req.query.gw as string, 10) : undefined;
+      const result = await FPLService.syncTeam(teamId, riskMode, tier, fuel, targetGw);
       return res.status(200).json(result);
     }
 

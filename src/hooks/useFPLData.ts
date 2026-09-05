@@ -342,6 +342,79 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
     }
   };
 
+  const reconcileUserSquad = async (gwId: number): Promise<boolean> => {
+    if (!teamId) return false;
+    try {
+      // Query official FPL picks specifically for this gameweek (unlocked after deadline)
+      const res = await axios.get(`/api/sync/${teamId.trim()}?gw=${gwId}&riskMode=${riskMode}&fuel=${fuel}&userId=${userId}&tier=${tier}`);
+      const squad = res.data?.squad;
+      const managerInfo = res.data?.managerInfo;
+      if (!squad || squad.length < 11) return false;
+
+      const startingXI = squad.filter((p: any) => (p.position_in_squad ?? 0) <= 11);
+      const bench = squad.filter((p: any) => (p.position_in_squad ?? 0) >= 12);
+      const captain = squad.find((p: any) => p.isCaptain || p.is_captain) || (startingXI.length > 0 ? startingXI[0] : null);
+      const viceCaptain = squad.find((p: any) => p.isViceCaptain || p.is_vice_captain);
+      const captainBonus = captain ? (captain.xP || 0) : 0;
+      const startingTotalXp = startingXI.reduce((sum: number, p: any) => sum + (p.xP || 0), 0) + captainBonus;
+
+      const now = Date.now();
+      const currentHistory = { ...history };
+      const gwHistory = { ...(currentHistory[gwId] || {}) };
+
+      const fuelsToEval: Array<'fplform' | 'native' | 'eye-test'> = ['fplform', 'native', 'eye-test'];
+      fuelsToEval.forEach(f => {
+        const userKey = `user_synced_squad_${f}`;
+        const existing = gwHistory[userKey];
+        gwHistory[userKey] = {
+          ...(existing || {}),
+          key: userKey,
+          fuel: f,
+          fuelLabel: f === 'eye-test' ? 'Eye Test' : f === 'native' ? 'Native FPL' : 'FPLForm',
+          scenario: 'user',
+          scenarioLabel: managerInfo?.teamName || existing?.scenarioLabel || 'Synced FPL Squad',
+          riskLabel: 'HUMAN',
+          isUserSquad: true,
+          players: startingXI.map((p: any) => ({
+            id: p.id,
+            web_name: p.web_name,
+            score: p.xP || p.score || 0,
+            position: p.position
+          })),
+          benchPlayers: bench.map((p: any) => ({
+            id: p.id,
+            web_name: p.web_name,
+            score: p.xP || p.score || 0,
+            position: p.position,
+            position_in_squad: p.position_in_squad
+          })),
+          xP: Math.round(startingTotalXp * 10) / 10,
+          captainId: captain?.id,
+          viceCaptainId: viceCaptain?.id,
+          timestamp: now,
+          isReconciled: true
+        };
+      });
+
+      currentHistory[gwId] = gwHistory;
+      const sanitized = sanitizeHistory(currentHistory);
+      setHistory(sanitized);
+      localStorage.setItem('fpl_optimizer_history', JSON.stringify(sanitized));
+
+      const keyToSave = teamId ? `team_${teamId.trim()}` : userId;
+      if (keyToSave) {
+        axios.post('/api/snapshots', { userId: keyToSave, history: sanitized, season: '2026/27' })
+          .catch(err => console.warn("[Snapshots API] Reconcile save notice:", err));
+      }
+
+      console.log(`[Reconcile] Successfully updated GW${gwId} user squad with official FPL picks for ${keyToSave}`);
+      return true;
+    } catch (err: any) {
+      console.warn(`[Reconcile] Could not reconcile GW${gwId} picks (gameweek may not have deadline passed):`, err.message);
+      return false;
+    }
+  };
+
   const syncTeam = async () => {
     if (!teamId) return;
     setSyncing(true);
@@ -395,6 +468,7 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
     history,
     takeSnapshot,
     fetchLivePoints,
+    reconcileUserSquad,
     tier,
     isTeamIdLocked,
     activeScenario,

@@ -90,6 +90,7 @@ function FPLApp() {
     history,
     takeSnapshot,
     fetchLivePoints,
+    reconcileUserSquad,
     tier,
     isTeamIdLocked,
     activeScenario,
@@ -250,7 +251,7 @@ function FPLApp() {
               ) : tab === 'transfers' ? (
                 <TransferView syncedData={syncedData} tier={tier} setTab={setTab} userId={activeUserId} />
               ) : tab === 'performance' ? (
-                <PerformanceView history={history} fetchLivePoints={fetchLivePoints} activeFuel={fuel} onFuelChange={setFuel} />
+                <PerformanceView history={history} fetchLivePoints={fetchLivePoints} reconcileUserSquad={reconcileUserSquad} activeFuel={fuel} onFuelChange={setFuel} />
               ) : tab === 'backtest' ? (
                 <BacktestDashboard initialFuel={fuel} />
               ) : tab === 'chips' ? (
