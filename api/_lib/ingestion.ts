@@ -20,6 +20,8 @@ export interface XPOracle {
   getAllPlayerIds(): number[];
   getTop1kEO?(playerId: number): number;
   getTop1kOwnership?(playerId: number): number;
+  getTeamDefenseRating?(teamShort: string): number;
+  getEliteDefensiveTeams?(percentile?: number): Set<string>;
   playerNames: Record<number, string>;
 }
 
@@ -53,6 +55,7 @@ export abstract class BaseOracle implements XPOracle {
   protected playerPositions: Record<number, string> = {};
   protected playerCosts: Record<number, number> = {};
   protected playerTeams: Record<number, string> = {};
+  protected teamDefenseRatings: Record<string, number> = {};
   protected allIds: number[] = [];
   protected top1kData: Record<number, { ownership: number; started: number; eo: number; captain: number; tripleCaptain: number }> = {};
   
@@ -137,6 +140,8 @@ export abstract class BaseOracle implements XPOracle {
            attack: features.attack, 
            defense: features.defense 
         };
+        const strengthMetric = ((t.strength_overall_home || 2) + (t.strength_overall_away || 2));
+        this.teamDefenseRatings[t.short_name] = strengthMetric;
       });
     }
 
@@ -331,6 +336,29 @@ export abstract class BaseOracle implements XPOracle {
   getCost(playerId: number): number { return this.playerCosts[playerId]; }
   getTeam(playerId: number): string { return this.playerTeams[playerId]; }
   getAllPlayerIds(): number[] { return this.allIds; }
+
+  getTeamDefenseRating(teamShort: string): number {
+    return this.teamDefenseRatings[teamShort] ?? 4;
+  }
+
+  getEliteDefensiveTeams(percentile: number = 0.80): Set<string> {
+    const entries = Object.entries(this.teamDefenseRatings);
+    if (entries.length === 0) return new Set();
+
+    const scores = entries.map(([_, score]) => score).sort((a, b) => b - a);
+    const topFraction = Math.max(0.05, Math.min(0.50, 1 - percentile));
+    const cutoffIndex = Math.min(scores.length - 1, Math.max(0, Math.floor(scores.length * topFraction) - 1));
+    const threshold = scores[cutoffIndex] ?? 8;
+
+    const eliteSet = new Set<string>();
+    entries.forEach(([team, score]) => {
+      if (score >= threshold) {
+        eliteSet.add(team);
+      }
+    });
+
+    return eliteSet;
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

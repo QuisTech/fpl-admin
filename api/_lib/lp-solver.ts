@@ -146,12 +146,30 @@ export function solveOptimalSquad(
       .map(c => c.id)
   );
 
+  // Dynamic Defensive Diversification Setup
+  const enableDiversification = params.enableDefensiveDiversification !== false;
+  const maxStandardDef = params.maxStandardDefendersPerTeam ?? 1;
+  const maxEliteDef = params.maxEliteDefendersPerTeam ?? 2;
+  const elitePercentile = params.eliteDefensePercentile ?? 0.80;
+  const eliteDefensiveTeams = oracle.getEliteDefensiveTeams?.(elitePercentile) ?? new Set<string>();
+
   filteredCandidates.forEach(c => {
     const v = `p_${c.id}`;
     const capVar = `c_${c.id}`;
 
     if (!model.constraints[`team_${c.team}`]) {
       model.constraints[`team_${c.team}`] = { max: 3 };
+    }
+
+    // Enforce defensive concentration constraint: max 1 per standard club, max 2 per elite defense
+    if (enableDiversification && c.pos === 'def') {
+      const defKey = `def_team_${c.team}`;
+      if (!model.constraints[defKey]) {
+        const lockedDefCount = filteredCandidates.filter(cand => cand.isLocked && cand.pos === 'def' && cand.team === c.team).length;
+        const baseAllowed = eliteDefensiveTeams.has(c.team) ? maxEliteDef : maxStandardDef;
+        const maxAllowed = Math.max(baseAllowed, lockedDefCount);
+        model.constraints[defKey] = { max: maxAllowed };
+      }
     }
 
     const hasCapOption = topCaptainIds.has(c.id);
@@ -164,6 +182,10 @@ export function solveOptimalSquad(
       [`team_${c.team}`]: 1, 
       [v]: 1
     };
+
+    if (enableDiversification && c.pos === 'def') {
+      model.variables[v][`def_team_${c.team}`] = 1;
+    }
 
     if (hasCapOption) {
       model.variables[v][`cap_link_${c.id}`] = -1;
@@ -380,6 +402,22 @@ export function solveOptimalTransfers(
     }
   };
 
+  // Dynamic Defensive Diversification Setup
+  const enableDiversification = params.enableDefensiveDiversification !== false;
+  const maxStandardDef = params.maxStandardDefendersPerTeam ?? 1;
+  const maxEliteDef = params.maxEliteDefendersPerTeam ?? 2;
+  const elitePercentile = params.eliteDefensePercentile ?? 0.80;
+  const eliteTeams = oracle.getEliteDefensiveTeams?.(elitePercentile) ?? new Set<string>();
+
+  // Count existing defenders owned from each club in the current squad
+  const currentDefTeamCounts: Record<string, number> = {};
+  state.squad.forEach(id => {
+    if (oracle.getPosition(id).toLowerCase() === 'def') {
+      const team = oracle.getTeam(id);
+      currentDefTeamCounts[team] = (currentDefTeamCounts[team] || 0) + 1;
+    }
+  });
+
   allIds.forEach(id => {
     const team = oracle.getTeam(id);
     if (!model.constraints[`team_${team}`]) {
@@ -388,6 +426,17 @@ export function solveOptimalTransfers(
 
     const v = `p_${id}`;
     const pos = oracle.getPosition(id).toLowerCase();
+
+    // Resulting squad defensive constraint: existing + incoming <= maxAllowed
+    if (enableDiversification && pos === 'def') {
+      const defKey = `def_team_${team}`;
+      if (!model.constraints[defKey]) {
+        const baseAllowed = eliteTeams.has(team) ? maxEliteDef : maxStandardDef;
+        const currentCount = currentDefTeamCounts[team] || 0;
+        const maxAllowed = Math.max(baseAllowed, currentCount);
+        model.constraints[defKey] = { max: maxAllowed };
+      }
+    }
     
     const score = getPlayerScore(oracle, gameweek, id, horizon, params);
     const isCurrent = currentSet.has(id);
@@ -405,6 +454,9 @@ export function solveOptimalTransfers(
         keep: isCurrent ? 1 : 0,
         [v]: 1
       };
+      if (enableDiversification && pos === 'def') {
+        model.variables[v][`def_team_${team}`] = 1;
+      }
       model.constraints[v] = { max: 1 };
       model.ints[v] = 1;
     }

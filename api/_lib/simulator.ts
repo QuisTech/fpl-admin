@@ -280,6 +280,12 @@ export class Simulator {
       candidateXPs[inId] = calculateUtility(inXP, inVar, eo, params, inId);
     });
 
+    const enableDiversification = params.enableDefensiveDiversification !== false;
+    const maxStandardDef = params.maxStandardDefendersPerTeam ?? 1;
+    const maxEliteDef = params.maxEliteDefendersPerTeam ?? 2;
+    const elitePercentile = params.eliteDefensePercentile ?? 0.80;
+    const eliteTeams = oracle.getEliteDefensiveTeams?.(elitePercentile) ?? new Set<string>();
+
     state.squad.forEach(outId => {
       const outPos = oracle.getPosition(outId);
       const outCost = getSellingPrice(oracle.getCost(outId), state.purchasePrices[outId] || oracle.getCost(outId));
@@ -298,6 +304,15 @@ export class Simulator {
 
         const inCost = oracle.getCost(inId);
         if (inCost > outCost + state.bank) return;
+
+        if (enableDiversification && outPos.toLowerCase() === 'def') {
+          const inTeam = oracle.getTeam(inId);
+          const outTeam = oracle.getTeam(outId);
+          const currentCount = state.squad.filter(id => oracle.getPosition(id).toLowerCase() === 'def' && oracle.getTeam(id) === inTeam).length;
+          const resultingCount = currentCount - (outTeam === inTeam ? 1 : 0) + 1;
+          const maxAllowed = eliteTeams.has(inTeam) ? maxEliteDef : maxStandardDef;
+          if (resultingCount > maxAllowed) return;
+        }
 
         // Using a fast proxy for net expected gain in candidate generation step
         const netExpectedGain = candidateXPs[inId] - currentUtility - (state.freeTransfers > 0 ? 0 : 4);

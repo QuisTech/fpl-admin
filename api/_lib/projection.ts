@@ -51,6 +51,11 @@ export interface UtilityParameters {
   minElitePlayers?: number;
   budgetMultiplier?: number;
   betaDifferential?: number;
+  // Defensive Diversification Risk Guardrail
+  enableDefensiveDiversification?: boolean;
+  maxStandardDefendersPerTeam?: number;
+  maxEliteDefendersPerTeam?: number;
+  eliteDefensePercentile?: number;
 }
 
 export interface ProjectionInput {
@@ -108,6 +113,12 @@ export function getParamsForRiskMode(
       params.minEoTotal = 150;
     }
   }
+
+  // Dynamic Defensive Diversification Defaults
+  params.enableDefensiveDiversification = params.enableDefensiveDiversification ?? true;
+  params.maxStandardDefendersPerTeam = params.maxStandardDefendersPerTeam ?? 1;
+  params.maxEliteDefendersPerTeam = params.maxEliteDefendersPerTeam ?? 2;
+  params.eliteDefensePercentile = params.eliteDefensePercentile ?? 0.80;
 
   return params;
 }

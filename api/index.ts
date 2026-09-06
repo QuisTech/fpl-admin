@@ -839,6 +839,11 @@ export class FPLService {
     const transfers: TransferRecommendation[] = [];
     const squadIds = new Set(squad.map(p => p.id));
     const params = getParamsForRiskMode(riskMode, baseWeights);
+    const enableDiversification = params.enableDefensiveDiversification !== false;
+    const maxStandardDef = params.maxStandardDefendersPerTeam ?? 1;
+    const maxEliteDef = params.maxEliteDefendersPerTeam ?? 2;
+    const elitePercentile = params.eliteDefensePercentile ?? 0.80;
+    const eliteTeams = oracle.getEliteDefensiveTeams?.(elitePercentile) ?? new Set<string>();
 
     // Build team count map for 3-player-per-club constraint
     const squadTeamCounts: Record<number, number> = {};
@@ -867,6 +872,16 @@ export class FPLService {
         // Enforce 3-player-per-club: count how many from inPlayer's team remain after removing outPlayer
         const teamCountAfterRemoval = (squadTeamCounts[p.team] || 0) - (p.team === outPlayer.team ? 1 : 0);
         if (teamCountAfterRemoval >= 3) return false;
+
+        // Enforce dynamic defensive diversification: max 1 per standard club, max 2 per elite defense
+        if (enableDiversification && p.position === 'DEF') {
+          const inTeamShort = p.team_short_name;
+          const currentDefCount = squad.filter(sp => sp.position === 'DEF' && sp.team_short_name === inTeamShort).length;
+          const defCountAfterRemoval = currentDefCount - (outPlayer.position === 'DEF' && outPlayer.team_short_name === inTeamShort ? 1 : 0);
+          const maxAllowed = eliteTeams.has(inTeamShort) ? maxEliteDef : maxStandardDef;
+          if (defCountAfterRemoval >= maxAllowed) return false;
+        }
+
         return true;
       }).sort((a, b) => (b.score || 0) - (a.score || 0));
 
@@ -1045,13 +1060,14 @@ export class FPLService {
       purchasePrices
     };
 
+    const params = getParamsForRiskMode(riskMode, baseWeights);
+
     // 3. Execute the Multi-Horizon Beam Search (Only for Grand Cru / Beta Pilot)
     let optimalFirstMove = 'ROLL';
     let bestFutures: any[] = [];
     
     if (tier === 'grandCru' || tier === 'aiAgent' || tier === 'betaPilot' || tier === 'admin') {
       console.log(`[V3 Engine] Executing Beam Search for Team ${teamId}...`);
-      const params = getParamsForRiskMode(riskMode, baseWeights);
       bestFutures = simulator.simulateHorizon(initialState, oracle, params);
       if (bestFutures.length > 0) {
         optimalFirstMove = bestFutures[0].firstAction || 'ROLL';
@@ -1161,9 +1177,22 @@ export class FPLService {
         const existingSwapSignatures = new Set(transfers.map(t => `${t.out.id}-${t.in.id}`));
         const allCandidates = [...transfers];
         
+        const enableDiversification = params.enableDefensiveDiversification !== false;
+        const maxStandardDef = params.maxStandardDefendersPerTeam ?? 1;
+        const maxEliteDef = params.maxEliteDefendersPerTeam ?? 2;
+        const elitePercentile = params.eliteDefensePercentile ?? 0.80;
+        const eliteTeams = oracle.getEliteDefensiveTeams?.(elitePercentile) ?? new Set<string>();
+
         for (const swap of alternativeSwaps) {
           if (swap.in.position !== swap.out.position) continue;
           if (swap.in.now_cost > swap.out.now_cost + bank) continue;
+          if (enableDiversification && swap.in.position === 'DEF') {
+            const inTeam = swap.in.team_short_name;
+            const currentDefs = myPicks.filter(p => p.position === 'DEF' && p.team_short_name === inTeam).length;
+            const resultingDefs = currentDefs - (swap.out.position === 'DEF' && swap.out.team_short_name === inTeam ? 1 : 0) + 1;
+            const maxAllowed = eliteTeams.has(inTeam) ? maxEliteDef : maxStandardDef;
+            if (resultingDefs > maxAllowed) continue;
+          }
           const sig = `${swap.out.id}-${swap.in.id}`;
           if (!existingSwapSignatures.has(sig)) {
             allCandidates.push(swap);
@@ -1171,7 +1200,18 @@ export class FPLService {
           }
         }
         transfers = allCandidates
-          .filter(t => t.in.position === t.out.position && t.in.now_cost <= t.out.now_cost + bank)
+          .filter(t => {
+            if (t.in.position !== t.out.position) return false;
+            if (t.in.now_cost > t.out.now_cost + bank) return false;
+            if (enableDiversification && t.in.position === 'DEF') {
+              const inTeam = t.in.team_short_name;
+              const currentDefs = myPicks.filter(p => p.position === 'DEF' && p.team_short_name === inTeam).length;
+              const resultingDefs = currentDefs - (t.out.position === 'DEF' && t.out.team_short_name === inTeam ? 1 : 0) + 1;
+              const maxAllowed = eliteTeams.has(inTeam) ? maxEliteDef : maxStandardDef;
+              if (resultingDefs > maxAllowed) return false;
+            }
+            return true;
+          })
           .sort((a, b) => {
             const deltaDiff = (b.horizon8GwDelta ?? 0) - (a.horizon8GwDelta ?? 0);
             if (Math.abs(deltaDiff) > 0.05) return deltaDiff;
