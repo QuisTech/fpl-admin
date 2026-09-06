@@ -195,6 +195,12 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
         score: p.score,
         position: p.position
       })),
+      benchPlayers: (currentModeData.bench || []).map(p => ({
+        id: p.id,
+        web_name: p.web_name,
+        score: p.score,
+        position: p.position
+      })),
       xP: currentModeData.expectedPoints,
       captainId: currentModeData.captain?.id,
       viceCaptainId: currentModeData.viceCaptain?.id,
@@ -246,6 +252,12 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
             score: p.score,
             position: p.position
           })),
+          benchPlayers: (res.data.bench || []).map((p: any) => ({
+            id: p.id,
+            web_name: p.web_name,
+            score: p.score,
+            position: p.position
+          })),
           xP: res.data.expectedPoints,
           captainId: res.data.captain?.id,
           viceCaptainId: res.data.viceCaptain?.id,
@@ -279,6 +291,7 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
       syncedResults.forEach(({ fuel: f, squad, managerInfo }) => {
         if (!squad || squad.length < 11) return;
         const startingXI = squad.filter((p: any) => (p.position_in_squad ?? 0) <= 11);
+        const bench = squad.filter((p: any) => (p.position_in_squad ?? 0) >= 12);
         const captain = squad.find((p: any) => p.isCaptain || p.is_captain) || (startingXI.length > 0 ? startingXI[0] : null);
         const viceCaptain = squad.find((p: any) => p.isViceCaptain || p.is_vice_captain);
         const captainBonus = captain ? (captain.xP || 0) : 0;
@@ -298,6 +311,13 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
             web_name: p.web_name,
             score: p.xP || p.score || 0,
             position: p.position
+          })),
+          benchPlayers: bench.map((p: any) => ({
+            id: p.id,
+            web_name: p.web_name,
+            score: p.xP || p.score || 0,
+            position: p.position,
+            position_in_squad: p.position_in_squad
           })),
           xP: Math.round(startingTotalXp * 10) / 10,
           captainId: captain?.id,

@@ -54,6 +54,26 @@ async function startServer() {
     }
   });
 
+  app.all("/api/agent*", async (req, res) => {
+    try {
+      const handler = (await import("./api/index")).default;
+      await handler(req as any, res as any);
+    } catch (error: any) {
+      console.error("Local Dev Agent Error:", error.message);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.all("/api/snapshots*", async (req, res) => {
+    try {
+      const handler = (await import("./api/index")).default;
+      await handler(req as any, res as any);
+    } catch (error: any) {
+      console.error("Local Dev Snapshots Error:", error.message);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.get("/api/user", async (req, res) => {
     try {
       const userId = req.query.userId as string;

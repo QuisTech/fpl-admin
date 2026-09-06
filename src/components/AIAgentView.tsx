@@ -119,6 +119,7 @@ export const AIAgentView = ({ syncedData, optimalData, tier, userId, riskMode, f
         chips: {
           WC: 1, FH: 1, BB: 1, TC: 1 // chip state
         },
+        chipAdvice: syncedData.chips || [],
         riskMode: riskMode,
         fuel: fuel,
         userPrompt: prompt
@@ -304,6 +305,9 @@ export const AIAgentView = ({ syncedData, optimalData, tier, userId, riskMode, f
               <h3 className="text-white text-xs sm:text-sm font-bold flex items-center gap-2">
                 <span>FPL AI Intelligence</span>
                 <span className="text-[9px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">GW {activeGw}</span>
+                <span className="text-[8.5px] font-mono text-purple-300 bg-purple-950/60 px-2 py-0.5 rounded border border-purple-500/30">
+                  {activeGw <= 19 ? `Set 1 (GW1–19, ${Math.max(0, 19 - activeGw)} left)` : `Set 2 (GW20–38)`}
+                </span>
               </h3>
               <p className="text-[9px] text-fpl-green uppercase tracking-widest font-black">Online & Context Synced</p>
             </div>

@@ -8,6 +8,7 @@ interface PerformanceViewProps {
   reconcileUserSquad?: (gwId: number) => Promise<boolean>;
   activeFuel?: 'fplform' | 'native' | 'eye-test';
   onFuelChange?: (fuel: 'fplform' | 'native' | 'eye-test') => void;
+  syncedData?: any;
 }
 
 type SortField = 'actual' | 'diff' | 'xp' | 'time';
@@ -20,7 +21,7 @@ interface PlayerLiveScore {
   finished: boolean;
 }
 
-export const PerformanceView = ({ history, fetchLivePoints, reconcileUserSquad, activeFuel, onFuelChange }: PerformanceViewProps) => {
+export const PerformanceView = ({ history, fetchLivePoints, reconcileUserSquad, activeFuel, onFuelChange, syncedData }: PerformanceViewProps) => {
   const [actualScores, setActualScores] = useState<Record<number, Record<number, PlayerLiveScore>>>({});
   const [loading, setLoading] = useState<Record<number, boolean>>({});
   const [selectedGwIndex, setSelectedGwIndex] = useState<number>(0);
@@ -882,35 +883,65 @@ export const PerformanceView = ({ history, fetchLivePoints, reconcileUserSquad, 
                           </div>
 
                           {/* Bench Players section */}
-                          {data.benchPlayers && data.benchPlayers.length > 0 && (
-                            <div className="mt-3 pt-2.5 border-t border-dashed border-slate-800">
-                              <p className="text-[8.5px] font-bold uppercase tracking-wider text-slate-500 mb-1.5 flex items-center gap-1">
-                                Bench ({data.benchPlayers.length})
-                              </p>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5">
-                                {data.benchPlayers.map((b: any) => {
-                                  const bScore = actualScores[gwId]?.[b.id];
-                                  return (
-                                    <div key={b.id} className="flex justify-between items-center bg-slate-950/40 px-2 py-1 rounded border border-slate-900 text-slate-400">
-                                      <div className="flex items-center gap-2">
-                                        <span className="text-[7.5px] text-slate-600 w-6 font-mono font-bold">{b.position}</span>
-                                        <span className="text-[9.5px] text-slate-400">{b.web_name}</span>
-                                      </div>
-                                      <span className="text-[8.5px] font-mono font-bold text-slate-400">
-                                        {bScore !== undefined ? (
-                                          !bScore.started ? (
-                                            <span className="text-slate-500 text-[8px]">Upcoming</span>
+                          {(() => {
+                            const benchList = (data.benchPlayers && data.benchPlayers.length > 0)
+                              ? data.benchPlayers
+                              : (data.isUserSquad && syncedData?.squad)
+                                ? syncedData.squad.filter((p: any) => (p.position_in_squad ?? 0) >= 12).map((p: any) => ({
+                                    id: p.id,
+                                    web_name: p.web_name,
+                                    position: p.position,
+                                    score: p.xP || p.score || 0
+                                  }))
+                                : [];
+
+                            if (benchList.length === 0) return null;
+
+                            return (
+                              <div className="mt-3 pt-2.5 border-t border-dashed border-slate-800">
+                                <p className="text-[8.5px] font-bold uppercase tracking-wider text-slate-500 mb-1.5 flex items-center justify-between">
+                                  <span className="flex items-center gap-1">
+                                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-slate-600" />
+                                    Substitutes ({benchList.length})
+                                  </span>
+                                  <span className="text-[7.5px] font-mono text-slate-500 uppercase">
+                                    Auto-sub ready
+                                  </span>
+                                </p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5">
+                                  {benchList.map((b: any, bIdx: number) => {
+                                    const bScore = actualScores[gwId]?.[b.id];
+                                    return (
+                                      <div key={b.id || bIdx} className="flex justify-between items-center bg-slate-950/60 px-2 py-1.5 rounded-lg border border-slate-900/80 text-slate-400">
+                                        <div className="flex items-center gap-2 min-w-0">
+                                          <span className="text-[7.5px] text-slate-500 w-6 font-mono font-bold">{b.position}</span>
+                                          <span className="text-[9.5px] text-slate-300 font-medium truncate">{b.web_name}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1.5 shrink-0">
+                                          {bScore !== undefined ? (
+                                            !bScore.started ? (
+                                              <span className="text-[7.5px] font-mono text-amber-400/80 font-bold bg-amber-400/10 px-1.5 py-0.5 rounded border border-amber-400/20">
+                                                Upcoming
+                                              </span>
+                                            ) : (
+                                              <span className="text-[8.5px] font-mono font-bold text-slate-300">
+                                                {bScore.points} pts
+                                                {!bScore.finished && (
+                                                  <span className="text-[7px] text-emerald-400 ml-1 font-bold">LIVE</span>
+                                                )}
+                                              </span>
+                                            )
                                           ) : (
-                                            `${bScore.points} pts`
-                                          )
-                                        ) : '--'}
-                                      </span>
-                                    </div>
-                                  );
-                                })}
+                                            <span className="text-[8.5px] font-mono text-slate-600">--</span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            );
+                          })()}
                         </div>
                       )}
                     </div>

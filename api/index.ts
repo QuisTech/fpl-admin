@@ -1393,6 +1393,12 @@ async function handleAutoSnapshot(req: any, res: any) {
                     score: p.score,
                     position: p.position
                   })),
+                  benchPlayers: (result.bench || []).map((p: any) => ({
+                    id: p.id,
+                    web_name: p.web_name,
+                    score: p.score,
+                    position: p.position
+                  })),
                   xP: result.expectedPoints,
                   captainId: result.captain?.id,
                   viceCaptainId: result.viceCaptain?.id
@@ -1549,7 +1555,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (url.includes('/api/agent/ask') && req.method === 'POST') {
-      const { gameweek, squad, bank, freeTransfers = 1, chips = {}, riskMode = 'safe', userPrompt, fuel = 'fplform' } = req.body || {};
+      const { gameweek, squad, bank, freeTransfers = 1, chips = {}, chipAdvice = [], riskMode = 'safe', userPrompt, fuel = 'fplform' } = req.body || {};
       if (!squad) return res.status(400).json({ error: "Missing payload" });
       
       const uid = await verifyAuth(req, res);
@@ -1644,7 +1650,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }));
 
       const decision = await getLLMTransferDecision(
-        uid, squad, effectiveGw, upcoming, bank, freeTransfers, chips, riskMode, userPrompt, fplContext, validTargets
+        uid, squad, effectiveGw, upcoming, bank, freeTransfers, chips, riskMode, userPrompt, fplContext, validTargets, chipAdvice
       );
       
       return res.status(200).json({ decision });

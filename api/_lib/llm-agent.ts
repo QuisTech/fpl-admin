@@ -39,7 +39,8 @@ export async function getLLMTransferDecision(
   riskMode: string,
   userPrompt?: string,
   fplContext?: any | null,
-  validTargets?: any[]
+  validTargets?: any[],
+  chipAdvice?: any[]
 ): Promise<TransferDecision> {
   
   // Build context for LLM with explicit team and upcoming fixture tagging
@@ -100,17 +101,22 @@ export async function getLLMTransferDecision(
     CRITICAL FPL TRANSFER RULES:
     1. If suggesting a single transfer, the incoming player MUST have the EXACT SAME POSITION (e.g., DEF for DEF, MID for MID) as the outgoing player. Do not suggest swapping a Midfielder for a Defender.
 
-    CRITICAL FPL CHIP STRATEGY RULES (NEVER VIOLATE):
-    1. BENCH BOOST (BB): 
-       - NEVER recommend Bench Boost in standard Single Gameweeks (especially GW1-GW25) when the bench consists of typical low-cost enablers (£4.0M-£4.5M players with 1.5-3.5 xP).
-       - Bench Boost is exclusively reserved for Double Gameweeks (DGW) where bench players play two games each (yielding 20-35+ points), or when total bench xP exceeds 18.0+.
-       - A bench with players like Dubravka, Mitchell, Bassey, Hughes (~10.5 total xP) is a standard budget bench—NEVER waste Bench Boost on this. Recommend ROLL or TRANSFER instead.
-    2. TRIPLE CAPTAIN (TC): 
-       - Save for Double Gameweeks (DGW) with elite assets (Haaland, Salah, Palmer) or rare extreme outlier single fixtures (xP >= 10.5+).
-    3. FREE HIT (FH): 
-       - Save for Blank Gameweeks (BGW) or high-upside Double Gameweeks.
-    4. WILDCARD (WC): 
-       - Only recommend if squad has multiple long-term injuries or structural defects requiring 4+ transfers.
+    OFFICIAL 2026/27 PREMIER LEAGUE TWO-SET CHIP SYSTEM (MANDATORY KNOWLEDGE):
+    1. TWO INDEPENDENT SETS OF 4 CHIPS:
+       - Set 1: Gameweeks 1 to 19 (1x Wildcard, 1x Free Hit, 1x Bench Boost, 1x Triple Captain).
+       - Set 2: Gameweeks 20 to 38 (1x Wildcard, 1x Free Hit, 1x Bench Boost, 1x Triple Captain).
+    2. STRICT EXPIRATION DEADLINE & NO ROLLOVER:
+       - ${gameweek <= 19 
+           ? `CURRENT HALF: Set 1 is active (GW1–19). All Set 1 chips EXPIRE at the Gameweek 19 deadline (${Math.max(0, 19 - gameweek)} gameweek${Math.max(0, 19 - gameweek) !== 1 ? 's' : ''} remaining). Unused Set 1 chips DO NOT roll over to Set 2 and will be permanently lost! A brand-new Set 2 will activate in Gameweek 20.`
+           : `CURRENT HALF: Set 2 is active (GW20–38). All Set 1 chips have expired. Set 2 chips run until Gameweek 38 (${Math.max(0, 38 - gameweek)} GWs left).`}
+       - A manager can only play ONE chip per gameweek. Therefore, holding unplayed Set 1 chips as GW19 approaches causes a chip bottleneck. Managers must deploy them before the GW19 cutoff!
+    3. 2026/27 CHIP STRATEGY PLAYBOOK:
+       - TRIPLE CAPTAIN (TC): In Set 1, DO NOT hold back for spring Double Gameweeks because Set 2 has its own Triple Captain! Use Set 1 TC on premier single-fixture outliers with elite assets (e.g. Haaland vs newly promoted sides or bottom-tier defenses at Home with xP >= 10.0+ such as GW5 vs Sunderland where projected xP is 11.2).
+       - BENCH BOOST (BB): In Set 1, no need to save for spring DGWs because Set 2 has its own Bench Boost! Deploy Set 1 BB immediately following your Wildcard when all 15 squad players have active starting spots and favorable fixtures (bench xP >= 14.0+). Never waste BB on a low-minute budget bench (< 10 xP).
+       - WILDCARD (WC): In Set 1, prime window is GW6–GW8 during the international break for early structural squad fixes, or ahead of fixture swings before GW19. In Set 2, hold for late-season DGW planning (GW30–33).
+       - FREE HIT (FH): In Set 1, deploy on autumn European rotation weeks, postponed fixtures, or short-term injury crises before GW19. In Set 2, reserve for the major spring Blank Gameweek (GW29/30).
+    4. USER INQUIRIES ABOUT CHIPS:
+       - If the user asks anything about chips (e.g. "When should I play chips?"), ALWAYS frame your response around the 2026/27 Two-Set rules. Explicitly confirm that Set 1 is currently active (with ${Math.max(0, 19 - gameweek)} GWs remaining before the GW19 expiration cutoff), outline the Set 1 roadmap to burn all 4 chips safely, and remind them that a fresh Set 2 arrives in GW20!
 
     CRITICAL RISK MODE INSTRUCTIONS:
     ${riskMode === 'safe' ? '- You are in SAFE mode. You MUST prioritize highly-owned "template" players to defend rank. Avoid wild punts. Do NOT burn chips prematurely.' : ''}
@@ -125,6 +131,7 @@ export async function getLLMTransferDecision(
     
     CHIPS AVAILABLE:
     ${Object.entries(chipState).filter(([_, avail]) => avail).map(([chip]) => chip).join(', ') || 'None'}
+    ${chipAdvice && chipAdvice.length > 0 ? `\nV3 ENGINE CHIP ADVISOR SIGNALS:\n${chipAdvice.map((c: any) => `- ${c.chip}: [${c.recommendation}] ${c.reason}`).join('\n')}\n` : ''}
     ${newsSummary}${targetsSummary}
     ${userPrompt && userPrompt.trim() !== '' ? `USER QUESTION/CONTEXT:\n    "${userPrompt}"\n    (Address this question specifically in your reasoning!)` : ''}
     
@@ -176,18 +183,23 @@ export async function getLLMChipAdvice(
   gameweek: number,
   fixtures: any[]
 ): Promise<{ recommendation: string; reasoning: string; confidence: number }> {
-  
+  const isSet1 = gameweek <= 19;
+  const remainingGwsInSet = isSet1 ? Math.max(0, 19 - gameweek) : Math.max(0, 38 - gameweek);
+  const setHeader = isSet1 ? "Set 1 (GW1–19)" : "Set 2 (GW20–38)";
+
   const prompt = `
-    Analyze if I should play a chip this GW${gameweek}.
+    Analyze if I should play a chip this GW${gameweek} under the 2026/27 Two-Set Chip System.
     
+    Active Chip Set: ${setHeader} (${remainingGwsInSet} GWs remaining before ${isSet1 ? 'GW19 expiration deadline' : 'season end'}).
+    ${isSet1 ? 'CRITICAL: Set 1 chips EXPIRE at GW19 deadline and NEVER roll over to Set 2. A brand-new Set 2 activates in GW20.' : 'Set 2 active.'}
     Squad strength: Avg xP ${(squad.reduce((s,p)=>s+p.xP,0)/15).toFixed(1)}
     Chips available: ${Object.entries(chips).filter(([_,a]) => a).map(([c]) => c).join(', ')}
     
-    CRITICAL FPL CHIP STRATEGY RULES:
-    1. BENCH BOOST (BB): MUST HOLD in normal single gameweeks (especially GW1-GW25) when bench has standard cheap players (1-3 xP each). Only recommend BB in Double Gameweeks (DGW) or if total bench xP >= 18.0.
-    2. TRIPLE CAPTAIN (TC): MUST HOLD unless a premier asset has a Double Gameweek or extreme fixture outlier (xP >= 10.5).
-    3. FREE HIT (FH): Save for Blank Gameweeks (BGW) or massive DGWs.
-    4. WILDCARD (WC): Save for major fixture swings or 4+ injured starters.
+    2026/27 TWO-SET CHIP RULES:
+    1. BENCH BOOST: In Set 1, play when bench xP >= 14.0 (often post-Wildcard). In Set 2, reserve for spring DGWs.
+    2. TRIPLE CAPTAIN: In Set 1, play on single fixture outliers (xP >= 10.0 e.g. Haaland vs Sunderland in GW5). Fresh TC awarded in GW20.
+    3. FREE HIT: Save for autumn fixture clashes/rotation in Set 1; save for spring BGW in Set 2.
+    4. WILDCARD: Target GW6-8 international break in Set 1; target GW30-33 in Set 2.
     
     Recommend: WC, FH, BB, TC, or HOLD.
     Respond with VALID JSON OBJECT: {"recommendation": "WC/HOLD/etc", "reasoning": "...", "confidence": 0-100}
