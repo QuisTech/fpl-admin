@@ -835,7 +835,7 @@ export class FPLService {
     return Math.round((localSignal + (0.35 * horizonDelta) + financialBonus + deadWeightBonus) * 10) / 10;
   }
 
-  static generateTransfers(squad: ScoredPlayer[], candidates: ScoredPlayer[], oracle: XPOracle, riskMode: string, gameweek: number): TransferRecommendation[] {
+  static generateTransfers(squad: ScoredPlayer[], candidates: ScoredPlayer[], oracle: XPOracle, riskMode: string, gameweek: number, bank: number = 0): TransferRecommendation[] {
     const transfers: TransferRecommendation[] = [];
     const squadIds = new Set(squad.map(p => p.id));
     const params = getParamsForRiskMode(riskMode, baseWeights);
@@ -858,9 +858,11 @@ export class FPLService {
 
     squad.forEach(outPlayer => {
       const betterOptions = candidates.filter(p => {
+        // Enforce strict position equality: GKP with GKP, DEF with DEF, etc.
         if (p.position !== outPlayer.position) return false;
         if (squadIds.has(p.id)) return false;
-        if (p.now_cost > outPlayer.now_cost) return false;
+        // Enforce budget affordability with available bank
+        if (p.now_cost > outPlayer.now_cost + bank) return false;
         if ((p.score || 0) <= (outPlayer.score || 0) + 0.5) return false;
         // Enforce 3-player-per-club: count how many from inPlayer's team remain after removing outPlayer
         const teamCountAfterRemoval = (squadTeamCounts[p.team] || 0) - (p.team === outPlayer.team ? 1 : 0);
@@ -1084,57 +1086,80 @@ export class FPLService {
         const lpTeamCounts: Record<number, number> = {};
         myPicks.forEach(p => { lpTeamCounts[p.team] = (lpTeamCounts[p.team] || 0) + 1; });
 
-        for (let i = 0; i < ins.length; i++) {
-          const inPlayer = baseData.players.find(p => p.id === ins[i]);
-          const outPlayer = myPicks.find(p => p.id === outs[i]);
-          if (inPlayer && outPlayer) {
-            // Enforce 3-player-per-club: skip if adding inPlayer would exceed 3 from same club
-            const teamCountAfterRemoval = (lpTeamCounts[inPlayer.team] || 0) - (inPlayer.team === outPlayer.team ? 1 : 0);
-            if (teamCountAfterRemoval >= 3) continue;
+        // Match transfers In and Out strictly by position so each 1-for-1 swap is a valid FPL move
+        const remainingIns = [...ins];
+        for (const outId of outs) {
+          const outPlayer = myPicks.find(p => p.id === outId);
+          if (!outPlayer) continue;
 
-            const inXp = oracle.getXP(inPlayer.id, baseData.nextEventId);
-            const inScored = FPLService.mapToScoredPlayer(inPlayer, baseData.teams, baseData.fixtures, baseData.nextEventId, riskMode, inXp, fuel);
-            
-            const inVar = oracle.getVariance(inPlayer.id, baseData.nextEventId);
-            const outVar = oracle.getVariance(outPlayer.id, baseData.nextEventId);
-            const inEO = oracle.getTop1kEO?.(inPlayer.id) ?? 0;
-            const outEO = oracle.getTop1kEO?.(outPlayer.id) ?? 0;
+          const outPos = outPlayer.position || (outPlayer.element_type === 1 ? 'GKP' : outPlayer.element_type === 2 ? 'DEF' : outPlayer.element_type === 3 ? 'MID' : 'FWD');
+          const inIdx = remainingIns.findIndex(inId => {
+            const p = baseData.players.find(x => x.id === inId);
+            if (!p) return false;
+            const pPos = p.element_type === 1 ? 'GKP' : p.element_type === 2 ? 'DEF' : p.element_type === 3 ? 'MID' : 'FWD';
+            return pPos === outPos;
+          });
 
-            const transferUtilityDelta = (inScored.xP - outPlayer.xP) - params.betaVariance * (inVar - outVar) + params.betaEO * (inEO - outEO);
-            const xPDelta = inScored.xP - outPlayer.xP;
+          if (inIdx !== -1) {
+            const inId = remainingIns.splice(inIdx, 1)[0];
+            const inPlayer = baseData.players.find(p => p.id === inId);
+            if (inPlayer) {
+              const inPos = inPlayer.element_type === 1 ? 'GKP' : inPlayer.element_type === 2 ? 'DEF' : inPlayer.element_type === 3 ? 'MID' : 'FWD';
+              if (inPos !== outPos) continue;
 
-            const horizon8GwXpIn = get8GwXp(inPlayer.id);
-            const horizon8GwXpOut = get8GwXp(outPlayer.id);
-            const horizon8GwDelta = Math.round((horizon8GwXpIn - horizon8GwXpOut) * 10) / 10;
-            const squad8GwXpAfter = Math.round((squad8GwXpBefore + horizon8GwDelta) * 10) / 10;
+              // Enforce 3-player-per-club: skip if adding inPlayer would exceed 3 from same club
+              const teamCountAfterRemoval = (lpTeamCounts[inPlayer.team] || 0) - (inPlayer.team === outPlayer.team ? 1 : 0);
+              if (teamCountAfterRemoval >= 3) continue;
 
-            const rec: TransferRecommendation = {
-              out: outPlayer,
-              in: inScored,
-              localTransferSignal: transferUtilityDelta,
-              xPDelta,
-              horizon8GwXpIn,
-              horizon8GwXpOut,
-              horizon8GwDelta,
-              squad8GwXpBefore,
-              squad8GwXpAfter
-            };
-            rec.strategicScore = FPLService.calculateStrategicScore(rec);
-            transfers.push(rec);
+              // Enforce individual affordability for 1-for-1 execution
+              if (inPlayer.now_cost > outPlayer.now_cost + bank) continue;
+
+              const inXp = oracle.getXP(inPlayer.id, baseData.nextEventId);
+              const inScored = FPLService.mapToScoredPlayer(inPlayer, baseData.teams, baseData.fixtures, baseData.nextEventId, riskMode, inXp, fuel);
+              
+              const inVar = oracle.getVariance(inPlayer.id, baseData.nextEventId);
+              const outVar = oracle.getVariance(outPlayer.id, baseData.nextEventId);
+              const inEO = oracle.getTop1kEO?.(inPlayer.id) ?? 0;
+              const outEO = oracle.getTop1kEO?.(outPlayer.id) ?? 0;
+
+              const transferUtilityDelta = (inScored.xP - outPlayer.xP) - params.betaVariance * (inVar - outVar) + params.betaEO * (inEO - outEO);
+              const xPDelta = inScored.xP - outPlayer.xP;
+
+              const horizon8GwXpIn = get8GwXp(inPlayer.id);
+              const horizon8GwXpOut = get8GwXp(outPlayer.id);
+              const horizon8GwDelta = Math.round((horizon8GwXpIn - horizon8GwXpOut) * 10) / 10;
+              const squad8GwXpAfter = Math.round((squad8GwXpBefore + horizon8GwDelta) * 10) / 10;
+
+              const rec: TransferRecommendation = {
+                out: outPlayer,
+                in: inScored,
+                localTransferSignal: transferUtilityDelta,
+                xPDelta,
+                horizon8GwXpIn,
+                horizon8GwXpOut,
+                horizon8GwDelta,
+                squad8GwXpBefore,
+                squad8GwXpAfter
+              };
+              rec.strategicScore = FPLService.calculateStrategicScore(rec);
+              transfers.push(rec);
+            }
           }
         }
       }
 
       if (transfers.length === 0) {
-        transfers = this.generateTransfers(myPicks, candidates, oracle, riskMode, baseData.nextEventId);
+        transfers = this.generateTransfers(myPicks, candidates, oracle, riskMode, baseData.nextEventId, bank);
       } else {
         // Append alternative independent swaps and rank the full pool by holistic strategic score
-        const alternativeSwaps = this.generateTransfers(myPicks, candidates, oracle, riskMode, baseData.nextEventId);
+        const alternativeSwaps = this.generateTransfers(myPicks, candidates, oracle, riskMode, baseData.nextEventId, bank);
         
         const existingSwapSignatures = new Set(transfers.map(t => `${t.out.id}-${t.in.id}`));
         const allCandidates = [...transfers];
         
         for (const swap of alternativeSwaps) {
+          if (swap.in.position !== swap.out.position) continue;
+          if (swap.in.now_cost > swap.out.now_cost + bank) continue;
           const sig = `${swap.out.id}-${swap.in.id}`;
           if (!existingSwapSignatures.has(sig)) {
             allCandidates.push(swap);
@@ -1142,6 +1167,7 @@ export class FPLService {
           }
         }
         transfers = allCandidates
+          .filter(t => t.in.position === t.out.position && t.in.now_cost <= t.out.now_cost + bank)
           .sort((a, b) => (b.strategicScore ?? 0) - (a.strategicScore ?? 0))
           .slice(0, 5);
       }
