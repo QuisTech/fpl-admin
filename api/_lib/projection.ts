@@ -60,25 +60,55 @@ export interface ProjectionInput {
   externalXP?: number;
 }
 
-export function getParamsForRiskMode(riskMode: string, baseWeights: UtilityParameters): UtilityParameters {
+export function getParamsForRiskMode(
+  riskMode: string, 
+  baseWeights: UtilityParameters, 
+  scenario: 'quant' | 'template' = 'quant'
+): UtilityParameters {
   const params = { ...baseWeights };
-  if (riskMode === 'aggressive' || riskMode === 'risky') {
-    params.betaVariance = 0.8; // Favor high variance (differentials)
-    params.betaEO = -5.0; // Strongly penalize high EO template players
-    params.betaDifferential = 5.0; // Directly reward low-ownership differential gems (< 15% EO)
-  } else if (riskMode === 'safe') {
-    params.betaVariance = -0.1; // Slight penalty to variance
-    params.betaEO = 3.5; // Strongly reward high EO template players
-    params.minEoTotal = 200; // Force solid template coverage
-    params.minElitePlayers = 1;
-  } else if (riskMode === 'value') {
-    params.betaVariance = 0.0;
-    params.betaEO = 0.0;
-    params.budgetMultiplier = 0.85; // Force a strict 85% budget to maximize ROI
+
+  if (scenario === 'quant') {
+    // Pure Quant: Mathematical knapsack optimization free of herd bias (betaEO = 0.0)
+    if (riskMode === 'aggressive' || riskMode === 'risky') {
+      params.betaVariance = 0.8; // High variance ceiling chasing
+      params.betaEO = -2.0;      // Slight differential tilt
+      params.betaDifferential = 4.0;
+    } else if (riskMode === 'safe') {
+      params.betaVariance = -0.2; // Penalize volatility/unpredictability for high points floor
+      params.betaEO = 0.0;        // Zero crowd-following bias
+      params.minEoTotal = 0;
+      params.minElitePlayers = 1; // Guarantee at least one elite premium
+    } else if (riskMode === 'value') {
+      params.betaVariance = 0.0;
+      params.betaEO = 0.0;
+      params.budgetMultiplier = 0.85; // Strict 85% budget to maximize ROI
+    } else {
+      params.betaVariance = 0.0;
+      params.betaEO = 0.0;
+    }
   } else {
-    params.betaVariance = 0.05;
-    params.betaEO = 0.0;
+    // Template Shield: Game-theoretic rank defense & consensus EO protection
+    if (riskMode === 'aggressive' || riskMode === 'risky') {
+      // Template Core + Differential Weapons
+      params.betaVariance = 0.6;
+      params.betaEO = 0.0; // Anchors protect the core; remaining slots seek differentials
+      params.betaDifferential = 4.0;
+    } else if (riskMode === 'safe') {
+      params.betaVariance = -0.1;
+      params.betaEO = 3.5;     // Strongly reward high Top 1k EO across the entire squad
+      params.minEoTotal = 250; // Enforce massive template protection
+      params.minElitePlayers = 1;
+    } else if (riskMode === 'value') {
+      params.betaVariance = 0.0;
+      params.betaEO = 1.5;
+      params.budgetMultiplier = 0.90;
+    } else {
+      params.betaVariance = -0.05;
+      params.betaEO = 2.0;
+      params.minEoTotal = 150;
+    }
   }
+
   return params;
 }
 

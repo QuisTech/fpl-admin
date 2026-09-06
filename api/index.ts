@@ -474,14 +474,34 @@ export class FPLService {
     const lockedSet = new Set<number>(lockedPlayerIds);
     const excludedSet = new Set<number>(excludedPlayerIds);
 
-    // Identify monster template anchors (Top 1k EO >= 60% or extreme ownership)
-    const templateAnchorIds = scored
-      .filter(p => ((p.eo && p.eo >= 60) || (p.ownership && p.ownership >= 65)) && (p.xP || 0) >= 3.5)
-      .sort((a, b) => (b.eo || 0) - (a.eo || 0))
-      .slice(0, 5)
-      .map(p => p.id);
+    // Pure dynamic template anchor selection (100% dynamic, 0% heuristics)
+    // Anchors top EO/ownership consensus asset per line (DEF, MID, FWD)
+    // plus any consensus premium asset (cost >= 110, ownership/EO >= 40%) representing asymmetric captaincy risk
+    const selectPureDynamicAnchors = (scoredList: ScoredPlayer[]): number[] => {
+      const active = scoredList.filter(p => ((p.eo && p.eo >= 30) || (p.ownership && p.ownership >= 30)) && (p.xP || 0) >= 3.0);
 
-    const params = getParamsForRiskMode(riskMode, baseWeights);
+      const defs = active.filter(p => p.position === 'DEF').sort((a, b) => (b.eo || b.ownership || 0) - (a.eo || a.ownership || 0));
+      const mids = active.filter(p => p.position === 'MID').sort((a, b) => (b.eo || b.ownership || 0) - (a.eo || a.ownership || 0));
+      const fwds = active.filter(p => p.position === 'FWD').sort((a, b) => (b.eo || b.ownership || 0) - (a.eo || a.ownership || 0));
+
+      const anchors: ScoredPlayer[] = [];
+      if (defs.length > 0) anchors.push(defs[0]);
+      if (mids.length > 0) anchors.push(mids[0]);
+      if (fwds.length > 0) anchors.push(fwds[0]);
+
+      const premiums = active.filter(p => Number(p.cost || p.now_cost || 0) >= 110 && ((p.eo && p.eo >= 40) || (p.ownership && p.ownership >= 40)));
+      for (const prem of premiums) {
+        if (!anchors.some(a => a.id === prem.id) && anchors.length < 4) {
+          anchors.push(prem);
+        }
+      }
+
+      return anchors.map(a => a.id);
+    };
+
+    const templateAnchorIds = selectPureDynamicAnchors(scored);
+
+    const params = getParamsForRiskMode(riskMode, baseWeights, scenario);
     const effectiveBudget = budget * (params.budgetMultiplier || 1.0);
 
     const activeLockedSet = new Set<number>(lockedSet);
@@ -586,11 +606,15 @@ export class FPLService {
     let scenarioComparison = undefined;
     if (!skipComparison) {
       try {
-          // Solve Quant
-          const quantIds = solveOptimalSquad(oracle, nextEventId, budget, 8, params, availableIds, lockedSet, excludedSet);
-          const quantSquad = scored.filter(p => quantIds.includes(p.id));
-          const quantXI = buildStartingXI(quantSquad);
-        const { captain: qCapId } = solveCaptain(oracle, nextEventId, quantXI.map(p => p.id), params);
+        const quantParams = getParamsForRiskMode(riskMode, baseWeights, 'quant');
+        const templateParams = getParamsForRiskMode(riskMode, baseWeights, 'template');
+        const templateEffectiveBudget = budget * (templateParams.budgetMultiplier || 1.0);
+
+        // Solve Quant
+        const quantIds = solveOptimalSquad(oracle, nextEventId, budget, 8, quantParams, availableIds, lockedSet, excludedSet);
+        const quantSquad = scored.filter(p => quantIds.includes(p.id));
+        const quantXI = buildStartingXI(quantSquad);
+        const { captain: qCapId } = solveCaptain(oracle, nextEventId, quantXI.map(p => p.id), quantParams);
         const quantCap = quantXI.find(p => p.id === qCapId) || quantXI[0];
         const quantXp = Math.round((quantXI.reduce((sum, p) => sum + (p.xP || 0), 0) + (quantCap?.xP || 0)) * 10) / 10;
         const quantEo = quantXI.length > 0 ? Math.round((quantXI.reduce((sum, p) => sum + (p.eo || 0), 0) / quantXI.length) * 10) / 10 : 0;
@@ -612,18 +636,18 @@ export class FPLService {
           const remainingSlots = Math.max(0, 15 - newCount);
           const minRemainingCost = remainingSlots * 42;
 
-          if (currentTemplateCost + pCost + minRemainingCost <= effectiveBudget) {
+          if (currentTemplateCost + pCost + minRemainingCost <= templateEffectiveBudget) {
             templateSet.add(id);
             currentTemplateCost += pCost;
           }
         });
-        let templateIds = solveOptimalSquad(oracle, nextEventId, budget, 8, params, availableIds, templateSet, excludedSet);
+        let templateIds = solveOptimalSquad(oracle, nextEventId, budget, 8, templateParams, availableIds, templateSet, excludedSet);
         if (!templateIds || templateIds.length === 0) {
-          templateIds = solveOptimalSquad(oracle, nextEventId, budget, 8, params, availableIds, lockedSet, excludedSet);
+          templateIds = solveOptimalSquad(oracle, nextEventId, budget, 8, templateParams, availableIds, lockedSet, excludedSet);
         }
         const templateSquad = scored.filter(p => templateIds.includes(p.id));
         const templateXI = buildStartingXI(templateSquad);
-        const { captain: tCapId } = solveCaptain(oracle, nextEventId, templateXI.map(p => p.id), params);
+        const { captain: tCapId } = solveCaptain(oracle, nextEventId, templateXI.map(p => p.id), templateParams);
         const templateCap = templateXI.find(p => p.id === tCapId) || templateXI[0];
         const templateXp = Math.round((templateXI.reduce((sum, p) => sum + (p.xP || 0), 0) + (templateCap?.xP || 0)) * 10) / 10;
         const templateEo = templateXI.length > 0 ? Math.round((templateXI.reduce((sum, p) => sum + (p.eo || 0), 0) / templateXI.length) * 10) / 10 : 0;
@@ -764,8 +788,8 @@ export class FPLService {
         riskMode: riskMode,
         solverStatus: isHeuristicFallback ? 'heuristic_fallback' : 'optimal',
         activeConstraints: {
-          minEoTotal: riskMode === 'safe' ? 200 : 0,
-          minElitePlayers: riskMode === 'safe' ? 1 : 0,
+          minEoTotal: params.minEoTotal || 0,
+          minElitePlayers: params.minElitePlayers || 0,
           lockedCount: lockedPlayerIds.length,
           excludedCount: excludedPlayerIds.length
         },
