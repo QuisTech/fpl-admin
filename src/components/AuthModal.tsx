@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Mail, Lock, User, AlertCircle, RefreshCw } from 'lucide-react';
-import { auth, googleProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from '../lib/firebase';
+import { X, Mail, Lock, AlertCircle, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { 
+  auth, 
+  googleProvider, 
+  signInWithPopup, 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail
+} from '../lib/firebase';
 import { cn } from '../lib/utils';
 import axios from 'axios';
 
@@ -11,20 +18,66 @@ interface AuthModalProps {
   anonymousId: string;
 }
 
+const getAuthErrorMessage = (err: any, isGoogle: boolean = false): string => {
+  const code = err?.code || '';
+  const message = err?.message || '';
+
+  if (isGoogle) {
+    if (code === 'auth/popup-closed-by-user') {
+      return 'Google sign-in popup was closed before completing. Please try again.';
+    }
+    if (code === 'auth/popup-blocked') {
+      return 'Google sign-in popup was blocked by your browser. Please allow popups for this site and try again.';
+    }
+    if (code === 'auth/cancelled-popup-request') {
+      return 'Google sign-in was cancelled. Please try again.';
+    }
+    if (code === 'auth/invalid-credential' || message.includes('userinfo') || message.includes('401')) {
+      return 'Google authentication session expired or was blocked by browser cross-site tracking protections. Please try again with "Continue with Google", or reset your password to log in with email.';
+    }
+    return 'Google authentication could not be completed. Please try again or log in with email.';
+  }
+
+  // Email / Password flow
+  if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found') {
+    return 'Invalid email or password. If you originally registered with Google, please click "Continue with Google" below, or use "Forgot password?" to set a password.';
+  }
+  if (code === 'auth/email-already-in-use') {
+    return 'An account with this email already exists. Please log in or click "Continue with Google".';
+  }
+  if (code === 'auth/weak-password') {
+    return 'Password must be at least 6 characters.';
+  }
+  if (code === 'auth/invalid-email') {
+    return 'Please enter a valid email address.';
+  }
+  if (code === 'auth/too-many-requests') {
+    return 'Too many failed login attempts. Please reset your password or try again in a few minutes.';
+  }
+  return message || 'Authentication failed. Please try again.';
+};
+
 export const AuthModal = ({ isOpen, onClose, anonymousId }: AuthModalProps) => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [resetSent, setResetSent] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // Helper to merge anonymous tier after successful auth
   const handleMerge = async (user: any) => {
     try {
-      // We pass the new true user ID and the old anonymous ID to backend to merge
+      const idToken = await user.getIdToken();
+      // Pass the new user ID, old anonymous ID, and bearer token to backend to merge
       await axios.post('/api/auth/merge', {
         newUserId: user.uid,
         anonymousId: anonymousId
+      }, {
+        headers: {
+          Authorization: `Bearer ${idToken}`
+        }
       });
       onClose();
     } catch (err) {
@@ -38,16 +91,17 @@ export const AuthModal = ({ isOpen, onClose, anonymousId }: AuthModalProps) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setResetSent(false);
     try {
       let result;
       if (isLogin) {
-        result = await signInWithEmailAndPassword(auth, email, password);
+        result = await signInWithEmailAndPassword(auth, email.trim(), password);
       } else {
-        result = await createUserWithEmailAndPassword(auth, email, password);
+        result = await createUserWithEmailAndPassword(auth, email.trim(), password);
       }
       await handleMerge(result.user);
     } catch (err: any) {
-      setError(err.message || 'Authentication failed');
+      setError(getAuthErrorMessage(err, false));
       setLoading(false);
     }
   };
@@ -55,12 +109,31 @@ export const AuthModal = ({ isOpen, onClose, anonymousId }: AuthModalProps) => {
   const handleGoogleAuth = async () => {
     setLoading(true);
     setError(null);
+    setResetSent(false);
     try {
       const result = await signInWithPopup(auth, googleProvider);
       await handleMerge(result.user);
     } catch (err: any) {
-      setError(err.message || 'Google authentication failed');
+      setError(getAuthErrorMessage(err, true));
       setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!email.trim()) {
+      setError("Please enter your email address above first to receive a password reset link.");
+      return;
+    }
+    setResetLoading(true);
+    setError(null);
+    setResetSent(false);
+    try {
+      await sendPasswordResetEmail(auth, email.trim());
+      setResetSent(true);
+    } catch (err: any) {
+      setError(getAuthErrorMessage(err, false));
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -99,7 +172,16 @@ export const AuthModal = ({ isOpen, onClose, anonymousId }: AuthModalProps) => {
               {error && (
                 <div className="mb-4 p-3 bg-rose-500/10 border border-rose-500/20 rounded-lg flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                  <p className="text-xs text-rose-400">{error}</p>
+                  <p className="text-xs text-rose-400 leading-relaxed">{error}</p>
+                </div>
+              )}
+
+              {resetSent && (
+                <div className="mb-4 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <p className="text-xs text-emerald-300 leading-relaxed">
+                    Password reset link sent to <strong>{email}</strong>! Check your inbox to create or reset your password.
+                  </p>
                 </div>
               )}
 
@@ -120,7 +202,19 @@ export const AuthModal = ({ isOpen, onClose, anonymousId }: AuthModalProps) => {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold uppercase text-slate-400">Password</label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] font-bold uppercase text-slate-400">Password</label>
+                    {isLogin && (
+                      <button
+                        type="button"
+                        onClick={handleResetPassword}
+                        disabled={resetLoading}
+                        className="text-[10px] text-fpl-green/80 hover:text-fpl-green hover:underline font-bold transition-colors disabled:opacity-50"
+                      >
+                        {resetLoading ? 'Sending...' : 'Forgot password?'}
+                      </button>
+                    )}
+                  </div>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                     <input 
@@ -137,7 +231,7 @@ export const AuthModal = ({ isOpen, onClose, anonymousId }: AuthModalProps) => {
                 <button 
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-fpl-green hover:bg-fpl-green/90 text-slate-950 font-black uppercase tracking-widest text-sm py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full bg-fpl-green hover:bg-fpl-green/90 text-slate-950 font-black uppercase tracking-widest text-sm py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                 >
                   {loading && <RefreshCw className="w-4 h-4 animate-spin" />}
                   {isLogin ? 'Log In' : 'Sign Up'}
@@ -153,7 +247,7 @@ export const AuthModal = ({ isOpen, onClose, anonymousId }: AuthModalProps) => {
               <button 
                 onClick={handleGoogleAuth}
                 disabled={loading}
-                className="w-full bg-white hover:bg-slate-100 text-slate-900 font-bold text-sm py-2.5 rounded-lg transition-colors flex items-center justify-center gap-3 disabled:opacity-50"
+                className="w-full bg-white hover:bg-slate-100 text-slate-900 font-bold text-sm py-2.5 rounded-lg transition-colors flex items-center justify-center gap-3 disabled:opacity-50 cursor-pointer"
               >
                 <svg viewBox="0 0 24 24" className="w-4 h-4">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -166,8 +260,12 @@ export const AuthModal = ({ isOpen, onClose, anonymousId }: AuthModalProps) => {
 
               <div className="mt-6 text-center">
                 <button 
-                  onClick={() => setIsLogin(!isLogin)}
-                  className="text-xs text-slate-400 hover:text-fpl-green transition-colors font-bold"
+                  onClick={() => {
+                    setIsLogin(!isLogin);
+                    setError(null);
+                    setResetSent(false);
+                  }}
+                  className="text-xs text-slate-400 hover:text-fpl-green transition-colors font-bold cursor-pointer"
                 >
                   {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Log In"}
                 </button>
@@ -179,3 +277,4 @@ export const AuthModal = ({ isOpen, onClose, anonymousId }: AuthModalProps) => {
     </AnimatePresence>
   );
 };
+
