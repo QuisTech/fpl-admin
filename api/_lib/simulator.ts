@@ -189,13 +189,19 @@ export class Simulator {
   }
 
   private getChipResidual(chip: string, gw: number): number {
-    const remaining = Math.max(0, 38 - gw);
-    // Residual valuations calibrated to realistic Double Gameweek & late-season chip power
-    if (chip === 'WC') return 28.0 * (0.4 + 0.6 * (remaining / 38));
-    if (chip === 'FH') return 22.0 * (0.4 + 0.6 * (remaining / 38));
-    // BB in a Double Gameweek typically delivers 25-35+ points; early single GW use must carry high opportunity cost
-    if (chip === 'BB') return 26.0 * (0.5 + 0.5 * (remaining / 38));
-    if (chip === 'TC') return 18.0 * (0.5 + 0.5 * (remaining / 38));
+    // 2026/27 Official Rule: Two distinct sets of 4 chips (Set 1: GW1-19, Set 2: GW20-38).
+    // Chips do NOT roll over between halves. Set 1 chips expire at the GW19 deadline.
+    const halfEnd = gw <= 19 ? 19 : 38;
+    const halfStart = gw <= 19 ? 1 : 20;
+    const halfLength = halfEnd - halfStart + 1; // 19 gameweeks
+    const remaining = Math.max(0, halfEnd - gw);
+    
+    // Residual valuations calibrated to the active half's horizon (decaying towards half deadline)
+    const decayRatio = remaining / halfLength;
+    if (chip === 'WC') return 28.0 * (0.3 + 0.7 * decayRatio);
+    if (chip === 'FH') return 22.0 * (0.3 + 0.7 * decayRatio);
+    if (chip === 'BB') return 24.0 * (0.3 + 0.7 * decayRatio);
+    if (chip === 'TC') return 18.0 * (0.3 + 0.7 * decayRatio);
     return 0;
   }
 

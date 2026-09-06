@@ -1237,26 +1237,47 @@ export class FPLService {
       }
     }
 
+    const targetEvent = baseData.nextEventId;
+    const isSet1 = targetEvent <= 19;
+    const remainingGwsInSet = isSet1 ? Math.max(0, 19 - targetEvent) : Math.max(0, 38 - targetEvent);
+    const setHeader = isSet1 ? "Set 1 (GW1–19)" : "Set 2 (GW20–38)";
+
     const chips: ChipAdvice[] = [
       {
-        chip: "Wildcard",
+        chip: `Wildcard (${setHeader})`,
         recommendation: optimalFirstMove === 'WC' ? "STRONG BUY" : "HOLD",
-        reason: optimalFirstMove === 'WC' ? "V3 Engine recommends activating Wildcard to restructure your squad." : "Hold for upcoming major fixture swings or injury crises."
+        reason: optimalFirstMove === 'WC' 
+          ? "V3 Engine recommends activating Wildcard to restructure your squad." 
+          : isSet1 
+            ? `Set 1 Wildcard expires at the GW19 deadline (${remainingGwsInSet} GWs left). Optimal window: GW6–GW8 during the international break.`
+            : "Set 2 Wildcard active. Hold for major spring Double Gameweek preparation."
       },
       {
-        chip: "Free Hit",
+        chip: `Free Hit (${setHeader})`,
         recommendation: optimalFirstMove === 'FH' ? "STRONG BUY" : "HOLD",
-        reason: optimalFirstMove === 'FH' ? "V3 Engine recommends a Free Hit this week." : "Hold for future Blank or Double Gameweeks."
+        reason: optimalFirstMove === 'FH' 
+          ? "V3 Engine recommends a Free Hit this week." 
+          : isSet1 
+            ? `Set 1 Free Hit expires at GW19 (${remainingGwsInSet} GWs left). Hold for an autumn fixture clash, European rotation, or postponement.`
+            : "Set 2 Free Hit active. Hold for the major spring Blank Gameweek (GW29/30)."
       },
       {
-        chip: "Bench Boost",
+        chip: `Bench Boost (${setHeader})`,
         recommendation: optimalFirstMove === 'BB' ? "STRONG BUY" : "HOLD",
-        reason: optimalFirstMove === 'BB' ? "V3 Engine detects extraordinary bench expected points (>= 16.0 xP)." : "Hold for a Double Gameweek where your 4 bench players play multiple fixtures."
+        reason: optimalFirstMove === 'BB' 
+          ? "V3 Engine detects extraordinary bench expected points (>= 15.0 xP). Play now!" 
+          : isSet1 
+            ? `Set 1 Bench Boost expires at GW19 (${remainingGwsInSet} GWs left). Optimal play: deploy immediately after your Wildcard when all 15 squad players are fit and starting.`
+            : "Set 2 Bench Boost active. Save for the massive Double Gameweek (GW34/37)."
       },
       {
-        chip: "Triple Captain",
+        chip: `Triple Captain (${setHeader})`,
         recommendation: optimalFirstMove === 'TC' ? "STRONG BUY" : "HOLD",
-        reason: optimalFirstMove === 'TC' ? "V3 Engine detects an elite captaincy matchup (>= 9.5 xP)." : "Hold for a premier captain in a favorable Double Gameweek."
+        reason: optimalFirstMove === 'TC' 
+          ? "V3 Engine detects an elite captaincy outlier (>= 9.5 xP). Go for the kill!" 
+          : isSet1 
+            ? `Set 1 Triple Captain expires at GW19 (${remainingGwsInSet} GWs left; fresh TC arrives in GW20). Optimal window: Haaland vs Sunderland at Home (GW5) where projected xP is 11.2!`
+            : "Set 2 Triple Captain active. Save for Haaland in a spring Double Gameweek."
       }
     ];
 
