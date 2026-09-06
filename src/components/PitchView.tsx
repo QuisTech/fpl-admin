@@ -393,12 +393,12 @@ export const PitchView = ({
               >
                 {/* 🏟️ Stadium Outer Flanks (#0f172a Dark Surround Outside Pitch & Billboard Headers) */}
                 <polygon 
-                  points="-10,-10 105,-10 105,4 0,240 -10,240 -10,-10" 
+                  points="-10,-10 105,-10 105,4 0,227.44 -10,227.44 -10,-10" 
                   className="fill-[#0f172a] stroke-[#0f172a]" 
                   strokeWidth="2" 
                 />
                 <polygon 
-                  points="810,-10 695,-10 695,4 800,240 810,240 810,-10" 
+                  points="810,-10 695,-10 695,4 800,227.44 810,227.44 810,-10" 
                   className="fill-[#0f172a] stroke-[#0f172a]" 
                   strokeWidth="2" 
                 />
@@ -408,9 +408,9 @@ export const PitchView = ({
                   strokeWidth="2" 
                 />
 
-                {/* 🏟️ Straight Continuous Parallel Outer Pitch Boundary (From Top Corners at y=4 to Outer Edges at y=240) */}
-                <line x1="105" y1="4" x2="0" y2="240" strokeWidth="2" className="stroke-white/70" />
-                <line x1="695" y1="4" x2="800" y2="240" strokeWidth="2" className="stroke-white/70" />
+                {/* 🏟️ Straight Continuous Parallel Outer Pitch Boundary (From Top Corners at y=4 to Outer Edges at y=227.44, strictly parallel dx/dy = 125/266) */}
+                <line x1="105" y1="4" x2="0" y2="227.44" strokeWidth="2" className="stroke-white/70" />
+                <line x1="695" y1="4" x2="800" y2="227.44" strokeWidth="2" className="stroke-white/70" />
                 <line x1="105" y1="4" x2="695" y2="4" strokeWidth="2" className="stroke-white/70" />
 
                 {/* 🌟 Left Billboard: Vibrant Cyan "Fantasy" with Premier League Crown Lion */}
