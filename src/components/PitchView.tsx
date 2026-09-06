@@ -393,12 +393,12 @@ export const PitchView = ({
               >
                 {/* 🏟️ Stadium Outer Flanks (#0f172a Dark Surround Outside Pitch & Billboard Headers) */}
                 <polygon 
-                  points="-10,-10 105,-10 105,4 0,135 -10,135 -10,-10" 
+                  points="-10,-10 105,-10 105,4 0,240 -10,240 -10,-10" 
                   className="fill-[#0f172a] stroke-[#0f172a]" 
                   strokeWidth="2" 
                 />
                 <polygon 
-                  points="810,-10 695,-10 695,4 800,135 810,135 810,-10" 
+                  points="810,-10 695,-10 695,4 800,240 810,240 810,-10" 
                   className="fill-[#0f172a] stroke-[#0f172a]" 
                   strokeWidth="2" 
                 />
@@ -408,9 +408,9 @@ export const PitchView = ({
                   strokeWidth="2" 
                 />
 
-                {/* 🏟️ Straight Continuous Parallel Outer Pitch Boundary (From Top Corners at y=4 to Outer Edges at Defender Head y=135) */}
-                <line x1="105" y1="4" x2="0" y2="135" strokeWidth="2" className="stroke-white/70" />
-                <line x1="695" y1="4" x2="800" y2="135" strokeWidth="2" className="stroke-white/70" />
+                {/* 🏟️ Straight Continuous Parallel Outer Pitch Boundary (From Top Corners at y=4 to Outer Edges at y=240) */}
+                <line x1="105" y1="4" x2="0" y2="240" strokeWidth="2" className="stroke-white/70" />
+                <line x1="695" y1="4" x2="800" y2="240" strokeWidth="2" className="stroke-white/70" />
                 <line x1="105" y1="4" x2="695" y2="4" strokeWidth="2" className="stroke-white/70" />
 
                 {/* 🌟 Left Billboard: Vibrant Cyan "Fantasy" with Premier League Crown Lion */}
@@ -441,11 +441,11 @@ export const PitchView = ({
                 {/* Top Goal Line */}
                 <line x1="125" y1="24" x2="675" y2="24" strokeWidth="2.5" />
 
-                {/* Slanted Sideline Touchlines Intersecting at Defender Head y=145 */}
-                <line x1="125" y1="24" x2="0" y2="145" strokeWidth="3" />
-                <line x1="0" y1="145" x2="0" y2="590" strokeWidth="3" />
-                <line x1="675" y1="24" x2="800" y2="145" strokeWidth="3" />
-                <line x1="800" y1="145" x2="800" y2="590" strokeWidth="3" />
+                {/* Slanted Sideline Touchlines */}
+                <line x1="125" y1="24" x2="0" y2="290" strokeWidth="3" />
+                <line x1="0" y1="290" x2="0" y2="450" strokeWidth="3" />
+                <line x1="675" y1="24" x2="800" y2="290" strokeWidth="3" />
+                <line x1="800" y1="290" x2="800" y2="450" strokeWidth="3" />
 
                 {/* Top 6-Yard Goal Area */}
                 <polygon points="295,24 505,24 512,62 288,62" strokeWidth="2" />
