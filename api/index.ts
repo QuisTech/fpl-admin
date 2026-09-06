@@ -899,7 +899,11 @@ export class FPLService {
         transfers.push(rec);
       }
     });
-    return transfers.sort((a, b) => (b.strategicScore ?? 0) - (a.strategicScore ?? 0)).slice(0, 5);
+    return transfers.sort((a, b) => {
+      const deltaDiff = (b.horizon8GwDelta ?? 0) - (a.horizon8GwDelta ?? 0);
+      if (Math.abs(deltaDiff) > 0.05) return deltaDiff;
+      return (b.strategicScore ?? b.xPDelta ?? 0) - (a.strategicScore ?? a.xPDelta ?? 0);
+    }).slice(0, 5);
   }
 
   static generateChipAdvice(squad: ScoredPlayer[], riskMode: string): ChipAdvice[] {
@@ -1168,7 +1172,11 @@ export class FPLService {
         }
         transfers = allCandidates
           .filter(t => t.in.position === t.out.position && t.in.now_cost <= t.out.now_cost + bank)
-          .sort((a, b) => (b.strategicScore ?? 0) - (a.strategicScore ?? 0))
+          .sort((a, b) => {
+            const deltaDiff = (b.horizon8GwDelta ?? 0) - (a.horizon8GwDelta ?? 0);
+            if (Math.abs(deltaDiff) > 0.05) return deltaDiff;
+            return (b.strategicScore ?? b.xPDelta ?? 0) - (a.strategicScore ?? a.xPDelta ?? 0);
+          })
           .slice(0, 5);
       }
     }

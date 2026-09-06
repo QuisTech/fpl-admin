@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { 
   Users, 
@@ -49,6 +49,17 @@ export const TransferView = ({ syncedData, tier = 'ai-agent', setTab, userId }: 
   }
 
   const { squad, transfers, entryHistory, managerInfo } = syncedData;
+
+  const sortedTransfers = useMemo(() => {
+    if (!transfers) return [];
+    return [...transfers].sort((a, b) => {
+      const deltaDiff = (b.horizon8GwDelta ?? 0) - (a.horizon8GwDelta ?? 0);
+      if (Math.abs(deltaDiff) > 0.05) return deltaDiff;
+      const scoreA = a.strategicScore ?? a.xPDelta ?? 0;
+      const scoreB = b.strategicScore ?? b.xPDelta ?? 0;
+      return scoreB - scoreA;
+    });
+  }, [transfers]);
 
   // Split into Starting XI and Bench using the position_in_squad property
   const startingXI = squad.filter(p => (p.position_in_squad ?? 0) <= 11);
@@ -268,7 +279,7 @@ export const TransferView = ({ syncedData, tier = 'ai-agent', setTab, userId }: 
             </div>
 
             {/* 8-Gameweek Strategy Squad Horizon Summary Banner */}
-            {transfers.length > 0 && transfers[0].squad8GwXpBefore !== undefined && (
+            {sortedTransfers.length > 0 && sortedTransfers[0].squad8GwXpBefore !== undefined && (
               <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-fpl-purple/40 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 shadow-md relative overflow-hidden">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-xl bg-fpl-purple/20 border border-fpl-purple/40 flex items-center justify-center text-fpl-purple shrink-0">
@@ -287,36 +298,30 @@ export const TransferView = ({ syncedData, tier = 'ai-agent', setTab, userId }: 
                 <div className="flex items-center gap-3 bg-slate-950/80 px-3 py-1.5 rounded-xl border border-slate-800">
                   <div className="text-right">
                     <span className="text-[8px] text-slate-500 font-bold uppercase block">Current Squad (8-GW)</span>
-                    <span className="text-xs font-mono font-black text-slate-300">{transfers[0].squad8GwXpBefore} pts</span>
+                    <span className="text-xs font-mono font-black text-slate-300">{sortedTransfers[0].squad8GwXpBefore} pts</span>
                   </div>
                   <ArrowRightCircle className="w-3.5 h-3.5 text-fpl-purple shrink-0" />
                   <div className="text-right">
                     <span className="text-[8px] text-fpl-green font-bold uppercase block">Strategy Squad (8-GW)</span>
-                    <span className="text-xs font-mono font-black text-fpl-green">{transfers[0].squad8GwXpAfter} pts</span>
+                    <span className="text-xs font-mono font-black text-fpl-green">{sortedTransfers[0].squad8GwXpAfter} pts</span>
                   </div>
                   <div className="bg-fpl-green/10 border border-fpl-green/30 px-2 py-1 rounded-lg text-right shrink-0">
                     <span className="text-[8px] text-slate-400 font-bold uppercase block">Net 8-GW Gain</span>
                     <span className="text-xs font-mono font-black text-fpl-green">
-                      {((transfers[0].horizon8GwDelta || 0) > 0 ? '+' : '')}{transfers[0].horizon8GwDelta} pts
+                      {((sortedTransfers[0].horizon8GwDelta || 0) > 0 ? '+' : '')}{sortedTransfers[0].horizon8GwDelta} pts
                     </span>
                   </div>
                 </div>
               </div>
             )}
 
-            {transfers.length === 0 ? (
+            {sortedTransfers.length === 0 ? (
               <div className="text-center py-6 bg-slate-950/20 border border-dashed border-fpl-border rounded-2xl text-slate-500 text-xs">
                 No beneficial single transfers found. Your squad is in peak condition!
               </div>
             ) : (
               <div className="space-y-3">
-                {[...transfers]
-                  .sort((a, b) => {
-                    const scoreA = a.strategicScore ?? a.xPDelta ?? 0;
-                    const scoreB = b.strategicScore ?? b.xPDelta ?? 0;
-                    return scoreB - scoreA;
-                  })
-                  .map((rec, i) => {
+                {sortedTransfers.map((rec, i) => {
                   const isStartingXI = (rec.out.position_in_squad ?? 0) <= 11;
                   const priceDiff = (rec.out.now_cost - rec.in.now_cost) / 10;
                   const isHovered = hoveredSwapIndex === i;
@@ -415,7 +420,7 @@ export const TransferView = ({ syncedData, tier = 'ai-agent', setTab, userId }: 
                                   : "Equal Price"}
                             </span>
                           </div>
-                          {i === 0 && (rec.strategicScore || rec.xPDelta) > 0 && (
+                          {i === 0 && ((rec.horizon8GwDelta ?? 0) > 0 || (rec.strategicScore ?? 0) > 0 || (rec.xPDelta ?? 0) > 0) && (
                             <span className="text-fpl-green font-black uppercase tracking-widest text-[8px] flex items-center gap-1">
                               <Sparkles className="w-2.5 h-2.5 animate-spin" /> Top Swap Recommendation
                             </span>
