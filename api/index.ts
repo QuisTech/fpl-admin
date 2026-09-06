@@ -15,7 +15,7 @@ import { getParamsForRiskMode } from './_lib/projection.js';
 import { loadWeights } from './_lib/weights-loader.js';
 const baseWeights = loadWeights('baseline');
 import { Simulator } from './_lib/simulator.js';
-import { solveOptimalSquad, solveCaptain } from './_lib/lp-solver.js';
+import { solveOptimalSquad, solveStartingXI, solveCaptain } from './_lib/lp-solver.js';
 import { getUserTier, mergeUserTiers, getFirestore, isAdminUser } from '../lib/firestore.js';
 import { getLLMTransferDecision, getLLMChipAdvice, generateSocialThread } from './_lib/llm-agent.js';
 import { getNewsContextFromCache } from './_lib/news-service.js';
@@ -530,14 +530,26 @@ export class FPLService {
 
     const availableIds = new Set<number>(scored.map(p => p.id));
 
-    // Helper to build 11-man starting XI from 15-man squad
-    const buildStartingXI = (squadList: ScoredPlayer[]) => {
-      const g = squadList.filter(p => p.position === "GKP").sort(sortByScore);
-      const d = squadList.filter(p => p.position === "DEF").sort(sortByScore);
-      const m = squadList.filter(p => p.position === "MID").sort(sortByScore);
-      const f = squadList.filter(p => p.position === "FWD").sort(sortByScore);
+    // Helper to build 11-man starting XI from 15-man squad using dynamic utility solver
+    const buildStartingXI = (squadList: ScoredPlayer[], targetParams = params) => {
+      const squadIds = squadList.map(p => p.id);
+      try {
+        const xiIds = solveStartingXI(oracle, nextEventId, squadIds, targetParams);
+        const xiIdSet = new Set(xiIds);
+        const starters = squadList.filter(p => xiIdSet.has(p.id));
+        if (starters.length === 11) {
+          return starters;
+        }
+      } catch (err: any) {
+        console.warn("[FPLService] solveStartingXI fallback to utility score sort:", err?.message || err);
+      }
+      // Failsafe: sort by utility score (which incorporates EO and risk weights)
+      const g = squadList.filter(p => p.position === "GKP").sort(sortByUtility);
+      const d = squadList.filter(p => p.position === "DEF").sort(sortByUtility);
+      const m = squadList.filter(p => p.position === "MID").sort(sortByUtility);
+      const f = squadList.filter(p => p.position === "FWD").sort(sortByUtility);
       const mand = [g[0], ...d.slice(0, 3), ...m.slice(0, 2), ...f.slice(0, 1)].filter(Boolean) as ScoredPlayer[];
-      const remaining = [...d.slice(3), ...m.slice(2), ...f.slice(1)].sort(sortByScore);
+      const remaining = [...d.slice(3), ...m.slice(2), ...f.slice(1)].sort(sortByUtility);
       return [...mand, ...remaining.slice(0, 4)].filter(Boolean) as ScoredPlayer[];
     };
 
@@ -569,13 +581,17 @@ export class FPLService {
       }
     }
     
-    const startingXI = buildStartingXI(squad);
+    const startingXI = buildStartingXI(squad, params);
     const startingIds = new Set(startingXI.map(p => p.id));
     const bench = squad.filter(p => !startingIds.has(p.id)).sort((a, b) => {
       if (a.position === 'GKP' && b.position !== 'GKP') return -1;
       if (a.position !== 'GKP' && b.position === 'GKP') return 1;
-      return (b.xP || 0) - (a.xP || 0);
+      return (b.score || b.xP || 0) - (a.score || a.xP || 0);
     });
+
+    // Assign position_in_squad (1-11 for starters, 12-15 for bench) so all downstream UI views stay in sync
+    startingXI.forEach((p, idx) => { p.position_in_squad = idx + 1; });
+    bench.forEach((p, idx) => { p.position_in_squad = 12 + idx; });
       
     const startingIdsArr = Array.from(startingIds);
     const { captain: captainId, viceCaptain: vcId } = solveCaptain(
@@ -613,7 +629,7 @@ export class FPLService {
         // Solve Quant
         const quantIds = solveOptimalSquad(oracle, nextEventId, budget, 8, quantParams, availableIds, lockedSet, excludedSet);
         const quantSquad = scored.filter(p => quantIds.includes(p.id));
-        const quantXI = buildStartingXI(quantSquad);
+        const quantXI = buildStartingXI(quantSquad, quantParams);
         const { captain: qCapId } = solveCaptain(oracle, nextEventId, quantXI.map(p => p.id), quantParams);
         const quantCap = quantXI.find(p => p.id === qCapId) || quantXI[0];
         const quantXp = Math.round((quantXI.reduce((sum, p) => sum + (p.xP || 0), 0) + (quantCap?.xP || 0)) * 10) / 10;
@@ -646,7 +662,7 @@ export class FPLService {
           templateIds = solveOptimalSquad(oracle, nextEventId, budget, 8, templateParams, availableIds, lockedSet, excludedSet);
         }
         const templateSquad = scored.filter(p => templateIds.includes(p.id));
-        const templateXI = buildStartingXI(templateSquad);
+        const templateXI = buildStartingXI(templateSquad, templateParams);
         const { captain: tCapId } = solveCaptain(oracle, nextEventId, templateXI.map(p => p.id), templateParams);
         const templateCap = templateXI.find(p => p.id === tCapId) || templateXI[0];
         const templateXp = Math.round((templateXI.reduce((sum, p) => sum + (p.xP || 0), 0) + (templateCap?.xP || 0)) * 10) / 10;
@@ -760,7 +776,7 @@ export class FPLService {
         const safeOptimalIds = solveOptimalSquad(oracle, nextEventId, budget, 8, safeParams, availableIds);
         if (safeOptimalIds && safeOptimalIds.length > 0) {
           const safeSquad = scored.filter(p => safeOptimalIds.includes(p.id));
-          const safeXI = buildStartingXI(safeSquad);
+          const safeXI = buildStartingXI(safeSquad, safeParams);
           swapAnalysisResult = this.computeSwapAnalysis(safeXI, startingXI);
         }
       } catch (err) {
