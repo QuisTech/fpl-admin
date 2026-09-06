@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { PlayerCard } from './PlayerCard';
 import { RecommendationResponse, ScoredPlayer, TeamSyncResponse } from '../types';
-import { Zap, Shield, Lock, Ban, X, ArrowRightLeft, Calendar, Eye, EyeOff, Activity, Trophy, Coins, Users } from 'lucide-react';
+import { Zap, Shield, Lock, Ban, X, ArrowRightLeft, Calendar, Eye, EyeOff, Activity, Trophy, Coins, Users, Layout, List } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface PitchViewProps {
@@ -23,6 +23,37 @@ interface PitchViewProps {
   onClearConstraints?: () => void;
 }
 
+const getFdrBadgeColor = (difficulty?: number) => {
+  switch (difficulty) {
+    case 1:
+    case 2:
+      return "bg-[#00ff85] text-slate-950 font-black";
+    case 3:
+      return "bg-slate-700 text-slate-200 font-bold";
+    case 4:
+      return "bg-[#ff005a] text-white font-black";
+    case 5:
+      return "bg-[#80072d] text-white font-black";
+    default:
+      return "bg-slate-800 text-slate-400";
+  }
+};
+
+const getPosBadgeColor = (pos?: string) => {
+  switch (pos) {
+    case 'GKP':
+      return "bg-amber-500/20 text-amber-300 border-amber-500/40";
+    case 'DEF':
+      return "bg-sky-500/20 text-sky-300 border-sky-500/40";
+    case 'MID':
+      return "bg-emerald-500/20 text-emerald-300 border-emerald-500/40";
+    case 'FWD':
+      return "bg-rose-500/20 text-rose-300 border-rose-500/40";
+    default:
+      return "bg-slate-800 text-slate-400 border-slate-700";
+  }
+};
+
 export const PitchView = ({ 
   data, 
   syncedData,
@@ -36,6 +67,7 @@ export const PitchView = ({
   onClearConstraints
 }: PitchViewProps) => {
   const [showFixtures, setShowFixtures] = useState(true);
+  const [viewMode, setViewMode] = useState<'pitch' | 'list'>('pitch');
 
   const scenarioComp = (data as any)?.engineDiagnostics?.metrics?.scenarioComparison;
   const delta = scenarioComp?.delta;
@@ -276,254 +308,699 @@ export const PitchView = ({
         </div>
       )}
 
-      {/* 🌟 Authentic Football Pitch Container (1:1 Proportional Match with Official FPL) */}
-      <div className="relative mx-auto w-full max-w-2xl py-0.5 sm:py-1">
-        <div className="relative rounded-2xl shadow-2xl border-2 border-slate-800 bg-[#00a350] p-1.5 sm:p-3">
-          
-          {/* 🌿 Clipped Stadium Turf & Diagram Underlay (Keeps Rounded Corners without Clipping Tooltips) */}
-          <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
-            {/* Realistic Mown Grass Horizontal Lawn Stripes Background */}
-            <div 
-              className="absolute inset-0"
-              style={{
-                background: `repeating-linear-gradient(
-                  to bottom,
-                  #00a350,
-                  #00a350 40px,
-                  #009b4d 40px,
-                  #009b4d 80px
-                )`
-              }}
-            />
+      {/* 🎛️ Pitch / List View Mode & Formation Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-2 px-1 max-w-2xl sm:max-w-4xl mx-auto w-full">
+        <div className="flex items-center gap-2">
+          <span className="bg-slate-900 border border-slate-800 text-slate-300 font-mono font-bold text-[10px] sm:text-xs px-2.5 py-1 rounded-lg uppercase tracking-wider">
+            {formation.def.length}-{formation.mid.length}-{formation.fwd.length} Formation
+          </span>
+          <span className="text-slate-600 hidden sm:inline">•</span>
+          <span className="text-[10px] text-slate-400 font-mono hidden sm:inline">
+            11 Starters, {benchPlayers.length} Subs
+          </span>
+        </div>
 
-            {/* 🏟️ Authentic Zoomed Official Pitch Diagram SVG (Aligned with Rows) */}
-            <svg 
-              className="absolute inset-0 w-full h-full stroke-white/80 fill-none" 
-              preserveAspectRatio="none" 
-              viewBox="0 0 800 680"
-            >
-              {/* 🏟️ Stadium Outer Flanks (#0f172a Dark Surround Outside Pitch & Billboard Headers) */}
-              <polygon 
-                points="-10,-10 105,-10 105,4 0,240 -10,240 -10,-10" 
-                className="fill-[#0f172a] stroke-[#0f172a]" 
-                strokeWidth="2"
-              />
-              <polygon 
-                points="810,-10 695,-10 695,4 800,240 810,240 810,-10" 
-                className="fill-[#0f172a] stroke-[#0f172a]" 
-                strokeWidth="2"
-              />
-              <polygon 
-                points="105,-10 695,-10 695,4 105,4" 
-                className="fill-[#0f172a] stroke-[#0f172a]" 
-                strokeWidth="2"
-              />
-
-              {/* 🏟️ Straight Continuous Parallel Outer Pitch Boundary (From Top Corners at y=4 to Outer Edges at y=240) */}
-              <line x1="105" y1="4" x2="0" y2="240" strokeWidth="2" className="stroke-white/70" />
-              <line x1="695" y1="4" x2="800" y2="240" strokeWidth="2" className="stroke-white/70" />
-              <line x1="105" y1="4" x2="695" y2="4" strokeWidth="2" className="stroke-white/70" />
-
-              {/* 🌟 Left Billboard: Vibrant Cyan "Fantasy" with Premier League Crown Lion */}
-              <rect x="125" y="4" width="215" height="20" rx="4" className="fill-[#00e5ff] stroke-none" />
-              <g transform="translate(170, 6)">
-                {/* Crowned Lion Head Vector */}
-                <path d="M12 2L14.5 5.5L18 4L16.5 8L20 9.5L17.5 12.5L18.5 16L15 14.5L13 18L11 14.5L7.5 16L8.5 12.5L6 9.5L9.5 8L8 4L11.5 5.5Z" fill="#37003c" />
-                <text x="24" y="13" fill="#37003c" fontSize="13" fontWeight="900" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="0.4">Fantasy</text>
-              </g>
-
-              {/* 🌟 Center Goal Net (Neat & Straight Rectangular Frame with Crisp Grid) */}
-              <rect x="340" y="4" width="120" height="20" className="fill-[#00b4d8]/25 stroke-white" strokeWidth="2" />
-              <line x1="364" y1="4" x2="364" y2="24" strokeWidth="1" className="stroke-white/50" />
-              <line x1="388" y1="4" x2="388" y2="24" strokeWidth="1" className="stroke-white/50" />
-              <line x1="412" y1="4" x2="412" y2="24" strokeWidth="1" className="stroke-white/50" />
-              <line x1="436" y1="4" x2="436" y2="24" strokeWidth="1" className="stroke-white/50" />
-              <line x1="340" y1="10" x2="460" y2="10" strokeWidth="1" className="stroke-white/50" />
-              <line x1="340" y1="17" x2="460" y2="17" strokeWidth="1" className="stroke-white/50" />
-
-              {/* 🌟 Right Billboard: Vibrant Violet "Fantasy" with Premier League Crown Lion */}
-              <rect x="460" y="4" width="215" height="20" rx="4" className="fill-[#6366f1] stroke-none" />
-              <g transform="translate(505, 6)">
-                {/* Crowned Lion Head Vector */}
-                <path d="M12 2L14.5 5.5L18 4L16.5 8L20 9.5L17.5 12.5L18.5 16L15 14.5L13 18L11 14.5L7.5 16L8.5 12.5L6 9.5L9.5 8L8 4L11.5 5.5Z" fill="#1e1b4b" />
-                <text x="24" y="13" fill="#1e1b4b" fontSize="13" fontWeight="900" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="0.4">Fantasy</text>
-              </g>
-
-              {/* Top Goal Line */}
-              <line x1="125" y1="24" x2="675" y2="24" strokeWidth="2.5" />
-
-              {/* Slanted Sideline Touchlines */}
-              <line x1="125" y1="24" x2="0" y2="290" strokeWidth="3" />
-              <line x1="0" y1="290" x2="0" y2="450" strokeWidth="3" />
-              <line x1="675" y1="24" x2="800" y2="290" strokeWidth="3" />
-              <line x1="800" y1="290" x2="800" y2="450" strokeWidth="3" />
-
-              {/* Top 6-Yard Goal Area */}
-              <polygon points="295,24 505,24 512,62 288,62" strokeWidth="2" />
-
-              {/* Top 18-Yard Penalty Area in Perspective */}
-              <polygon points="200,24 600,24 618,125 182,125" strokeWidth="2.5" />
-              
-              {/* Penalty Spot */}
-              <circle cx="400" cy="90" r="4" className="fill-white" stroke="none" />
-              
-              {/* Penalty Arc ('D' Curving Downwards from 18-Yard Box) */}
-              <path d="M 325,125 A 85,38 0 0,0 475,125" strokeWidth="2.2" />
-
-              {/* Top Corner Arcs */}
-              <path d="M 117.0,46.8 A 24,24 0 0,0 149,24" strokeWidth="2.2" />
-              <path d="M 651,24 A 24,24 0 0,0 683.0,46.8" strokeWidth="2.2" />
-
-              {/* Halfway Line (Cutting horizontally through the center of the Forwards row) */}
-              <line x1="0" y1="450" x2="800" y2="450" strokeWidth="3.5" />
-              
-              {/* Center Circle (Encircling Forwards, bottom touches at Bench Shelf Intersection) */}
-              <ellipse cx="400" cy="450" rx="160" ry="85" strokeWidth="2.8" />
-              <circle cx="400" cy="450" r="4.5" className="fill-white" stroke="none" />
-            </svg>
-          </div>
-
-          {/* 🎛️ Pitch Stadium HUD: Floating Fixture Ticker Toggle */}
-          <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-30">
+        <div className="flex items-center gap-2">
+          {/* Official FPL Pitch / List Switcher (Segmented Radio Button Group) */}
+          <div className="flex items-center gap-1 bg-slate-900/95 p-1 rounded-lg border border-slate-800 shadow-inner" role="radiogroup" aria-label="Lineup view format">
             <button
-              onClick={() => setShowFixtures(!showFixtures)}
+              type="button"
+              role="radio"
+              aria-checked={viewMode === 'pitch'}
+              data-selected={viewMode === 'pitch'}
+              tabIndex={0}
+              data-react-aria-pressable="true"
+              onClick={() => setViewMode('pitch')}
               className={cn(
-                "flex items-center gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg border text-[8.5px] sm:text-[9.5px] font-extrabold uppercase tracking-wider backdrop-blur-md transition-all shadow-lg select-none",
-                showFixtures 
-                  ? "bg-black/70 border-emerald-400/50 text-[#00ff85] hover:bg-black/90 hover:border-emerald-400" 
-                  : "bg-black/40 border-white/20 text-white/70 hover:bg-black/70 hover:text-white"
+                "flex items-center gap-1.5 px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-wider transition-all",
+                viewMode === 'pitch'
+                  ? "bg-fpl-green text-slate-950 shadow-[0_0_10px_rgba(0,255,133,0.35)] font-black"
+                  : "text-slate-400 hover:text-slate-200"
               )}
-              title="Toggle upcoming 3-match FDR fixture ticker under players"
             >
-              {showFixtures ? (
-                <>
-                  <Eye className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#00ff85]" />
-                  <span>3-Match FDR: On</span>
-                </>
-              ) : (
-                <>
-                  <EyeOff className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white/50" />
-                  <span>3-Match FDR: Off</span>
-                </>
+              <Layout className="w-3 h-3" />
+              <span>Pitch</span>
+            </button>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={viewMode === 'list'}
+              data-selected={viewMode === 'list'}
+              tabIndex={0}
+              data-react-aria-pressable="true"
+              onClick={() => setViewMode('list')}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-wider transition-all",
+                viewMode === 'list'
+                  ? "bg-fpl-green text-slate-950 shadow-[0_0_10px_rgba(0,255,133,0.35)] font-black"
+                  : "text-slate-400 hover:text-slate-200"
               )}
+            >
+              <List className="w-3 h-3" />
+              <span>List</span>
             </button>
           </div>
 
-          {/* 🏟️ Starting XI Lines on the Pitch (Ultra-Compact Responsive Row Proportions for Mobile) */}
-          <div className="relative z-10 flex flex-col justify-between min-h-[360px] sm:min-h-[420px] md:min-h-[490px] pt-4 pb-0.5 sm:pt-6 sm:pb-1.5">
-            
-            {/* Row 1: Goalkeeper (Inside Goalmouth & 18-Yard Box) */}
-            <div className="flex justify-center items-center w-full my-0 sm:my-0.5">
-              {formation.gkp.map(p => (
-                <PlayerCard 
-                  key={p.id} 
-                  player={p} 
-                  showFixtures={showFixtures}
-                  isCaptain={!!(data?.captain?.id && p.id === data.captain.id)} 
-                  isViceCaptain={!!(data?.viceCaptain?.id && p.id === data.viceCaptain.id)}
-                  isLocked={lockedPlayerIds.includes(p.id)}
-                  isExcluded={excludedPlayerIds.includes(p.id)}
-                  onToggleLock={onToggleLock}
-                  onToggleExclude={onToggleExclude}
-                />
-              ))}
-            </div>
-
-            {/* Row 2: Defenders (Upper Pitch between Penalty Box & Midfield) */}
-            <div className="flex justify-around items-center w-full max-w-[88%] mx-auto my-0 sm:my-0.5">
-              {formation.def.map(p => (
-                <PlayerCard 
-                  key={p.id} 
-                  player={p} 
-                  showFixtures={showFixtures}
-                  isCaptain={!!(data?.captain?.id && p.id === data.captain.id)} 
-                  isViceCaptain={!!(data?.viceCaptain?.id && p.id === data.viceCaptain.id)}
-                  isLocked={lockedPlayerIds.includes(p.id)}
-                  isExcluded={excludedPlayerIds.includes(p.id)}
-                  onToggleLock={onToggleLock}
-                  onToggleExclude={onToggleExclude}
-                />
-              ))}
-            </div>
-
-            {/* Row 3: Midfielders (Wider Middle Pitch above Halfway Line) */}
-            <div className="flex justify-around items-center w-full max-w-[98%] mx-auto my-0 sm:my-0.5">
-              {formation.mid.map(p => (
-                <PlayerCard 
-                  key={p.id} 
-                  player={p} 
-                  showFixtures={showFixtures}
-                  isCaptain={!!(data?.captain?.id && p.id === data.captain.id)} 
-                  isViceCaptain={!!(data?.viceCaptain?.id && p.id === data.viceCaptain.id)}
-                  isLocked={lockedPlayerIds.includes(p.id)}
-                  isExcluded={excludedPlayerIds.includes(p.id)}
-                  onToggleLock={onToggleLock}
-                  onToggleExclude={onToggleExclude}
-                />
-              ))}
-            </div>
-
-            {/* Row 4: Forwards (Inside the Center Circle & Over Halfway Line) */}
-            <div className="flex justify-around items-center w-full max-w-[80%] mx-auto my-0 sm:my-0.5">
-              {formation.fwd.map(p => (
-                <PlayerCard 
-                  key={p.id} 
-                  player={p} 
-                  showFixtures={showFixtures}
-                  isCaptain={!!(data?.captain?.id && p.id === data.captain.id)} 
-                  isViceCaptain={!!(data?.viceCaptain?.id && p.id === data.viceCaptain.id)}
-                  isLocked={lockedPlayerIds.includes(p.id)}
-                  isExcluded={excludedPlayerIds.includes(p.id)}
-                  onToggleLock={onToggleLock}
-                  onToggleExclude={onToggleExclude}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* 🌿 Smooth Bottom Grass-to-App Background Fade (#0f172a at Bench Nameplates) */}
-          <div className="absolute inset-x-0 bottom-0 h-20 sm:h-28 bg-gradient-to-b from-transparent via-[#0f172a]/70 to-[#0f172a] pointer-events-none z-10" />
-
-          {/* 🪑 Official Substitutes Bench Dugout Shelf (Proportional Frosted Shelf at Pitch Bottom intersecting Center Circle) */}
-          <div className="relative z-20 w-full max-w-[94%] mx-auto mt-0.5 sm:mt-1.5 rounded-xl border border-white/15 bg-[#0f172a]/40 backdrop-blur-md p-1.5 sm:p-2.5 shadow-2xl">
-            <div className="flex justify-around items-end gap-0.5 sm:gap-1.5 px-0.5 sm:px-1">
-              {benchPlayers.map((p, idx) => {
-                const isGkp = idx === 0 || p.element_type === 1 || p.position === 'GKP';
-                const subLabel = isGkp ? 'GKP' : `${idx}. ${p.position || 'SUB'}`;
-
-                return (
-                  <div key={p.id} className="flex flex-col items-center gap-0.5">
-                    {/* Official Position / Auto-Sub Priority Header Label */}
-                    <div className="text-[8px] sm:text-[9px] font-mono font-extrabold uppercase tracking-wider text-emerald-100 border-b border-dotted border-white/40 pb-0.5 px-0.5">
-                      {subLabel}
-                    </div>
-
-                    {/* Semi-transparent frosted slot card wrapper */}
-                    <div className="bg-white/10 rounded-lg p-0.5 sm:p-1 border border-white/15 shadow-inner">
-                      <PlayerCard 
-                        player={p} 
-                        compact 
-                        benchIndex={idx}
-                        showFixtures={showFixtures}
-                        isLocked={lockedPlayerIds.includes(p.id)}
-                        isExcluded={excludedPlayerIds.includes(p.id)}
-                        onToggleLock={onToggleLock}
-                        onToggleExclude={onToggleExclude}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            
-            {/* 🪑 Official Substitutes Header Label */}
-            <p className="text-center text-white font-extrabold text-[10px] sm:text-[11px] tracking-wider mt-1 drop-shadow-md">
-              Substitutes
-            </p>
-          </div>
-
+          {/* FDR Fixture Ticker Toggle */}
+          <button
+            type="button"
+            onClick={() => setShowFixtures(!showFixtures)}
+            className={cn(
+              "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[9.5px] font-extrabold uppercase tracking-wider backdrop-blur-md transition-all shadow-sm select-none",
+              showFixtures 
+                ? "bg-slate-900/90 border-emerald-500/40 text-fpl-green hover:bg-slate-900" 
+                : "bg-slate-900/50 border-slate-800 text-slate-400 hover:bg-slate-900 hover:text-white"
+            )}
+            title="Toggle upcoming 3-match FDR fixture ticker"
+          >
+            {showFixtures ? (
+              <>
+                <Eye className="w-3 h-3 text-fpl-green" />
+                <span>FDR: On</span>
+              </>
+            ) : (
+              <>
+                <EyeOff className="w-3 h-3 text-slate-500" />
+                <span>FDR: Off</span>
+              </>
+            )}
+          </button>
         </div>
       </div>
+
+      {/* 🏟️ View Mode Content: Authentic Pitch or Official FPL List View */}
+      {viewMode === 'pitch' ? (
+        /* 🌟 Authentic Football Pitch Container (1:1 Proportional Match with Official FPL) */
+        <div className="relative mx-auto w-full max-w-2xl py-0.5 sm:py-1">
+          <div className="relative rounded-2xl shadow-2xl border-2 border-slate-800 bg-[#00a350] p-1.5 sm:p-3">
+            
+            {/* 🌿 Clipped Stadium Turf & Diagram Underlay (Keeps Rounded Corners without Clipping Tooltips) */}
+            <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
+              {/* Realistic Mown Grass Horizontal Lawn Stripes Background */}
+              <div 
+                className="absolute inset-0"
+                style={{
+                  background: `repeating-linear-gradient(
+                    to bottom,
+                    #00a350,
+                    #00a350 40px,
+                    #009b4d 40px,
+                    #009b4d 80px
+                  )`
+                }}
+              />
+
+              {/* 🏟️ Authentic Zoomed Official Pitch Diagram SVG (Aligned with Rows) */}
+              <svg 
+                className="absolute inset-0 w-full h-full stroke-white/80 fill-none" 
+                preserveAspectRatio="none" 
+                viewBox="0 0 800 680"
+              >
+                {/* 🏟️ Stadium Outer Flanks (#0f172a Dark Surround Outside Pitch & Billboard Headers) */}
+                <polygon 
+                  points="-10,-10 105,-10 105,4 0,240 -10,240 -10,-10" 
+                  className="fill-[#0f172a] stroke-[#0f172a]" 
+                  strokeWidth="2" 
+                />
+                <polygon 
+                  points="810,-10 695,-10 695,4 800,240 810,240 810,-10" 
+                  className="fill-[#0f172a] stroke-[#0f172a]" 
+                  strokeWidth="2" 
+                />
+                <polygon 
+                  points="105,-10 695,-10 695,4 105,4" 
+                  className="fill-[#0f172a] stroke-[#0f172a]" 
+                  strokeWidth="2" 
+                />
+
+                {/* 🌟 Left Billboard: Vibrant Hot Pink "Fantasy" with Premier League Crown Lion */}
+                <rect x="125" y="4" width="215" height="20" rx="4" className="fill-[#e90052] stroke-none" />
+                <g transform="translate(170, 6)">
+                  {/* Crowned Lion Head Vector */}
+                  <path d="M12 2L14.5 5.5L18 4L16.5 8L20 9.5L17.5 12.5L18.5 16L15 14.5L13 18L11 14.5L7.5 16L8.5 12.5L6 9.5L9.5 8L8 4L11.5 5.5Z" fill="#37003c" />
+                  <text x="24" y="13" fill="#37003c" fontSize="13" fontWeight="900" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="0.4">Fantasy</text>
+                </g>
+
+                {/* 🌟 Center Goal Net (Neat & Straight Rectangular Frame with Crisp Grid) */}
+                <rect x="340" y="4" width="120" height="20" className="fill-[#00b4d8]/25 stroke-white" strokeWidth="2" />
+                <line x1="364" y1="4" x2="364" y2="24" strokeWidth="1" className="stroke-white/50" />
+                <line x1="388" y1="4" x2="388" y2="24" strokeWidth="1" className="stroke-white/50" />
+                <line x1="412" y1="4" x2="412" y2="24" strokeWidth="1" className="stroke-white/50" />
+                <line x1="436" y1="4" x2="436" y2="24" strokeWidth="1" className="stroke-white/50" />
+                <line x1="340" y1="10" x2="460" y2="10" strokeWidth="1" className="stroke-white/50" />
+                <line x1="340" y1="17" x2="460" y2="17" strokeWidth="1" className="stroke-white/50" />
+
+                {/* 🌟 Right Billboard: Vibrant Violet "Fantasy" with Premier League Crown Lion */}
+                <rect x="460" y="4" width="215" height="20" rx="4" className="fill-[#6366f1] stroke-none" />
+                <g transform="translate(505, 6)">
+                  {/* Crowned Lion Head Vector */}
+                  <path d="M12 2L14.5 5.5L18 4L16.5 8L20 9.5L17.5 12.5L18.5 16L15 14.5L13 18L11 14.5L7.5 16L8.5 12.5L6 9.5L9.5 8L8 4L11.5 5.5Z" fill="#1e1b4b" />
+                  <text x="24" y="13" fill="#1e1b4b" fontSize="13" fontWeight="900" fontFamily="system-ui, -apple-system, sans-serif" letterSpacing="0.4">Fantasy</text>
+                </g>
+
+                {/* Top Goal Line */}
+                <line x1="125" y1="24" x2="675" y2="24" strokeWidth="2.5" />
+
+                {/* Slanted Sideline Touchlines */}
+                <line x1="125" y1="24" x2="0" y2="290" strokeWidth="3" />
+                <line x1="0" y1="290" x2="0" y2="450" strokeWidth="3" />
+                <line x1="675" y1="24" x2="800" y2="290" strokeWidth="3" />
+                <line x1="800" y1="290" x2="800" y2="450" strokeWidth="3" />
+
+                {/* Top 6-Yard Goal Area */}
+                <polygon points="295,24 505,24 512,62 288,62" strokeWidth="2" />
+
+                {/* Top 18-Yard Penalty Area in Perspective */}
+                <polygon points="200,24 600,24 618,125 182,125" strokeWidth="2.5" />
+                
+                {/* Penalty Spot */}
+                <circle cx="400" cy="90" r="4" className="fill-white" stroke="none" />
+                
+                {/* Penalty Arc ('D' Curving Downwards from 18-Yard Box) */}
+                <path d="M 325,125 A 85,38 0 0,0 475,125" strokeWidth="2.2" />
+
+                {/* Top Corner Arcs */}
+                <path d="M 117.0,46.8 A 24,24 0 0,0 149,24" strokeWidth="2.2" />
+                <path d="M 651,24 A 24,24 0 0,0 683.0,46.8" strokeWidth="2.2" />
+
+                {/* Halfway Line */}
+                <line x1="0" y1="450" x2="800" y2="450" strokeWidth="3" />
+
+                {/* Center Circle (Encircling Forwards, bottom touches at Bench Shelf Intersection) */}
+                <ellipse cx="400" cy="450" rx="160" ry="85" strokeWidth="2.8" />
+                <circle cx="400" cy="450" r="4.5" className="fill-white" stroke="none" />
+              </svg>
+            </div>
+
+            {/* 🎛️ Pitch Stadium HUD: Floating Fixture Ticker Toggle */}
+            <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-30">
+              <button
+                onClick={() => setShowFixtures(!showFixtures)}
+                className={cn(
+                  "flex items-center gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg border text-[8.5px] sm:text-[9.5px] font-extrabold uppercase tracking-wider backdrop-blur-md transition-all shadow-lg select-none",
+                  showFixtures 
+                    ? "bg-black/70 border-emerald-400/50 text-[#00ff85] hover:bg-black/90 hover:border-emerald-400" 
+                    : "bg-black/40 border-white/20 text-white/70 hover:bg-black/70 hover:text-white"
+                )}
+                title="Toggle upcoming 3-match FDR fixture ticker under players"
+              >
+                {showFixtures ? (
+                  <>
+                    <Eye className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#00ff85]" />
+                    <span>3-Match FDR: On</span>
+                  </>
+                ) : (
+                  <>
+                    <EyeOff className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white/50" />
+                    <span>3-Match FDR: Off</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* 🏟️ Starting XI Lines on the Pitch (Ultra-Compact Responsive Row Proportions for Mobile) */}
+            <div className="relative z-10 flex flex-col justify-between min-h-[360px] sm:min-h-[420px] md:min-h-[490px] pt-4 pb-0.5 sm:pt-6 sm:pb-1.5">
+              
+              {/* Row 1: Goalkeeper (Inside Goalmouth & 18-Yard Box) */}
+              <div className="flex justify-center items-center py-0 sm:py-1">
+                {formation.gkp.map(p => (
+                  <PlayerCard 
+                    key={p.id} 
+                    player={p} 
+                    compact 
+                    showFixtures={showFixtures}
+                    isCaptain={p.isCaptain}
+                    isViceCaptain={p.isViceCaptain}
+                    isLocked={lockedPlayerIds.includes(p.id)}
+                    isExcluded={excludedPlayerIds.includes(p.id)}
+                    onToggleLock={onToggleLock}
+                    onToggleExclude={onToggleExclude}
+                  />
+                ))}
+              </div>
+
+              {/* Row 2: Defenders (Above Penalty Arc) */}
+              <div className="flex justify-around items-center px-0.5 sm:px-2 py-0 sm:py-1">
+                {formation.def.map(p => (
+                  <PlayerCard 
+                    key={p.id} 
+                    player={p} 
+                    compact 
+                    showFixtures={showFixtures}
+                    isCaptain={p.isCaptain}
+                    isViceCaptain={p.isViceCaptain}
+                    isLocked={lockedPlayerIds.includes(p.id)}
+                    isExcluded={excludedPlayerIds.includes(p.id)}
+                    onToggleLock={onToggleLock}
+                    onToggleExclude={onToggleExclude}
+                  />
+                ))}
+              </div>
+
+              {/* Row 3: Midfielders (Approaching Halfway Line) */}
+              <div className="flex justify-around items-center px-0.5 sm:px-2 py-0 sm:py-1">
+                {formation.mid.map(p => (
+                  <PlayerCard 
+                    key={p.id} 
+                    player={p} 
+                    compact 
+                    showFixtures={showFixtures}
+                    isCaptain={p.isCaptain}
+                    isViceCaptain={p.isViceCaptain}
+                    isLocked={lockedPlayerIds.includes(p.id)}
+                    isExcluded={excludedPlayerIds.includes(p.id)}
+                    onToggleLock={onToggleLock}
+                    onToggleExclude={onToggleExclude}
+                  />
+                ))}
+              </div>
+
+              {/* Row 4: Forwards (Inside Center Circle) */}
+              <div className="flex justify-around items-center px-1 sm:px-8 py-0 sm:py-1">
+                {formation.fwd.map(p => (
+                  <PlayerCard 
+                    key={p.id} 
+                    player={p} 
+                    compact 
+                    showFixtures={showFixtures}
+                    isCaptain={p.isCaptain}
+                    isViceCaptain={p.isViceCaptain}
+                    isLocked={lockedPlayerIds.includes(p.id)}
+                    isExcluded={excludedPlayerIds.includes(p.id)}
+                    onToggleLock={onToggleLock}
+                    onToggleExclude={onToggleExclude}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* 🌿 Smooth Bottom Grass-to-App Background Fade (#0f172a at Bench Nameplates) */}
+            <div className="absolute inset-x-0 bottom-0 h-20 sm:h-28 bg-gradient-to-b from-transparent via-[#0f172a]/70 to-[#0f172a] pointer-events-none z-10" />
+
+            {/* 🪑 Official Substitutes Bench Dugout Shelf (Proportional Frosted Shelf at Pitch Bottom intersecting Center Circle) */}
+            <div className="relative z-20 w-full max-w-[94%] mx-auto mt-0.5 sm:mt-1.5 rounded-xl border border-white/15 bg-[#0f172a]/40 backdrop-blur-md p-1.5 sm:p-2.5 shadow-2xl">
+              <div className="flex justify-around items-end gap-0.5 sm:gap-1.5 px-0.5 sm:px-1">
+                {benchPlayers.map((p, idx) => {
+                  const isGkp = idx === 0 || p.element_type === 1 || p.position === 'GKP';
+                  const subLabel = isGkp ? 'GKP' : `${idx}. ${p.position || 'SUB'}`;
+
+                  return (
+                    <div key={p.id} className="flex flex-col items-center gap-0.5">
+                      {/* Official Position / Auto-Sub Priority Header Label */}
+                      <div className="text-[8px] sm:text-[9px] font-mono font-extrabold uppercase tracking-wider text-emerald-100 border-b border-dotted border-white/40 pb-0.5 px-0.5">
+                        {subLabel}
+                      </div>
+
+                      {/* Semi-transparent frosted slot card wrapper */}
+                      <div className="bg-white/10 rounded-lg p-0.5 sm:p-1 border border-white/15 shadow-inner">
+                        <PlayerCard 
+                          player={p} 
+                          compact 
+                          benchIndex={idx}
+                          showFixtures={showFixtures}
+                          isLocked={lockedPlayerIds.includes(p.id)}
+                          isExcluded={excludedPlayerIds.includes(p.id)}
+                          onToggleLock={onToggleLock}
+                          onToggleExclude={onToggleExclude}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {/* 🪑 Official Substitutes Header Label */}
+              <p className="text-center text-white font-extrabold text-[10px] sm:text-[11px] tracking-wider mt-1 drop-shadow-md">
+                Substitutes
+              </p>
+            </div>
+
+          </div>
+        </div>
+      ) : (
+        /* 📋 Official FPL List View Container */
+        <motion.div
+          key="list-view-container"
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.2 }}
+          className="w-full max-w-4xl mx-auto space-y-3"
+        >
+          {/* Starting XI Section Table */}
+          <div className="bg-slate-950/90 border border-slate-800/80 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-md">
+            {/* Starting XI Section Header */}
+            <div className="bg-slate-900/90 px-3 sm:px-4 py-2.5 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-fpl-green animate-pulse" />
+                <span className="text-xs sm:text-sm font-black uppercase tracking-wider text-white">
+                  Starting XI
+                </span>
+                <span className="text-[10px] font-mono bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-bold border border-slate-700">
+                  {formation.gkp.length + formation.def.length + formation.mid.length + formation.fwd.length} Players
+                </span>
+              </div>
+              <div className="flex items-center gap-3 text-[10px] sm:text-xs font-mono">
+                <span className="text-slate-400">
+                  Cost: <span className="text-slate-200 font-bold">£{((formation.gkp.concat(formation.def, formation.mid, formation.fwd).reduce((sum, p) => sum + (p.now_cost || p.cost || 0), 0)) / 10).toFixed(1)}M</span>
+                </span>
+                <span className="text-slate-600">•</span>
+                <span className="text-slate-400">
+                  Expected: <span className="text-fpl-green font-black">{expectedPoints.toFixed(1)} pts</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Starting XI Table Content */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-800/80 bg-slate-900/40 text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
+                    <th className="py-2.5 px-3">Pos</th>
+                    <th className="py-2.5 px-3">Player</th>
+                    <th className="py-2.5 px-3">Next Fixture</th>
+                    <th className="py-2.5 px-3 text-right">Cost</th>
+                    <th className="py-2.5 px-3 text-right">GW xP</th>
+                    <th className="py-2.5 px-3 text-right hidden md:table-cell">8-GW xP</th>
+                    <th className="py-2.5 px-3 text-right hidden sm:table-cell">Top-1K EO</th>
+                    {(onToggleLock || onToggleExclude) && (
+                      <th className="py-2.5 px-3 text-center">Rules</th>
+                    )}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/40 text-xs">
+                  {[...formation.gkp, ...formation.def, ...formation.mid, ...formation.fwd].map(p => {
+                    const isLocked = lockedPlayerIds.includes(p.id);
+                    const isExcluded = excludedPlayerIds.includes(p.id);
+                    const nextFix = p.next_fixtures?.[0];
+
+                    return (
+                      <tr 
+                        key={p.id} 
+                        className={cn(
+                          "hover:bg-slate-900/70 transition-colors",
+                          isLocked && "bg-amber-400/5",
+                          isExcluded && "bg-rose-500/5 opacity-60"
+                        )}
+                      >
+                        {/* Position Badge */}
+                        <td className="py-2.5 px-3 whitespace-nowrap">
+                          <span className={cn("px-2 py-0.5 rounded text-[9.5px] font-mono font-black uppercase tracking-wider border", getPosBadgeColor(p.position))}>
+                            {p.position}
+                          </span>
+                        </td>
+
+                        {/* Player Name & Team */}
+                        <td className="py-2.5 px-3">
+                          <div className="flex items-center gap-2">
+                            <div className="flex flex-col">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="font-bold text-white text-xs sm:text-sm">{p.web_name}</span>
+                                {p.isCaptain && (
+                                  <span className="w-4 h-4 rounded-full bg-[#37003c] text-white flex items-center justify-center text-[9px] font-black border border-white/70 shadow-sm" title="Captain (2x Points)">
+                                    C
+                                  </span>
+                                )}
+                                {p.isViceCaptain && (
+                                  <span className="w-4 h-4 rounded-full bg-slate-800 text-slate-200 flex items-center justify-center text-[9px] font-black border border-slate-600" title="Vice Captain">
+                                    V
+                                  </span>
+                                )}
+                                {p.chance_of_playing_next_round !== undefined && p.chance_of_playing_next_round !== null && p.chance_of_playing_next_round < 100 && (
+                                  <span className="bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[8px] font-mono px-1 rounded font-bold">
+                                    {p.chance_of_playing_next_round}%
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-[10px] text-slate-400 font-medium">
+                                {p.team_name || p.team_short_name}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Next Fixture with FDR */}
+                        <td className="py-2.5 px-3 whitespace-nowrap">
+                          {nextFix ? (
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-xs font-mono font-bold text-slate-200">
+                                {nextFix.opponent} ({nextFix.is_home ? 'H' : 'A'})
+                              </span>
+                              <span className={cn("text-[9px] font-mono px-1.5 py-0.5 rounded shadow-sm", getFdrBadgeColor(nextFix.difficulty))}>
+                                FDR {nextFix.difficulty}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-slate-500 font-mono">TBD</span>
+                          )}
+                        </td>
+
+                        {/* Cost */}
+                        <td className="py-2.5 px-3 text-right font-mono text-xs text-slate-300 font-bold whitespace-nowrap">
+                          £{((p.now_cost || p.cost || 0) / 10).toFixed(1)}m
+                        </td>
+
+                        {/* Immediate GW xP */}
+                        <td className="py-2.5 px-3 text-right whitespace-nowrap">
+                          <span className="font-mono font-black text-xs sm:text-sm text-fpl-green">
+                            {p.isCaptain ? ((p.xP || 0) * 2).toFixed(1) : (p.xP || 0).toFixed(1)}
+                          </span>
+                          {p.isCaptain && <span className="text-[9px] text-fpl-green/80 ml-1 font-mono">(2x)</span>}
+                        </td>
+
+                        {/* 8-GW Horizon xP */}
+                        <td className="py-2.5 px-3 text-right font-mono text-xs text-slate-300 font-semibold whitespace-nowrap hidden md:table-cell">
+                          {(p.horizonXP || (p.xP || 0) * 8).toFixed(1)}
+                        </td>
+
+                        {/* Top-1K EO */}
+                        <td className="py-2.5 px-3 text-right font-mono text-xs whitespace-nowrap hidden sm:table-cell">
+                          <span className={cn(
+                            "font-bold",
+                            (p.eo ?? 0) >= 30 ? "text-cyan-400" : "text-slate-400"
+                          )}>
+                            {p.eo !== undefined ? `${p.eo}%` : `${p.ownership || 0}%`}
+                          </span>
+                        </td>
+
+                        {/* Lock & Exclude Rule Buttons */}
+                        {(onToggleLock || onToggleExclude) && (
+                          <td className="py-2.5 px-3 text-center whitespace-nowrap">
+                            <div className="flex items-center justify-center gap-1">
+                              {onToggleLock && (
+                                <button
+                                  type="button"
+                                  onClick={() => onToggleLock(p.id)}
+                                  title={isLocked ? "Unlock player" : "Lock player into squad"}
+                                  className={cn(
+                                    "p-1 rounded transition-colors",
+                                    isLocked
+                                      ? "bg-amber-400/20 text-amber-300 border border-amber-400/40"
+                                      : "text-slate-500 hover:text-slate-300"
+                                  )}
+                                >
+                                  <Lock className="w-3 h-3" />
+                                </button>
+                              )}
+                              {onToggleExclude && (
+                                <button
+                                  type="button"
+                                  onClick={() => onToggleExclude(p.id)}
+                                  title={isExcluded ? "Remove exclusion" : "Exclude player from squad"}
+                                  className={cn(
+                                    "p-1 rounded transition-colors",
+                                    isExcluded
+                                      ? "bg-rose-500/20 text-rose-400 border border-rose-500/40"
+                                      : "text-slate-500 hover:text-slate-300"
+                                  )}
+                                >
+                                  <Ban className="w-3 h-3" />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Substitutes / Bench Dugout Section Table */}
+          <div className="bg-slate-950/90 border border-slate-800/80 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-md">
+            {/* Bench Header */}
+            <div className="bg-slate-900/80 px-3 sm:px-4 py-2.5 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-slate-400" />
+                <span className="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-300">
+                  Substitutes / Bench Dugout
+                </span>
+                <span className="text-[10px] font-mono bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-700 font-bold">
+                  {benchPlayers.length} Subs
+                </span>
+              </div>
+              <div className="flex items-center gap-3 text-[10px] sm:text-xs font-mono">
+                <span className="text-slate-400">
+                  Cost: <span className="text-slate-200 font-bold">£{((benchPlayers.reduce((sum, p) => sum + (p.now_cost || p.cost || 0), 0)) / 10).toFixed(1)}M</span>
+                </span>
+                <span className="text-slate-600">•</span>
+                <span className="text-slate-400">
+                  Bench xP: <span className="text-amber-400 font-black">{benchPlayers.reduce((sum, p) => sum + (p.xP || 0), 0).toFixed(1)} pts</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Bench Table Content */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-800/80 bg-slate-900/40 text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
+                    <th className="py-2.5 px-3">Sub Priority</th>
+                    <th className="py-2.5 px-3">Player</th>
+                    <th className="py-2.5 px-3">Next Fixture</th>
+                    <th className="py-2.5 px-3 text-right">Cost</th>
+                    <th className="py-2.5 px-3 text-right">GW xP</th>
+                    <th className="py-2.5 px-3 text-right hidden md:table-cell">8-GW xP</th>
+                    <th className="py-2.5 px-3 text-right hidden sm:table-cell">Top-1K EO</th>
+                    {(onToggleLock || onToggleExclude) && (
+                      <th className="py-2.5 px-3 text-center">Rules</th>
+                    )}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/40 text-xs">
+                  {benchPlayers.map((p, idx) => {
+                    const isLocked = lockedPlayerIds.includes(p.id);
+                    const isExcluded = excludedPlayerIds.includes(p.id);
+                    const nextFix = p.next_fixtures?.[0];
+                    const isGkp = idx === 0 || p.element_type === 1 || p.position === 'GKP';
+                    const subLabel = isGkp ? 'GKP' : `${idx}. Sub`;
+
+                    return (
+                      <tr 
+                        key={p.id} 
+                        className={cn(
+                          "bg-slate-950/40 hover:bg-slate-900/70 transition-colors",
+                          isLocked && "bg-amber-400/5",
+                          isExcluded && "bg-rose-500/5 opacity-60"
+                        )}
+                      >
+                        {/* Sub Priority Label */}
+                        <td className="py-2.5 px-3 whitespace-nowrap">
+                          <span className="px-2 py-0.5 rounded text-[9.5px] font-mono font-bold uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700">
+                            {subLabel}
+                          </span>
+                        </td>
+
+                        {/* Player Name & Team */}
+                        <td className="py-2.5 px-3">
+                          <div className="flex items-center gap-2">
+                            <div className="flex flex-col">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="font-bold text-white text-xs sm:text-sm">{p.web_name}</span>
+                                {p.chance_of_playing_next_round !== undefined && p.chance_of_playing_next_round !== null && p.chance_of_playing_next_round < 100 && (
+                                  <span className="bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[8px] font-mono px-1 rounded font-bold">
+                                    {p.chance_of_playing_next_round}%
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-[10px] text-slate-400 font-medium">
+                                {p.team_name || p.team_short_name}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Next Fixture with FDR */}
+                        <td className="py-2.5 px-3 whitespace-nowrap">
+                          {nextFix ? (
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-xs font-mono font-bold text-slate-200">
+                                {nextFix.opponent} ({nextFix.is_home ? 'H' : 'A'})
+                              </span>
+                              <span className={cn("text-[9px] font-mono px-1.5 py-0.5 rounded shadow-sm", getFdrBadgeColor(nextFix.difficulty))}>
+                                FDR {nextFix.difficulty}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-slate-500 font-mono">TBD</span>
+                          )}
+                        </td>
+
+                        {/* Cost */}
+                        <td className="py-2.5 px-3 text-right font-mono text-xs text-slate-300 font-bold whitespace-nowrap">
+                          £{((p.now_cost || p.cost || 0) / 10).toFixed(1)}m
+                        </td>
+
+                        {/* Immediate GW xP */}
+                        <td className="py-2.5 px-3 text-right whitespace-nowrap">
+                          <span className="font-mono font-bold text-xs sm:text-sm text-slate-300">
+                            {(p.xP || 0).toFixed(1)}
+                          </span>
+                        </td>
+
+                        {/* 8-GW Horizon xP */}
+                        <td className="py-2.5 px-3 text-right font-mono text-xs text-slate-400 whitespace-nowrap hidden md:table-cell">
+                          {(p.horizonXP || (p.xP || 0) * 8).toFixed(1)}
+                        </td>
+
+                        {/* Top-1K EO */}
+                        <td className="py-2.5 px-3 text-right font-mono text-xs whitespace-nowrap hidden sm:table-cell">
+                          <span className={cn(
+                            "font-bold",
+                            (p.eo ?? 0) >= 30 ? "text-cyan-400" : "text-slate-500"
+                          )}>
+                            {p.eo !== undefined ? `${p.eo}%` : `${p.ownership || 0}%`}
+                          </span>
+                        </td>
+
+                        {/* Lock & Exclude Rule Buttons */}
+                        {(onToggleLock || onToggleExclude) && (
+                          <td className="py-2.5 px-3 text-center whitespace-nowrap">
+                            <div className="flex items-center justify-center gap-1">
+                              {onToggleLock && (
+                                <button
+                                  type="button"
+                                  onClick={() => onToggleLock(p.id)}
+                                  title={isLocked ? "Unlock player" : "Lock player into squad"}
+                                  className={cn(
+                                    "p-1 rounded transition-colors",
+                                    isLocked
+                                      ? "bg-amber-400/20 text-amber-300 border border-amber-400/40"
+                                      : "text-slate-500 hover:text-slate-300"
+                                  )}
+                                >
+                                  <Lock className="w-3 h-3" />
+                                </button>
+                              )}
+                              {onToggleExclude && (
+                                <button
+                                  type="button"
+                                  onClick={() => onToggleExclude(p.id)}
+                                  title={isExcluded ? "Remove exclusion" : "Exclude player from squad"}
+                                  className={cn(
+                                    "p-1 rounded transition-colors",
+                                    isExcluded
+                                      ? "bg-rose-500/20 text-rose-400 border border-rose-500/40"
+                                      : "text-slate-500 hover:text-slate-300"
+                                  )}
+                                >
+                                  <Ban className="w-3 h-3" />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </motion.div>
+      )}
 
     </motion.div>
   );
