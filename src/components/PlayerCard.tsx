@@ -292,21 +292,21 @@ export const PlayerCard = ({
       </div>
 
       {/* 3. Next 3 FDR Fixture Difficulty Ticker (Distinctive Solid Backgrounds) */}
-      {showFixtures && !compact && player.next_fixtures && player.next_fixtures.length > 0 && (
-        <div className="flex items-center justify-center gap-0.5 mt-1 w-full px-0.5">
+      {showFixtures && player.next_fixtures && player.next_fixtures.length > 0 && (
+        <div className="flex items-center justify-center gap-0.5 mt-0.5 sm:mt-1 w-full px-0.5">
           {player.next_fixtures.slice(0, 3).map((f, idx) => (
             <span
               key={idx}
               title={`${f.opponent} (${f.is_home ? 'Home' : 'Away'}) - FDR ${f.difficulty}`}
               className={cn(
-                "text-[6.5px] sm:text-[8px] font-extrabold px-1 py-0.5 rounded font-mono leading-none tracking-tighter truncate flex items-center justify-center shadow-md",
+                "text-[6px] sm:text-[7.5px] font-black px-0.5 sm:px-1 py-0.5 rounded font-mono leading-none tracking-tight truncate flex items-center justify-center shadow-md flex-1 text-center",
                 f.difficulty <= 2 ? "bg-[#00753b] text-white border border-emerald-400/40" :
                 f.difficulty === 3 ? "bg-[#374151] text-white border border-slate-500/40" :
                 f.difficulty === 4 ? "bg-[#e11d48] text-white border border-rose-400/40" :
                 "bg-[#881337] text-white border border-pink-400/40"
               )}
             >
-              {f.opponent}{f.is_home ? '(H)' : '(A)'}
+              {f.opponent}{f.is_home ? 'H' : 'A'}
             </span>
           ))}
         </div>
