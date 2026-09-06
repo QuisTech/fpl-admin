@@ -13,8 +13,15 @@ interface PerformanceViewProps {
 type SortField = 'actual' | 'diff' | 'xp' | 'time';
 type SortOrder = 'desc' | 'asc';
 
+interface PlayerLiveScore {
+  points: number;
+  minutes: number;
+  started: boolean;
+  finished: boolean;
+}
+
 export const PerformanceView = ({ history, fetchLivePoints, reconcileUserSquad, activeFuel, onFuelChange }: PerformanceViewProps) => {
-  const [actualScores, setActualScores] = useState<Record<number, Record<number, { points: number; minutes: number }>>>({});
+  const [actualScores, setActualScores] = useState<Record<number, Record<number, PlayerLiveScore>>>({});
   const [loading, setLoading] = useState<Record<number, boolean>>({});
   const [selectedGwIndex, setSelectedGwIndex] = useState<number>(0);
   const [viewAll, setViewAll] = useState<boolean>(false);
@@ -43,6 +50,16 @@ export const PerformanceView = ({ history, fetchLivePoints, reconcileUserSquad, 
     }
   }, [gws.length]);
 
+  // Automatically fetch live scores for the active gameweek on load or selection
+  useEffect(() => {
+    if (gws.length > 0) {
+      const activeGw = gws[selectedGwIndex] || gws[0];
+      if (!actualScores[activeGw] && !loading[activeGw]) {
+        refreshActuals(activeGw);
+      }
+    }
+  }, [gws.length, selectedGwIndex]);
+
   const calculateActual = (gwId: number, snapshot: any) => {
     if (!actualScores[gwId]) return 0;
     let total = 0;
@@ -54,7 +71,13 @@ export const PerformanceView = ({ history, fetchLivePoints, reconcileUserSquad, 
     const viceCaptainId = snapshot.viceCaptainId;
 
     let activeCaptainId = captainId;
-    if (captainId && actualScores[gwId][captainId] && actualScores[gwId][captainId].minutes === 0) {
+    // Only switch to Vice-Captain if Captain's fixture has 100% FINISHED and they played 0 minutes
+    if (
+      captainId && 
+      actualScores[gwId][captainId] && 
+      actualScores[gwId][captainId].finished && 
+      actualScores[gwId][captainId].minutes === 0
+    ) {
       activeCaptainId = viceCaptainId;
     }
 
@@ -64,8 +87,10 @@ export const PerformanceView = ({ history, fetchLivePoints, reconcileUserSquad, 
     playerIds.forEach((id: number) => {
       const pData = actualScores[gwId][id];
       if (pData !== undefined) {
-        // Official FPL Auto-sub: if starter played 0 minutes and bench is available
-        if (pData.minutes === 0 && benchPlayers.length > 0) {
+        // Official FPL Auto-sub Rule:
+        // A player is ONLY substituted out if their fixture has FINISHED and they played 0 minutes!
+        // If their fixture has not finished yet (e.g. match scheduled for later today), they REMAIN in the starting XI!
+        if (pData.finished && pData.minutes === 0 && benchPlayers.length > 0) {
           const originalPlayer = players.find((p: any) => p.id === id);
           const sub = benchPlayers.find((b: any) => {
             if (usedBenchIds.has(b.id)) return false;
@@ -225,11 +250,30 @@ export const PerformanceView = ({ history, fetchLivePoints, reconcileUserSquad, 
         await reconcileUserSquad(gwId);
       }
       // 2. Fetch live actual points for this gameweek
-      const elements = await fetchLivePoints(gwId);
-      if (elements) {
-        const scores: Record<number, { points: number; minutes: number }> = {};
+      const liveData = await fetchLivePoints(gwId);
+      if (liveData) {
+        const elements = Array.isArray(liveData) ? liveData : (liveData.elements || []);
+        const fixtures = liveData.fixtures || [];
+        const fixtureMap: Record<number, { started: boolean; finished: boolean }> = {};
+        fixtures.forEach((f: any) => {
+          fixtureMap[f.id] = {
+            started: !!f.started,
+            finished: !!(f.finished || f.finished_provisional)
+          };
+        });
+
+        const scores: Record<number, PlayerLiveScore> = {};
         elements.forEach((el: any) => {
-          scores[el.id] = { points: el.stats.total_points, minutes: el.stats.minutes };
+          const fId = el.explain?.[0]?.fixture;
+          const fix = fId ? fixtureMap[fId] : null;
+          const mins = el.stats?.minutes ?? el.minutes ?? 0;
+          const pts = el.stats?.total_points ?? el.total_points ?? 0;
+          scores[el.id] = { 
+            points: pts, 
+            minutes: mins,
+            started: fix ? fix.started : (mins > 0 || pts > 0),
+            finished: fix ? fix.finished : (mins > 0)
+          };
         });
         setActualScores(prev => ({ ...prev, [gwId]: scores }));
       }
@@ -786,23 +830,87 @@ export const PerformanceView = ({ history, fetchLivePoints, reconcileUserSquad, 
                       </div>
 
                       {isExpanded && data.players && (
-                        <div className="mt-4 pt-4 border-t border-fpl-border grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
-                          {data.players.map((p: any) => (
-                            <div key={p.id} className="flex justify-between items-center bg-slate-900/50 px-2 py-1 rounded border border-slate-800/50">
-                              <div className="flex items-center gap-2">
-                                <span className="text-[8px] text-slate-500 w-6 font-bold font-mono">{p.position}</span>
-                                <span className={cn(
-                                  "text-[10px] font-bold",
-                                  p.id === data.captainId ? "text-fpl-green" : p.id === data.viceCaptainId ? "text-fpl-pink" : "text-slate-300"
+                        <div className="mt-4 pt-4 border-t border-fpl-border space-y-3">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
+                            {data.players.map((p: any) => {
+                              const pScore = actualScores[gwId]?.[p.id];
+                              const isCapt = p.id === data.captainId;
+                              const isVice = p.id === data.viceCaptainId;
+                              const isSubbed = pScore?.finished && pScore?.minutes === 0;
+
+                              return (
+                                <div key={p.id} className={cn(
+                                  "flex justify-between items-center px-2 py-1.5 rounded border transition-colors",
+                                  isSubbed 
+                                    ? "bg-rose-500/10 border-rose-500/30 opacity-70"
+                                    : "bg-slate-900/50 border-slate-800/50"
                                 )}>
-                                  {p.web_name} {p.id === data.captainId && '(C)'} {p.id === data.viceCaptainId && '(V)'}
-                                </span>
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <span className="text-[8px] text-slate-500 w-6 font-bold font-mono">{p.position}</span>
+                                    <span className={cn(
+                                      "text-[10px] font-bold truncate",
+                                      isCapt ? "text-fpl-green" : isVice ? "text-fpl-pink" : "text-slate-300",
+                                      isSubbed && "line-through text-slate-500"
+                                    )}>
+                                      {p.web_name} {isCapt && '(C)'} {isVice && '(V)'}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-1.5 shrink-0">
+                                    {pScore !== undefined ? (
+                                      !pScore.started ? (
+                                        <span className="text-[8px] font-mono text-amber-400 font-bold bg-amber-400/10 px-1.5 py-0.5 rounded border border-amber-400/20">
+                                          Upcoming
+                                        </span>
+                                      ) : (
+                                        <span className={cn(
+                                          "text-[9px] font-mono font-bold",
+                                          isCapt && activeCaptainId === p.id ? "text-fpl-green font-black" : "text-slate-300"
+                                        )}>
+                                          {pScore.points * (p.id === activeCaptainId ? 2 : 1)} pts
+                                          {!pScore.finished && (
+                                            <span className="text-[7.5px] text-emerald-400 ml-1 font-bold">LIVE</span>
+                                          )}
+                                        </span>
+                                      )
+                                    ) : (
+                                      <span className="text-[9px] font-mono text-slate-500">--</span>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          {/* Bench Players section */}
+                          {data.benchPlayers && data.benchPlayers.length > 0 && (
+                            <div className="mt-3 pt-2.5 border-t border-dashed border-slate-800">
+                              <p className="text-[8.5px] font-bold uppercase tracking-wider text-slate-500 mb-1.5 flex items-center gap-1">
+                                Bench ({data.benchPlayers.length})
+                              </p>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5">
+                                {data.benchPlayers.map((b: any) => {
+                                  const bScore = actualScores[gwId]?.[b.id];
+                                  return (
+                                    <div key={b.id} className="flex justify-between items-center bg-slate-950/40 px-2 py-1 rounded border border-slate-900 text-slate-400">
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-[7.5px] text-slate-600 w-6 font-mono font-bold">{b.position}</span>
+                                        <span className="text-[9.5px] text-slate-400">{b.web_name}</span>
+                                      </div>
+                                      <span className="text-[8.5px] font-mono font-bold text-slate-400">
+                                        {bScore !== undefined ? (
+                                          !bScore.started ? (
+                                            <span className="text-slate-500 text-[8px]">Upcoming</span>
+                                          ) : (
+                                            `${bScore.points} pts`
+                                          )
+                                        ) : '--'}
+                                      </span>
+                                    </div>
+                                  );
+                                })}
                               </div>
-                              <span className="text-[9px] font-mono text-slate-400 font-bold">
-                                {actualScores[gwId]?.[p.id] !== undefined ? `${actualScores[gwId][p.id].points}${p.id === activeCaptainId ? 'x2' : ''} pts` : '--'}
-                              </span>
                             </div>
-                          ))}
+                          )}
                         </div>
                       )}
                     </div>

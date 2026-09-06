@@ -1399,8 +1399,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (url.includes('/api/live')) {
       const eventId = url.split('/').pop()?.split('?')[0];
       if (!eventId) return res.status(400).json({ error: "Missing Event ID" });
-      const liveRes = await axios.get(`${FPL_BASE_URL}/event/${eventId}/live/`, { headers: (FPLService as any).getHeaders() });
-      return res.status(200).json(liveRes.data);
+      try {
+        const [liveRes, fixturesRes] = await Promise.all([
+          axios.get(`${FPL_BASE_URL}/event/${eventId}/live/`, { headers: (FPLService as any).getHeaders() }),
+          axios.get(`${FPL_BASE_URL}/fixtures/?event=${eventId}`, { headers: (FPLService as any).getHeaders() }).catch(() => ({ data: [] }))
+        ]);
+        return res.status(200).json({
+          elements: liveRes.data.elements,
+          fixtures: fixturesRes.data || []
+        });
+      } catch (err: any) {
+        return res.status(500).json({ error: err.message });
+      }
     }
 
     if (url.includes('/api/agent/ask') && req.method === 'POST') {
