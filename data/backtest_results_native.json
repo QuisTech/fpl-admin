@@ -1,24 +1,24 @@
 {
-  "generatedAt": "2026-09-07T11:12:05.683Z",
+  "generatedAt": "2026-09-07T13:39:09.369Z",
   "fuel": "native",
   "startGw": 1,
-  "endGw": 2,
+  "endGw": 3,
   "hasLivePoints": true,
   "totals": {
     "safe": {
-      "totalPoints": 190,
-      "alphaVsTemplate": 53.1
+      "totalPoints": 272,
+      "alphaVsTemplate": 93.3
     },
     "risky": {
-      "totalPoints": 162,
-      "alphaVsTemplate": 25.1
+      "totalPoints": 260,
+      "alphaVsTemplate": 81.3
     },
     "value": {
-      "totalPoints": 179,
-      "alphaVsTemplate": 42.1
+      "totalPoints": 262,
+      "alphaVsTemplate": 83.3
     },
     "template": {
-      "totalPoints": 136.9
+      "totalPoints": 178.7
     }
   },
   "gameweeks": [
@@ -167,6 +167,79 @@
       "riskySwapCount": 4,
       "riskyAvgSwapCost": 0.18,
       "riskyQuality": "PASS"
+    },
+    {
+      "gameweek": 3,
+      "templateScore": 41.8,
+      "safe": {
+        "mode": "SAFE",
+        "startingXI": [
+          "Calafiori (ARS)",
+          "Ødegaard (ARS)",
+          "Palmer (CHE)",
+          "João Pedro (CHE)",
+          "Tarkowski (EVE)",
+          "Tzolakis (HUL)",
+          "Mendy (HUL)",
+          "Bogle (LEE)",
+          "Gakpo (LIV)",
+          "Isak (LIV)",
+          "B.Fernandes (MUN)"
+        ],
+        "captain": "Gakpo (C)",
+        "projectedGwXp": 95.6,
+        "projected8GwXp": 826.2,
+        "actualPoints": 82,
+        "averageXiEo": 43.9,
+        "alphaVsTemplate": 40.2
+      },
+      "risky": {
+        "mode": "RISKY",
+        "startingXI": [
+          "Ødegaard (ARS)",
+          "Havertz (ARS)",
+          "Scott (BOU)",
+          "Rogers (CHE)",
+          "Palmer (CHE)",
+          "Tarkowski (EVE)",
+          "Ajayi (HUL)",
+          "Tzolakis (HUL)",
+          "Bogle (LEE)",
+          "Gakpo (LIV)",
+          "Isak (LIV)"
+        ],
+        "captain": "Gakpo (C)",
+        "projectedGwXp": 92.2,
+        "projected8GwXp": 778.4,
+        "actualPoints": 98,
+        "averageXiEo": 7.8,
+        "alphaVsTemplate": 56.2
+      },
+      "value": {
+        "mode": "VALUE",
+        "startingXI": [
+          "Calafiori (ARS)",
+          "Ødegaard (ARS)",
+          "Scott (BOU)",
+          "Rogers (CHE)",
+          "João Pedro (CHE)",
+          "Thomas (COV)",
+          "Tarkowski (EVE)",
+          "Ajayi (HUL)",
+          "Tzolakis (HUL)",
+          "Bogle (LEE)",
+          "Gakpo (LIV)"
+        ],
+        "captain": "Gakpo (C)",
+        "projectedGwXp": 91.5,
+        "projected8GwXp": 847.1,
+        "actualPoints": 83,
+        "averageXiEo": 20.7,
+        "alphaVsTemplate": 41.2
+      },
+      "riskySwapCount": 4,
+      "riskyAvgSwapCost": 1.49,
+      "riskyQuality": "WARNING"
     }
   ]
 }

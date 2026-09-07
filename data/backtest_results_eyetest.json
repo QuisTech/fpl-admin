@@ -1,24 +1,24 @@
 {
-  "generatedAt": "2026-09-07T11:12:11.332Z",
+  "generatedAt": "2026-09-07T13:39:15.632Z",
   "fuel": "eyetest",
   "startGw": 1,
-  "endGw": 2,
+  "endGw": 3,
   "hasLivePoints": true,
   "totals": {
     "safe": {
-      "totalPoints": 122,
-      "alphaVsTemplate": -14.9
+      "totalPoints": 191,
+      "alphaVsTemplate": 12.3
     },
     "risky": {
-      "totalPoints": 102,
-      "alphaVsTemplate": -34.9
+      "totalPoints": 171,
+      "alphaVsTemplate": -7.7
     },
     "value": {
-      "totalPoints": 82,
-      "alphaVsTemplate": -54.9
+      "totalPoints": 119,
+      "alphaVsTemplate": -59.7
     },
     "template": {
-      "totalPoints": 136.9
+      "totalPoints": 178.7
     }
   },
   "gameweeks": [
@@ -167,6 +167,79 @@
       "riskySwapCount": 5,
       "riskyAvgSwapCost": 0.3,
       "riskyQuality": "WARNING"
+    },
+    {
+      "gameweek": 3,
+      "templateScore": 41.8,
+      "safe": {
+        "mode": "SAFE",
+        "startingXI": [
+          "Ødegaard (ARS)",
+          "Thiago (BRE)",
+          "De Cuyper (BHA)",
+          "Castagne (FUL)",
+          "Scherpen (IPS)",
+          "Gakpo (LIV)",
+          "Isak (LIV)",
+          "Foden (MCI)",
+          "Cherki (MCI)",
+          "Haaland (MCI)",
+          "Hall (NEW)"
+        ],
+        "captain": "Haaland (C)",
+        "projectedGwXp": 94.4,
+        "projected8GwXp": 605.3,
+        "actualPoints": 69,
+        "averageXiEo": 9.5,
+        "alphaVsTemplate": 27.2
+      },
+      "risky": {
+        "mode": "RISKY",
+        "startingXI": [
+          "Ødegaard (ARS)",
+          "Thiago (BRE)",
+          "De Cuyper (BHA)",
+          "Castagne (FUL)",
+          "Scherpen (IPS)",
+          "Gakpo (LIV)",
+          "Isak (LIV)",
+          "Foden (MCI)",
+          "Cherki (MCI)",
+          "Haaland (MCI)",
+          "Hall (NEW)"
+        ],
+        "captain": "Haaland (C)",
+        "projectedGwXp": 94.4,
+        "projected8GwXp": 605.3,
+        "actualPoints": 69,
+        "averageXiEo": 9.5,
+        "alphaVsTemplate": 27.2
+      },
+      "value": {
+        "mode": "VALUE",
+        "startingXI": [
+          "Lewis-Potter (BRE)",
+          "De Cuyper (BHA)",
+          "Gomez (BHA)",
+          "Yalcouyé (BHA)",
+          "Barry (EVE)",
+          "Castagne (FUL)",
+          "Bobb (FUL)",
+          "Scherpen (IPS)",
+          "Foden (MCI)",
+          "Haaland (MCI)",
+          "Dedić (NEW)"
+        ],
+        "captain": "Haaland (C)",
+        "projectedGwXp": 92,
+        "projected8GwXp": 553,
+        "actualPoints": 37,
+        "averageXiEo": 5.3,
+        "alphaVsTemplate": -4.8
+      },
+      "riskySwapCount": 0,
+      "riskyAvgSwapCost": 0,
+      "riskyQuality": "PASS"
     }
   ]
 }

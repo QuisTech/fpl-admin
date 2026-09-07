@@ -1,24 +1,24 @@
 {
-  "generatedAt": "2026-09-07T11:12:03.273Z",
+  "generatedAt": "2026-09-07T13:39:06.562Z",
   "fuel": "fplform",
   "startGw": 1,
-  "endGw": 2,
+  "endGw": 3,
   "hasLivePoints": true,
   "totals": {
     "safe": {
-      "totalPoints": 145,
-      "alphaVsTemplate": 8.1
+      "totalPoints": 194,
+      "alphaVsTemplate": 15.3
     },
     "risky": {
-      "totalPoints": 116,
-      "alphaVsTemplate": -20.9
+      "totalPoints": 184,
+      "alphaVsTemplate": 5.3
     },
     "value": {
-      "totalPoints": 101,
-      "alphaVsTemplate": -35.9
+      "totalPoints": 181,
+      "alphaVsTemplate": 2.3
     },
     "template": {
-      "totalPoints": 136.9
+      "totalPoints": 178.7
     }
   },
   "gameweeks": [
@@ -34,18 +34,18 @@
           "Tavernier (BOU)",
           "Scott (BOU)",
           "Thiago (BRE)",
-          "João Pedro (CHE)",
-          "Bogle (LEE)",
+          "Tarkowski (EVE)",
+          "Calvert-Lewin (LEE)",
           "Szoboszlai (LIV)",
           "B.Fernandes (MUN)",
           "Van de Ven (TOT)"
         ],
         "captain": "B.Fernandes (C)",
-        "projectedGwXp": 47.5,
-        "projected8GwXp": 359.6,
-        "actualPoints": 55,
-        "averageXiEo": 36.4,
-        "alphaVsTemplate": 40.9
+        "projectedGwXp": 47.4,
+        "projected8GwXp": 357.4,
+        "actualPoints": 45,
+        "averageXiEo": 35.5,
+        "alphaVsTemplate": 30.9
       },
       "risky": {
         "mode": "RISKY",
@@ -54,25 +54,26 @@
           "Suzuki (AVL)",
           "Tavernier (BOU)",
           "Scott (BOU)",
-          "Mitchell (CRY)",
+          "Evanilson (BOU)",
+          "Thiago (BRE)",
           "Barry (EVE)",
           "Bogle (LEE)",
-          "Stach (LEE)",
           "Virgil (LIV)",
           "Guéhi (MCI)",
           "Van de Ven (TOT)"
         ],
         "captain": "Tavernier (C)",
-        "projectedGwXp": 42.7,
-        "projected8GwXp": 322.8,
-        "actualPoints": 71,
-        "averageXiEo": 0.4,
-        "alphaVsTemplate": 56.9
+        "projectedGwXp": 42.9,
+        "projected8GwXp": 324,
+        "actualPoints": 61,
+        "averageXiEo": 0.7,
+        "alphaVsTemplate": 46.9
       },
       "value": {
         "mode": "VALUE",
         "startingXI": [
           "Suzuki (AVL)",
+          "Truffert (BOU)",
           "Tavernier (BOU)",
           "Scott (BOU)",
           "Groß (BHA)",
@@ -80,19 +81,18 @@
           "Bogle (LEE)",
           "Calvert-Lewin (LEE)",
           "Szoboszlai (LIV)",
-          "Anderson (MCI)",
-          "Van de Ven (TOT)",
-          "Ballard (SUN)"
+          "Ballard (SUN)",
+          "E.Le Fée (SUN)"
         ],
         "captain": "Tavernier (C)",
-        "projectedGwXp": 43.6,
-        "projected8GwXp": 329.9,
-        "actualPoints": 52,
-        "averageXiEo": 26.4,
-        "alphaVsTemplate": 37.9
+        "projectedGwXp": 43.5,
+        "projected8GwXp": 328.4,
+        "actualPoints": 53,
+        "averageXiEo": 26.8,
+        "alphaVsTemplate": 38.9
       },
       "riskySwapCount": 5,
-      "riskyAvgSwapCost": 0.92,
+      "riskyAvgSwapCost": 0.84,
       "riskyQuality": "WARNING"
     },
     {
@@ -114,8 +114,8 @@
           "B.Fernandes (MUN)"
         ],
         "captain": "B.Fernandes (C)",
-        "projectedGwXp": 48.6,
-        "projected8GwXp": 363.2,
+        "projectedGwXp": 48.5,
+        "projected8GwXp": 362.4,
         "actualPoints": 90,
         "averageXiEo": 36.5,
         "alphaVsTemplate": -32.8
@@ -128,19 +128,19 @@
           "Truffert (BOU)",
           "Tavernier (BOU)",
           "Scott (BOU)",
+          "Thiago (BRE)",
           "Barry (EVE)",
           "Bogle (LEE)",
-          "Gakpo (LIV)",
+          "Virgil (LIV)",
           "Guéhi (MCI)",
-          "Anderson (MCI)",
           "Van de Ven (TOT)"
         ],
         "captain": "Tavernier (C)",
-        "projectedGwXp": 44.5,
-        "projected8GwXp": 333.4,
-        "actualPoints": 45,
-        "averageXiEo": 0.4,
-        "alphaVsTemplate": -77.8
+        "projectedGwXp": 44.4,
+        "projected8GwXp": 332.2,
+        "actualPoints": 40,
+        "averageXiEo": 0.7,
+        "alphaVsTemplate": -82.8
       },
       "value": {
         "mode": "VALUE",
@@ -158,14 +158,87 @@
           "E.Le Fée (SUN)"
         ],
         "captain": "Tavernier (C)",
-        "projectedGwXp": 45,
-        "projected8GwXp": 338,
+        "projectedGwXp": 44.9,
+        "projected8GwXp": 337.2,
         "actualPoints": 49,
         "averageXiEo": 23.3,
         "alphaVsTemplate": -73.8
       },
-      "riskySwapCount": 6,
-      "riskyAvgSwapCost": 0.62,
+      "riskySwapCount": 5,
+      "riskyAvgSwapCost": 0.76,
+      "riskyQuality": "WARNING"
+    },
+    {
+      "gameweek": 3,
+      "templateScore": 41.8,
+      "safe": {
+        "mode": "SAFE",
+        "startingXI": [
+          "Gabriel (ARS)",
+          "Suzuki (AVL)",
+          "Tavernier (BOU)",
+          "Scott (BOU)",
+          "Thiago (BRE)",
+          "João Pedro (CHE)",
+          "Virgil (LIV)",
+          "Szoboszlai (LIV)",
+          "Guéhi (MCI)",
+          "Anderson (MCI)",
+          "B.Fernandes (MUN)"
+        ],
+        "captain": "B.Fernandes (C)",
+        "projectedGwXp": 49.7,
+        "projected8GwXp": 364.6,
+        "actualPoints": 59,
+        "averageXiEo": 36.5,
+        "alphaVsTemplate": 17.2
+      },
+      "risky": {
+        "mode": "RISKY",
+        "startingXI": [
+          "Saka (ARS)",
+          "Suzuki (AVL)",
+          "Truffert (BOU)",
+          "Tavernier (BOU)",
+          "Scott (BOU)",
+          "Thiago (BRE)",
+          "Barry (EVE)",
+          "Bogle (LEE)",
+          "Virgil (LIV)",
+          "Guéhi (MCI)",
+          "Van de Ven (TOT)"
+        ],
+        "captain": "Tavernier (C)",
+        "projectedGwXp": 45.5,
+        "projected8GwXp": 334.2,
+        "actualPoints": 83,
+        "averageXiEo": 0.7,
+        "alphaVsTemplate": 41.2
+      },
+      "value": {
+        "mode": "VALUE",
+        "startingXI": [
+          "Suzuki (AVL)",
+          "Truffert (BOU)",
+          "Tavernier (BOU)",
+          "Scott (BOU)",
+          "João Pedro (CHE)",
+          "Bogle (LEE)",
+          "Calvert-Lewin (LEE)",
+          "Szoboszlai (LIV)",
+          "Anderson (MCI)",
+          "Van de Ven (TOT)",
+          "E.Le Fée (SUN)"
+        ],
+        "captain": "Tavernier (C)",
+        "projectedGwXp": 46.1,
+        "projected8GwXp": 339.4,
+        "actualPoints": 79,
+        "averageXiEo": 23.3,
+        "alphaVsTemplate": 37.2
+      },
+      "riskySwapCount": 5,
+      "riskyAvgSwapCost": 0.76,
       "riskyQuality": "WARNING"
     }
   ]
