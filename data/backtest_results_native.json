@@ -1,24 +1,24 @@
 {
-  "generatedAt": "2026-09-01T15:18:49.097Z",
+  "generatedAt": "2026-09-07T11:12:05.683Z",
   "fuel": "native",
   "startGw": 1,
   "endGw": 2,
   "hasLivePoints": true,
   "totals": {
     "safe": {
-      "totalPoints": 249,
-      "alphaVsTemplate": 124.1
+      "totalPoints": 190,
+      "alphaVsTemplate": 53.1
     },
     "risky": {
-      "totalPoints": 246,
-      "alphaVsTemplate": 121.1
+      "totalPoints": 162,
+      "alphaVsTemplate": 25.1
     },
     "value": {
-      "totalPoints": 226,
-      "alphaVsTemplate": 101.1
+      "totalPoints": 179,
+      "alphaVsTemplate": 42.1
     },
     "template": {
-      "totalPoints": 124.89999999999999
+      "totalPoints": 136.9
     }
   },
   "gameweeks": [
@@ -28,144 +28,144 @@
       "safe": {
         "mode": "SAFE",
         "startingXI": [
-          "Tzolakis (HUL)",
-          "Calafiori (ARS)",
-          "White (ARS)",
-          "Tarkowski (EVE)",
-          "B.Fernandes (MUN)",
-          "Cherki (MCI)",
+          "Tavernier (BOU)",
+          "De Cuyper (BHA)",
           "João Pedro (CHE)",
-          "Saka (ARS)",
-          "Palmer (CHE)",
-          "M.Sangaré (BRE)",
-          "De Cuyper (BHA)"
+          "King (FUL)",
+          "Tzolakis (HUL)",
+          "Bogle (LEE)",
+          "Gakpo (LIV)",
+          "Isak (LIV)",
+          "Gvardiol (MCI)",
+          "Haaland (MCI)",
+          "Elanga (NEW)"
         ],
-        "captain": "B.Fernandes (C)",
-        "projectedGwXp": 121.5,
-        "projected8GwXp": 620.8,
-        "actualPoints": 112,
-        "averageXiEo": 37.7,
-        "alphaVsTemplate": 97.9
+        "captain": "Gakpo (C)",
+        "projectedGwXp": 90.9,
+        "projected8GwXp": 760.4,
+        "actualPoints": 107,
+        "averageXiEo": 17.7,
+        "alphaVsTemplate": 92.9
       },
       "risky": {
         "mode": "RISKY",
         "startingXI": [
+          "Tavernier (BOU)",
+          "King (FUL)",
           "Tzolakis (HUL)",
-          "Calafiori (ARS)",
-          "White (ARS)",
-          "Tarkowski (EVE)",
-          "B.Fernandes (MUN)",
-          "Cherki (MCI)",
-          "João Pedro (CHE)",
-          "Saka (ARS)",
-          "Palmer (CHE)",
-          "De Cuyper (BHA)",
+          "Bogle (LEE)",
+          "Gakpo (LIV)",
+          "Guéhi (MCI)",
+          "Gvardiol (MCI)",
+          "Haaland (MCI)",
+          "Hall (NEW)",
+          "Barnes (NEW)",
           "Elanga (NEW)"
         ],
-        "captain": "Cherki (C)",
-        "projectedGwXp": 119.5,
-        "projected8GwXp": 617.9,
-        "actualPoints": 113,
-        "averageXiEo": 34,
-        "alphaVsTemplate": 98.9
+        "captain": "Gakpo (C)",
+        "projectedGwXp": 87.6,
+        "projected8GwXp": 796.8,
+        "actualPoints": 92,
+        "averageXiEo": 5.3,
+        "alphaVsTemplate": 77.9
       },
       "value": {
         "mode": "VALUE",
         "startingXI": [
-          "Tzolakis (HUL)",
-          "Calafiori (ARS)",
-          "White (ARS)",
+          "Tavernier (BOU)",
+          "Scott (BOU)",
           "De Cuyper (BHA)",
-          "Cherki (MCI)",
-          "M.Sangaré (BRE)",
           "João Pedro (CHE)",
-          "Stach (LEE)",
-          "Elanga (NEW)",
-          "Lewis-Potter (BRE)",
-          "Kayode (BRE)"
+          "King (FUL)",
+          "Tzolakis (HUL)",
+          "Bogle (LEE)",
+          "Gakpo (LIV)",
+          "Gvardiol (MCI)",
+          "Hall (NEW)",
+          "Elanga (NEW)"
         ],
-        "captain": "Cherki (C)",
-        "projectedGwXp": 111,
-        "projected8GwXp": 569.5,
-        "actualPoints": 133,
-        "averageXiEo": 26.3,
-        "alphaVsTemplate": 118.9
+        "captain": "Gakpo (C)",
+        "projectedGwXp": 89.2,
+        "projected8GwXp": 792.3,
+        "actualPoints": 108,
+        "averageXiEo": 10.1,
+        "alphaVsTemplate": 93.9
       },
-      "riskySwapCount": 1,
-      "riskyAvgSwapCost": 0.35,
+      "riskySwapCount": 3,
+      "riskyAvgSwapCost": -1.52,
       "riskyQuality": "PASS"
     },
     {
       "gameweek": 2,
-      "templateScore": 110.8,
+      "templateScore": 122.8,
       "safe": {
         "mode": "SAFE",
         "startingXI": [
-          "Tzolakis (HUL)",
           "Calafiori (ARS)",
-          "Ajayi (HUL)",
-          "White (ARS)",
-          "B.Fernandes (MUN)",
+          "Ødegaard (ARS)",
+          "Scott (BOU)",
+          "De Cuyper (BHA)",
+          "Mitchell (CRY)",
+          "Tzolakis (HUL)",
+          "Bogle (LEE)",
+          "Gakpo (LIV)",
+          "Isak (LIV)",
           "Cherki (MCI)",
-          "João Pedro (CHE)",
-          "Saka (ARS)",
-          "Palmer (CHE)",
-          "Tarkowski (EVE)",
-          "M.Sangaré (BRE)"
+          "Haaland (MCI)"
         ],
-        "captain": "B.Fernandes (C)",
-        "projectedGwXp": 123,
-        "projected8GwXp": 629.3,
-        "actualPoints": 137,
-        "averageXiEo": 33.5,
-        "alphaVsTemplate": 26.2
+        "captain": "Gakpo (C)",
+        "projectedGwXp": 94.2,
+        "projected8GwXp": 782.9,
+        "actualPoints": 83,
+        "averageXiEo": 17.6,
+        "alphaVsTemplate": -39.8
       },
       "risky": {
         "mode": "RISKY",
         "startingXI": [
-          "Tzolakis (HUL)",
-          "Calafiori (ARS)",
-          "Ajayi (HUL)",
-          "White (ARS)",
-          "B.Fernandes (MUN)",
-          "Cherki (MCI)",
-          "João Pedro (CHE)",
           "Saka (ARS)",
-          "Palmer (CHE)",
-          "Tarkowski (EVE)",
-          "Egan (HUL)"
+          "Ødegaard (ARS)",
+          "De Cuyper (BHA)",
+          "Mitchell (CRY)",
+          "Tzolakis (HUL)",
+          "Emersonn (IPS)",
+          "Bogle (LEE)",
+          "Gakpo (LIV)",
+          "Cherki (MCI)",
+          "N.Williams (NFO)",
+          "Gibbs-White (NFO)"
         ],
-        "captain": "Cherki (C)",
-        "projectedGwXp": 121,
-        "projected8GwXp": 626.5,
-        "actualPoints": 133,
-        "averageXiEo": 29.9,
-        "alphaVsTemplate": 22.2
+        "captain": "Gakpo (C)",
+        "projectedGwXp": 85.5,
+        "projected8GwXp": 777,
+        "actualPoints": 70,
+        "averageXiEo": 1.4,
+        "alphaVsTemplate": -52.8
       },
       "value": {
         "mode": "VALUE",
         "startingXI": [
-          "Tzolakis (HUL)",
           "Calafiori (ARS)",
-          "Ajayi (HUL)",
-          "White (ARS)",
-          "Cherki (MCI)",
-          "M.Sangaré (BRE)",
-          "João Pedro (CHE)",
+          "Ødegaard (ARS)",
+          "Scott (BOU)",
+          "Janelt (BRE)",
           "De Cuyper (BHA)",
-          "Egan (HUL)",
-          "Stach (LEE)",
+          "Groß (BHA)",
+          "João Pedro (CHE)",
+          "Mitchell (CRY)",
+          "Tzolakis (HUL)",
+          "Bogle (LEE)",
           "Gakpo (LIV)"
         ],
-        "captain": "Cherki (C)",
-        "projectedGwXp": 114,
-        "projected8GwXp": 586.6,
-        "actualPoints": 93,
-        "averageXiEo": 26.2,
-        "alphaVsTemplate": -17.8
+        "captain": "Gakpo (C)",
+        "projectedGwXp": 89.5,
+        "projected8GwXp": 742.7,
+        "actualPoints": 71,
+        "averageXiEo": 21.4,
+        "alphaVsTemplate": -51.8
       },
-      "riskySwapCount": 1,
-      "riskyAvgSwapCost": 0.35,
+      "riskySwapCount": 4,
+      "riskyAvgSwapCost": 0.18,
       "riskyQuality": "PASS"
     }
   ]
