@@ -224,7 +224,7 @@ export const TransferView = ({ syncedData, tier = 'ai-agent', setTab, userId }: 
           </div>
 
           {/* Metric 5: Squad Value & Bank */}
-          <div className="bg-slate-950/60 border border-fpl-border/40 rounded-xl p-2.5 flex flex-col justify-between">
+          <div className="bg-slate-950/60 border border-fpl-border/40 rounded-xl p-2.5 flex flex-col justify-between col-span-2 sm:col-span-1">
             <div className="flex items-center justify-between text-slate-400 mb-1">
               <span className="text-[9px] font-bold uppercase tracking-wider">Squad Value</span>
               <Coins className="w-3 h-3 text-purple-400" />
@@ -281,21 +281,21 @@ export const TransferView = ({ syncedData, tier = 'ai-agent', setTab, userId }: 
             {/* 8-Gameweek Strategy Squad Horizon Summary Banner */}
             {sortedTransfers.length > 0 && sortedTransfers[0].squad8GwXpBefore !== undefined && (
               <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-fpl-purple/40 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 shadow-md relative overflow-hidden">
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2.5 min-w-0">
                   <div className="w-8 h-8 rounded-xl bg-fpl-purple/20 border border-fpl-purple/40 flex items-center justify-center text-fpl-purple shrink-0">
                     <Layers className="w-4 h-4 text-fpl-green animate-pulse" />
                   </div>
-                  <div className="flex flex-col">
-                    <span className="text-[10px] font-black uppercase text-white tracking-wider flex items-center gap-1.5">
-                      8-Gameweek Strategy Squad Horizon
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-[10px] font-black uppercase text-white tracking-wider flex items-center gap-1.5 truncate">
+                      5-Gameweek Tactical Fixture Window
                     </span>
-                    <span className="text-[9px] text-slate-400 font-medium">
-                      Multi-strategy scraped projection & squad lookahead analysis for your 15-man squad
+                    <span className="text-[9px] text-slate-400 font-medium line-clamp-1 sm:line-clamp-none">
+                      FDR-weighted fixture difficulty & form projections for your 15-man squad
                     </span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 bg-slate-950/80 px-3 py-1.5 rounded-xl border border-slate-800">
+                <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 bg-slate-950/80 px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-800 w-full sm:w-auto">
                   <div className="text-right">
                     <span className="text-[8px] text-slate-500 font-bold uppercase block">Current Squad (8-GW)</span>
                     <span className="text-xs font-mono font-black text-slate-300">{sortedTransfers[0].squad8GwXpBefore} pts</span>
@@ -357,49 +357,64 @@ export const TransferView = ({ syncedData, tier = 'ai-agent', setTab, userId }: 
                           : "bg-slate-950/40 border-fpl-border/60 hover:border-slate-700"
                       )}
                     >
-                      <div className="flex items-center justify-between gap-2">
-                        {/* Out Player */}
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <div className="w-6 h-6 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 shrink-0">
-                            <UserMinus className="w-3.5 h-3.5" />
-                          </div>
-                          <div className="flex flex-col min-w-0">
-                            <span className="text-[8px] text-slate-500 font-bold uppercase">Out</span>
-                            <span className="text-xs font-bold text-slate-200 truncate">{rec.out.web_name}</span>
-                            <span className="text-[8px] text-slate-500 font-mono truncate">{rec.out.team_short_name} • £{(rec.out.now_cost/10).toFixed(1)}m</span>
-                          </div>
-                        </div>
-
-                        {/* Transition Arrow / Badge */}
-                        <div className="flex flex-col items-center justify-center px-1">
-                          <ArrowRightCircle className={cn(
-                            "w-4 h-4 transition-colors",
-                            isHovered ? "text-fpl-green animate-pulse" : "text-slate-600"
-                          )} />
-                          <span className={cn("text-[7px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded-full mt-1 whitespace-nowrap", roleStyle)}>
-                            {roleText}
-                          </span>
-                        </div>
-
-                        {/* In Player */}
-                        <div className="flex items-center gap-2 flex-1 min-w-0 justify-end text-right">
-                          <div className="flex flex-col min-w-0">
-                            <span className="text-[8px] text-slate-500 font-bold uppercase">In</span>
-                            <span className="text-xs font-bold text-fpl-green truncate">{rec.in.web_name}</span>
-                            <span className="text-[8px] text-slate-500 font-mono truncate">£{(rec.in.now_cost/10).toFixed(1)}m • {rec.in.team_short_name}</span>
-                          </div>
-                          <div className="w-6 h-6 rounded-lg bg-fpl-green/10 border border-fpl-green/20 flex items-center justify-center text-fpl-green shrink-0">
-                            <UserPlus className="w-3.5 h-3.5" />
-                          </div>
-
-                          <div className="flex items-center gap-3">
-                            <div className="w-px h-8 bg-slate-800/80 hidden sm:block"></div>
-                            <div className="flex flex-col items-end sm:items-center justify-center min-w-[60px]">
-                              <span className={cn("text-sm sm:text-lg font-black flex items-center gap-0.5", rec.xPDelta > 0 ? "text-fpl-green" : "text-rose-400")}>
-                                {rec.xPDelta > 0 ? '+' : ''}{rec.xPDelta.toFixed(1)}
-                              </span>
-                              <span className="text-[8px] text-slate-500 font-bold uppercase">xP Gain</span>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
+                        {/* Players Swap Area (Out -> In) */}
+                        <div className="flex items-center justify-between gap-1.5 sm:gap-3 flex-1 min-w-0">
+                          {/* Out Player */}
+                          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
+                            <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 shrink-0">
+                              <UserMinus className="w-3.5 h-3.5" />
                             </div>
+                            <div className="flex flex-col min-w-0">
+                              <span className="text-[7.5px] sm:text-[8px] text-slate-500 font-bold uppercase">Out</span>
+                              <span className="text-[11px] sm:text-xs font-bold text-slate-200 truncate">{rec.out.web_name}</span>
+                              <span className="text-[7.5px] sm:text-[8px] text-slate-400 font-mono truncate">{rec.out.team_short_name} • £{(rec.out.now_cost/10).toFixed(1)}m</span>
+                            </div>
+                          </div>
+
+                          {/* Transition Arrow / Role Badge */}
+                          <div className="flex flex-col items-center justify-center px-1 shrink-0 text-center max-w-[85px] sm:max-w-none">
+                            <ArrowRightCircle className={cn(
+                              "w-3.5 h-3.5 sm:w-4 sm:h-4 transition-colors",
+                              isHovered ? "text-fpl-green animate-pulse" : "text-slate-500"
+                            )} />
+                            <span className={cn(
+                              "text-[6.5px] sm:text-[7px] uppercase tracking-wider font-bold px-1 sm:px-1.5 py-0.5 rounded-full mt-0.5 sm:mt-1 truncate max-w-full", 
+                              roleStyle
+                            )}>
+                              {roleText}
+                            </span>
+                          </div>
+
+                          {/* In Player */}
+                          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1 justify-end text-right">
+                            <div className="flex flex-col min-w-0">
+                              <span className="text-[7.5px] sm:text-[8px] text-slate-500 font-bold uppercase">In</span>
+                              <span className="text-[11px] sm:text-xs font-bold text-fpl-green truncate">{rec.in.web_name}</span>
+                              <span className="text-[7.5px] sm:text-[8px] text-slate-400 font-mono truncate">£{(rec.in.now_cost/10).toFixed(1)}m • {rec.in.team_short_name}</span>
+                            </div>
+                            <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-fpl-green/10 border border-fpl-green/20 flex items-center justify-center text-fpl-green shrink-0">
+                              <UserPlus className="w-3.5 h-3.5" />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* xP Gain Badge - cleanly partitioned below on mobile, or side-by-side on desktop */}
+                        <div className="flex sm:flex-col items-center justify-between sm:justify-center border-t sm:border-t-0 sm:border-l border-slate-800/80 pt-2 sm:pt-0 sm:pl-3 shrink-0">
+                          <div className="flex items-center gap-1.5 sm:hidden">
+                            <span className="text-[8px] text-slate-400 font-bold uppercase">Immediate Return:</span>
+                            <span className="text-[8px] font-mono text-slate-500">
+                              {rec.xPDelta > 0 ? `+${rec.xPDelta.toFixed(1)} Net Projected` : `${rec.xPDelta.toFixed(1)} Projected`}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline sm:flex-col sm:items-center gap-1 sm:gap-0">
+                            <span className={cn(
+                              "text-sm sm:text-lg font-black flex items-center gap-0.5 font-mono", 
+                              rec.xPDelta > 0 ? "text-fpl-green" : "text-rose-400"
+                            )}>
+                              {rec.xPDelta > 0 ? '+' : ''}{rec.xPDelta.toFixed(1)}
+                            </span>
+                            <span className="text-[7.5px] sm:text-[8px] text-slate-500 font-bold uppercase">xP Gain</span>
                           </div>
                         </div>
                       </div>
