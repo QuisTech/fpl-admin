@@ -72,6 +72,8 @@ export interface ScoredPlayer extends FPLPlayer {
   multiplier?: number;
   eo?: number;
   ownership?: number;
+  cost?: number;
+  horizonXP?: number;
 }
 
 export interface OmissionAnalysis {
