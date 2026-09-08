@@ -539,6 +539,18 @@ export class FPLService {
         return sum + Number(p?.cost || 0);
       }, 0);
 
+      // In VALUE Mode: Exclude non-consensus ultra-premiums (>£13.5m, e.g. Haaland) to allow 5-Midfield Stack
+      scored.forEach(p => {
+        const pCost = Number(p.cost || p.now_cost || 0);
+        const webNameLower = (p.web_name || '').toLowerCase();
+        const secondNameLower = (p.second_name || '').toLowerCase();
+        const isConsensus = consensusNames.has(webNameLower) || consensusNames.has(secondNameLower);
+
+        if (!isConsensus && pCost >= 135) {
+          excludedSet.add(p.id);
+        }
+      });
+
       scored.forEach(p => {
         if (excludedSet.has(p.id)) return;
         const webNameLower = (p.web_name || '').toLowerCase();
@@ -551,7 +563,7 @@ export class FPLService {
           const remainingSlots = Math.max(0, 15 - newCount);
           const minRemainingCost = remainingSlots * 42;
 
-          if (currentLockedCost + pCost + minRemainingCost <= effectiveBudget && activeLockedSet.size < 6) {
+          if (currentLockedCost + pCost + minRemainingCost <= effectiveBudget && activeLockedSet.size < 10) {
             activeLockedSet.add(p.id);
             currentLockedCost += pCost;
           }
@@ -567,20 +579,37 @@ export class FPLService {
       try {
         const xiIds = solveStartingXI(oracle, nextEventId, squadIds, targetParams);
         const xiIdSet = new Set(xiIds);
-        const starters = squadList.filter(p => xiIdSet.has(p.id));
+        let starters = squadList.filter(p => xiIdSet.has(p.id));
+        
+        // Ensure activeLockedSet consensus picks are prioritized into starting XI over bench fillers
+        const benchedConsensus = squadList.filter(p => !xiIdSet.has(p.id) && activeLockedSet.has(p.id));
+        if (benchedConsensus.length > 0) {
+          benchedConsensus.forEach(bp => {
+            const replacableIndex = starters.findIndex(sp => sp.position === bp.position && !activeLockedSet.has(sp.id));
+            if (replacableIndex !== -1) {
+              starters[replacableIndex] = bp;
+            }
+          });
+        }
+
         if (starters.length === 11) {
           return starters;
         }
       } catch (err: any) {
         console.warn("[FPLService] solveStartingXI fallback to utility score sort:", err?.message || err);
       }
-      // Failsafe: sort by utility score (which incorporates EO and risk weights)
-      const g = squadList.filter(p => p.position === "GKP").sort(sortByUtility);
-      const d = squadList.filter(p => p.position === "DEF").sort(sortByUtility);
-      const m = squadList.filter(p => p.position === "MID").sort(sortByUtility);
-      const f = squadList.filter(p => p.position === "FWD").sort(sortByUtility);
+      // Failsafe: sort by utility score giving priority boost to active locked consensus picks
+      const consensusPrioritySort = (a: ScoredPlayer, b: ScoredPlayer) => {
+        const aLocked = activeLockedSet.has(a.id) ? 100 : 0;
+        const bLocked = activeLockedSet.has(b.id) ? 100 : 0;
+        return (b.score + bLocked) - (a.score + aLocked);
+      };
+      const g = squadList.filter(p => p.position === "GKP").sort(consensusPrioritySort);
+      const d = squadList.filter(p => p.position === "DEF").sort(consensusPrioritySort);
+      const m = squadList.filter(p => p.position === "MID").sort(consensusPrioritySort);
+      const f = squadList.filter(p => p.position === "FWD").sort(consensusPrioritySort);
       const mand = [g[0], ...d.slice(0, 3), ...m.slice(0, 2), ...f.slice(0, 1)].filter(Boolean) as ScoredPlayer[];
-      const remaining = [...d.slice(3), ...m.slice(2), ...f.slice(1)].sort(sortByUtility);
+      const remaining = [...d.slice(3), ...m.slice(2), ...f.slice(1)].sort(consensusPrioritySort);
       return [...mand, ...remaining.slice(0, 4)].filter(Boolean) as ScoredPlayer[];
     };
 
