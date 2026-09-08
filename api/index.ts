@@ -20,6 +20,7 @@ import { getUserTier, mergeUserTiers, getFirestore, isAdminUser } from '../lib/f
 import { getLLMTransferDecision, getLLMChipAdvice, generateSocialThread } from './_lib/llm-agent.js';
 import { getNewsContextFromCache } from './_lib/news-service.js';
 import { verifyAuth } from './_lib/auth.js';
+import { ManagerSnapshotService } from './_lib/manager-snapshot-service.js';
 
 const FPL_BASE_URL = "https://fantasy.premierleague.com/api";
 
@@ -823,15 +824,7 @@ export class FPLService {
         mid: scored.filter(p => p.position === "MID").sort(sortByUtility).slice(0, 5),
         fwd: scored.filter(p => p.position === "FWD").sort(sortByUtility).slice(0, 5)
       },
-      topManagerInsight: {
-        noChipLeaderCount: 2,
-        sampleLeaders: [
-          { rank: 587, entry: 4148445, manager_name: "Abhishek Raj", team_name: "Gunnerball", total_points: 273 },
-          { rank: 956, entry: 5662742, manager_name: "Tony Elliott", team_name: "Shetland Tonys", total_points: 270 }
-        ],
-        marketDisagreementRating: 8.7,
-        eliteConsensusPicks: ["Gvardiol", "Calafiori", "Palmer", "B.Fernandes", "Szoboszlai", "Ødegaard", "Cherki", "João Pedro", "Isak"]
-      },
+      topManagerInsight: await ManagerSnapshotService.getDynamicTopManagerInsight(players, nextEventId),
       nextEventId,
       lastUpdated: Date.now()
     };
