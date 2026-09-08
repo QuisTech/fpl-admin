@@ -530,8 +530,9 @@ export class FPLService {
         }
       });
     } else if (riskMode === 'value' || fuel === 'value') {
-      // Auto-lock 0-Chip Elite Consensus Picks into MILP Solver for VALUE Mode
+      // Consume Elite Intelligence for VALUE Mode
       const topInsight = await ManagerSnapshotService.getDynamicTopManagerInsight(players, nextEventId);
+      const consensusDetails = topInsight?.consensusDetails || [];
       const consensusNames = new Set((topInsight?.eliteConsensusPicks || []).map(n => n.toLowerCase()));
 
       let currentLockedCost = Array.from(activeLockedSet).reduce((sum: number, id: number) => {
@@ -539,34 +540,46 @@ export class FPLService {
         return sum + Number(p?.cost || 0);
       }, 0);
 
-      // In VALUE Mode: Exclude non-consensus ultra-premiums (>£13.5m, e.g. Haaland) to allow 5-Midfield Stack
+      // In VALUE Mode: Exclude non-consensus ultra-premiums (>£13.5m, e.g. Haaland) to prevent budget starvation
       scored.forEach(p => {
         const pCost = Number(p.cost || p.now_cost || 0);
         const webNameLower = (p.web_name || '').toLowerCase();
         const secondNameLower = (p.second_name || '').toLowerCase();
-        const isConsensus = consensusNames.has(webNameLower) || consensusNames.has(secondNameLower);
+        const isConsensus = consensusNames.has(webNameLower) || consensusNames.has(secondNameLower) ||
+          consensusDetails.some(cd => cd.id === p.id && cd.ownershipRate > 0);
 
         if (!isConsensus && pCost >= 135) {
           excludedSet.add(p.id);
         }
       });
 
-      scored.forEach(p => {
-        if (excludedSet.has(p.id)) return;
-        const webNameLower = (p.web_name || '').toLowerCase();
-        const secondNameLower = (p.second_name || '').toLowerCase();
-        const isConsensus = consensusNames.has(webNameLower) || consensusNames.has(secondNameLower);
+      // Filter ranked consensus candidates by two-condition hard-lock rule:
+      // 1. convictionScore >= config.hardLockMinConviction
+      // 2. startRate >= config.startingWeaponMinStartRate
+      // (Consensus detail provides canonical qualifiesForHardLock flag)
+      // Moderate conviction picks (e.g. 0.40 - 0.99) remain dynamic intelligence signals in the pool
+      // for the LP solver to select on xP/value merits, rather than being forced as hard optimization constraints.
+      const hardLockCandidates = consensusDetails
+        .filter(cd => cd.qualifiesForHardLock)
+        .sort((a, b) => b.convictionScore - a.convictionScore);
 
-        if (isConsensus) {
-          const pCost = Number(p.cost || p.now_cost || 0);
-          const newCount = activeLockedSet.size + 1;
-          const remainingSlots = Math.max(0, 15 - newCount);
-          const minRemainingCost = remainingSlots * 42;
+      hardLockCandidates.forEach(cand => {
+        if (excludedSet.has(cand.id)) return;
+        const p = scored.find(x => 
+          x.id === cand.id || 
+          x.web_name.toLowerCase() === cand.web_name.toLowerCase() ||
+          (x.second_name && cand.web_name.toLowerCase().includes(x.second_name.toLowerCase()))
+        );
+        if (!p || excludedSet.has(p.id)) return;
 
-          if (currentLockedCost + pCost + minRemainingCost <= effectiveBudget && activeLockedSet.size < 10) {
-            activeLockedSet.add(p.id);
-            currentLockedCost += pCost;
-          }
+        const pCost = Number(p.cost || p.now_cost || 0);
+        const newCount = activeLockedSet.size + 1;
+        const remainingSlots = Math.max(0, 15 - newCount);
+        const minRemainingCost = remainingSlots * 42;
+
+        if (currentLockedCost + pCost + minRemainingCost <= effectiveBudget && activeLockedSet.size < 10) {
+          activeLockedSet.add(p.id);
+          currentLockedCost += pCost;
         }
       });
     }

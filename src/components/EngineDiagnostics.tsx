@@ -230,16 +230,106 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
               ))}
             </div>
 
-            <div className="pt-1">
-              <span className="text-[8px] font-black uppercase text-slate-500 block mb-1">Elite Consensus Picks:</span>
-              <div className="flex flex-wrap gap-1">
-                {data.topManagerInsight.eliteConsensusPicks.map(pick => (
-                  <span key={pick} className="bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 px-1.5 py-0.5 rounded text-[8px] font-mono font-bold">
-                    {pick}
+            {/* Split Elite Consensus: Starting Weapons & Bench Enablers */}
+            {data.topManagerInsight.consensusDetails && data.topManagerInsight.consensusDetails.length > 0 ? (
+              <div className="pt-2 space-y-2 border-t border-slate-800/80">
+                <div className="flex items-center justify-between">
+                  <span className="text-[9px] font-black uppercase tracking-wider text-slate-300">
+                    Elite Consensus
                   </span>
-                ))}
+                  <span 
+                    className="text-[8px] font-mono text-slate-400 bg-slate-900 border border-slate-800 px-1.5 py-0.5 rounded cursor-help"
+                    title={`All rates calculated across ${data.topManagerInsight.eligibleManagers || data.topManagerInsight.noChipLeaderCount} active 0-chip elite managers (${data.topManagerInsight.eligibleManagers || data.topManagerInsight.noChipLeaderCount} total)`}
+                  >
+                    Elite cohort: {data.topManagerInsight.eligibleManagers || data.topManagerInsight.noChipLeaderCount} managers
+                  </span>
+                </div>
+
+                {/* Starting Weapons */}
+                {(() => {
+                  const weapons = data.topManagerInsight.consensusDetails.filter(d => d.isStartingWeapon);
+                  if (weapons.length === 0) return null;
+                  return (
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1 text-[8.5px] font-black uppercase text-amber-400 tracking-wider">
+                        <span>🔥</span>
+                        <span>Starting Weapons</span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                        {weapons.map(p => (
+                          <div 
+                            key={p.id} 
+                            className="flex items-center justify-between px-2 py-1 bg-slate-950/80 rounded-lg border border-amber-500/20 text-[9px]"
+                            title={`${p.web_name}: ${p.startCount}/${p.eligibleManagers} starts (${Math.round(p.startRate * 100)}%), ${p.captainCount}/${p.eligibleManagers} captains (${Math.round(p.captainRate * 100)}%), Conviction: ${p.convictionScore}`}
+                          >
+                            <div className="flex items-center gap-1.5 truncate">
+                              <span className="text-[8px] font-mono font-bold text-amber-400 bg-amber-400/10 px-1 py-0.2 rounded">
+                                {p.position}
+                              </span>
+                              <span className="text-slate-200 font-semibold truncate">{p.web_name}</span>
+                            </div>
+                            <div className="flex items-center gap-1 font-mono text-[8.5px] shrink-0">
+                              <span className="text-emerald-400 font-bold">{Math.round(p.startRate * 100)}% Start</span>
+                              {p.captainRate > 0 && (
+                                <>
+                                  <span className="text-slate-500">•</span>
+                                  <span className="text-amber-300 font-bold">{Math.round(p.captainRate * 100)}% Cap</span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Bench Enablers */}
+                {(() => {
+                  const enablers = data.topManagerInsight.consensusDetails.filter(d => d.isBenchEnabler);
+                  if (enablers.length === 0) return null;
+                  return (
+                    <div className="space-y-1 pt-1">
+                      <div className="flex items-center gap-1 text-[8.5px] font-black uppercase text-cyan-400 tracking-wider">
+                        <span>🪑</span>
+                        <span>Bench Enablers</span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                        {enablers.map(p => (
+                          <div 
+                            key={p.id} 
+                            className="flex items-center justify-between px-2 py-1 bg-slate-950/80 rounded-lg border border-cyan-500/20 text-[9px]"
+                            title={`${p.web_name}: £${(p.cost / 10).toFixed(1)}m, ${p.benchCount}/${p.eligibleManagers} benched (${Math.round(p.benchRate * 100)}%), ${p.startCount}/${p.eligibleManagers} starts (${Math.round(p.startRate * 100)}%), Conviction: ${p.convictionScore}`}
+                          >
+                            <div className="flex items-center gap-1.5 truncate">
+                              <span className="text-[8px] font-mono font-bold text-cyan-400 bg-cyan-400/10 px-1 py-0.2 rounded">
+                                {p.position}
+                              </span>
+                              <span className="text-slate-300 font-semibold truncate">{p.web_name}</span>
+                              <span className="text-[8px] text-slate-500 font-mono">£{(p.cost / 10).toFixed(1)}m</span>
+                            </div>
+                            <div className="flex items-center gap-1 font-mono text-[8.5px] shrink-0">
+                              <span className="text-slate-400">{Math.round(p.benchRate * 100)}% Bench</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
-            </div>
+            ) : (
+              <div className="pt-1">
+                <span className="text-[8px] font-black uppercase text-slate-500 block mb-1">Elite Consensus Picks:</span>
+                <div className="flex flex-wrap gap-1">
+                  {data.topManagerInsight.eliteConsensusPicks.map(pick => (
+                    <span key={pick} className="bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 px-1.5 py-0.5 rounded text-[8px] font-mono font-bold">
+                      {pick}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -1,6 +1,16 @@
 import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
+import { EliteIntelligenceConfig, EliteConsensusDetail, TopManagerInsight } from './types.js';
+
+export const DEFAULT_INTELLIGENCE_CONFIG: EliteIntelligenceConfig = {
+  startWeight: 1.0,
+  captainWeight: 0.5,
+  benchPenalty: 0.2,
+  startingWeaponMinStartRate: 0.50,
+  benchEnablerMinBenchRate: 0.50,
+  hardLockMinConviction: 1.0,
+};
 
 export interface ManagerGWDecisionSnapshot {
   season: string;
@@ -153,12 +163,16 @@ export class ManagerSnapshotService {
   /**
    * Calculate live dynamic Top Manager Insights from snapshots or live API
    */
-  public static async getDynamicTopManagerInsight(players: Array<{ id: number; web_name: string; selected_by_percent?: string }>, targetGw: number): Promise<{
-    noChipLeaderCount: number;
-    sampleLeaders: Array<{ rank: number; entry: number; manager_name: string; team_name: string; total_points: number }>;
-    marketDisagreementRating: number;
-    eliteConsensusPicks: string[];
-  }> {
+  public static async getDynamicTopManagerInsight(
+    players: Array<{ id: number; web_name: string; selected_by_percent?: string; element_type?: number; cost?: number; now_cost?: number }>,
+    targetGw: number,
+    configPartial?: Partial<EliteIntelligenceConfig>
+  ): Promise<TopManagerInsight> {
+    const config: EliteIntelligenceConfig = {
+      ...DEFAULT_INTELLIGENCE_CONFIG,
+      ...(configPartial || {})
+    };
+
     let decisions: ManagerGWDecisionSnapshot[] = [];
     const archive = this.loadSnapshot(targetGw);
     if (archive && archive.decisions && archive.decisions.length > 0) {
@@ -169,9 +183,55 @@ export class ManagerSnapshotService {
     }
 
     const zeroChipManagers = decisions.filter(d => (!d.chips_used || d.chips_used.length === 0) && !d.active_chip);
-    const noChipLeaderCount = zeroChipManagers.length > 0 ? zeroChipManagers.length : 2;
+    let leadersToUse = zeroChipManagers.length > 0 ? zeroChipManagers : decisions;
 
-    const leadersToUse = zeroChipManagers.length > 0 ? zeroChipManagers : decisions;
+    // Fallback if no snapshots captured yet (authentic top 2 0-chip managers baseline)
+    if (leadersToUse.length === 0) {
+      leadersToUse = [
+        {
+          season: '2026-27',
+          gameweek: targetGw,
+          manager_id: 4148445,
+          manager_name: "Abhishek Raj",
+          team_name: "Gunnerball",
+          overall_rank: 587,
+          total_points: 273,
+          chips_used: [],
+          active_chip: null,
+          squad_15: [1, 279, 8, 391, 426, 399, 368, 15, 154, 165, 379, 497, 272, 233, 377],
+          starting_xi: [1, 279, 8, 391, 426, 399, 368, 15, 154, 165, 379],
+          captain_id: 379,
+          vice_captain_id: 399,
+          transfers_in: [8, 399],
+          transfers_out: [],
+          bank: 0,
+          team_value: 1000,
+          timestamp: Date.now()
+        },
+        {
+          season: '2026-27',
+          gameweek: targetGw,
+          manager_id: 5662742,
+          manager_name: "Tony Elliott",
+          team_name: "Shetland Tonys",
+          overall_rank: 956,
+          total_points: 270,
+          chips_used: [],
+          active_chip: null,
+          squad_15: [28, 115, 391, 8, 368, 426, 15, 399, 154, 379, 464, 497, 165, 31, 508],
+          starting_xi: [28, 115, 391, 8, 368, 426, 15, 399, 154, 379, 464],
+          captain_id: 399,
+          vice_captain_id: 464,
+          transfers_in: [368, 399],
+          transfers_out: [],
+          bank: 0,
+          team_value: 1000,
+          timestamp: Date.now()
+        }
+      ];
+    }
+
+    const eligibleManagers = leadersToUse.length;
     const sampleLeaders = leadersToUse.slice(0, 3).map(d => ({
       rank: d.overall_rank,
       entry: d.manager_id,
@@ -180,31 +240,132 @@ export class ManagerSnapshotService {
       total_points: d.total_points
     }));
 
-    // Tally consensus picks across 0-chip cohort
-    const playerCounts: Record<number, number> = {};
+    const playerMap = new Map(players.map(p => [p.id, p]));
+    const posMap: Record<number, string> = { 1: 'GKP', 2: 'DEF', 3: 'MID', 4: 'FWD' };
+
+    // Tally canonical decision counts
+    interface DecisionTally {
+      squadCount: number;
+      startCount: number;
+      captainCount: number;
+      viceCaptainCount: number;
+      transfersInCount: number;
+      transfersOutCount: number;
+    }
+    const tallies = new Map<number, DecisionTally>();
+    const getTally = (pid: number): DecisionTally => {
+      let t = tallies.get(pid);
+      if (!t) {
+        t = {
+          squadCount: 0,
+          startCount: 0,
+          captainCount: 0,
+          viceCaptainCount: 0,
+          transfersInCount: 0,
+          transfersOutCount: 0
+        };
+        tallies.set(pid, t);
+      }
+      return t;
+    };
+
     leadersToUse.forEach(d => {
-      const picks = d.squad_15 || [];
-      picks.forEach(pid => {
-        playerCounts[pid] = (playerCounts[pid] || 0) + 1;
+      const squad = new Set(d.squad_15 || []);
+      const starting = new Set(d.starting_xi || []);
+      const xfersIn = new Set(d.transfers_in || []);
+      const xfersOut = new Set(d.transfers_out || []);
+
+      squad.forEach(pid => {
+        const t = getTally(pid);
+        t.squadCount += 1;
+        if (starting.has(pid)) {
+          t.startCount += 1;
+        }
+      });
+
+      if (d.captain_id) {
+        getTally(d.captain_id).captainCount += 1;
+      }
+      if (d.vice_captain_id) {
+        getTally(d.vice_captain_id).viceCaptainCount += 1;
+      }
+
+      // Manager participation counts
+      xfersIn.forEach(pid => {
+        getTally(pid).transfersInCount += 1;
+      });
+      xfersOut.forEach(pid => {
+        getTally(pid).transfersOutCount += 1;
       });
     });
 
-    const playerMap = new Map(players.map(p => [p.id, p]));
-    const sortedPickIds = Object.keys(playerCounts)
-      .map(Number)
-      .sort((a, b) => (playerCounts[b] || 0) - (playerCounts[a] || 0));
+    const consensusDetails: EliteConsensusDetail[] = [];
 
-    const eliteConsensusPicks = sortedPickIds
-      .slice(0, 8)
-      .map(id => playerMap.get(id)?.web_name || `Player ${id}`);
+    tallies.forEach((t, pid) => {
+      const p = playerMap.get(pid);
+      const benchCount = Math.max(0, t.squadCount - t.startCount);
 
-    // Calculate disagreement rating (0.0 to 1.0)
+      const ownershipRate = eligibleManagers > 0 ? t.squadCount / eligibleManagers : 0;
+      const startRate = eligibleManagers > 0 ? t.startCount / eligibleManagers : 0;
+      const benchRate = eligibleManagers > 0 ? benchCount / eligibleManagers : 0;
+      const captainRate = eligibleManagers > 0 ? t.captainCount / eligibleManagers : 0;
+      const viceCaptainRate = eligibleManagers > 0 ? t.viceCaptainCount / eligibleManagers : 0;
+      // Manager participation rates (managers who made the transfer / eligible managers)
+      const transfersInRate = eligibleManagers > 0 ? t.transfersInCount / eligibleManagers : 0;
+      const transfersOutRate = eligibleManagers > 0 ? t.transfersOutCount / eligibleManagers : 0;
+
+      // Conviction model (ordinal score)
+      const rawConviction = (startRate * config.startWeight) + (captainRate * config.captainWeight) - (benchRate * config.benchPenalty);
+      const convictionScore = Math.round(rawConviction * 1000) / 1000;
+      const convictionIndex = Math.round(convictionScore * 100);
+
+      // Derived classifications
+      const isStartingWeapon = startRate >= config.startingWeaponMinStartRate;
+      const isBenchEnabler = benchRate >= config.benchEnablerMinBenchRate && startRate < config.startingWeaponMinStartRate;
+      // Two-condition hard-lock rule: requires both conviction threshold AND starting weapon threshold
+      const qualifiesForHardLock = convictionScore >= config.hardLockMinConviction && startRate >= config.startingWeaponMinStartRate;
+
+      const position = p?.element_type ? (posMap[p.element_type] || 'MID') : 'MID';
+      const cost = p?.now_cost || p?.cost || 0;
+
+      consensusDetails.push({
+        id: pid,
+        web_name: p?.web_name || `Player ${pid}`,
+        position,
+        cost,
+        squadCount: t.squadCount,
+        startCount: t.startCount,
+        benchCount,
+        captainCount: t.captainCount,
+        viceCaptainCount: t.viceCaptainCount,
+        transfersInCount: t.transfersInCount,
+        transfersOutCount: t.transfersOutCount,
+        eligibleManagers,
+        ownershipRate: Math.round(ownershipRate * 1000) / 1000,
+        startRate: Math.round(startRate * 1000) / 1000,
+        benchRate: Math.round(benchRate * 1000) / 1000,
+        captainRate: Math.round(captainRate * 1000) / 1000,
+        viceCaptainRate: Math.round(viceCaptainRate * 1000) / 1000,
+        transfersInRate: Math.round(transfersInRate * 1000) / 1000,
+        transfersOutRate: Math.round(transfersOutRate * 1000) / 1000,
+        convictionScore,
+        convictionIndex,
+        isStartingWeapon,
+        isBenchEnabler,
+        qualifiesForHardLock
+      });
+    });
+
+    // Rank by convictionScore descending, then ownershipRate descending
+    consensusDetails.sort((a, b) => b.convictionScore - a.convictionScore || b.ownershipRate - a.ownershipRate);
+
+    // Calculate market disagreement rating (0.0 to 1.0)
     let totalDiff = 0;
     let count = 0;
-    sortedPickIds.slice(0, 10).forEach(id => {
-      const p = playerMap.get(id);
+    consensusDetails.slice(0, 10).forEach(cd => {
+      const p = playerMap.get(cd.id);
       if (p) {
-        const cohortOwnership = ((playerCounts[id] || 0) / (leadersToUse.length || 1)) * 100;
+        const cohortOwnership = cd.ownershipRate * 100;
         const generalOwnership = parseFloat(p.selected_by_percent || "0");
         totalDiff += Math.abs(cohortOwnership - generalOwnership);
         count++;
@@ -214,14 +375,23 @@ export class ManagerSnapshotService {
     const avgDiff = count > 0 ? totalDiff / count : 25.0;
     const marketDisagreementRating = Math.min(0.85, Math.max(0.15, Math.round((avgDiff / 100) * 100) / 100));
 
+    const eliteConsensusPicks = consensusDetails
+      .filter(d => d.isStartingWeapon || d.ownershipRate >= 0.5)
+      .slice(0, 10)
+      .map(d => d.web_name);
+
     return {
-      noChipLeaderCount,
+      noChipLeaderCount: leadersToUse.length,
+      eligibleManagers,
       sampleLeaders: sampleLeaders.length > 0 ? sampleLeaders : [
         { rank: 587, entry: 4148445, manager_name: "Abhishek Raj", team_name: "Gunnerball", total_points: 273 },
         { rank: 956, entry: 5662742, manager_name: "Tony Elliott", team_name: "Shetland Tonys", total_points: 270 }
       ],
       marketDisagreementRating,
-      eliteConsensusPicks: eliteConsensusPicks.length > 0 ? eliteConsensusPicks : ["Gvardiol", "Calafiori", "Palmer", "B.Fernandes", "Szoboszlai", "Ødegaard", "Cherki", "João Pedro", "Isak"]
+      eliteConsensusPicks: eliteConsensusPicks.length > 0 ? eliteConsensusPicks : [
+        "Gvardiol", "Calafiori", "Palmer", "B.Fernandes", "Szoboszlai", "Ødegaard", "Cherki", "João Pedro", "Isak"
+      ],
+      consensusDetails
     };
   }
 }

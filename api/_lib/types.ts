@@ -171,20 +171,68 @@ export interface RecommendationResponse {
     mid: ScoredPlayer[];
     fwd: ScoredPlayer[];
   };
-  topManagerInsight?: {
-    noChipLeaderCount: number;
-    sampleLeaders: Array<{
-      rank: number;
-      entry: number;
-      manager_name: string;
-      team_name: string;
-      total_points: number;
-    }>;
-    marketDisagreementRating: number;
-    eliteConsensusPicks: string[];
-  };
+  topManagerInsight?: TopManagerInsight;
   nextEventId: number;
   lastUpdated: number;
+}
+
+export interface EliteIntelligenceConfig {
+  startWeight: number; // default: 1.0
+  captainWeight: number; // default: 0.5
+  benchPenalty: number; // default: 0.2
+  startingWeaponMinStartRate: number; // default: 0.50
+  benchEnablerMinBenchRate: number; // default: 0.50
+  hardLockMinConviction: number; // default: 1.0
+}
+
+export interface EliteConsensusDetail {
+  id: number;
+  web_name: string;
+  position: string;
+  cost: number;
+  
+  // Raw decision counts
+  squadCount: number;
+  startCount: number;
+  benchCount: number;
+  captainCount: number;
+  viceCaptainCount: number;
+  transfersInCount: number;
+  transfersOutCount: number;
+  eligibleManagers: number;
+
+  // Canonical Rates (0.0 to 1.0)
+  // NOTE: transfersInRate and transfersOutRate represent manager participation rates,
+  // not the percentage share of all league transfers.
+  ownershipRate: number;
+  startRate: number;
+  benchRate: number;
+  captainRate: number;
+  viceCaptainRate: number;
+  transfersInRate: number;
+  transfersOutRate: number;
+
+  // Conviction & Derived Classifications
+  convictionScore: number;
+  convictionIndex: number; // Normalized (0-100 scale, e.g. 1.25 -> 125)
+  isStartingWeapon: boolean;
+  isBenchEnabler: boolean;
+  qualifiesForHardLock: boolean;
+}
+
+export interface TopManagerInsight {
+  noChipLeaderCount: number;
+  eligibleManagers: number;
+  sampleLeaders: Array<{
+    rank: number;
+    entry: number;
+    manager_name: string;
+    team_name: string;
+    total_points: number;
+  }>;
+  marketDisagreementRating: number;
+  eliteConsensusPicks: string[];
+  consensusDetails: EliteConsensusDetail[];
 }
 
 export interface TransferRecommendation {
