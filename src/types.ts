@@ -169,6 +169,18 @@ export interface RecommendationResponse {
     mid: ScoredPlayer[];
     fwd: ScoredPlayer[];
   };
+  topManagerInsight?: {
+    noChipLeaderCount: number;
+    sampleLeaders: Array<{
+      rank: number;
+      entry: number;
+      manager_name: string;
+      team_name: string;
+      total_points: number;
+    }>;
+    marketDisagreementRating: number;
+    eliteConsensusPicks: string[];
+  };
   nextEventId: number;
   lastUpdated: number;
 }

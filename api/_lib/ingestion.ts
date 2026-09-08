@@ -88,17 +88,16 @@ export abstract class BaseOracle implements XPOracle {
             const data = parsed.players[pId];
             let fplId = parseInt(pId);
             
-            if (players.length > 0 && data.name) {
-              const pName = data.name.toLowerCase();
-              const match = players.find(p => {
-                const wName = (p.web_name || '').toLowerCase();
-                const sName = (p.second_name || '').toLowerCase();
-                return wName === pName || sName === pName || 
-                       (wName.length > 2 && pName.includes(wName)) || 
-                       (sName.length > 2 && pName.includes(sName));
-              });
-              if (match) {
-                fplId = match.id;
+            if (players.length > 0) {
+              const directMatch = players.find(p => p.id === fplId);
+              if (!directMatch && data.name) {
+                const pName = data.name.toLowerCase();
+                const match = players.find(p => {
+                  const wName = (p.web_name || '').toLowerCase();
+                  const sName = (p.second_name || '').toLowerCase();
+                  return wName === pName || sName === pName;
+                });
+                if (match) fplId = match.id;
               }
             }
             this.top1kData[fplId] = data;
@@ -131,7 +130,7 @@ export abstract class BaseOracle implements XPOracle {
 
     // 1. Build live team ratings and team short name map
     if (teams && teams.length > 0) {
-      const currentSeason = '2023-24';
+      const currentSeason = '2026-27';
       const previousGw = nextEventId > 1 ? nextEventId - 1 : 38;
       teams.forEach(t => {
         teamNameMap[t.id] = t.short_name;
@@ -242,6 +241,15 @@ export abstract class BaseOracle implements XPOracle {
         dynamicPredictedMins = 0;
       }
 
+      const safeThreat = safeParseFloat(p.threat || "0");
+      const safeCreativity = safeParseFloat(p.creativity || "0");
+      const safeForm = safeParseFloat(p.form || "0");
+
+      const shots90 = safeThreat > 0 ? (safeThreat / 25) : (xG90 * 3.5);
+      const keyPasses90 = safeCreativity > 0 ? (safeCreativity / 25) : (xA90 * 3.0);
+      const minutesTrend = avgMins >= 60 ? 1 : (avgMins >= 30 ? 0 : -1);
+      const selectionMomentum = safeForm;
+
       this.featuresMatrix[fplId] = {
         id: fplId,
         name: playerName,
@@ -252,15 +260,15 @@ export abstract class BaseOracle implements XPOracle {
         startsLast4: (dynamicPredictedMins >= 60 ? 1 : 0) * 4,
         xGLast4: xG90 * 4,
         xALast4: xA90 * 4,
-        shotsLast4: 0,
-        keyPassesLast4: 0,
+        shotsLast4: shots90 * 4,
+        keyPassesLast4: keyPasses90 * 4,
         xG90,
         xA90,
         xGI3: (xG90 + xA90) * 3,
         xGI5: (xG90 + xA90) * 5,
-        minutesTrend: 0,
-        shots90: 0,
-        keyPasses90: 0,
+        minutesTrend,
+        shots90,
+        keyPasses90,
         fixturesByGw,
         
         minutesLast1: dynamicPredictedMins,
@@ -274,7 +282,7 @@ export abstract class BaseOracle implements XPOracle {
         fixturesLast14Days: 2,
         minutesVolatility: 0,
         chanceOfPlayingThisRound: probPlay * 100,
-        selectionMomentum: 0,
+        selectionMomentum,
         consecutiveStarts: starts,
 
         predictedMinutes: dynamicPredictedMins,

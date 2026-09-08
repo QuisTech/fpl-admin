@@ -56,10 +56,16 @@ export class FeatureStoreRepository {
       }
     }
 
-    // For current/future seasons, use the final gameweek of 2023-24 as a reasonable baseline
-    if (season !== '2021-22' && season !== '2022-23' && season !== '2023-24') {
-      if (this.data['2023-24']?.[38]?.[teamId]) {
-        return this.data['2023-24'][38][teamId];
+    // For future seasons, search available seasons in reverse chronological order
+    const availableSeasons = Object.keys(this.data).sort().reverse();
+    for (const s of availableSeasons) {
+      if (this.data[s]) {
+        const gws = Object.keys(this.data[s]).map(Number).filter(gw => s === season ? gw <= gameweek : true).sort((a, b) => b - a);
+        for (const gw of gws) {
+          if (this.data[s][gw]?.[teamId]) {
+            return this.data[s][gw][teamId];
+          }
+        }
       }
     }
 

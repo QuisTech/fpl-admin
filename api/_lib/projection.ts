@@ -86,7 +86,8 @@ export function getParamsForRiskMode(
     } else if (riskMode === 'value') {
       params.betaVariance = 0.0;
       params.betaEO = 0.0;
-      params.budgetMultiplier = 0.85; // Strict 85% budget to maximize ROI
+      params.budgetMultiplier = 1.0; // Deploy 100% budget for High-Density PPM Capital Efficiency
+      params.betaDifferential = 2.0;
     } else {
       params.betaVariance = 0.0;
       params.betaEO = 0.0;
@@ -106,7 +107,7 @@ export function getParamsForRiskMode(
     } else if (riskMode === 'value') {
       params.betaVariance = 0.0;
       params.betaEO = 1.5;
-      params.budgetMultiplier = 0.90;
+      params.budgetMultiplier = 1.0; // Deploy 100% budget
     } else {
       params.betaVariance = -0.05;
       params.betaEO = 2.0;
