@@ -7449,7 +7449,7 @@
   {
     "code": 2645221,
     "event": 3,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 21,
     "kickoff_time": "2026-09-04T19:00:00Z",
@@ -7791,7 +7791,7 @@
   {
     "code": 2645223,
     "event": 3,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 27,
     "kickoff_time": "2026-09-05T11:30:00Z",
@@ -8168,7 +8168,7 @@
   {
     "code": 2645216,
     "event": 3,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 22,
     "kickoff_time": "2026-09-05T14:00:00Z",
@@ -8529,7 +8529,7 @@
   {
     "code": 2645217,
     "event": 3,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 23,
     "kickoff_time": "2026-09-05T14:00:00Z",
@@ -8874,7 +8874,7 @@
   {
     "code": 2645219,
     "event": 3,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 24,
     "kickoff_time": "2026-09-05T14:00:00Z",
@@ -9240,7 +9240,7 @@
   {
     "code": 2645222,
     "event": 3,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 26,
     "kickoff_time": "2026-09-05T14:00:00Z",
@@ -9594,7 +9594,7 @@
   {
     "code": 2645224,
     "event": 3,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 28,
     "kickoff_time": "2026-09-05T14:00:00Z",
@@ -9930,7 +9930,7 @@
   {
     "code": 2645220,
     "event": 3,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 25,
     "kickoff_time": "2026-09-05T16:30:00Z",
@@ -10278,7 +10278,7 @@
   {
     "code": 2645218,
     "event": 3,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 30,
     "kickoff_time": "2026-09-06T13:00:00Z",
@@ -10663,7 +10663,7 @@
   {
     "code": 2645215,
     "event": 3,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 29,
     "kickoff_time": "2026-09-06T15:30:00Z",
