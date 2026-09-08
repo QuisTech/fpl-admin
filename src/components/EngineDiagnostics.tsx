@@ -190,12 +190,14 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
       {/* Top Manager Intelligence HUD */}
       {data.topManagerInsight && (
         <div className="relative z-10 mt-3 pt-3 border-t border-slate-800/80">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-1.5 text-cyan-400">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-200">Top Manager Intelligence (0 Chips)</span>
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <div className="flex items-center gap-1.5 text-cyan-400 min-w-0">
+              <Sparkles className="w-3.5 h-3.5 shrink-0" />
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-200 truncate">
+                Top Manager Intelligence (0 Chips)
+              </span>
             </div>
-            <span className="text-[8px] font-mono font-bold text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-1.5 py-0.5 rounded">
+            <span className="text-[8.5px] font-mono font-bold text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-2 py-0.5 rounded shrink-0 whitespace-nowrap shadow-sm">
               Edge: {(() => {
                 const r = data.topManagerInsight.marketDisagreementRating;
                 if (r > 100) return Math.round(r / 100);
@@ -206,40 +208,59 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
           </div>
 
           <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 space-y-2">
-            <div className="flex justify-between items-center text-[10px]">
-              <span className="text-slate-400">0-Chip Top 1k Leaders:</span>
-              <span className="font-bold text-emerald-400 font-mono">{data.topManagerInsight.noChipLeaderCount} Managers</span>
+            <div className="flex justify-between items-center text-[10px] px-0.5">
+              <span className="text-slate-400 font-medium">0-Chip Top 1k Leaders:</span>
+              <span className="font-bold text-emerald-400 font-mono bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded text-[9px]">
+                {data.topManagerInsight.noChipLeaderCount} Managers
+              </span>
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               {data.topManagerInsight.sampleLeaders.map(m => (
-                <div key={m.entry} className="flex items-center justify-between gap-2 text-[9.5px] bg-slate-950/70 p-2 rounded-xl border border-slate-800/80">
-                  <div className="flex items-center gap-1.5 min-w-0 pr-1">
-                    <span className="text-slate-200 font-bold shrink-0">#{m.rank}</span>
-                    <span className="text-slate-500 shrink-0">•</span>
-                    <span className="text-slate-300 font-medium truncate">{m.manager_name}</span>
-                    <span className="font-mono text-fpl-green font-bold shrink-0 ml-1">{m.total_points} pts</span>
+                <div 
+                  key={m.entry} 
+                  className="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800/80 hover:border-slate-700/80 transition-all space-y-2"
+                >
+                  {/* Top row: Manager info + Points */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="text-[9.5px] font-black font-mono text-amber-400 bg-amber-400/10 border border-amber-400/20 px-1.5 py-0.5 rounded shrink-0">
+                        #{m.rank}
+                      </span>
+                      <span className="text-[11px] font-bold text-slate-100 truncate" title={m.manager_name}>
+                        {m.manager_name}
+                      </span>
+                    </div>
+                    <span className="font-mono text-fpl-green font-black text-[11px] shrink-0 bg-fpl-green/10 border border-fpl-green/20 px-2 py-0.5 rounded">
+                      {m.total_points} pts
+                    </span>
                   </div>
 
-                  <div className="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
-                    {onSyncTeamId && (
-                      <button
-                        onClick={() => onSyncTeamId(m.entry.toString())}
-                        className="text-[8.5px] font-black uppercase tracking-wider text-slate-950 bg-fpl-green hover:bg-fpl-green/90 px-2 py-0.5 rounded-md transition-all shadow-[0_0_8px_rgba(0,255,133,0.25)] flex items-center gap-1 cursor-pointer"
-                        title={`Sync Team ID ${m.entry} directly into Horizon and analyze squad`}
+                  {/* Bottom row: Team ID & Actions */}
+                  <div className="flex items-center justify-between pt-1 border-t border-slate-900/90 text-[9px]">
+                    <span className="text-slate-500 font-mono text-[8.5px]">
+                      0 Chips Active
+                    </span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {onSyncTeamId && (
+                        <button
+                          onClick={() => onSyncTeamId(m.entry.toString())}
+                          className="text-[8.5px] font-black uppercase tracking-wider text-slate-950 bg-fpl-green hover:bg-fpl-green/90 px-2 py-0.5 rounded-md transition-all shadow-[0_0_8px_rgba(0,255,133,0.25)] flex items-center gap-1 cursor-pointer active:scale-95"
+                          title={`Sync Team ID ${m.entry} directly into Horizon and analyze squad`}
+                        >
+                          ⚡ Sync Squad
+                        </button>
+                      )}
+                      <a 
+                        href={`https://fantasy.premierleague.com/entry/${m.entry}/history`} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-[8.5px] font-mono text-cyan-300 bg-slate-900 border border-slate-700/80 hover:border-cyan-500/40 px-2 py-0.5 rounded-md hover:bg-slate-800 transition-all flex items-center gap-1"
+                        title="Open Manager Account on Official FPL Website"
                       >
-                        ⚡ Sync
-                      </button>
-                    )}
-                    <a 
-                      href={`https://fantasy.premierleague.com/entry/${m.entry}/history`} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="text-[8.5px] font-mono text-cyan-300 bg-slate-900 border border-slate-700/80 px-1.5 py-0.5 rounded-md hover:bg-slate-800 transition-colors flex items-center gap-1"
-                      title="Open Manager Account on Official FPL Website"
-                    >
-                      ID: {m.entry} ↗
-                    </a>
+                        ID: {m.entry} ↗
+                      </a>
+                    </div>
                   </div>
                 </div>
               ))}
