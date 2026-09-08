@@ -198,7 +198,18 @@ export const EngineDiagnostics = ({ data }: EngineDiagnosticsProps) => {
             <div className="space-y-1">
               {data.topManagerInsight.sampleLeaders.map(m => (
                 <div key={m.entry} className="flex justify-between items-center text-[9px] bg-slate-950/60 px-2 py-1 rounded border border-slate-800/80">
-                  <span className="text-slate-300 font-medium">#{m.rank} • {m.manager_name}</span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-slate-300 font-medium">#{m.rank} • {m.manager_name}</span>
+                    <a 
+                      href={`https://fantasy.premierleague.com/entry/${m.entry}/history`} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-[8px] font-mono text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-1 py-0.5 rounded hover:bg-cyan-400/20 transition-colors flex items-center gap-0.5"
+                      title="View Manager Team & History on Official FPL Website"
+                    >
+                      ID: {m.entry} ↗
+                    </a>
+                  </div>
                   <span className="font-mono text-fpl-green font-bold">{m.total_points} pts</span>
                 </div>
               ))}
