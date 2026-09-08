@@ -287,10 +287,10 @@ export const TransferView = ({ syncedData, tier = 'ai-agent', setTab, userId }: 
                   </div>
                   <div className="flex flex-col min-w-0">
                     <span className="text-[10px] font-black uppercase text-white tracking-wider flex items-center gap-1.5 truncate">
-                      5-Gameweek Tactical Fixture Window
+                      8-Gameweek Strategy Squad Horizon
                     </span>
                     <span className="text-[9px] text-slate-400 font-medium line-clamp-1 sm:line-clamp-none">
-                      FDR-weighted fixture difficulty & form projections for your 15-man squad
+                      Multi-strategy scraped projection & squad lookahead analysis for your 15-man squad
                     </span>
                   </div>
                 </div>
