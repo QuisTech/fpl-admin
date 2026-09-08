@@ -210,12 +210,17 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
           <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 space-y-2">
             <div className="flex justify-between items-center text-[10px] px-0.5">
               <span className="text-slate-400 font-medium">0-Chip Top 1k Leaders:</span>
-              <span className="font-bold text-emerald-400 font-mono bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded text-[9px]">
-                {data.topManagerInsight.noChipLeaderCount} Managers
-              </span>
+              <div className="flex items-center gap-1.5">
+                {data.topManagerInsight.sampleLeaders.length > 2 && (
+                  <span className="text-[8px] text-slate-500 font-mono">Scroll for more ▾</span>
+                )}
+                <span className="font-bold text-emerald-400 font-mono bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded text-[9px]">
+                  {data.topManagerInsight.noChipLeaderCount} Managers
+                </span>
+              </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
               {data.topManagerInsight.sampleLeaders.map(m => (
                 <div 
                   key={m.entry} 
