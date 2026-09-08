@@ -529,6 +529,34 @@ export class FPLService {
           currentLockedCost += pCost;
         }
       });
+    } else if (riskMode === 'value' || fuel === 'value') {
+      // Auto-lock 0-Chip Elite Consensus Picks into MILP Solver for VALUE Mode
+      const topInsight = await ManagerSnapshotService.getDynamicTopManagerInsight(players, nextEventId);
+      const consensusNames = new Set((topInsight?.eliteConsensusPicks || []).map(n => n.toLowerCase()));
+
+      let currentLockedCost = Array.from(activeLockedSet).reduce((sum: number, id: number) => {
+        const p = scored.find(x => x.id === id);
+        return sum + Number(p?.cost || 0);
+      }, 0);
+
+      scored.forEach(p => {
+        if (excludedSet.has(p.id)) return;
+        const webNameLower = (p.web_name || '').toLowerCase();
+        const secondNameLower = (p.second_name || '').toLowerCase();
+        const isConsensus = consensusNames.has(webNameLower) || consensusNames.has(secondNameLower);
+
+        if (isConsensus) {
+          const pCost = Number(p.cost || p.now_cost || 0);
+          const newCount = activeLockedSet.size + 1;
+          const remainingSlots = Math.max(0, 15 - newCount);
+          const minRemainingCost = remainingSlots * 42;
+
+          if (currentLockedCost + pCost + minRemainingCost <= effectiveBudget && activeLockedSet.size < 6) {
+            activeLockedSet.add(p.id);
+            currentLockedCost += pCost;
+          }
+        }
+      });
     }
 
     const availableIds = new Set<number>(scored.map(p => p.id));
