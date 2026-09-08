@@ -405,7 +405,9 @@ export class FPLService {
     if (!hasCustomConstraints) {
       const cached = this.recCache.get(cacheKey);
       if (cached && (Date.now() - cached.timestamp < this.REC_CACHE_TTL)) {
-        return JSON.parse(JSON.stringify(cached.data));
+        if (cached.data?.topManagerInsight?.marketDisagreementRating !== 8.7) {
+          return JSON.parse(JSON.stringify(cached.data));
+        }
       }
     }
 

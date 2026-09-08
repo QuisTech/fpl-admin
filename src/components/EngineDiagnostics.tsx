@@ -180,7 +180,12 @@ export const EngineDiagnostics = ({ data }: EngineDiagnosticsProps) => {
               <span className="text-[10px] font-black uppercase tracking-wider text-slate-200">Top Manager Intelligence (0 Chips)</span>
             </div>
             <span className="text-[8px] font-mono font-bold text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-1.5 py-0.5 rounded">
-              Edge: {(data.topManagerInsight.marketDisagreementRating * 100).toFixed(0)}%
+              Edge: {(() => {
+                const r = data.topManagerInsight.marketDisagreementRating;
+                if (r > 100) return Math.round(r / 100);
+                if (r > 1.0) return Math.round(r);
+                return Math.round(r * 100);
+              })()}%
             </span>
           </div>
 
