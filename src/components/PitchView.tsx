@@ -102,7 +102,7 @@ export const PitchView = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex-grow flex flex-col justify-between py-1 sm:py-2 w-full max-w-5xl mx-auto"
+      className="flex-grow flex flex-col justify-start space-y-2 py-1 sm:py-2 w-full max-w-5xl mx-auto"
     >
       {/* Top Controls: Scenario Switcher & Delta Comparison Bar (Only rendered when onSelectScenario is provided) */}
       {onSelectScenario && (
