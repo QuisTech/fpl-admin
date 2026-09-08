@@ -170,6 +170,48 @@ export const EngineDiagnostics = ({ data }: EngineDiagnosticsProps) => {
           </div>
         </div>
       )}
+
+      {/* Top Manager Intelligence HUD */}
+      {data.topManagerInsight && (
+        <div className="relative z-10 mt-3 pt-3 border-t border-slate-800/80">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-1.5 text-cyan-400">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-200">Top Manager Intelligence (0 Chips)</span>
+            </div>
+            <span className="text-[8px] font-mono font-bold text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-1.5 py-0.5 rounded">
+              Edge: {(data.topManagerInsight.marketDisagreementRating * 100).toFixed(0)}%
+            </span>
+          </div>
+
+          <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 space-y-2">
+            <div className="flex justify-between items-center text-[10px]">
+              <span className="text-slate-400">0-Chip Top 1k Leaders:</span>
+              <span className="font-bold text-emerald-400 font-mono">{data.topManagerInsight.noChipLeaderCount} Managers</span>
+            </div>
+
+            <div className="space-y-1">
+              {data.topManagerInsight.sampleLeaders.map(m => (
+                <div key={m.entry} className="flex justify-between items-center text-[9px] bg-slate-950/60 px-2 py-1 rounded border border-slate-800/80">
+                  <span className="text-slate-300 font-medium">#{m.rank} • {m.manager_name}</span>
+                  <span className="font-mono text-fpl-green font-bold">{m.total_points} pts</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-1">
+              <span className="text-[8px] font-black uppercase text-slate-500 block mb-1">Elite Consensus Picks:</span>
+              <div className="flex flex-wrap gap-1">
+                {data.topManagerInsight.eliteConsensusPicks.map(pick => (
+                  <span key={pick} className="bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 px-1.5 py-0.5 rounded text-[8px] font-mono font-bold">
+                    {pick}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 };
