@@ -577,20 +577,9 @@ export class FPLService {
     const buildStartingXI = (squadList: ScoredPlayer[], targetParams = params) => {
       const squadIds = squadList.map(p => p.id);
       try {
-        const xiIds = solveStartingXI(oracle, nextEventId, squadIds, targetParams);
+        const xiIds = solveStartingXI(oracle, nextEventId, squadIds, targetParams, activeLockedSet);
         const xiIdSet = new Set(xiIds);
-        let starters = squadList.filter(p => xiIdSet.has(p.id));
-        
-        // Ensure activeLockedSet consensus picks are prioritized into starting XI over bench fillers
-        const benchedConsensus = squadList.filter(p => !xiIdSet.has(p.id) && activeLockedSet.has(p.id));
-        if (benchedConsensus.length > 0) {
-          benchedConsensus.forEach(bp => {
-            const replacableIndex = starters.findIndex(sp => sp.position === bp.position && !activeLockedSet.has(sp.id));
-            if (replacableIndex !== -1) {
-              starters[replacableIndex] = bp;
-            }
-          });
-        }
+        const starters = squadList.filter(p => xiIdSet.has(p.id));
 
         if (starters.length === 11) {
           return starters;

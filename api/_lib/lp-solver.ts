@@ -243,7 +243,8 @@ export function solveStartingXI(
   oracle: XPOracle,
   gameweek: number,
   squadIds: number[],
-  params: UtilityParameters = DEFAULT_PARAMETERS
+  params: UtilityParameters = DEFAULT_PARAMETERS,
+  lockedIds?: Set<number>
 ): number[] {
   // Score each player in the squad for the upcoming gameweek (horizon = 1)
   const scored = squadIds.map(id => {
@@ -252,6 +253,7 @@ export function solveStartingXI(
     return {
       id,
       pos,
+      isLocked: lockedIds ? lockedIds.has(id) : false,
       score: getPlayerScore(oracle, gameweek, id, 1, params)
     };
   });
@@ -263,22 +265,71 @@ export function solveStartingXI(
 
   // Exact FPL formation rules: 1 GKP, 3 DEF, 2 MID, 1 FWD mandatory (7 players)
   if (gkps.length >= 1 && defs.length >= 3 && mids.length >= 2 && fwds.length >= 1) {
-    const mandatory = [
-      gkps[0],
-      defs[0], defs[1], defs[2],
-      mids[0], mids[1],
-      fwds[0]
-    ];
+    // 1. Mandatory base: 1 GKP
+    const starters: typeof scored = [gkps[0]];
 
-    // The remaining 7 outfielders compete for the remaining 4 starting slots by highest score
-    const flexPool = [
-      ...defs.slice(3),
-      ...mids.slice(2),
-      ...fwds.slice(1)
-    ].sort((a, b) => b.score - a.score);
+    // 2. Add all locked consensus outfielders directly into starting XI (respecting FPL max: 5 DEF, 5 MID, 3 FWD)
+    const lockedDefs = defs.filter(p => p.isLocked).slice(0, 5);
+    const lockedMids = mids.filter(p => p.isLocked).slice(0, 5);
+    const lockedFwds = fwds.filter(p => p.isLocked).slice(0, 3);
+    starters.push(...lockedDefs, ...lockedMids, ...lockedFwds);
 
-    const startingXI = [...mandatory, ...flexPool.slice(0, 4)];
-    return startingXI.map(p => p.id);
+    const starterIdSet = new Set(starters.map(p => p.id));
+
+    // 3. Satisfy FPL positional minimums: min 3 DEF, min 2 MID, min 1 FWD
+    const currentDefs = starters.filter(p => p.pos === 'DEF').length;
+    const currentMids = starters.filter(p => p.pos === 'MID').length;
+    const currentFwds = starters.filter(p => p.pos === 'FWD').length;
+
+    const neededDefs = Math.max(0, 3 - currentDefs);
+    const neededMids = Math.max(0, 2 - currentMids);
+    const neededFwds = Math.max(0, 1 - currentFwds);
+
+    if (neededDefs > 0) {
+      const remainingDefs = defs.filter(p => !starterIdSet.has(p.id));
+      for (let i = 0; i < neededDefs && i < remainingDefs.length; i++) {
+        starters.push(remainingDefs[i]);
+        starterIdSet.add(remainingDefs[i].id);
+      }
+    }
+
+    if (neededMids > 0) {
+      const remainingMids = mids.filter(p => !starterIdSet.has(p.id));
+      for (let i = 0; i < neededMids && i < remainingMids.length; i++) {
+        starters.push(remainingMids[i]);
+        starterIdSet.add(remainingMids[i].id);
+      }
+    }
+
+    if (neededFwds > 0) {
+      const remainingFwds = fwds.filter(p => !starterIdSet.has(p.id));
+      for (let i = 0; i < neededFwds && i < remainingFwds.length; i++) {
+        starters.push(remainingFwds[i]);
+        starterIdSet.add(remainingFwds[i].id);
+      }
+    }
+
+    // 4. Fill remaining flex slots up to 11 players from highest scoring eligible outfielders
+    // (FPL limits: max 5 DEF, max 5 MID, max 3 FWD)
+    if (starters.length < 11) {
+      const flexPool = [
+        ...defs.filter(p => !starterIdSet.has(p.id)),
+        ...mids.filter(p => !starterIdSet.has(p.id)),
+        ...fwds.filter(p => !starterIdSet.has(p.id))
+      ].sort((a, b) => b.score - a.score);
+
+      for (const candidate of flexPool) {
+        if (starters.length >= 11) break;
+        const countPos = starters.filter(p => p.pos === candidate.pos).length;
+        const maxPos = candidate.pos === 'DEF' ? 5 : candidate.pos === 'MID' ? 5 : 3;
+        if (countPos < maxPos) {
+          starters.push(candidate);
+          starterIdSet.add(candidate.id);
+        }
+      }
+    }
+
+    return starters.map(p => p.id);
   }
 
   // Failsafe fallback
