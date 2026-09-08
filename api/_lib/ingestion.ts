@@ -117,6 +117,29 @@ export abstract class BaseOracle implements XPOracle {
     return this.top1kData[playerId]?.ownership ?? 0;
   }
 
+  protected resolveSeason(fixtures?: any[]): string {
+    if (fixtures && fixtures.length > 0) {
+      for (const fix of fixtures) {
+        if (fix.kickoff_time) {
+          const d = new Date(fix.kickoff_time);
+          if (!isNaN(d.getTime())) {
+            const year = d.getUTCFullYear();
+            const month = d.getUTCMonth() + 1; // 1-indexed (1-12)
+            return month >= 7
+              ? `${year}-${(year + 1).toString().slice(-2)}`
+              : `${year - 1}-${year.toString().slice(-2)}`;
+          }
+        }
+      }
+    }
+    const now = new Date();
+    const curYear = now.getUTCFullYear();
+    const curMonth = now.getUTCMonth() + 1;
+    return curMonth >= 7
+      ? `${curYear}-${(curYear + 1).toString().slice(-2)}`
+      : `${curYear - 1}-${curYear.toString().slice(-2)}`;
+  }
+
   protected populateMetadataAndFeatures(
     players: any[],
     fixtures: any[],
@@ -130,7 +153,7 @@ export abstract class BaseOracle implements XPOracle {
 
     // 1. Build live team ratings and team short name map
     if (teams && teams.length > 0) {
-      const currentSeason = '2026-27';
+      const currentSeason = this.resolveSeason(fixtures);
       const previousGw = nextEventId > 1 ? nextEventId - 1 : 38;
       teams.forEach(t => {
         teamNameMap[t.id] = t.short_name;
