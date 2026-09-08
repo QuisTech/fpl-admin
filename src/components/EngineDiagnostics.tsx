@@ -5,9 +5,10 @@ import { RecommendationResponse } from '../types';
 
 interface EngineDiagnosticsProps {
   data: RecommendationResponse | null;
+  onSyncTeamId?: (teamId: string) => void;
 }
 
-export const EngineDiagnostics = ({ data }: EngineDiagnosticsProps) => {
+export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps) => {
   const [expandedOmission, setExpandedOmission] = useState<number | null>(null);
 
   if (!data?.engineDiagnostics) return null;
@@ -195,22 +196,36 @@ export const EngineDiagnostics = ({ data }: EngineDiagnosticsProps) => {
               <span className="font-bold text-emerald-400 font-mono">{data.topManagerInsight.noChipLeaderCount} Managers</span>
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               {data.topManagerInsight.sampleLeaders.map(m => (
-                <div key={m.entry} className="flex justify-between items-center text-[9px] bg-slate-950/60 px-2 py-1 rounded border border-slate-800/80">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-slate-300 font-medium">#{m.rank} • {m.manager_name}</span>
+                <div key={m.entry} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[9px] bg-slate-950/70 p-2 rounded-xl border border-slate-800/80">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-slate-200 font-bold">#{m.rank}</span>
+                    <span className="text-slate-400">•</span>
+                    <span className="text-slate-300 font-medium truncate max-w-[120px]">{m.manager_name}</span>
+                    <span className="font-mono text-fpl-green font-bold ml-auto sm:ml-0">{m.total_points} pts</span>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 justify-end">
+                    {onSyncTeamId && (
+                      <button
+                        onClick={() => onSyncTeamId(m.entry.toString())}
+                        className="text-[8.5px] font-black uppercase tracking-wider text-slate-950 bg-fpl-green hover:bg-fpl-green/90 px-2 py-0.5 rounded-md transition-all shadow-[0_0_8px_rgba(0,255,133,0.25)] flex items-center gap-1 cursor-pointer"
+                        title={`Sync Team ID ${m.entry} directly into Horizon and analyze squad`}
+                      >
+                        ⚡ Sync
+                      </button>
+                    )}
                     <a 
                       href={`https://fantasy.premierleague.com/entry/${m.entry}/history`} 
                       target="_blank" 
                       rel="noopener noreferrer" 
-                      className="text-[8px] font-mono text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-1 py-0.5 rounded hover:bg-cyan-400/20 transition-colors flex items-center gap-0.5"
-                      title="View Manager Team & History on Official FPL Website"
+                      className="text-[8.5px] font-mono text-cyan-300 bg-slate-900 border border-slate-700/80 px-1.5 py-0.5 rounded-md hover:bg-slate-800 transition-colors flex items-center gap-1"
+                      title="Open Manager Account on Official FPL Website"
                     >
                       ID: {m.entry} ↗
                     </a>
                   </div>
-                  <span className="font-mono text-fpl-green font-bold">{m.total_points} pts</span>
                 </div>
               ))}
             </div>

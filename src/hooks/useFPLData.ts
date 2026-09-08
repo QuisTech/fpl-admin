@@ -435,11 +435,12 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
     }
   };
 
-  const syncTeam = async () => {
-    if (!teamId) return;
+  const syncTeam = async (overrideTeamId?: string) => {
+    const targetId = overrideTeamId || teamId;
+    if (!targetId) return;
     setSyncing(true);
     try {
-      const res = await axios.get(`/api/sync/${teamId}?riskMode=${riskMode}&fuel=${fuel}&userId=${userId}&tier=${tier}`);
+      const res = await axios.get(`/api/sync/${targetId.trim()}?riskMode=${riskMode}&fuel=${fuel}&userId=${userId}&tier=${tier}`);
       setSyncedData(res.data);
       setError(null);
 

@@ -7,9 +7,10 @@ interface MetricsColumnProps {
   data: RecommendationResponse | null;
   syncedData?: TeamSyncResponse | null;
   riskMode: 'safe' | 'aggressive' | 'value';
+  onSyncTeamId?: (teamId: string) => void;
 }
 
-export const MetricsColumn = ({ data, syncedData, riskMode, tab }: MetricsColumnProps & { tab: string }) => {
+export const MetricsColumn = ({ data, syncedData, riskMode, tab, onSyncTeamId }: MetricsColumnProps & { tab: string }) => {
   const isViewingMySquad = !!syncedData && ['transfers', 'performance', 'chips'].includes(tab);
   const squadValue = isViewingMySquad ? (syncedData.totalCost || 0) : (data?.totalCost || 0);
   const itb = isViewingMySquad
@@ -74,7 +75,7 @@ export const MetricsColumn = ({ data, syncedData, riskMode, tab }: MetricsColumn
       </div>
 
       {/* Engine Diagnostics */}
-      <EngineDiagnostics data={data} />
+      <EngineDiagnostics data={data} onSyncTeamId={onSyncTeamId} />
     </div>
   );
 };

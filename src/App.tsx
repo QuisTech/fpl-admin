@@ -104,14 +104,16 @@ function FPLApp() {
 
   const isSuperAdmin = (authUser?.email || '').toLowerCase().trim() === 'michquis@gmail.com' || tier === 'admin';
 
-  const handleSync = async () => {
+  const handleSync = async (explicitId?: string) => {
+    const target = explicitId || (teamId ? teamId.trim() : undefined);
+    if (explicitId) setTeamId(explicitId);
     if (!isSuperAdmin && tier !== 'free' && tier !== 'admin' && !isTeamIdLocked) {
       alert("Premium Account: Please link your FPL Team ID in your Settings profile before running an analysis.");
       if (authUser) setProfileTab('fpl');
       else setIsAuthModalOpen(true);
       return;
     }
-    const success = await syncTeam();
+    const success = await syncTeam(target);
     if (success) setTab('transfers');
   };
 
@@ -164,7 +166,7 @@ function FPLApp() {
 
         <Header data={data} riskMode={riskMode} setRiskMode={setRiskMode} fuel={fuel} setFuel={setFuel} authUser={authUser} tier={tier} onOpenAuth={() => setIsAuthModalOpen(true)} onSignOut={() => signOut(auth)} setTeamId={setTeamId} profileTab={profileTab} setProfileTab={setProfileTab} />
 
-        <MetricsColumn data={data} syncedData={syncedData} riskMode={riskMode} tab={tab} />
+        <MetricsColumn data={data} syncedData={syncedData} riskMode={riskMode} tab={tab} onSyncTeamId={(id) => handleSync(id)} />
 
         {/* Primary Content Area */}
         <div className="col-span-12 lg:col-span-6 bg-card-bg border border-fpl-border rounded-3xl overflow-hidden relative shadow-xl min-h-[600px]">
