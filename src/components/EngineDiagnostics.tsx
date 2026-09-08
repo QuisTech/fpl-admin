@@ -8,6 +8,21 @@ interface EngineDiagnosticsProps {
   onSyncTeamId?: (teamId: string) => void;
 }
 
+const getPositionBadge = (pos: string) => {
+  switch (pos) {
+    case 'GKP':
+      return 'text-purple-300 bg-purple-500/15 border-purple-500/30';
+    case 'DEF':
+      return 'text-sky-300 bg-sky-500/15 border-sky-500/30';
+    case 'MID':
+      return 'text-emerald-300 bg-emerald-500/15 border-emerald-500/30';
+    case 'FWD':
+      return 'text-amber-300 bg-amber-500/15 border-amber-500/30';
+    default:
+      return 'text-slate-300 bg-slate-500/15 border-slate-500/30';
+  }
+};
+
 export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps) => {
   const [expandedOmission, setExpandedOmission] = useState<number | null>(null);
 
@@ -198,15 +213,15 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
 
             <div className="space-y-1.5">
               {data.topManagerInsight.sampleLeaders.map(m => (
-                <div key={m.entry} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[9px] bg-slate-950/70 p-2 rounded-xl border border-slate-800/80">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-slate-200 font-bold">#{m.rank}</span>
-                    <span className="text-slate-400">•</span>
-                    <span className="text-slate-300 font-medium truncate max-w-[120px]">{m.manager_name}</span>
-                    <span className="font-mono text-fpl-green font-bold ml-auto sm:ml-0">{m.total_points} pts</span>
+                <div key={m.entry} className="flex items-center justify-between gap-2 text-[9.5px] bg-slate-950/70 p-2 rounded-xl border border-slate-800/80">
+                  <div className="flex items-center gap-1.5 min-w-0 pr-1">
+                    <span className="text-slate-200 font-bold shrink-0">#{m.rank}</span>
+                    <span className="text-slate-500 shrink-0">•</span>
+                    <span className="text-slate-300 font-medium truncate">{m.manager_name}</span>
+                    <span className="font-mono text-fpl-green font-bold shrink-0 ml-1">{m.total_points} pts</span>
                   </div>
 
-                  <div className="flex items-center gap-1.5 justify-end">
+                  <div className="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
                     {onSyncTeamId && (
                       <button
                         onClick={() => onSyncTeamId(m.entry.toString())}
@@ -232,14 +247,14 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
 
             {/* Split Elite Consensus: Starting Weapons & Bench Enablers */}
             {data.topManagerInsight.consensusDetails && data.topManagerInsight.consensusDetails.length > 0 ? (
-              <div className="pt-2 space-y-2 border-t border-slate-800/80">
+              <div className="pt-2.5 space-y-3 border-t border-slate-800/80">
                 <div className="flex items-center justify-between">
-                  <span className="text-[9px] font-black uppercase tracking-wider text-slate-300">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-200">
                     Elite Consensus
                   </span>
                   <span 
-                    className="text-[8px] font-mono text-slate-400 bg-slate-900 border border-slate-800 px-1.5 py-0.5 rounded cursor-help"
-                    title={`All rates calculated across ${data.topManagerInsight.eligibleManagers || data.topManagerInsight.noChipLeaderCount} active 0-chip elite managers (${data.topManagerInsight.eligibleManagers || data.topManagerInsight.noChipLeaderCount} total)`}
+                    className="text-[8.5px] font-mono font-bold text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-2 py-0.5 rounded cursor-help"
+                    title={`Calculated across ${data.topManagerInsight.eligibleManagers || data.topManagerInsight.noChipLeaderCount} active 0-chip elite managers`}
                   >
                     Elite cohort: {data.topManagerInsight.eligibleManagers || data.topManagerInsight.noChipLeaderCount} managers
                   </span>
@@ -250,31 +265,39 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
                   const weapons = data.topManagerInsight.consensusDetails.filter(d => d.isStartingWeapon);
                   if (weapons.length === 0) return null;
                   return (
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-1 text-[8.5px] font-black uppercase text-amber-400 tracking-wider">
-                        <span>🔥</span>
-                        <span>Starting Weapons</span>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between text-[9px]">
+                        <span className="flex items-center gap-1 font-black uppercase text-amber-400 tracking-wider">
+                          <span>🔥</span>
+                          <span>Starting Weapons ({weapons.length})</span>
+                        </span>
+                        <span className="text-[8px] text-slate-500 font-mono">Ranked by Conviction</span>
                       </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                      <div className="space-y-1 max-h-60 overflow-y-auto pr-1">
                         {weapons.map(p => (
                           <div 
                             key={p.id} 
-                            className="flex items-center justify-between px-2 py-1 bg-slate-950/80 rounded-lg border border-amber-500/20 text-[9px]"
+                            className="flex items-center justify-between px-2.5 py-1.5 bg-slate-950/80 hover:bg-slate-900 rounded-xl border border-slate-800/80 hover:border-amber-500/30 transition-all text-[10px]"
                             title={`${p.web_name}: ${p.startCount}/${p.eligibleManagers} starts (${Math.round(p.startRate * 100)}%), ${p.captainCount}/${p.eligibleManagers} captains (${Math.round(p.captainRate * 100)}%), Conviction: ${p.convictionScore}`}
                           >
-                            <div className="flex items-center gap-1.5 truncate">
-                              <span className="text-[8px] font-mono font-bold text-amber-400 bg-amber-400/10 px-1 py-0.2 rounded">
+                            <div className="flex items-center gap-2 min-w-0 pr-2">
+                              <span className={`text-[8px] font-mono font-black px-1.5 py-0.5 rounded border shrink-0 ${getPositionBadge(p.position)}`}>
                                 {p.position}
                               </span>
-                              <span className="text-slate-200 font-semibold truncate">{p.web_name}</span>
+                              <span className="text-slate-200 font-bold truncate">{p.web_name}</span>
                             </div>
-                            <div className="flex items-center gap-1 font-mono text-[8.5px] shrink-0">
-                              <span className="text-emerald-400 font-bold">{Math.round(p.startRate * 100)}% Start</span>
+                            <div className="flex items-center gap-1.5 font-mono text-[8.5px] shrink-0 whitespace-nowrap">
+                              <span className={`font-bold px-1.5 py-0.5 rounded border ${
+                                p.startRate >= 1.0 
+                                  ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/25' 
+                                  : 'text-slate-300 bg-slate-800/80 border-slate-700/60'
+                              }`}>
+                                {Math.round(p.startRate * 100)}% Start
+                              </span>
                               {p.captainRate > 0 && (
-                                <>
-                                  <span className="text-slate-500">•</span>
-                                  <span className="text-amber-300 font-bold">{Math.round(p.captainRate * 100)}% Cap</span>
-                                </>
+                                <span className="text-amber-300 font-bold bg-amber-400/10 border border-amber-400/25 px-1.5 py-0.5 rounded">
+                                  {Math.round(p.captainRate * 100)}% Cap
+                                </span>
                               )}
                             </div>
                           </div>
@@ -289,27 +312,38 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
                   const enablers = data.topManagerInsight.consensusDetails.filter(d => d.isBenchEnabler);
                   if (enablers.length === 0) return null;
                   return (
-                    <div className="space-y-1 pt-1">
-                      <div className="flex items-center gap-1 text-[8.5px] font-black uppercase text-cyan-400 tracking-wider">
-                        <span>🪑</span>
-                        <span>Bench Enablers</span>
+                    <div className="space-y-1.5 pt-1">
+                      <div className="flex items-center justify-between text-[9px]">
+                        <span className="flex items-center gap-1 font-black uppercase text-cyan-400 tracking-wider">
+                          <span>🪑</span>
+                          <span>Bench Enablers ({enablers.length})</span>
+                        </span>
+                        <span className="text-[8px] text-slate-500 font-mono">Budget Facilitators</span>
                       </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                      <div className="space-y-1 max-h-44 overflow-y-auto pr-1">
                         {enablers.map(p => (
                           <div 
                             key={p.id} 
-                            className="flex items-center justify-between px-2 py-1 bg-slate-950/80 rounded-lg border border-cyan-500/20 text-[9px]"
+                            className="flex items-center justify-between px-2.5 py-1.5 bg-slate-950/80 hover:bg-slate-900 rounded-xl border border-slate-800/80 hover:border-cyan-500/30 transition-all text-[10px]"
                             title={`${p.web_name}: £${(p.cost / 10).toFixed(1)}m, ${p.benchCount}/${p.eligibleManagers} benched (${Math.round(p.benchRate * 100)}%), ${p.startCount}/${p.eligibleManagers} starts (${Math.round(p.startRate * 100)}%), Conviction: ${p.convictionScore}`}
                           >
-                            <div className="flex items-center gap-1.5 truncate">
-                              <span className="text-[8px] font-mono font-bold text-cyan-400 bg-cyan-400/10 px-1 py-0.2 rounded">
+                            <div className="flex items-center gap-2 min-w-0 pr-2">
+                              <span className={`text-[8px] font-mono font-black px-1.5 py-0.5 rounded border shrink-0 ${getPositionBadge(p.position)}`}>
                                 {p.position}
                               </span>
                               <span className="text-slate-300 font-semibold truncate">{p.web_name}</span>
-                              <span className="text-[8px] text-slate-500 font-mono">£{(p.cost / 10).toFixed(1)}m</span>
+                              <span className="text-[8.5px] text-slate-400 font-mono bg-slate-900/90 px-1.5 py-0.5 rounded border border-slate-800 shrink-0">
+                                £{(p.cost / 10).toFixed(1)}m
+                              </span>
                             </div>
-                            <div className="flex items-center gap-1 font-mono text-[8.5px] shrink-0">
-                              <span className="text-slate-400">{Math.round(p.benchRate * 100)}% Bench</span>
+                            <div className="flex items-center gap-1 font-mono text-[8.5px] shrink-0 whitespace-nowrap">
+                              <span className={`font-bold px-1.5 py-0.5 rounded border ${
+                                p.benchRate >= 1.0 
+                                  ? 'text-cyan-300 bg-cyan-500/10 border-cyan-500/25' 
+                                  : 'text-slate-400 bg-slate-800/80 border-slate-700/60'
+                              }`}>
+                                {Math.round(p.benchRate * 100)}% Bench
+                              </span>
                             </div>
                           </div>
                         ))}
