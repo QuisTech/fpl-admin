@@ -558,14 +558,12 @@ export class FPLService {
         }
       });
 
-      // Filter ranked consensus candidates by two-condition hard-lock rule:
-      // 1. convictionScore >= config.hardLockMinConviction
-      // 2. startRate >= config.startingWeaponMinStartRate
-      // (Consensus detail provides canonical qualifiesForHardLock flag)
-      // Moderate conviction picks (e.g. 0.40 - 0.99) remain dynamic intelligence signals in the pool
-      // for the LP solver to select on xP/value merits, rather than being forced as hard optimization constraints.
+      // Filter ranked consensus candidates by two-condition hard-lock rule or Starting Weapon status:
+      // 1. convictionScore >= config.hardLockMinConviction OR isStartingWeapon (startRate >= 50%)
+      // This locks the high-conviction Starting Weapons (Haaland, Calafiori, Isak, Gvardiol, Mbeumo, De Cuyper, B.Fernandes, João Pedro)
+      // into the squad skeleton as core consensus anchors, while letting the LP solver optimize remaining budget slots.
       const hardLockCandidates = consensusDetails
-        .filter(cd => cd.qualifiesForHardLock)
+        .filter(cd => cd.qualifiesForHardLock || cd.isStartingWeapon)
         .sort((a, b) => b.convictionScore - a.convictionScore);
 
       hardLockCandidates.forEach(cand => {
