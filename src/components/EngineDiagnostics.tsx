@@ -194,7 +194,7 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
             <div className="flex items-center gap-1.5 text-cyan-400 min-w-0">
               <Sparkles className="w-3.5 h-3.5 shrink-0" />
               <span className="text-[10px] font-black uppercase tracking-wider text-slate-200 truncate">
-                Top Manager Intelligence (0 Chips)
+                Top Manager Intelligence (Normalized)
               </span>
             </div>
             <span className="text-[8.5px] font-mono font-bold text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-2 py-0.5 rounded shrink-0 whitespace-nowrap shadow-sm">
@@ -209,13 +209,13 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
 
           <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 space-y-2">
             <div className="flex justify-between items-center text-[10px] px-0.5">
-              <span className="text-slate-400 font-medium">0-Chip Top 1k Leaders:</span>
+              <span className="text-slate-400 font-medium">Elite Top 1k Leaders:</span>
               <div className="flex items-center gap-1.5">
                 {data.topManagerInsight.sampleLeaders.length > 2 && (
                   <span className="text-[8px] text-slate-500 font-mono">Scroll for more ▾</span>
                 )}
                 <span className="font-bold text-emerald-400 font-mono bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded text-[9px]">
-                  {data.topManagerInsight.noChipLeaderCount} Managers
+                  {data.topManagerInsight.noChipLeaderCount || data.topManagerInsight.eligibleManagers || data.topManagerInsight.sampleLeaders.length} Managers
                 </span>
               </div>
             </div>
@@ -244,7 +244,7 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
                   {/* Bottom row: Team ID & Actions */}
                   <div className="flex items-center justify-between pt-1 border-t border-slate-900/90 text-[9px]">
                     <span className="text-slate-500 font-mono text-[8.5px]">
-                      0 Chips Active
+                      Normalized Cohort
                     </span>
                     <div className="flex items-center gap-1.5 shrink-0">
                       {onSyncTeamId && (

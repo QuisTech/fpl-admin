@@ -40,6 +40,11 @@ export class FPLService {
   private static teamPicksCache: Map<string, { teamRes: any; managerInfo: ManagerInfo | null; timestamp: number }> = new Map();
   private static TEAM_PICKS_CACHE_TTL = 2 * 60 * 1000; // 2 minutes
 
+  public static clearRecCache() {
+    this.recCache.clear();
+    console.log('[FPLService] Cleared recommendation cache.');
+  }
+
   private static getHeaders() {
     return {
       "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",

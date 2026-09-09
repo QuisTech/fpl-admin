@@ -82,6 +82,18 @@ export class ManagerSnapshotService {
   public static loadSnapshot(gameweek: number): EliteCohortArchive | null {
     const archivePath = path.resolve(process.cwd(), 'data', 'snapshots', `gw_${gameweek}`, 'manager_decisions.json');
     if (!fs.existsSync(archivePath)) {
+      // Search backwards for the most recent archived gameweek (e.g. GW3 if GW4 is not yet played)
+      for (let gw = gameweek - 1; gw >= 1; gw--) {
+        const fallbackPath = path.resolve(process.cwd(), 'data', 'snapshots', `gw_${gw}`, 'manager_decisions.json');
+        if (fs.existsSync(fallbackPath)) {
+          try {
+            const raw = fs.readFileSync(fallbackPath, 'utf-8');
+            return JSON.parse(raw);
+          } catch (err: any) {
+            // ignore fallback parse error
+          }
+        }
+      }
       return null;
     }
     try {
