@@ -18,6 +18,7 @@ firebase-key.json
 # Scratch scripts
 check_tier.ts
 test_firebase_init.mjs
+scratch/
 
 # Backtesting Data & Logs
 data/vaastav/
