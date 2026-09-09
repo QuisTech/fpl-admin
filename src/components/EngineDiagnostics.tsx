@@ -194,7 +194,7 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
             <div className="flex items-center gap-1.5 text-cyan-400 min-w-0">
               <Sparkles className="w-3.5 h-3.5 shrink-0" />
               <span className="text-[10px] font-black uppercase tracking-wider text-slate-200 truncate">
-                Top Manager Intelligence (Normalized)
+                Top Manager Intelligence
               </span>
             </div>
             <span className="text-[8.5px] font-mono font-bold text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-2 py-0.5 rounded shrink-0 whitespace-nowrap shadow-sm">
@@ -208,67 +208,118 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
           </div>
 
           <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 space-y-2">
-            <div className="flex justify-between items-center text-[10px] px-0.5">
-              <span className="text-slate-400 font-medium">Elite Top 1k Leaders:</span>
-              <div className="flex items-center gap-1.5">
-                {data.topManagerInsight.sampleLeaders.length > 2 && (
-                  <span className="text-[8px] text-slate-500 font-mono">Scroll for more ▾</span>
-                )}
-                <span className="font-bold text-emerald-400 font-mono bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded text-[9px]">
-                  {data.topManagerInsight.noChipLeaderCount || data.topManagerInsight.eligibleManagers || data.topManagerInsight.sampleLeaders.length} Managers
-                </span>
+            {/* Filter Tabs Header */}
+            <div className="flex items-center justify-between gap-1 text-[10px] border-b border-slate-800/60 pb-2">
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setCohortTab('all')}
+                  className={`px-2 py-0.5 rounded text-[8.5px] font-bold uppercase transition-all ${
+                    cohortTab === 'all'
+                      ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                      : 'text-slate-400 hover:text-slate-200 bg-slate-950/60 border border-slate-800'
+                  }`}
+                >
+                  All ({data.topManagerInsight.sampleLeaders.length})
+                </button>
+                <button
+                  onClick={() => setCohortTab('zero')}
+                  className={`px-2 py-0.5 rounded text-[8.5px] font-bold uppercase transition-all ${
+                    cohortTab === 'zero'
+                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                      : 'text-slate-400 hover:text-slate-200 bg-slate-950/60 border border-slate-800'
+                  }`}
+                >
+                  Pure 0-Chips ({data.topManagerInsight.sampleLeaders.filter(m => (!m.chips_used || m.chips_used.length === 0) && !m.chip_deduction).length})
+                </button>
+                <button
+                  onClick={() => setCohortTab('normalized')}
+                  className={`px-2 py-0.5 rounded text-[8.5px] font-bold uppercase transition-all ${
+                    cohortTab === 'normalized'
+                      ? 'bg-sky-500/20 text-sky-300 border border-sky-500/30'
+                      : 'text-slate-400 hover:text-slate-200 bg-slate-950/60 border border-slate-800'
+                  }`}
+                >
+                  TC/BB Normalized ({data.topManagerInsight.sampleLeaders.filter(m => m.chip_deduction && m.chip_deduction > 0).length})
+                </button>
               </div>
+
+              {data.topManagerInsight.sampleLeaders.length > 2 && (
+                <span className="text-[8px] text-slate-500 font-mono hidden sm:block">Scroll for more ▾</span>
+              )}
             </div>
 
-            <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-              {data.topManagerInsight.sampleLeaders.map(m => (
-                <div 
-                  key={m.entry} 
-                  className="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800/80 hover:border-slate-700/80 transition-all space-y-2"
-                >
-                  {/* Top row: Manager info + Points */}
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <span className="text-[9.5px] font-black font-mono text-amber-400 bg-amber-400/10 border border-amber-400/20 px-1.5 py-0.5 rounded shrink-0">
-                        #{m.rank}
-                      </span>
-                      <span className="text-[11px] font-bold text-slate-100 truncate" title={m.manager_name}>
-                        {m.manager_name}
-                      </span>
-                    </div>
-                    <span className="font-mono text-fpl-green font-black text-[11px] shrink-0 bg-fpl-green/10 border border-fpl-green/20 px-2 py-0.5 rounded">
-                      {m.total_points} pts
-                    </span>
-                  </div>
+            <div className="space-y-2 max-h-80 overflow-y-auto pr-1 text-[11px] border border-slate-800/40 rounded-xl p-1 bg-slate-950/40">
+              {data.topManagerInsight.sampleLeaders
+                .filter(m => {
+                  const isNorm = Boolean(m.chip_deduction && m.chip_deduction > 0);
+                  if (cohortTab === 'zero') return !isNorm && (!m.chips_used || m.chips_used.length === 0);
+                  if (cohortTab === 'normalized') return isNorm;
+                  return true;
+                })
+                .map(m => {
+                  const isNorm = Boolean(m.chip_deduction && m.chip_deduction > 0);
+                  const normPts = m.normalized_total_points || (m.total_points - (m.chip_deduction || 0));
 
-                  {/* Bottom row: Team ID & Actions */}
-                  <div className="flex items-center justify-between pt-1 border-t border-slate-900/90 text-[9px]">
-                    <span className="text-slate-500 font-mono text-[8.5px]">
-                      Normalized Cohort
-                    </span>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      {onSyncTeamId && (
-                        <button
-                          onClick={() => onSyncTeamId(m.entry.toString())}
-                          className="text-[8.5px] font-black uppercase tracking-wider text-slate-950 bg-fpl-green hover:bg-fpl-green/90 px-2 py-0.5 rounded-md transition-all shadow-[0_0_8px_rgba(0,255,133,0.25)] flex items-center gap-1 cursor-pointer active:scale-95"
-                          title={`Sync Team ID ${m.entry} directly into Horizon and analyze squad`}
-                        >
-                          ⚡ Sync Squad
-                        </button>
-                      )}
-                      <a 
-                        href={`https://fantasy.premierleague.com/entry/${m.entry}/history`} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="text-[8.5px] font-mono text-cyan-300 bg-slate-900 border border-slate-700/80 hover:border-cyan-500/40 px-2 py-0.5 rounded-md hover:bg-slate-800 transition-all flex items-center gap-1"
-                        title="Open Manager Account on Official FPL Website"
-                      >
-                        ID: {m.entry} ↗
-                      </a>
+                  return (
+                    <div 
+                      key={m.entry} 
+                      className="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800/80 hover:border-slate-700/80 transition-all space-y-2"
+                    >
+                      {/* Top row: Manager info + Points */}
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className="text-[9.5px] font-black font-mono text-amber-400 bg-amber-400/10 border border-amber-400/20 px-1.5 py-0.5 rounded shrink-0">
+                            #{m.rank}
+                          </span>
+                          <span className="text-[11px] font-bold text-slate-100 truncate" title={m.manager_name}>
+                            {m.manager_name}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0 font-mono text-[10.5px]">
+                          {isNorm && (
+                            <span className="text-slate-400 line-through text-[9.5px]" title="Raw Points before TC/BB deduction">
+                              {m.total_points}
+                            </span>
+                          )}
+                          <span className="text-fpl-green font-black bg-fpl-green/10 border border-fpl-green/20 px-2 py-0.5 rounded">
+                            {normPts} pts
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Bottom row: Chip status & Actions */}
+                      <div className="flex items-center justify-between pt-1 border-t border-slate-900/90 text-[9px]">
+                        <span className={`font-mono text-[8.5px] px-1.5 py-0.5 rounded border ${
+                          isNorm
+                            ? 'bg-sky-500/10 text-sky-400 border-sky-500/20'
+                            : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                        }`}>
+                          {isNorm ? `TC/BB Normalized (-${m.chip_deduction} pts)` : 'Pure 0-Chips'}
+                        </span>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {onSyncTeamId && (
+                            <button
+                              onClick={() => onSyncTeamId(m.entry.toString())}
+                              className="text-[8.5px] font-black uppercase tracking-wider text-slate-950 bg-fpl-green hover:bg-fpl-green/90 px-2 py-0.5 rounded-md transition-all shadow-[0_0_8px_rgba(0,255,133,0.25)] flex items-center gap-1 cursor-pointer active:scale-95"
+                              title={`Sync Team ID ${m.entry} directly into Horizon and analyze squad`}
+                            >
+                              ⚡ Sync Squad
+                            </button>
+                          )}
+                          <a 
+                            href={`https://fantasy.premierleague.com/entry/${m.entry}/history`} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="text-[8.5px] font-mono text-cyan-300 bg-slate-900 border border-slate-700/80 hover:border-cyan-500/40 px-2 py-0.5 rounded-md hover:bg-slate-800 transition-all flex items-center gap-1"
+                            title="Open Manager Account on Official FPL Website"
+                          >
+                            ID: {m.entry} ↗
+                          </a>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ))}
+                  );
+                })}
             </div>
 
             {/* Split Elite Consensus: Starting Weapons & Bench Enablers */}
