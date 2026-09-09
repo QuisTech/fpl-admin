@@ -24,9 +24,11 @@ const TEAM_SHIRT_CODES: Record<string, number> = {
   BRE: 94,
   BHA: 36,
   CHE: 8,
+  COV: 9,
   CRY: 31,
   EVE: 11,
   FUL: 54,
+  HUL: 88,
   IPS: 40,
   LEI: 13,
   LIV: 14,
@@ -52,9 +54,11 @@ const TEAM_COLORS: Record<string, { primary: string; secondary: string }> = {
   BRE: { primary: '#E30613', secondary: '#FFFFFF' },
   BHA: { primary: '#0057B8', secondary: '#FFFFFF' },
   CHE: { primary: '#034694', secondary: '#FFFFFF' },
+  COV: { primary: '#00A3E0', secondary: '#FFFFFF' },
   CRY: { primary: '#1B458F', secondary: '#C4122E' },
   EVE: { primary: '#003399', secondary: '#FFFFFF' },
   FUL: { primary: '#FFFFFF', secondary: '#000000' },
+  HUL: { primary: '#F2A900', secondary: '#000000' },
   IPS: { primary: '#0054A6', secondary: '#FFFFFF' },
   LEI: { primary: '#003090', secondary: '#FDBE11' },
   LIV: { primary: '#C8102E', secondary: '#00B2A9' },
@@ -121,7 +125,7 @@ export const PlayerCard = ({
   if (!player) return null;
 
   const teamShort = player.team_short_name?.toUpperCase() || 'UNK';
-  const teamCode = TEAM_SHIRT_CODES[teamShort] || player.team || 1;
+  const teamCode = (player as any).team_code || TEAM_SHIRT_CODES[teamShort] || player.team || 1;
   const isGkp = player.element_type === 1 || player.position === 'GKP';
   const shirtBaseName = `shirt_${teamCode}${isGkp ? '_1' : ''}`;
   const shirtUrl = `https://fantasy.premierleague.com/dist/img/shirts/standard/${shirtBaseName}-220.webp`;
