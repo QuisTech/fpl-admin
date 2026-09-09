@@ -21,6 +21,9 @@ export interface ManagerGWDecisionSnapshot {
   overall_rank: number;
   gw_rank?: number;
   total_points: number;
+  normalized_total_points?: number;
+  chip_deduction?: number;
+  is_chip_normalized?: boolean;
   gw_points?: number;
   chips_used: Array<{ name: string; time: string; event: number }>;
   active_chip?: string | null;
@@ -161,6 +164,51 @@ export class ManagerSnapshotService {
   }
 
   /**
+   * Calculate Chip-Normalized 0-Chip Equivalent Score for a manager.
+   * - Deducts 1x captain points for Triple Captain (3xc).
+   * - Deducts bench points for Bench Boost (bboost).
+   * - Excludes active Free Hit (freehit) or Wildcard (wildcard) in target GW.
+   */
+  public static calculateNormalizedScore(
+    snap: ManagerGWDecisionSnapshot,
+    playerPointsMap?: Map<number, number>
+  ): { normalizedScore: number; isEligibleForCohort: boolean; chipDeduction: number } {
+    // Exclude active Free Hit or Wildcard in target GW as non-organic 1-GW punts
+    if (snap.active_chip === 'freehit' || snap.active_chip === 'wildcard') {
+      return { normalizedScore: 0, isEligibleForCohort: false, chipDeduction: 0 };
+    }
+
+    let deduction = 0;
+    const chips = snap.chips_used || [];
+
+    for (const chip of chips) {
+      if (chip.name === '3xc') {
+        if (chip.event === snap.gameweek && snap.captain_id && playerPointsMap?.has(snap.captain_id)) {
+          const capPts = playerPointsMap.get(snap.captain_id) || 0;
+          deduction += capPts;
+        } else {
+          deduction += 12; // Average TC captain haul deduction
+        }
+      } else if (chip.name === 'bboost') {
+        if (chip.event === snap.gameweek && snap.squad_15 && snap.starting_xi && playerPointsMap) {
+          const startingSet = new Set(snap.starting_xi);
+          const benchPlayers = snap.squad_15.filter(id => !startingSet.has(id));
+          let benchPts = 0;
+          benchPlayers.forEach(id => {
+            benchPts += playerPointsMap.get(id) || 0;
+          });
+          deduction += benchPts;
+        } else {
+          deduction += 15; // Average BB bench haul deduction
+        }
+      }
+    }
+
+    const normalizedScore = Math.max(0, snap.total_points - deduction);
+    return { normalizedScore, isEligibleForCohort: true, chipDeduction: deduction };
+  }
+
+  /**
    * Calculate live dynamic Top Manager Insights from snapshots or live API
    */
   public static async getDynamicTopManagerInsight(
@@ -182,8 +230,32 @@ export class ManagerSnapshotService {
       decisions = await this.captureTopManagerSnapshots('2026-27', targetGw, 25);
     }
 
-    const zeroChipManagers = decisions.filter(d => (!d.chips_used || d.chips_used.length === 0) && !d.active_chip);
-    let leadersToUse = zeroChipManagers.length > 0 ? zeroChipManagers : decisions;
+    // Build player points map for exact chip normalization if available
+    const playerPointsMap = new Map<number, number>();
+    players.forEach(p => {
+      if ((p as any).event_points !== undefined) {
+        playerPointsMap.set(p.id, (p as any).event_points);
+      }
+    });
+
+    // Normalize manager scores and filter eligible leaders
+    const normalizedLeaders = decisions
+      .map(d => {
+        const norm = this.calculateNormalizedScore(d, playerPointsMap);
+        return {
+          ...d,
+          normalized_total_points: norm.normalizedScore,
+          chip_deduction: norm.chipDeduction,
+          is_chip_normalized: norm.chipDeduction > 0,
+          is_eligible_cohort: norm.isEligibleForCohort
+        };
+      })
+      .filter(d => d.is_eligible_cohort);
+
+    // Sort by normalized score descending
+    normalizedLeaders.sort((a, b) => b.normalized_total_points - a.normalized_total_points || a.overall_rank - b.overall_rank);
+
+    let leadersToUse = normalizedLeaders.length > 0 ? normalizedLeaders : decisions;
 
     // Fallback if no snapshots captured yet (authentic top 2 0-chip managers baseline)
     if (leadersToUse.length === 0) {
