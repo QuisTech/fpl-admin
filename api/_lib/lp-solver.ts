@@ -321,7 +321,8 @@ export function solveStartingXI(
       for (const candidate of flexPool) {
         if (starters.length >= 11) break;
         const countPos = starters.filter(p => p.pos === candidate.pos).length;
-        const maxPos = candidate.pos === 'DEF' ? 5 : candidate.pos === 'MID' ? 5 : 3;
+        // Cap starting DEF at max 4 to favor attacking formations (3-5-2, 3-4-3, 4-4-2, 4-3-3) over passive 5-DEF setups
+        const maxPos = candidate.pos === 'DEF' ? 4 : candidate.pos === 'MID' ? 5 : 3;
         if (countPos < maxPos) {
           starters.push(candidate);
           starterIdSet.add(candidate.id);
