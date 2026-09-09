@@ -418,7 +418,9 @@ export class ManagerSnapshotService {
       const convictionIndex = Math.round(convictionScore * 100);
 
       // Derived classifications
-      const effectiveMinBenchRate = eligibleManagers > 0 ? Math.min(config.benchEnablerMinBenchRate, 1 / eligibleManagers) : 0.25;
+      const effectiveMinBenchRate = eligibleManagers >= 20 
+        ? 0.05 
+        : (eligibleManagers > 0 ? Math.min(config.benchEnablerMinBenchRate, 2 / eligibleManagers) : 0.25);
       const isStartingWeapon = startRate >= config.startingWeaponMinStartRate;
       const isBenchEnabler = benchRate >= effectiveMinBenchRate && startRate < config.startingWeaponMinStartRate;
       // Two-condition hard-lock rule: requires both conviction threshold AND starting weapon threshold

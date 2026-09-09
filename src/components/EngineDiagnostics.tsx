@@ -387,7 +387,9 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
 
                 {/* Bench Enablers */}
                 {(() => {
-                  const enablers = data.topManagerInsight.consensusDetails.filter(d => d.isBenchEnabler);
+                  const enablers = data.topManagerInsight.consensusDetails
+                    .filter(d => d.isBenchEnabler)
+                    .sort((a, b) => b.benchRate - a.benchRate || a.cost - b.cost || b.squadCount - a.squadCount);
                   if (enablers.length === 0) return null;
                   return (
                     <div className="space-y-1.5 pt-1">
@@ -396,7 +398,7 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
                           <span>🪑</span>
                           <span>Bench Enablers ({enablers.length})</span>
                         </span>
-                        <span className="text-[8px] text-slate-500 font-mono">Budget Facilitators</span>
+                        <span className="text-[8px] text-slate-400 font-mono">Ranked by Bench % & Value</span>
                       </div>
                       <div className="space-y-1 max-h-44 overflow-y-auto pr-1">
                         {enablers.map(p => (
@@ -416,9 +418,11 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
                             </div>
                             <div className="flex items-center gap-1 font-mono text-[8.5px] shrink-0 whitespace-nowrap">
                               <span className={`font-bold px-1.5 py-0.5 rounded border ${
-                                p.benchRate >= 1.0 
+                                p.benchRate >= 0.20
+                                  ? 'text-emerald-300 bg-emerald-500/15 border-emerald-500/30'
+                                  : p.benchRate >= 0.10 
                                   ? 'text-cyan-300 bg-cyan-500/10 border-cyan-500/25' 
-                                  : 'text-slate-400 bg-slate-800/80 border-slate-700/60'
+                                  : 'text-slate-300 bg-slate-800/80 border-slate-700/60'
                               }`}>
                                 {Math.round(p.benchRate * 100)}% Bench
                               </span>
