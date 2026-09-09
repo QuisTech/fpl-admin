@@ -25,6 +25,7 @@ const getPositionBadge = (pos: string) => {
 
 export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps) => {
   const [expandedOmission, setExpandedOmission] = useState<number | null>(null);
+  const [cohortTab, setCohortTab] = useState<'all' | 'zero' | 'normalized'>('all');
 
   if (!data?.engineDiagnostics) return null;
 
