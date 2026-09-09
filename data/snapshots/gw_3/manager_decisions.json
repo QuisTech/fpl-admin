@@ -1,8 +1,8 @@
 {
   "season": "2026-27",
   "gameweek": 3,
-  "sample_size": 202,
-  "last_updated": 1788949827166,
+  "sample_size": 251,
+  "last_updated": 1788952624087,
   "decisions": [
     {
       "season": "2026-27",
@@ -98,7 +98,7 @@
       ],
       "bank": 0,
       "team_value": 1003,
-      "timestamp": 1788949786975
+      "timestamp": 1788952593887
     },
     {
       "season": "2026-27",
@@ -165,7 +165,7 @@
       ],
       "bank": 1,
       "team_value": 1006,
-      "timestamp": 1788949787056
+      "timestamp": 1788952593973
     },
     {
       "season": "2026-27",
@@ -407,7 +407,7 @@
       ],
       "bank": 0,
       "team_value": 1005,
-      "timestamp": 1788949787139
+      "timestamp": 1788952594059
     },
     {
       "season": "2026-27",
@@ -527,7 +527,7 @@
       ],
       "bank": 0,
       "team_value": 1005,
-      "timestamp": 1788949787223
+      "timestamp": 1788952594141
     },
     {
       "season": "2026-27",
@@ -667,7 +667,7 @@
       ],
       "bank": 10,
       "team_value": 1005,
-      "timestamp": 1788949787309
+      "timestamp": 1788952594219
     },
     {
       "season": "2026-27",
@@ -781,7 +781,7 @@
       ],
       "bank": 0,
       "team_value": 1005,
-      "timestamp": 1788949788007
+      "timestamp": 1788952594301
     },
     {
       "season": "2026-27",
@@ -889,7 +889,7 @@
       ],
       "bank": 15,
       "team_value": 1007,
-      "timestamp": 1788949788088
+      "timestamp": 1788952594382
     },
     {
       "season": "2026-27",
@@ -985,7 +985,7 @@
       ],
       "bank": 0,
       "team_value": 1007,
-      "timestamp": 1788949788168
+      "timestamp": 1788952594464
     },
     {
       "season": "2026-27",
@@ -1079,7 +1079,7 @@
       ],
       "bank": 0,
       "team_value": 1005,
-      "timestamp": 1788949788246
+      "timestamp": 1788952594547
     },
     {
       "season": "2026-27",
@@ -1183,7 +1183,7 @@
       ],
       "bank": 10,
       "team_value": 1004,
-      "timestamp": 1788949788329
+      "timestamp": 1788952594632
     },
     {
       "season": "2026-27",
@@ -1286,7 +1286,7 @@
       ],
       "bank": 5,
       "team_value": 1005,
-      "timestamp": 1788949788409
+      "timestamp": 1788952594715
     },
     {
       "season": "2026-27",
@@ -1353,7 +1353,7 @@
       ],
       "bank": 1,
       "team_value": 1007,
-      "timestamp": 1788949788488
+      "timestamp": 1788952594806
     },
     {
       "season": "2026-27",
@@ -1441,7 +1441,7 @@
       ],
       "bank": 4,
       "team_value": 1008,
-      "timestamp": 1788949788569
+      "timestamp": 1788952594891
     },
     {
       "season": "2026-27",
@@ -1506,7 +1506,7 @@
       ],
       "bank": 0,
       "team_value": 1004,
-      "timestamp": 1788949788655
+      "timestamp": 1788952594976
     },
     {
       "season": "2026-27",
@@ -1702,7 +1702,7 @@
       ],
       "bank": 0,
       "team_value": 1009,
-      "timestamp": 1788949788738
+      "timestamp": 1788952595054
     },
     {
       "season": "2026-27",
@@ -1818,7 +1818,7 @@
       ],
       "bank": 2,
       "team_value": 1005,
-      "timestamp": 1788949788817
+      "timestamp": 1788952595132
     },
     {
       "season": "2026-27",
@@ -1928,7 +1928,7 @@
       ],
       "bank": 10,
       "team_value": 1004,
-      "timestamp": 1788949788901
+      "timestamp": 1788952595211
     },
     {
       "season": "2026-27",
@@ -2083,7 +2083,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949788981
+      "timestamp": 1788952595292
     },
     {
       "season": "2026-27",
@@ -2181,7 +2181,7 @@
       ],
       "bank": 0,
       "team_value": 1002,
-      "timestamp": 1788949789059
+      "timestamp": 1788952595380
     },
     {
       "season": "2026-27",
@@ -2276,7 +2276,7 @@
       ],
       "bank": 0,
       "team_value": 1008,
-      "timestamp": 1788949789137
+      "timestamp": 1788952595468
     },
     {
       "season": "2026-27",
@@ -2382,7 +2382,7 @@
       ],
       "bank": 0,
       "team_value": 1004,
-      "timestamp": 1788949789220
+      "timestamp": 1788952595550
     },
     {
       "season": "2026-27",
@@ -2472,7 +2472,7 @@
       ],
       "bank": 0,
       "team_value": 1003,
-      "timestamp": 1788949789301
+      "timestamp": 1788952595638
     },
     {
       "season": "2026-27",
@@ -2584,7 +2584,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949789387
+      "timestamp": 1788952595726
     },
     {
       "season": "2026-27",
@@ -2692,7 +2692,7 @@
       ],
       "bank": 10,
       "team_value": 1002,
-      "timestamp": 1788949789470
+      "timestamp": 1788952595809
     },
     {
       "season": "2026-27",
@@ -2810,7 +2810,7 @@
       ],
       "bank": 5,
       "team_value": 1002,
-      "timestamp": 1788949789549
+      "timestamp": 1788952595895
     },
     {
       "season": "2026-27",
@@ -2924,7 +2924,7 @@
       ],
       "bank": 0,
       "team_value": 1005,
-      "timestamp": 1788949789632
+      "timestamp": 1788952595980
     },
     {
       "season": "2026-27",
@@ -3013,7 +3013,7 @@
       ],
       "bank": 0,
       "team_value": 1008,
-      "timestamp": 1788949789711
+      "timestamp": 1788952596062
     },
     {
       "season": "2026-27",
@@ -3113,7 +3113,7 @@
       ],
       "bank": 5,
       "team_value": 1007,
-      "timestamp": 1788949789790
+      "timestamp": 1788952596147
     },
     {
       "season": "2026-27",
@@ -3178,7 +3178,7 @@
       ],
       "bank": 5,
       "team_value": 1009,
-      "timestamp": 1788949789873
+      "timestamp": 1788952596232
     },
     {
       "season": "2026-27",
@@ -3276,7 +3276,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949789953
+      "timestamp": 1788952596310
     },
     {
       "season": "2026-27",
@@ -3631,7 +3631,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949790173
+      "timestamp": 1788952596391
     },
     {
       "season": "2026-27",
@@ -3698,7 +3698,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949790430
+      "timestamp": 1788952596470
     },
     {
       "season": "2026-27",
@@ -3772,7 +3772,7 @@
       ],
       "bank": 0,
       "team_value": 1005,
-      "timestamp": 1788949790653
+      "timestamp": 1788952596562
     },
     {
       "season": "2026-27",
@@ -3837,7 +3837,7 @@
       ],
       "bank": 4,
       "team_value": 1008,
-      "timestamp": 1788949790883
+      "timestamp": 1788952596644
     },
     {
       "season": "2026-27",
@@ -3942,7 +3942,7 @@
       ],
       "bank": 0,
       "team_value": 1004,
-      "timestamp": 1788949791103
+      "timestamp": 1788952596723
     },
     {
       "season": "2026-27",
@@ -4232,7 +4232,7 @@
       ],
       "bank": 5,
       "team_value": 1005,
-      "timestamp": 1788949791321
+      "timestamp": 1788952596808
     },
     {
       "season": "2026-27",
@@ -4323,7 +4323,7 @@
       ],
       "bank": 0,
       "team_value": 1007,
-      "timestamp": 1788949791552
+      "timestamp": 1788952596895
     },
     {
       "season": "2026-27",
@@ -4437,7 +4437,7 @@
       ],
       "bank": 5,
       "team_value": 1005,
-      "timestamp": 1788949791769
+      "timestamp": 1788952596975
     },
     {
       "season": "2026-27",
@@ -4527,7 +4527,7 @@
       ],
       "bank": 0,
       "team_value": 1002,
-      "timestamp": 1788949791850
+      "timestamp": 1788952597054
     },
     {
       "season": "2026-27",
@@ -4628,7 +4628,7 @@
       ],
       "bank": 0,
       "team_value": 1007,
-      "timestamp": 1788949792075
+      "timestamp": 1788952597143
     },
     {
       "season": "2026-27",
@@ -4695,7 +4695,7 @@
       ],
       "bank": 6,
       "team_value": 1008,
-      "timestamp": 1788949792485
+      "timestamp": 1788952597533
     },
     {
       "season": "2026-27",
@@ -4764,7 +4764,7 @@
       ],
       "bank": 1,
       "team_value": 1004,
-      "timestamp": 1788949792575
+      "timestamp": 1788952597612
     },
     {
       "season": "2026-27",
@@ -4909,7 +4909,7 @@
       ],
       "bank": 17,
       "team_value": 1002,
-      "timestamp": 1788949792796
+      "timestamp": 1788952597687
     },
     {
       "season": "2026-27",
@@ -5033,7 +5033,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949792881
+      "timestamp": 1788952597767
     },
     {
       "season": "2026-27",
@@ -5135,7 +5135,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949793109
+      "timestamp": 1788952597843
     },
     {
       "season": "2026-27",
@@ -5223,7 +5223,7 @@
       ],
       "bank": 10,
       "team_value": 1004,
-      "timestamp": 1788949793330
+      "timestamp": 1788952597922
     },
     {
       "season": "2026-27",
@@ -5315,7 +5315,7 @@
       ],
       "bank": 4,
       "team_value": 1006,
-      "timestamp": 1788949793551
+      "timestamp": 1788952597997
     },
     {
       "season": "2026-27",
@@ -5415,7 +5415,7 @@
       ],
       "bank": 0,
       "team_value": 1004,
-      "timestamp": 1788949793781
+      "timestamp": 1788952598073
     },
     {
       "season": "2026-27",
@@ -5480,7 +5480,7 @@
       ],
       "bank": 4,
       "team_value": 1006,
-      "timestamp": 1788949793866
+      "timestamp": 1788952598153
     },
     {
       "season": "2026-27",
@@ -5589,7 +5589,7 @@
       ],
       "bank": 0,
       "team_value": 1007,
-      "timestamp": 1788949794094
+      "timestamp": 1788952598233
     },
     {
       "season": "2026-27",
@@ -5696,7 +5696,7 @@
       ],
       "bank": 0,
       "team_value": 1007,
-      "timestamp": 1788949794307
+      "timestamp": 1788952598321
     },
     {
       "season": "2026-27",
@@ -5818,7 +5818,7 @@
       ],
       "bank": 0,
       "team_value": 1007,
-      "timestamp": 1788949794528
+      "timestamp": 1788952598405
     },
     {
       "season": "2026-27",
@@ -5995,7 +5995,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949794744
+      "timestamp": 1788952598492
     },
     {
       "season": "2026-27",
@@ -6093,7 +6093,7 @@
       ],
       "bank": 0,
       "team_value": 1008,
-      "timestamp": 1788949794829
+      "timestamp": 1788952598577
     },
     {
       "season": "2026-27",
@@ -6203,7 +6203,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949795054
+      "timestamp": 1788952598657
     },
     {
       "season": "2026-27",
@@ -6314,7 +6314,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949795285
+      "timestamp": 1788952598738
     },
     {
       "season": "2026-27",
@@ -6416,7 +6416,7 @@
       ],
       "bank": 0,
       "team_value": 1003,
-      "timestamp": 1788949795523
+      "timestamp": 1788952598817
     },
     {
       "season": "2026-27",
@@ -6532,7 +6532,7 @@
       ],
       "bank": 0,
       "team_value": 1003,
-      "timestamp": 1788949795757
+      "timestamp": 1788952598894
     },
     {
       "season": "2026-27",
@@ -6814,7 +6814,7 @@
       ],
       "bank": 0,
       "team_value": 1004,
-      "timestamp": 1788949795983
+      "timestamp": 1788952598973
     },
     {
       "season": "2026-27",
@@ -6908,7 +6908,7 @@
       ],
       "bank": 5,
       "team_value": 1006,
-      "timestamp": 1788949796218
+      "timestamp": 1788952599051
     },
     {
       "season": "2026-27",
@@ -7063,7 +7063,7 @@
       ],
       "bank": 1,
       "team_value": 1010,
-      "timestamp": 1788949796439
+      "timestamp": 1788952599139
     },
     {
       "season": "2026-27",
@@ -7145,7 +7145,7 @@
       ],
       "bank": 0,
       "team_value": 1004,
-      "timestamp": 1788949796668
+      "timestamp": 1788952599219
     },
     {
       "season": "2026-27",
@@ -7262,7 +7262,7 @@
       ],
       "bank": 0,
       "team_value": 1004,
-      "timestamp": 1788949796896
+      "timestamp": 1788952599298
     },
     {
       "season": "2026-27",
@@ -7368,7 +7368,7 @@
       ],
       "bank": 15,
       "team_value": 1003,
-      "timestamp": 1788949797112
+      "timestamp": 1788952599381
     },
     {
       "season": "2026-27",
@@ -7464,7 +7464,7 @@
       ],
       "bank": 0,
       "team_value": 1007,
-      "timestamp": 1788949797334
+      "timestamp": 1788952599462
     },
     {
       "season": "2026-27",
@@ -7557,7 +7557,7 @@
       ],
       "bank": 5,
       "team_value": 1003,
-      "timestamp": 1788949797570
+      "timestamp": 1788952599542
     },
     {
       "season": "2026-27",
@@ -7655,7 +7655,7 @@
       ],
       "bank": 35,
       "team_value": 1003,
-      "timestamp": 1788949797793
+      "timestamp": 1788952599620
     },
     {
       "season": "2026-27",
@@ -7763,7 +7763,7 @@
       ],
       "bank": 0,
       "team_value": 1004,
-      "timestamp": 1788949798019
+      "timestamp": 1788952599702
     },
     {
       "season": "2026-27",
@@ -7861,7 +7861,7 @@
       ],
       "bank": 0,
       "team_value": 1004,
-      "timestamp": 1788949798246
+      "timestamp": 1788952599781
     },
     {
       "season": "2026-27",
@@ -8067,7 +8067,7 @@
       ],
       "bank": 12,
       "team_value": 1005,
-      "timestamp": 1788949798471
+      "timestamp": 1788952599861
     },
     {
       "season": "2026-27",
@@ -8193,7 +8193,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949798694
+      "timestamp": 1788952599944
     },
     {
       "season": "2026-27",
@@ -8286,7 +8286,7 @@
       ],
       "bank": 10,
       "team_value": 1009,
-      "timestamp": 1788949798928
+      "timestamp": 1788952600025
     },
     {
       "season": "2026-27",
@@ -8353,7 +8353,7 @@
       ],
       "bank": 25,
       "team_value": 1010,
-      "timestamp": 1788949799145
+      "timestamp": 1788952600104
     },
     {
       "season": "2026-27",
@@ -8420,7 +8420,7 @@
       ],
       "bank": 10,
       "team_value": 1012,
-      "timestamp": 1788949799368
+      "timestamp": 1788952600187
     },
     {
       "season": "2026-27",
@@ -8485,7 +8485,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949799587
+      "timestamp": 1788952600267
     },
     {
       "season": "2026-27",
@@ -8609,7 +8609,7 @@
       ],
       "bank": 0,
       "team_value": 1003,
-      "timestamp": 1788949799972
+      "timestamp": 1788952600351
     },
     {
       "season": "2026-27",
@@ -8707,7 +8707,7 @@
       ],
       "bank": 3,
       "team_value": 1002,
-      "timestamp": 1788949800187
+      "timestamp": 1788952600429
     },
     {
       "season": "2026-27",
@@ -8804,7 +8804,7 @@
       ],
       "bank": 0,
       "team_value": 1010,
-      "timestamp": 1788949800508
+      "timestamp": 1788952600508
     },
     {
       "season": "2026-27",
@@ -8892,7 +8892,7 @@
       ],
       "bank": 0,
       "team_value": 1005,
-      "timestamp": 1788949800722
+      "timestamp": 1788952600594
     },
     {
       "season": "2026-27",
@@ -8992,7 +8992,7 @@
       ],
       "bank": 0,
       "team_value": 1005,
-      "timestamp": 1788949800944
+      "timestamp": 1788952600671
     },
     {
       "season": "2026-27",
@@ -9089,7 +9089,7 @@
       ],
       "bank": 0,
       "team_value": 1005,
-      "timestamp": 1788949801168
+      "timestamp": 1788952600757
     },
     {
       "season": "2026-27",
@@ -9295,7 +9295,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949801393
+      "timestamp": 1788952600838
     },
     {
       "season": "2026-27",
@@ -9382,7 +9382,7 @@
       ],
       "bank": 0,
       "team_value": 1008,
-      "timestamp": 1788949801611
+      "timestamp": 1788952600921
     },
     {
       "season": "2026-27",
@@ -9517,7 +9517,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949801830
+      "timestamp": 1788952601004
     },
     {
       "season": "2026-27",
@@ -9647,7 +9647,7 @@
       ],
       "bank": 10,
       "team_value": 1006,
-      "timestamp": 1788949801912
+      "timestamp": 1788952601084
     },
     {
       "season": "2026-27",
@@ -9734,7 +9734,7 @@
       ],
       "bank": 0,
       "team_value": 1005,
-      "timestamp": 1788949802129
+      "timestamp": 1788952601169
     },
     {
       "season": "2026-27",
@@ -9829,7 +9829,7 @@
       ],
       "bank": 0,
       "team_value": 1005,
-      "timestamp": 1788949802350
+      "timestamp": 1788952601255
     },
     {
       "season": "2026-27",
@@ -9981,7 +9981,7 @@
       ],
       "bank": 0,
       "team_value": 1004,
-      "timestamp": 1788949802566
+      "timestamp": 1788952601333
     },
     {
       "season": "2026-27",
@@ -10080,7 +10080,7 @@
       ],
       "bank": 0,
       "team_value": 1007,
-      "timestamp": 1788949802784
+      "timestamp": 1788952601413
     },
     {
       "season": "2026-27",
@@ -10191,7 +10191,7 @@
       ],
       "bank": 0,
       "team_value": 1005,
-      "timestamp": 1788949802999
+      "timestamp": 1788952601493
     },
     {
       "season": "2026-27",
@@ -10278,7 +10278,7 @@
       ],
       "bank": 0,
       "team_value": 1005,
-      "timestamp": 1788949803221
+      "timestamp": 1788952601576
     },
     {
       "season": "2026-27",
@@ -10394,7 +10394,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949803439
+      "timestamp": 1788952601657
     },
     {
       "season": "2026-27",
@@ -10517,7 +10517,7 @@
       ],
       "bank": 0,
       "team_value": 1007,
-      "timestamp": 1788949803657
+      "timestamp": 1788952601738
     },
     {
       "season": "2026-27",
@@ -10643,7 +10643,7 @@
       ],
       "bank": 1,
       "team_value": 1002,
-      "timestamp": 1788949803884
+      "timestamp": 1788952601816
     },
     {
       "season": "2026-27",
@@ -10734,7 +10734,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949804112
+      "timestamp": 1788952601894
     },
     {
       "season": "2026-27",
@@ -10843,7 +10843,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949804331
+      "timestamp": 1788952601972
     },
     {
       "season": "2026-27",
@@ -10946,7 +10946,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949804545
+      "timestamp": 1788952602049
     },
     {
       "season": "2026-27",
@@ -11002,7 +11002,7 @@
       "transfers_out": [],
       "bank": 0,
       "team_value": 1008,
-      "timestamp": 1788949804769
+      "timestamp": 1788952602130
     },
     {
       "season": "2026-27",
@@ -11108,7 +11108,7 @@
       ],
       "bank": 5,
       "team_value": 1005,
-      "timestamp": 1788949804989
+      "timestamp": 1788952602213
     },
     {
       "season": "2026-27",
@@ -11202,7 +11202,7 @@
       ],
       "bank": 0,
       "team_value": 1002,
-      "timestamp": 1788949805208
+      "timestamp": 1788952602290
     },
     {
       "season": "2026-27",
@@ -11308,7 +11308,7 @@
       ],
       "bank": 0,
       "team_value": 1008,
-      "timestamp": 1788949805426
+      "timestamp": 1788952602369
     },
     {
       "season": "2026-27",
@@ -11434,7 +11434,7 @@
       ],
       "bank": 5,
       "team_value": 1004,
-      "timestamp": 1788949805660
+      "timestamp": 1788952602450
     },
     {
       "season": "2026-27",
@@ -11551,7 +11551,7 @@
       ],
       "bank": 5,
       "team_value": 1005,
-      "timestamp": 1788949805763
+      "timestamp": 1788952602534
     },
     {
       "season": "2026-27",
@@ -11641,7 +11641,7 @@
       ],
       "bank": 5,
       "team_value": 1004,
-      "timestamp": 1788949805977
+      "timestamp": 1788952602618
     },
     {
       "season": "2026-27",
@@ -11708,7 +11708,7 @@
       ],
       "bank": 12,
       "team_value": 1006,
-      "timestamp": 1788949806193
+      "timestamp": 1788952602697
     },
     {
       "season": "2026-27",
@@ -12011,7 +12011,7 @@
       ],
       "bank": 0,
       "team_value": 1003,
-      "timestamp": 1788949806419
+      "timestamp": 1788952602775
     },
     {
       "season": "2026-27",
@@ -12116,7 +12116,7 @@
       ],
       "bank": 5,
       "team_value": 1003,
-      "timestamp": 1788949806638
+      "timestamp": 1788952602944
     },
     {
       "season": "2026-27",
@@ -12214,7 +12214,7 @@
       ],
       "bank": 5,
       "team_value": 1004,
-      "timestamp": 1788949806728
+      "timestamp": 1788952603031
     },
     {
       "season": "2026-27",
@@ -12372,7 +12372,7 @@
       ],
       "bank": 0,
       "team_value": 1007,
-      "timestamp": 1788949806945
+      "timestamp": 1788952603118
     },
     {
       "season": "2026-27",
@@ -12459,7 +12459,7 @@
       ],
       "bank": 0,
       "team_value": 1004,
-      "timestamp": 1788949807162
+      "timestamp": 1788952603207
     },
     {
       "season": "2026-27",
@@ -12554,7 +12554,7 @@
       ],
       "bank": 0,
       "team_value": 1005,
-      "timestamp": 1788949807381
+      "timestamp": 1788952603290
     },
     {
       "season": "2026-27",
@@ -12645,7 +12645,7 @@
       ],
       "bank": 0,
       "team_value": 1008,
-      "timestamp": 1788949807599
+      "timestamp": 1788952603376
     },
     {
       "season": "2026-27",
@@ -12747,7 +12747,7 @@
       ],
       "bank": 10,
       "team_value": 1006,
-      "timestamp": 1788949807824
+      "timestamp": 1788952603468
     },
     {
       "season": "2026-27",
@@ -12847,7 +12847,7 @@
       ],
       "bank": 5,
       "team_value": 1006,
-      "timestamp": 1788949808048
+      "timestamp": 1788952603847
     },
     {
       "season": "2026-27",
@@ -12945,7 +12945,7 @@
       ],
       "bank": 5,
       "team_value": 1006,
-      "timestamp": 1788949808271
+      "timestamp": 1788952603928
     },
     {
       "season": "2026-27",
@@ -13060,7 +13060,7 @@
       ],
       "bank": 0,
       "team_value": 1008,
-      "timestamp": 1788949808506
+      "timestamp": 1788952604020
     },
     {
       "season": "2026-27",
@@ -13149,7 +13149,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949808598
+      "timestamp": 1788952604104
     },
     {
       "season": "2026-27",
@@ -13245,7 +13245,7 @@
       ],
       "bank": 3,
       "team_value": 1005,
-      "timestamp": 1788949808821
+      "timestamp": 1788952604204
     },
     {
       "season": "2026-27",
@@ -13312,7 +13312,7 @@
       ],
       "bank": 44,
       "team_value": 1009,
-      "timestamp": 1788949808903
+      "timestamp": 1788952604288
     },
     {
       "season": "2026-27",
@@ -13379,7 +13379,7 @@
       ],
       "bank": 0,
       "team_value": 1008,
-      "timestamp": 1788949809119
+      "timestamp": 1788952604372
     },
     {
       "season": "2026-27",
@@ -13444,7 +13444,7 @@
       ],
       "bank": 4,
       "team_value": 1005,
-      "timestamp": 1788949809341
+      "timestamp": 1788952604471
     },
     {
       "season": "2026-27",
@@ -13513,7 +13513,7 @@
       ],
       "bank": 0,
       "team_value": 1004,
-      "timestamp": 1788949809563
+      "timestamp": 1788952604559
     },
     {
       "season": "2026-27",
@@ -13641,7 +13641,7 @@
       ],
       "bank": 0,
       "team_value": 1004,
-      "timestamp": 1788949809782
+      "timestamp": 1788952604641
     },
     {
       "season": "2026-27",
@@ -13750,7 +13750,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949809999
+      "timestamp": 1788952604729
     },
     {
       "season": "2026-27",
@@ -13843,7 +13843,7 @@
       ],
       "bank": 0,
       "team_value": 1004,
-      "timestamp": 1788949810219
+      "timestamp": 1788952604807
     },
     {
       "season": "2026-27",
@@ -13942,7 +13942,7 @@
       ],
       "bank": 0,
       "team_value": 1009,
-      "timestamp": 1788949810447
+      "timestamp": 1788952604912
     },
     {
       "season": "2026-27",
@@ -14051,7 +14051,7 @@
       ],
       "bank": 5,
       "team_value": 1004,
-      "timestamp": 1788949810670
+      "timestamp": 1788952605000
     },
     {
       "season": "2026-27",
@@ -14171,7 +14171,7 @@
       ],
       "bank": 0,
       "team_value": 1004,
-      "timestamp": 1788949810884
+      "timestamp": 1788952605089
     },
     {
       "season": "2026-27",
@@ -14283,7 +14283,7 @@
       ],
       "bank": 0,
       "team_value": 1005,
-      "timestamp": 1788949811107
+      "timestamp": 1788952605172
     },
     {
       "season": "2026-27",
@@ -14372,7 +14372,7 @@
       ],
       "bank": 0,
       "team_value": 1007,
-      "timestamp": 1788949811320
+      "timestamp": 1788952605266
     },
     {
       "season": "2026-27",
@@ -14433,7 +14433,7 @@
       "transfers_out": [],
       "bank": 35,
       "team_value": 1007,
-      "timestamp": 1788949811530
+      "timestamp": 1788952605359
     },
     {
       "season": "2026-27",
@@ -14524,7 +14524,7 @@
       ],
       "bank": 0,
       "team_value": 1004,
-      "timestamp": 1788949811762
+      "timestamp": 1788952605445
     },
     {
       "season": "2026-27",
@@ -14672,7 +14672,7 @@
       ],
       "bank": 5,
       "team_value": 1004,
-      "timestamp": 1788949811972
+      "timestamp": 1788952605538
     },
     {
       "season": "2026-27",
@@ -14766,7 +14766,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949812194
+      "timestamp": 1788952605634
     },
     {
       "season": "2026-27",
@@ -14856,7 +14856,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949812419
+      "timestamp": 1788952605728
     },
     {
       "season": "2026-27",
@@ -14954,7 +14954,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949812648
+      "timestamp": 1788952605817
     },
     {
       "season": "2026-27",
@@ -15062,7 +15062,7 @@
       ],
       "bank": 0,
       "team_value": 1003,
-      "timestamp": 1788949812862
+      "timestamp": 1788952605910
     },
     {
       "season": "2026-27",
@@ -15220,7 +15220,7 @@
       ],
       "bank": 0,
       "team_value": 1008,
-      "timestamp": 1788949813320
+      "timestamp": 1788952606006
     },
     {
       "season": "2026-27",
@@ -15339,7 +15339,7 @@
       ],
       "bank": 5,
       "team_value": 1007,
-      "timestamp": 1788949813543
+      "timestamp": 1788952606097
     },
     {
       "season": "2026-27",
@@ -15431,7 +15431,7 @@
       ],
       "bank": 0,
       "team_value": 1004,
-      "timestamp": 1788949813763
+      "timestamp": 1788952606190
     },
     {
       "season": "2026-27",
@@ -15554,7 +15554,7 @@
       ],
       "bank": 0,
       "team_value": 1007,
-      "timestamp": 1788949813985
+      "timestamp": 1788952606294
     },
     {
       "season": "2026-27",
@@ -15682,7 +15682,7 @@
       ],
       "bank": 0,
       "team_value": 1008,
-      "timestamp": 1788949814201
+      "timestamp": 1788952606702
     },
     {
       "season": "2026-27",
@@ -15747,7 +15747,7 @@
       ],
       "bank": 5,
       "team_value": 1008,
-      "timestamp": 1788949814424
+      "timestamp": 1788952606804
     },
     {
       "season": "2026-27",
@@ -15807,7 +15807,7 @@
       ],
       "bank": 5,
       "team_value": 1004,
-      "timestamp": 1788949814647
+      "timestamp": 1788952606920
     },
     {
       "season": "2026-27",
@@ -15909,7 +15909,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949814868
+      "timestamp": 1788952607018
     },
     {
       "season": "2026-27",
@@ -15976,7 +15976,7 @@
       ],
       "bank": 14,
       "team_value": 1007,
-      "timestamp": 1788949815089
+      "timestamp": 1788952607387
     },
     {
       "season": "2026-27",
@@ -16043,7 +16043,7 @@
       ],
       "bank": 7,
       "team_value": 1007,
-      "timestamp": 1788949815308
+      "timestamp": 1788952607478
     },
     {
       "season": "2026-27",
@@ -16110,7 +16110,7 @@
       ],
       "bank": 0,
       "team_value": 1005,
-      "timestamp": 1788949815534
+      "timestamp": 1788952607566
     },
     {
       "season": "2026-27",
@@ -16247,7 +16247,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949815770
+      "timestamp": 1788952607650
     },
     {
       "season": "2026-27",
@@ -16353,7 +16353,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949815987
+      "timestamp": 1788952607754
     },
     {
       "season": "2026-27",
@@ -16477,7 +16477,7 @@
       ],
       "bank": 5,
       "team_value": 1006,
-      "timestamp": 1788949816216
+      "timestamp": 1788952607846
     },
     {
       "season": "2026-27",
@@ -16570,7 +16570,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949816449
+      "timestamp": 1788952607944
     },
     {
       "season": "2026-27",
@@ -16672,7 +16672,7 @@
       ],
       "bank": 0,
       "team_value": 1002,
-      "timestamp": 1788949816668
+      "timestamp": 1788952608041
     },
     {
       "season": "2026-27",
@@ -16757,7 +16757,7 @@
       ],
       "bank": 0,
       "team_value": 1005,
-      "timestamp": 1788949816892
+      "timestamp": 1788952608137
     },
     {
       "season": "2026-27",
@@ -16852,7 +16852,7 @@
       ],
       "bank": 0,
       "team_value": 1004,
-      "timestamp": 1788949817110
+      "timestamp": 1788952608491
     },
     {
       "season": "2026-27",
@@ -16987,7 +16987,7 @@
       ],
       "bank": 0,
       "team_value": 1008,
-      "timestamp": 1788949817337
+      "timestamp": 1788952608587
     },
     {
       "season": "2026-27",
@@ -17106,7 +17106,7 @@
       ],
       "bank": 0,
       "team_value": 1007,
-      "timestamp": 1788949817562
+      "timestamp": 1788952608678
     },
     {
       "season": "2026-27",
@@ -17228,7 +17228,7 @@
       ],
       "bank": 0,
       "team_value": 1003,
-      "timestamp": 1788949817782
+      "timestamp": 1788952608781
     },
     {
       "season": "2026-27",
@@ -17342,7 +17342,7 @@
       ],
       "bank": 0,
       "team_value": 1003,
-      "timestamp": 1788949818010
+      "timestamp": 1788952608877
     },
     {
       "season": "2026-27",
@@ -17437,7 +17437,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949818225
+      "timestamp": 1788952608995
     },
     {
       "season": "2026-27",
@@ -17533,7 +17533,7 @@
       ],
       "bank": 5,
       "team_value": 1006,
-      "timestamp": 1788949818453
+      "timestamp": 1788952609091
     },
     {
       "season": "2026-27",
@@ -17643,7 +17643,7 @@
       ],
       "bank": 3,
       "team_value": 1005,
-      "timestamp": 1788949818679
+      "timestamp": 1788952609185
     },
     {
       "season": "2026-27",
@@ -17745,7 +17745,7 @@
       ],
       "bank": 0,
       "team_value": 1005,
-      "timestamp": 1788949818919
+      "timestamp": 1788952609281
     },
     {
       "season": "2026-27",
@@ -17851,7 +17851,7 @@
       ],
       "bank": 0,
       "team_value": 1007,
-      "timestamp": 1788949819147
+      "timestamp": 1788952609675
     },
     {
       "season": "2026-27",
@@ -17927,7 +17927,7 @@
       ],
       "bank": 15,
       "team_value": 1004,
-      "timestamp": 1788949819377
+      "timestamp": 1788952609770
     },
     {
       "season": "2026-27",
@@ -18037,7 +18037,7 @@
       ],
       "bank": 0,
       "team_value": 1005,
-      "timestamp": 1788949819590
+      "timestamp": 1788952609868
     },
     {
       "season": "2026-27",
@@ -18131,7 +18131,7 @@
       ],
       "bank": 0,
       "team_value": 1002,
-      "timestamp": 1788949819807
+      "timestamp": 1788952609961
     },
     {
       "season": "2026-27",
@@ -18192,7 +18192,7 @@
       "transfers_out": [],
       "bank": 0,
       "team_value": 1009,
-      "timestamp": 1788949820032
+      "timestamp": 1788952610050
     },
     {
       "season": "2026-27",
@@ -18296,7 +18296,7 @@
       ],
       "bank": 0,
       "team_value": 1003,
-      "timestamp": 1788949820272
+      "timestamp": 1788952610151
     },
     {
       "season": "2026-27",
@@ -18425,7 +18425,7 @@
       ],
       "bank": 25,
       "team_value": 1005,
-      "timestamp": 1788949820484
+      "timestamp": 1788952610243
     },
     {
       "season": "2026-27",
@@ -18527,7 +18527,7 @@
       ],
       "bank": 0,
       "team_value": 1004,
-      "timestamp": 1788949820704
+      "timestamp": 1788952610331
     },
     {
       "season": "2026-27",
@@ -18617,7 +18617,7 @@
       ],
       "bank": 0,
       "team_value": 1000,
-      "timestamp": 1788949820921
+      "timestamp": 1788952610424
     },
     {
       "season": "2026-27",
@@ -18687,7 +18687,7 @@
       ],
       "bank": 5,
       "team_value": 1010,
-      "timestamp": 1788949821138
+      "timestamp": 1788952610516
     },
     {
       "season": "2026-27",
@@ -18743,7 +18743,7 @@
       "transfers_out": [],
       "bank": 0,
       "team_value": 1005,
-      "timestamp": 1788949821363
+      "timestamp": 1788952610792
     },
     {
       "season": "2026-27",
@@ -18826,7 +18826,7 @@
       ],
       "bank": 9,
       "team_value": 1006,
-      "timestamp": 1788949821580
+      "timestamp": 1788952610882
     },
     {
       "season": "2026-27",
@@ -18931,7 +18931,7 @@
       ],
       "bank": 0,
       "team_value": 1008,
-      "timestamp": 1788949821808
+      "timestamp": 1788952610959
     },
     {
       "season": "2026-27",
@@ -19025,7 +19025,7 @@
       ],
       "bank": 7,
       "team_value": 1007,
-      "timestamp": 1788949822036
+      "timestamp": 1788952611044
     },
     {
       "season": "2026-27",
@@ -19109,7 +19109,7 @@
       ],
       "bank": 0,
       "team_value": 1004,
-      "timestamp": 1788949822255
+      "timestamp": 1788952611136
     },
     {
       "season": "2026-27",
@@ -19199,7 +19199,7 @@
       ],
       "bank": 0,
       "team_value": 1000,
-      "timestamp": 1788949822492
+      "timestamp": 1788952611224
     },
     {
       "season": "2026-27",
@@ -19286,7 +19286,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949822720
+      "timestamp": 1788952611318
     },
     {
       "season": "2026-27",
@@ -19392,7 +19392,7 @@
       ],
       "bank": 5,
       "team_value": 1005,
-      "timestamp": 1788949822950
+      "timestamp": 1788952611406
     },
     {
       "season": "2026-27",
@@ -19477,7 +19477,7 @@
       ],
       "bank": 15,
       "team_value": 1007,
-      "timestamp": 1788949823165
+      "timestamp": 1788952611499
     },
     {
       "season": "2026-27",
@@ -19558,7 +19558,7 @@
       ],
       "bank": 5,
       "team_value": 1006,
-      "timestamp": 1788949823385
+      "timestamp": 1788952611591
     },
     {
       "season": "2026-27",
@@ -19650,7 +19650,7 @@
       ],
       "bank": 9,
       "team_value": 1006,
-      "timestamp": 1788949823607
+      "timestamp": 1788952611685
     },
     {
       "season": "2026-27",
@@ -19746,7 +19746,7 @@
       ],
       "bank": 0,
       "team_value": 1002,
-      "timestamp": 1788949823835
+      "timestamp": 1788952611776
     },
     {
       "season": "2026-27",
@@ -19839,7 +19839,7 @@
       ],
       "bank": 0,
       "team_value": 1005,
-      "timestamp": 1788949824053
+      "timestamp": 1788952611871
     },
     {
       "season": "2026-27",
@@ -19904,7 +19904,7 @@
       ],
       "bank": 5,
       "team_value": 1007,
-      "timestamp": 1788949824272
+      "timestamp": 1788952611966
     },
     {
       "season": "2026-27",
@@ -19971,7 +19971,7 @@
       ],
       "bank": 1,
       "team_value": 1007,
-      "timestamp": 1788949824493
+      "timestamp": 1788952612055
     },
     {
       "season": "2026-27",
@@ -20036,7 +20036,7 @@
       ],
       "bank": 0,
       "team_value": 1008,
-      "timestamp": 1788949824720
+      "timestamp": 1788952612161
     },
     {
       "season": "2026-27",
@@ -20103,7 +20103,7 @@
       ],
       "bank": 3,
       "team_value": 1011,
-      "timestamp": 1788949824936
+      "timestamp": 1788952612260
     },
     {
       "season": "2026-27",
@@ -20170,7 +20170,7 @@
       ],
       "bank": 1,
       "team_value": 1005,
-      "timestamp": 1788949825150
+      "timestamp": 1788952612348
     },
     {
       "season": "2026-27",
@@ -20237,7 +20237,7 @@
       ],
       "bank": 0,
       "team_value": 1007,
-      "timestamp": 1788949825365
+      "timestamp": 1788952612444
     },
     {
       "season": "2026-27",
@@ -20308,7 +20308,7 @@
       ],
       "bank": 0,
       "team_value": 1007,
-      "timestamp": 1788949825592
+      "timestamp": 1788952612537
     },
     {
       "season": "2026-27",
@@ -20464,7 +20464,7 @@
       ],
       "bank": 0,
       "team_value": 1004,
-      "timestamp": 1788949825814
+      "timestamp": 1788952612635
     },
     {
       "season": "2026-27",
@@ -20572,7 +20572,7 @@
       ],
       "bank": 0,
       "team_value": 1004,
-      "timestamp": 1788949826037
+      "timestamp": 1788952612721
     },
     {
       "season": "2026-27",
@@ -20699,7 +20699,7 @@
       ],
       "bank": 0,
       "team_value": 1008,
-      "timestamp": 1788949826259
+      "timestamp": 1788952612809
     },
     {
       "season": "2026-27",
@@ -20803,7 +20803,7 @@
       ],
       "bank": 0,
       "team_value": 1006,
-      "timestamp": 1788949826479
+      "timestamp": 1788952612900
     },
     {
       "season": "2026-27",
@@ -20901,7 +20901,7 @@
       ],
       "bank": 5,
       "team_value": 1002,
-      "timestamp": 1788949826705
+      "timestamp": 1788952612991
     },
     {
       "season": "2026-27",
@@ -21132,7 +21132,7 @@
       ],
       "bank": 0,
       "team_value": 1007,
-      "timestamp": 1788949826928
+      "timestamp": 1788952613081
     },
     {
       "season": "2026-27",
@@ -21281,7 +21281,5621 @@
       ],
       "bank": 0,
       "team_value": 1007,
-      "timestamp": 1788949827156
+      "timestamp": 1788952613170
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 391452,
+      "manager_name": "Bkry Nyala",
+      "team_name": "ليلى الغزليه",
+      "overall_rank": 194,
+      "gw_rank": 469164,
+      "total_points": 280,
+      "gw_points": 70,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-21T01:49:42.954800Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-08-24T20:19:07.261044Z",
+          "event": 2
+        },
+        {
+          "name": "wildcard",
+          "time": "2026-08-30T18:39:44.795737Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "wildcard",
+      "squad_15": [
+        384,
+        445,
+        391,
+        356,
+        124,
+        94,
+        480,
+        367,
+        379,
+        106,
+        411,
+        109,
+        115,
+        290,
+        31
+      ],
+      "starting_xi": [
+        384,
+        445,
+        391,
+        356,
+        124,
+        94,
+        480,
+        367,
+        379,
+        106,
+        411
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 106,
+      "transfers_in": [
+        94,
+        565,
+        384,
+        398,
+        82,
+        367,
+        391,
+        398,
+        8,
+        124,
+        127,
+        391,
+        445,
+        379,
+        367,
+        356,
+        449,
+        398,
+        426,
+        290,
+        277,
+        569,
+        40,
+        384,
+        31,
+        1,
+        165,
+        367,
+        391,
+        82,
+        106,
+        124,
+        367,
+        480,
+        565,
+        8,
+        10,
+        109,
+        31,
+        277,
+        384,
+        28,
+        173,
+        277,
+        1,
+        593,
+        88,
+        454,
+        82,
+        464,
+        40,
+        565,
+        31,
+        115,
+        279,
+        173,
+        449,
+        1,
+        572,
+        399
+      ],
+      "transfers_out": [
+        565,
+        398,
+        82,
+        565,
+        384,
+        398,
+        8,
+        367,
+        391,
+        127,
+        398,
+        277,
+        449,
+        569,
+        426,
+        8,
+        593,
+        40,
+        367,
+        124,
+        391,
+        165,
+        399,
+        1,
+        10,
+        82,
+        464,
+        454,
+        279,
+        384,
+        165,
+        367,
+        124,
+        426,
+        40,
+        31,
+        173,
+        28,
+        277,
+        31,
+        1,
+        572,
+        277,
+        88,
+        82,
+        449,
+        173,
+        565,
+        1,
+        346,
+        237,
+        542,
+        10,
+        233,
+        8,
+        423,
+        534,
+        496,
+        109,
+        427
+      ],
+      "bank": 5,
+      "team_value": 1002,
+      "timestamp": 1788952613393
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 625827,
+      "manager_name": "Aziz Kosti",
+      "team_name": "ALHILAL FC",
+      "overall_rank": 194,
+      "gw_rank": 4127256,
+      "total_points": 280,
+      "gw_points": 54,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-07-28T08:08:19.906007Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-08-28T11:08:50.919641Z",
+          "event": 2
+        },
+        {
+          "name": "freehit",
+          "time": "2026-09-01T09:21:03.399990Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        109,
+        84,
+        115,
+        449,
+        399,
+        94,
+        398,
+        480,
+        411,
+        106,
+        379,
+        572,
+        41,
+        277,
+        32
+      ],
+      "starting_xi": [
+        109,
+        84,
+        115,
+        449,
+        399,
+        94,
+        398,
+        480,
+        411,
+        106,
+        379
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 106,
+      "transfers_in": [
+        572,
+        84,
+        41,
+        32,
+        109,
+        82,
+        469,
+        109,
+        87,
+        449,
+        379,
+        356,
+        398,
+        464,
+        426,
+        282,
+        379,
+        12,
+        605,
+        497,
+        426,
+        32,
+        12,
+        290,
+        391,
+        94,
+        593,
+        124,
+        397,
+        87,
+        464,
+        379,
+        290,
+        279,
+        449,
+        124,
+        109,
+        115,
+        94,
+        449,
+        464,
+        391,
+        497,
+        124,
+        379,
+        411,
+        480,
+        368,
+        290,
+        399,
+        173,
+        277,
+        356
+      ],
+      "transfers_out": [
+        82,
+        469,
+        605,
+        282,
+        497,
+        109,
+        87,
+        82,
+        32,
+        356,
+        464,
+        391,
+        426,
+        379,
+        12,
+        593,
+        464,
+        426,
+        290,
+        109,
+        12,
+        356,
+        397,
+        124,
+        87,
+        368,
+        279,
+        290,
+        94,
+        391,
+        379,
+        464,
+        124,
+        449,
+        173,
+        290,
+        497,
+        449,
+        124,
+        87,
+        379,
+        8,
+        109,
+        426,
+        125,
+        165,
+        397,
+        427,
+        15,
+        154,
+        418,
+        534,
+        10
+      ],
+      "bank": 0,
+      "team_value": 1006,
+      "timestamp": 1788952613617
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 974497,
+      "manager_name": "Jack Grayson",
+      "team_name": "Grayson XI",
+      "overall_rank": 194,
+      "gw_rank": 389904,
+      "total_points": 280,
+      "gw_points": 71,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-21T11:38:54.484687Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-08-27T22:02:17.834574Z",
+          "event": 2
+        },
+        {
+          "name": "freehit",
+          "time": "2026-09-04T16:17:43.883473Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        350,
+        391,
+        84,
+        115,
+        12,
+        94,
+        399,
+        367,
+        379,
+        464,
+        411,
+        623,
+        124,
+        586,
+        277
+      ],
+      "starting_xi": [
+        350,
+        391,
+        84,
+        115,
+        12,
+        94,
+        399,
+        367,
+        379,
+        464,
+        411
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 379,
+      "transfers_in": [
+        411,
+        464,
+        124,
+        12,
+        367,
+        94,
+        399,
+        586,
+        115,
+        84,
+        391,
+        277,
+        623,
+        350
+      ],
+      "transfers_out": [
+        552,
+        165,
+        426,
+        397,
+        366,
+        237,
+        40,
+        534,
+        418,
+        304,
+        10,
+        8,
+        109,
+        1
+      ],
+      "bank": 10,
+      "team_value": 1003,
+      "timestamp": 1788952613846
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 1174244,
+      "manager_name": "Ken Harbet",
+      "team_name": "Ngentur25",
+      "overall_rank": 194,
+      "gw_rank": 666928,
+      "total_points": 280,
+      "gw_points": 68,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-21T02:13:46.428243Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-08-27T11:33:47.031236Z",
+          "event": 2
+        },
+        {
+          "name": "freehit",
+          "time": "2026-09-02T07:16:54.305428Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        567,
+        84,
+        449,
+        279,
+        41,
+        368,
+        397,
+        367,
+        379,
+        411,
+        106,
+        111,
+        387,
+        258,
+        212
+      ],
+      "starting_xi": [
+        567,
+        84,
+        449,
+        279,
+        41,
+        368,
+        397,
+        367,
+        379,
+        411,
+        106
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 379,
+      "transfers_in": [
+        368,
+        449,
+        593,
+        279,
+        258,
+        204,
+        111,
+        84,
+        41,
+        387,
+        397,
+        398,
+        399,
+        593,
+        469,
+        109,
+        38,
+        567,
+        411,
+        379,
+        366,
+        367,
+        398,
+        212,
+        32,
+        87,
+        449,
+        82
+      ],
+      "transfers_out": [
+        366,
+        593,
+        32,
+        38,
+        204,
+        504,
+        109,
+        593,
+        398,
+        469,
+        399,
+        397,
+        398,
+        449,
+        87,
+        82,
+        469,
+        1,
+        165,
+        346,
+        565,
+        427,
+        426,
+        557,
+        8,
+        391,
+        229,
+        412
+      ],
+      "bank": 0,
+      "team_value": 1007,
+      "timestamp": 1788952614058
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 1785846,
+      "manager_name": "Patric Addén",
+      "team_name": "FC Torrboll",
+      "overall_rank": 194,
+      "gw_rank": 265594,
+      "total_points": 280,
+      "gw_points": 73,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-20T18:26:10.010113Z",
+          "event": 1
+        },
+        {
+          "name": "freehit",
+          "time": "2026-09-02T17:52:17.469918Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        597,
+        84,
+        87,
+        115,
+        367,
+        399,
+        397,
+        480,
+        379,
+        411,
+        106,
+        625,
+        127,
+        277,
+        305
+      ],
+      "starting_xi": [
+        597,
+        84,
+        87,
+        115,
+        367,
+        399,
+        397,
+        480,
+        379,
+        411,
+        106
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 106,
+      "transfers_in": [
+        597,
+        127,
+        84,
+        397,
+        8,
+        387,
+        367,
+        605,
+        427,
+        106,
+        391,
+        426,
+        94,
+        466,
+        124,
+        277,
+        387,
+        605,
+        367,
+        427,
+        82,
+        106,
+        94,
+        613,
+        480,
+        586,
+        87,
+        391,
+        625,
+        464,
+        411,
+        399
+      ],
+      "transfers_out": [
+        82,
+        605,
+        8,
+        427,
+        387,
+        391,
+        124,
+        94,
+        426,
+        466,
+        387,
+        367,
+        605,
+        106,
+        427,
+        586,
+        391,
+        613,
+        94,
+        426,
+        109,
+        464,
+        427,
+        557,
+        154,
+        423,
+        10,
+        8,
+        529,
+        165,
+        106,
+        237
+      ],
+      "bank": 0,
+      "team_value": 1007,
+      "timestamp": 1788952614286
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 2535762,
+      "manager_name": "gareth nation",
+      "team_name": "gareth's Team",
+      "overall_rank": 194,
+      "gw_rank": 927475,
+      "total_points": 280,
+      "gw_points": 66,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-28T15:14:52.249695Z",
+          "event": 2
+        },
+        {
+          "name": "freehit",
+          "time": "2026-09-03T22:42:59.948632Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        250,
+        356,
+        115,
+        391,
+        366,
+        94,
+        480,
+        397,
+        379,
+        106,
+        411,
+        497,
+        277,
+        586,
+        605
+      ],
+      "starting_xi": [
+        250,
+        356,
+        115,
+        391,
+        366,
+        94,
+        480,
+        397,
+        379,
+        106,
+        411
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 397,
+      "transfers_in": [
+        106,
+        605,
+        356,
+        321,
+        411,
+        480,
+        366,
+        94,
+        586,
+        277,
+        115,
+        362,
+        497,
+        250,
+        109
+      ],
+      "transfers_out": [
+        321,
+        12,
+        362,
+        346,
+        165,
+        426,
+        154,
+        51,
+        175,
+        173,
+        10,
+        8,
+        496,
+        109,
+        110
+      ],
+      "bank": 0,
+      "team_value": 1006,
+      "timestamp": 1788952614507
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 2672506,
+      "manager_name": "PRIMA SANDI",
+      "team_name": "PT KELUARGA",
+      "overall_rank": 194,
+      "gw_rank": 176767,
+      "total_points": 280,
+      "gw_points": 75,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-03T03:23:50.489336Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-08-28T15:28:10.934104Z",
+          "event": 2
+        }
+      ],
+      "active_chip": null,
+      "squad_15": [
+        109,
+        115,
+        332,
+        334,
+        367,
+        40,
+        427,
+        399,
+        165,
+        411,
+        379,
+        496,
+        237,
+        329,
+        502
+      ],
+      "starting_xi": [
+        109,
+        115,
+        332,
+        334,
+        367,
+        40,
+        427,
+        399,
+        165,
+        411,
+        379
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 379,
+      "transfers_in": [],
+      "transfers_out": [],
+      "bank": 0,
+      "team_value": 1007,
+      "timestamp": 1788952614731
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 2762354,
+      "manager_name": "20.07. 1997.",
+      "team_name": "НиколаМилосављевићБГ",
+      "overall_rank": 194,
+      "gw_rank": 4898915,
+      "total_points": 280,
+      "gw_points": 52,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-21T11:37:57.305839Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-08-26T17:41:24.658309Z",
+          "event": 2
+        },
+        {
+          "name": "freehit",
+          "time": "2026-09-02T08:02:28.419746Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        82,
+        254,
+        115,
+        356,
+        426,
+        399,
+        124,
+        398,
+        379,
+        411,
+        464,
+        497,
+        290,
+        175,
+        173
+      ],
+      "starting_xi": [
+        82,
+        254,
+        115,
+        356,
+        426,
+        399,
+        124,
+        398,
+        379,
+        411,
+        464
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 426,
+      "transfers_in": [
+        290,
+        399,
+        175,
+        356,
+        82,
+        464,
+        411,
+        379,
+        397,
+        124,
+        605,
+        173,
+        279,
+        87,
+        115,
+        254,
+        497
+      ],
+      "transfers_out": [
+        605,
+        397,
+        279,
+        87,
+        1,
+        552,
+        165,
+        346,
+        15,
+        154,
+        427,
+        473,
+        229,
+        391,
+        418,
+        8,
+        109
+      ],
+      "bank": 5,
+      "team_value": 1006,
+      "timestamp": 1788952614954
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 2821849,
+      "manager_name": "AL BAGDADI Naoufal",
+      "team_name": "Albagdadi's",
+      "overall_rank": 194,
+      "gw_rank": 469164,
+      "total_points": 280,
+      "gw_points": 70,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-21T15:28:46.302701Z",
+          "event": 1
+        },
+        {
+          "name": "freehit",
+          "time": "2026-09-04T16:31:46.613334Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        82,
+        115,
+        87,
+        356,
+        427,
+        367,
+        398,
+        399,
+        106,
+        411,
+        379,
+        58,
+        38,
+        605,
+        173
+      ],
+      "starting_xi": [
+        82,
+        115,
+        87,
+        356,
+        427,
+        367,
+        398,
+        399,
+        106,
+        411,
+        379
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 379,
+      "transfers_in": [
+        356,
+        82,
+        427,
+        106,
+        464,
+        426,
+        350,
+        88,
+        115,
+        82,
+        258,
+        398,
+        605,
+        379,
+        367,
+        356,
+        464,
+        38,
+        399,
+        106,
+        411,
+        124,
+        87,
+        387,
+        173,
+        58,
+        572
+      ],
+      "transfers_out": [
+        88,
+        350,
+        426,
+        464,
+        106,
+        427,
+        82,
+        356,
+        258,
+        572,
+        387,
+        368,
+        124,
+        464,
+        426,
+        115,
+        379,
+        469,
+        397,
+        165,
+        346,
+        237,
+        8,
+        10,
+        418,
+        109,
+        1
+      ],
+      "bank": 0,
+      "team_value": 1006,
+      "timestamp": 1788952615174
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 3200180,
+      "manager_name": "Mitchell O'Hare",
+      "team_name": "ArtetaBall",
+      "overall_rank": 194,
+      "gw_rank": 2160192,
+      "total_points": 280,
+      "gw_points": 60,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-20T08:03:56.376581Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-08-25T10:04:17.728497Z",
+          "event": 2
+        },
+        {
+          "name": "freehit",
+          "time": "2026-09-03T21:54:44.251036Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        597,
+        84,
+        115,
+        254,
+        366,
+        94,
+        368,
+        399,
+        411,
+        106,
+        379,
+        301,
+        387,
+        290,
+        113
+      ],
+      "starting_xi": [
+        597,
+        84,
+        115,
+        254,
+        366,
+        94,
+        368,
+        399,
+        411,
+        106,
+        379
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 94,
+      "transfers_in": [
+        597,
+        94,
+        254,
+        106,
+        379,
+        290,
+        366,
+        41,
+        399,
+        113,
+        387,
+        115,
+        84,
+        301,
+        82
+      ],
+      "transfers_out": [
+        82,
+        41,
+        259,
+        165,
+        346,
+        426,
+        427,
+        565,
+        124,
+        204,
+        391,
+        423,
+        8,
+        496,
+        109
+      ],
+      "bank": 0,
+      "team_value": 1007,
+      "timestamp": 1788952615503
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 3870900,
+      "manager_name": "Aidan Smylie",
+      "team_name": "skys the limitless",
+      "overall_rank": 194,
+      "gw_rank": 1257337,
+      "total_points": 280,
+      "gw_points": 64,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-21T16:30:22.642036Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-08-28T16:08:11.762125Z",
+          "event": 2
+        },
+        {
+          "name": "freehit",
+          "time": "2026-09-01T19:05:39.466691Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        82,
+        8,
+        115,
+        356,
+        399,
+        398,
+        366,
+        15,
+        106,
+        411,
+        379,
+        497,
+        605,
+        473,
+        259
+      ],
+      "starting_xi": [
+        82,
+        8,
+        115,
+        356,
+        399,
+        398,
+        366,
+        15,
+        106,
+        411,
+        379
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 379,
+      "transfers_in": [
+        366,
+        15,
+        367,
+        115,
+        31,
+        356,
+        82,
+        94,
+        357,
+        1,
+        398,
+        565,
+        88,
+        391,
+        366,
+        11,
+        597,
+        15,
+        106,
+        1,
+        166,
+        82,
+        411,
+        605,
+        565,
+        368,
+        398,
+        399,
+        88,
+        497
+      ],
+      "transfers_out": [
+        367,
+        94,
+        368,
+        31,
+        11,
+        357,
+        1,
+        565,
+        88,
+        597,
+        366,
+        15,
+        391,
+        88,
+        398,
+        362,
+        1,
+        565,
+        166,
+        82,
+        316,
+        412,
+        165,
+        397,
+        154,
+        366,
+        15,
+        426,
+        11,
+        496
+      ],
+      "bank": 0,
+      "team_value": 1006,
+      "timestamp": 1788952615721
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 4085086,
+      "manager_name": "Bjørn Erik Westgård",
+      "team_name": "Liverpool",
+      "overall_rank": 194,
+      "gw_rank": 265594,
+      "total_points": 280,
+      "gw_points": 73,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-27T14:53:57.018804Z",
+          "event": 2
+        },
+        {
+          "name": "freehit",
+          "time": "2026-09-04T16:31:48.647686Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        597,
+        115,
+        277,
+        87,
+        367,
+        12,
+        94,
+        399,
+        379,
+        411,
+        106,
+        497,
+        387,
+        290,
+        586
+      ],
+      "starting_xi": [
+        597,
+        115,
+        277,
+        87,
+        367,
+        12,
+        94,
+        399,
+        379,
+        411,
+        106
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 379,
+      "transfers_in": [
+        106,
+        411,
+        290,
+        12,
+        367,
+        94,
+        399,
+        586,
+        277,
+        387,
+        115,
+        87,
+        497,
+        597
+      ],
+      "transfers_out": [
+        346,
+        165,
+        427,
+        426,
+        366,
+        237,
+        154,
+        418,
+        175,
+        173,
+        10,
+        8,
+        110,
+        1
+      ],
+      "bank": 0,
+      "team_value": 1005,
+      "timestamp": 1788952615949
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 5151567,
+      "manager_name": "Chris Greenwood",
+      "team_name": "I Want It Stach Way",
+      "overall_rank": 194,
+      "gw_rank": 56683,
+      "total_points": 280,
+      "gw_points": 80,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-21T09:08:15.190403Z",
+          "event": 1
+        },
+        {
+          "name": "freehit",
+          "time": "2026-09-03T13:48:51.463441Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        597,
+        87,
+        277,
+        32,
+        367,
+        399,
+        397,
+        366,
+        411,
+        106,
+        379,
+        497,
+        605,
+        34,
+        539
+      ],
+      "starting_xi": [
+        597,
+        87,
+        277,
+        32,
+        367,
+        399,
+        397,
+        366,
+        411,
+        106,
+        379
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 379,
+      "transfers_in": [
+        106,
+        366,
+        411,
+        379,
+        367,
+        397,
+        605,
+        277,
+        87,
+        34,
+        32,
+        497,
+        597,
+        399
+      ],
+      "transfers_out": [
+        165,
+        12,
+        552,
+        346,
+        428,
+        426,
+        260,
+        391,
+        329,
+        10,
+        8,
+        529,
+        412,
+        154
+      ],
+      "bank": 0,
+      "team_value": 1004,
+      "timestamp": 1788952616171
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 5469892,
+      "manager_name": "Jóhann Örn Kjartansson",
+      "team_name": "AVERAGEJOE",
+      "overall_rank": 194,
+      "gw_rank": 1257337,
+      "total_points": 280,
+      "gw_points": 64,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-21T17:22:02.331701Z",
+          "event": 1
+        },
+        {
+          "name": "freehit",
+          "time": "2026-09-04T01:54:50.481994Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        82,
+        87,
+        115,
+        259,
+        399,
+        480,
+        41,
+        367,
+        106,
+        411,
+        379,
+        111,
+        387,
+        586,
+        290
+      ],
+      "starting_xi": [
+        82,
+        87,
+        115,
+        259,
+        399,
+        480,
+        41,
+        367,
+        106,
+        411,
+        379
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 399,
+      "transfers_in": [
+        41,
+        480,
+        387,
+        367,
+        449,
+        398,
+        111,
+        82,
+        586,
+        259,
+        87,
+        290,
+        12,
+        399,
+        106,
+        379,
+        411
+      ],
+      "transfers_out": [
+        398,
+        12,
+        449,
+        368,
+        10,
+        154,
+        109,
+        412,
+        532,
+        4,
+        8,
+        237,
+        427,
+        426,
+        527,
+        346,
+        165
+      ],
+      "bank": 0,
+      "team_value": 1006,
+      "timestamp": 1788952616392
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 2138143,
+      "manager_name": "PLL Mo",
+      "team_name": "MustaphaElmaghrani",
+      "overall_rank": 215,
+      "gw_rank": 6053724,
+      "total_points": 280,
+      "gw_points": 49,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-07-29T20:21:05.333814Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-08-28T16:43:43.410357Z",
+          "event": 2
+        },
+        {
+          "name": "wildcard",
+          "time": "2026-09-01T19:05:59.269570Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "wildcard",
+      "squad_15": [
+        109,
+        593,
+        8,
+        115,
+        480,
+        605,
+        426,
+        398,
+        453,
+        411,
+        491,
+        497,
+        165,
+        387,
+        586
+      ],
+      "starting_xi": [
+        109,
+        593,
+        8,
+        115,
+        480,
+        605,
+        426,
+        398,
+        453,
+        411,
+        491
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 426,
+      "transfers_in": [
+        586,
+        453,
+        497,
+        411,
+        398,
+        605,
+        593,
+        387
+      ],
+      "transfers_out": [
+        233,
+        70,
+        496,
+        26,
+        397,
+        427,
+        418,
+        4
+      ],
+      "bank": 0,
+      "team_value": 1004,
+      "timestamp": 1788952616625
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 2174749,
+      "manager_name": "ali Hasan",
+      "team_name": "forza roma",
+      "overall_rank": 215,
+      "gw_rank": 1083284,
+      "total_points": 280,
+      "gw_points": 65,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-21T17:18:07.605274Z",
+          "event": 1
+        },
+        {
+          "name": "freehit",
+          "time": "2026-09-04T17:13:48.720306Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        597,
+        88,
+        254,
+        32,
+        368,
+        397,
+        399,
+        12,
+        411,
+        379,
+        106,
+        497,
+        605,
+        38,
+        539
+      ],
+      "starting_xi": [
+        597,
+        88,
+        254,
+        32,
+        368,
+        397,
+        399,
+        12,
+        411,
+        379,
+        106
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 368,
+      "transfers_in": [
+        597,
+        254,
+        88,
+        399,
+        32,
+        605,
+        387,
+        250,
+        127,
+        497,
+        84,
+        36,
+        38,
+        411,
+        50,
+        368,
+        379,
+        106,
+        464
+      ],
+      "transfers_out": [
+        250,
+        36,
+        84,
+        127,
+        387,
+        50,
+        115,
+        109,
+        426,
+        496,
+        8,
+        418,
+        10,
+        125,
+        154,
+        427,
+        464,
+        165,
+        346
+      ],
+      "bank": 0,
+      "team_value": 1007,
+      "timestamp": 1788952616845
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 3113632,
+      "manager_name": "Marc Wyatt",
+      "team_name": "Wyatt Wanderers F.C",
+      "overall_rank": 215,
+      "gw_rank": 1257337,
+      "total_points": 280,
+      "gw_points": 64,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-21T17:18:44.023550Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-08-28T15:51:54.465672Z",
+          "event": 2
+        },
+        {
+          "name": "freehit",
+          "time": "2026-09-01T18:41:16.117110Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        1,
+        279,
+        115,
+        84,
+        368,
+        399,
+        367,
+        398,
+        379,
+        411,
+        106,
+        629,
+        586,
+        638,
+        94
+      ],
+      "starting_xi": [
+        1,
+        279,
+        115,
+        84,
+        368,
+        399,
+        367,
+        398,
+        379,
+        411,
+        106
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 368,
+      "transfers_in": [
+        1,
+        84,
+        449,
+        94,
+        106,
+        445,
+        398,
+        426,
+        109,
+        449,
+        279,
+        626,
+        379,
+        586,
+        124,
+        638,
+        4,
+        8,
+        445,
+        84,
+        94,
+        557,
+        356,
+        106,
+        1,
+        379,
+        82,
+        169,
+        277,
+        12,
+        115,
+        1,
+        449,
+        366,
+        115,
+        586,
+        279,
+        82,
+        116,
+        277,
+        426,
+        449,
+        357,
+        454,
+        397,
+        277,
+        367,
+        124,
+        528,
+        106,
+        279,
+        610,
+        629,
+        109,
+        606,
+        115,
+        399,
+        411
+      ],
+      "transfers_out": [
+        109,
+        449,
+        445,
+        426,
+        169,
+        449,
+        397,
+        626,
+        1,
+        4,
+        8,
+        124,
+        106,
+        279,
+        94,
+        84,
+        356,
+        445,
+        449,
+        586,
+        557,
+        12,
+        277,
+        379,
+        82,
+        106,
+        1,
+        528,
+        610,
+        366,
+        116,
+        82,
+        115,
+        426,
+        277,
+        357,
+        606,
+        109,
+        115,
+        449,
+        454,
+        279,
+        277,
+        426,
+        124,
+        387,
+        13,
+        43,
+        165,
+        249,
+        8,
+        356,
+        1,
+        385,
+        142,
+        229,
+        40,
+        346
+      ],
+      "bank": 0,
+      "team_value": 1003,
+      "timestamp": 1788952617060
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 3396160,
+      "manager_name": "NYC FC",
+      "team_name": "The sharks",
+      "overall_rank": 215,
+      "gw_rank": 3062890,
+      "total_points": 280,
+      "gw_points": 57,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-21T14:02:27.218190Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-08-28T09:54:34.740017Z",
+          "event": 2
+        },
+        {
+          "name": "wildcard",
+          "time": "2026-08-30T17:36:11.868289Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "wildcard",
+      "squad_15": [
+        109,
+        88,
+        593,
+        115,
+        399,
+        124,
+        398,
+        367,
+        165,
+        411,
+        379,
+        497,
+        8,
+        279,
+        454
+      ],
+      "starting_xi": [
+        109,
+        88,
+        593,
+        115,
+        399,
+        124,
+        398,
+        367,
+        165,
+        411,
+        379
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 367,
+      "transfers_in": [
+        124,
+        379,
+        398,
+        497,
+        593,
+        8,
+        572,
+        15,
+        10,
+        173,
+        28,
+        464,
+        572,
+        565,
+        229,
+        502,
+        367,
+        454,
+        279,
+        399,
+        411
+      ],
+      "transfers_out": [
+        15,
+        464,
+        426,
+        572,
+        173,
+        10,
+        28,
+        565,
+        229,
+        502,
+        572,
+        346,
+        412,
+        154,
+        31,
+        8,
+        368,
+        12,
+        423,
+        397,
+        527
+      ],
+      "bank": 33,
+      "team_value": 1010,
+      "timestamp": 1788952617284
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 3648199,
+      "manager_name": "Jeremy Wang",
+      "team_name": "NOT INTO YOU",
+      "overall_rank": 215,
+      "gw_rank": 6806023,
+      "total_points": 280,
+      "gw_points": 47,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-21T08:11:04.565263Z",
+          "event": 1
+        },
+        {
+          "name": "wildcard",
+          "time": "2026-09-03T19:20:37.744895Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "wildcard",
+      "squad_15": [
+        567,
+        115,
+        31,
+        391,
+        449,
+        565,
+        426,
+        124,
+        368,
+        464,
+        411,
+        572,
+        387,
+        165,
+        290
+      ],
+      "starting_xi": [
+        567,
+        115,
+        31,
+        391,
+        449,
+        565,
+        426,
+        124,
+        368,
+        464,
+        411
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 426,
+      "transfers_in": [
+        368,
+        31,
+        572,
+        290,
+        605,
+        411,
+        464,
+        290,
+        480,
+        565,
+        277,
+        387,
+        391,
+        449,
+        115,
+        301,
+        567,
+        124
+      ],
+      "transfers_out": [
+        480,
+        277,
+        301,
+        605,
+        290,
+        552,
+        346,
+        367,
+        237,
+        154,
+        87,
+        88,
+        10,
+        8,
+        4,
+        109,
+        82,
+        208
+      ],
+      "bank": 1,
+      "team_value": 1000,
+      "timestamp": 1788952617499
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 4363226,
+      "manager_name": "Musab Mawya",
+      "team_name": "كفااااوي",
+      "overall_rank": 215,
+      "gw_rank": 1903210,
+      "total_points": 280,
+      "gw_points": 61,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-20T22:14:12.840839Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-08-28T17:18:37.790638Z",
+          "event": 2
+        },
+        {
+          "name": "freehit",
+          "time": "2026-08-31T17:33:44.550212Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        82,
+        391,
+        87,
+        84,
+        480,
+        398,
+        367,
+        454,
+        411,
+        379,
+        464,
+        572,
+        357,
+        127,
+        449
+      ],
+      "starting_xi": [
+        82,
+        391,
+        87,
+        84,
+        480,
+        398,
+        367,
+        454,
+        411,
+        379,
+        464
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 379,
+      "transfers_in": [
+        84,
+        449,
+        572,
+        480,
+        398,
+        445,
+        87,
+        454,
+        565,
+        154,
+        379,
+        106,
+        127,
+        399,
+        82,
+        124,
+        639,
+        127,
+        357,
+        565,
+        449,
+        115,
+        384,
+        427,
+        173,
+        411,
+        94,
+        277,
+        572,
+        279,
+        454,
+        533,
+        398,
+        565,
+        357,
+        296,
+        154,
+        447,
+        388,
+        384
+      ],
+      "transfers_out": [
+        115,
+        445,
+        497,
+        154,
+        399,
+        277,
+        449,
+        565,
+        454,
+        124,
+        106,
+        553,
+        426,
+        427,
+        384,
+        639,
+        127,
+        565,
+        279,
+        94,
+        357,
+        173,
+        572,
+        154,
+        447,
+        165,
+        398,
+        4,
+        384,
+        533,
+        565,
+        388,
+        368,
+        296,
+        200,
+        237,
+        40,
+        387,
+        8,
+        1
+      ],
+      "bank": 0,
+      "team_value": 1007,
+      "timestamp": 1788952617719
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 4397663,
+      "manager_name": "S s",
+      "team_name": "صكارهم",
+      "overall_rank": 215,
+      "gw_rank": 26677,
+      "total_points": 280,
+      "gw_points": 83,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-18T08:25:34.209673Z",
+          "event": 1
+        },
+        {
+          "name": "freehit",
+          "time": "2026-09-03T22:38:07.135488Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        82,
+        356,
+        499,
+        32,
+        453,
+        399,
+        367,
+        429,
+        401,
+        411,
+        379,
+        629,
+        387,
+        304,
+        127
+      ],
+      "starting_xi": [
+        82,
+        356,
+        499,
+        32,
+        453,
+        399,
+        367,
+        429,
+        401,
+        411,
+        379
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 399,
+      "transfers_in": [
+        127,
+        387,
+        82,
+        32,
+        429,
+        367,
+        629,
+        411,
+        379,
+        401,
+        41,
+        453,
+        304,
+        499,
+        469,
+        356,
+        399
+      ],
+      "transfers_out": [
+        41,
+        469,
+        384,
+        142,
+        154,
+        15,
+        1,
+        346,
+        165,
+        569,
+        237,
+        426,
+        357,
+        391,
+        418,
+        8,
+        427
+      ],
+      "bank": 0,
+      "team_value": 1007,
+      "timestamp": 1788952617937
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 4829085,
+      "manager_name": "Harman Messi",
+      "team_name": "KURDISTA",
+      "overall_rank": 215,
+      "gw_rank": 4504227,
+      "total_points": 280,
+      "gw_points": 53,
+      "chips_used": [
+        {
+          "name": "3xc",
+          "time": "2026-08-24T22:09:43.267079Z",
+          "event": 2
+        },
+        {
+          "name": "wildcard",
+          "time": "2026-08-30T19:12:11.663028Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "wildcard",
+      "squad_15": [
+        109,
+        115,
+        204,
+        8,
+        480,
+        94,
+        426,
+        124,
+        411,
+        106,
+        165,
+        57,
+        332,
+        214,
+        173
+      ],
+      "starting_xi": [
+        109,
+        115,
+        204,
+        8,
+        480,
+        94,
+        426,
+        124,
+        411,
+        106,
+        165
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 94,
+      "transfers_in": [
+        332,
+        214,
+        204,
+        115,
+        331,
+        499,
+        11,
+        277,
+        411,
+        106,
+        323,
+        124,
+        94,
+        8,
+        173,
+        61,
+        57
+      ],
+      "transfers_out": [
+        331,
+        323,
+        277,
+        499,
+        115,
+        11,
+        61,
+        116,
+        25,
+        346,
+        542,
+        397,
+        154,
+        230,
+        229,
+        233,
+        82
+      ],
+      "bank": 0,
+      "team_value": 1000,
+      "timestamp": 1788952618155
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 64372,
+      "manager_name": "Jørgen Welde Aronsen",
+      "team_name": "Kjelvik FC",
+      "overall_rank": 223,
+      "gw_rank": 635652,
+      "total_points": 280,
+      "gw_points": 69,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-20T18:28:51.702790Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-09-04T07:15:33.489724Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "3xc",
+      "squad_15": [
+        109,
+        8,
+        88,
+        504,
+        15,
+        426,
+        94,
+        427,
+        454,
+        411,
+        165,
+        496,
+        31,
+        346,
+        304
+      ],
+      "starting_xi": [
+        109,
+        8,
+        88,
+        504,
+        15,
+        426,
+        94,
+        427,
+        454,
+        411,
+        165
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 15,
+      "transfers_in": [
+        454,
+        31
+      ],
+      "transfers_out": [
+        123,
+        329
+      ],
+      "bank": 0,
+      "team_value": 1006,
+      "timestamp": 1788952618376
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 338945,
+      "manager_name": "Stian Herseth",
+      "team_name": "KJØH",
+      "overall_rank": 223,
+      "gw_rank": 752943,
+      "total_points": 280,
+      "gw_points": 68,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-21T14:58:46.325127Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-09-04T16:42:19.107343Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "3xc",
+      "squad_15": [
+        1,
+        8,
+        115,
+        10,
+        368,
+        124,
+        367,
+        427,
+        397,
+        346,
+        411,
+        109,
+        418,
+        165,
+        304
+      ],
+      "starting_xi": [
+        1,
+        8,
+        115,
+        10,
+        368,
+        124,
+        367,
+        427,
+        397,
+        346,
+        411
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 397,
+      "transfers_in": [
+        411,
+        124
+      ],
+      "transfers_out": [
+        379,
+        426
+      ],
+      "bank": 0,
+      "team_value": 1007,
+      "timestamp": 1788952618602
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 834884,
+      "manager_name": "Gregorio Poplar",
+      "team_name": "The Kroos Files",
+      "overall_rank": 223,
+      "gw_rank": 24719,
+      "total_points": 280,
+      "gw_points": 84,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-28T15:50:36.333223Z",
+          "event": 2
+        },
+        {
+          "name": "3xc",
+          "time": "2026-09-04T16:56:47.261086Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "3xc",
+      "squad_15": [
+        82,
+        391,
+        115,
+        230,
+        426,
+        368,
+        480,
+        427,
+        367,
+        379,
+        346,
+        412,
+        165,
+        61,
+        173
+      ],
+      "starting_xi": [
+        82,
+        391,
+        115,
+        230,
+        426,
+        368,
+        480,
+        427,
+        367,
+        379,
+        346
+      ],
+      "captain_id": 379,
+      "vice_captain_id": 368,
+      "transfers_in": [
+        480,
+        115
+      ],
+      "transfers_out": [
+        237,
+        11
+      ],
+      "bank": 4,
+      "team_value": 1004,
+      "timestamp": 1788952618706
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 3770628,
+      "manager_name": "Yousef Zezo",
+      "team_name": "علي الله أن شاء الله",
+      "overall_rank": 223,
+      "gw_rank": 1347965,
+      "total_points": 280,
+      "gw_points": 64,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-11T01:29:05.323802Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-08-25T16:23:17.732609Z",
+          "event": 2
+        }
+      ],
+      "active_chip": null,
+      "squad_15": [
+        1,
+        8,
+        391,
+        115,
+        368,
+        427,
+        397,
+        426,
+        464,
+        379,
+        165,
+        496,
+        237,
+        423,
+        534
+      ],
+      "starting_xi": [
+        1,
+        8,
+        391,
+        115,
+        368,
+        427,
+        397,
+        426,
+        464,
+        379,
+        165
+      ],
+      "captain_id": 379,
+      "vice_captain_id": 426,
+      "transfers_in": [
+        115
+      ],
+      "transfers_out": [
+        10
+      ],
+      "bank": 8,
+      "team_value": 1006,
+      "timestamp": 1788952618927
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 6392651,
+      "manager_name": "Jørgen Borvik",
+      "team_name": "Geordie4life",
+      "overall_rank": 223,
+      "gw_rank": 204969,
+      "total_points": 280,
+      "gw_points": 75,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-21T12:39:14.603686Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-09-04T16:34:50.173780Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "3xc",
+      "squad_15": [
+        109,
+        115,
+        8,
+        10,
+        368,
+        127,
+        15,
+        397,
+        237,
+        379,
+        411,
+        412,
+        165,
+        473,
+        418
+      ],
+      "starting_xi": [
+        109,
+        115,
+        8,
+        10,
+        368,
+        127,
+        15,
+        397,
+        237,
+        379,
+        411
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 397,
+      "transfers_in": [
+        127,
+        411
+      ],
+      "transfers_out": [
+        426,
+        346
+      ],
+      "bank": 5,
+      "team_value": 1007,
+      "timestamp": 1788952619143
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 19307,
+      "manager_name": "Kamol Sriwijit",
+      "team_name": "JJ United",
+      "overall_rank": 228,
+      "gw_rank": 4127256,
+      "total_points": 279,
+      "gw_points": 54,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-20T04:40:09.893720Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-08-23T16:34:06.256225Z",
+          "event": 2
+        },
+        {
+          "name": "wildcard",
+          "time": "2026-09-01T16:59:06.363769Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "wildcard",
+      "squad_15": [
+        1,
+        391,
+        115,
+        8,
+        154,
+        368,
+        367,
+        399,
+        565,
+        464,
+        411,
+        171,
+        165,
+        31,
+        277
+      ],
+      "starting_xi": [
+        1,
+        391,
+        115,
+        8,
+        154,
+        368,
+        367,
+        399,
+        565,
+        464,
+        411
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 368,
+      "transfers_in": [
+        115,
+        1,
+        464,
+        367,
+        321,
+        12,
+        367,
+        480,
+        109,
+        464,
+        377,
+        1,
+        321,
+        12,
+        480,
+        464,
+        109,
+        346,
+        367,
+        1,
+        321,
+        12,
+        109,
+        346,
+        367,
+        1,
+        321,
+        12,
+        480,
+        109,
+        171,
+        236,
+        1,
+        464,
+        111,
+        109,
+        321,
+        411,
+        480,
+        565,
+        449,
+        277,
+        31,
+        251,
+        154,
+        399
+      ],
+      "transfers_out": [
+        449,
+        109,
+        321,
+        12,
+        464,
+        367,
+        480,
+        377,
+        1,
+        321,
+        12,
+        109,
+        464,
+        480,
+        367,
+        346,
+        1,
+        321,
+        12,
+        109,
+        346,
+        367,
+        1,
+        321,
+        12,
+        109,
+        464,
+        480,
+        236,
+        1,
+        111,
+        480,
+        109,
+        321,
+        251,
+        1,
+        379,
+        346,
+        427,
+        397,
+        418,
+        304,
+        10,
+        109,
+        426,
+        237
+      ],
+      "bank": 2,
+      "team_value": 1010,
+      "timestamp": 1788952619362
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 22519,
+      "manager_name": "Josh Gibbs",
+      "team_name": "HasBeenXI",
+      "overall_rank": 228,
+      "gw_rank": 1903210,
+      "total_points": 279,
+      "gw_points": 61,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-07-23T22:18:55.924230Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-08-28T11:06:25.484214Z",
+          "event": 2
+        },
+        {
+          "name": "freehit",
+          "time": "2026-08-29T06:27:41.612267Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        597,
+        84,
+        279,
+        87,
+        366,
+        368,
+        398,
+        480,
+        379,
+        411,
+        106,
+        497,
+        387,
+        51,
+        305
+      ],
+      "starting_xi": [
+        597,
+        84,
+        279,
+        87,
+        366,
+        368,
+        398,
+        480,
+        379,
+        411,
+        106
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 366,
+      "transfers_in": [
+        480,
+        387,
+        597,
+        397,
+        115,
+        1,
+        480,
+        398,
+        379,
+        497,
+        41,
+        51,
+        387,
+        368,
+        109,
+        321,
+        480,
+        398,
+        87,
+        84,
+        597,
+        411,
+        305,
+        279,
+        111,
+        379,
+        106,
+        51,
+        41,
+        94,
+        366,
+        397,
+        32,
+        356,
+        387,
+        82
+      ],
+      "transfers_out": [
+        397,
+        115,
+        1,
+        480,
+        387,
+        597,
+        41,
+        397,
+        321,
+        109,
+        480,
+        398,
+        356,
+        51,
+        111,
+        379,
+        41,
+        94,
+        32,
+        387,
+        82,
+        321,
+        230,
+        149,
+        109,
+        165,
+        346,
+        15,
+        480,
+        154,
+        426,
+        427,
+        418,
+        8,
+        4,
+        496
+      ],
+      "bank": 0,
+      "team_value": 1005,
+      "timestamp": 1788952619596
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 28442,
+      "manager_name": "Albert Johansson",
+      "team_name": "Los Abbas",
+      "overall_rank": 228,
+      "gw_rank": 5284446,
+      "total_points": 279,
+      "gw_points": 51,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-07-31T12:26:17.098921Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-08-24T07:18:06.983983Z",
+          "event": 2
+        },
+        {
+          "name": "freehit",
+          "time": "2026-08-28T19:40:21.876425Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        82,
+        469,
+        115,
+        84,
+        391,
+        426,
+        399,
+        480,
+        411,
+        106,
+        464,
+        414,
+        180,
+        291,
+        605
+      ],
+      "starting_xi": [
+        82,
+        469,
+        115,
+        84,
+        391,
+        426,
+        399,
+        480,
+        411,
+        106,
+        464
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 480,
+      "transfers_in": [
+        180,
+        291,
+        277,
+        605,
+        426,
+        391,
+        84,
+        115,
+        106,
+        454,
+        449,
+        94,
+        469,
+        349,
+        201,
+        88,
+        426,
+        399,
+        397,
+        472,
+        398,
+        569,
+        449,
+        84,
+        464,
+        180,
+        471,
+        569,
+        414,
+        106,
+        480,
+        454,
+        58,
+        82,
+        464,
+        411,
+        399,
+        387,
+        115,
+        177,
+        356,
+        565
+      ],
+      "transfers_out": [
+        277,
+        398,
+        449,
+        454,
+        94,
+        472,
+        201,
+        88,
+        349,
+        565,
+        177,
+        426,
+        180,
+        569,
+        449,
+        84,
+        454,
+        397,
+        399,
+        387,
+        368,
+        106,
+        115,
+        471,
+        569,
+        8,
+        356,
+        464,
+        58,
+        165,
+        40,
+        427,
+        496,
+        226,
+        527,
+        379,
+        557,
+        10,
+        418,
+        233,
+        229,
+        426
+      ],
+      "bank": 0,
+      "team_value": 1003,
+      "timestamp": 1788952619819
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 104024,
+      "manager_name": "كينغ اللعبة",
+      "team_name": "Dybala",
+      "overall_rank": 228,
+      "gw_rank": 560785,
+      "total_points": 279,
+      "gw_points": 69,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-21T17:03:33.149730Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-08-28T17:29:20.651003Z",
+          "event": 2
+        },
+        {
+          "name": "freehit",
+          "time": "2026-09-01T10:27:21.971274Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        350,
+        84,
+        36,
+        391,
+        12,
+        397,
+        453,
+        366,
+        411,
+        106,
+        569,
+        497,
+        605,
+        277,
+        586
+      ],
+      "starting_xi": [
+        350,
+        84,
+        36,
+        391,
+        12,
+        397,
+        453,
+        366,
+        411,
+        106,
+        569
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 12,
+      "transfers_in": [
+        350,
+        12,
+        366,
+        36,
+        367,
+        277,
+        115,
+        250,
+        569,
+        411,
+        605,
+        397,
+        453,
+        586,
+        277,
+        391,
+        84,
+        497
+      ],
+      "transfers_out": [
+        250,
+        426,
+        367,
+        115,
+        124,
+        8,
+        277,
+        109,
+        346,
+        165,
+        427,
+        154,
+        15,
+        534,
+        418,
+        152,
+        10,
+        529
+      ],
+      "bank": 15,
+      "team_value": 1005,
+      "timestamp": 1788952620051
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 235045,
+      "manager_name": "kyle perry",
+      "team_name": "yernan crespo",
+      "overall_rank": 228,
+      "gw_rank": 1452279,
+      "total_points": 279,
+      "gw_points": 63,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-21T19:42:30.403175Z",
+          "event": 2
+        },
+        {
+          "name": "freehit",
+          "time": "2026-08-28T21:50:59.335504Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        82,
+        115,
+        279,
+        87,
+        127,
+        399,
+        367,
+        154,
+        106,
+        379,
+        411,
+        58,
+        124,
+        387,
+        259
+      ],
+      "starting_xi": [
+        82,
+        115,
+        279,
+        87,
+        127,
+        399,
+        367,
+        154,
+        106,
+        379,
+        411
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 399,
+      "transfers_in": [
+        367,
+        87,
+        154,
+        127,
+        379,
+        124,
+        464,
+        41,
+        565,
+        279,
+        480,
+        471,
+        387,
+        289,
+        166,
+        411,
+        106,
+        399,
+        367,
+        115,
+        581,
+        174,
+        259,
+        58,
+        82
+      ],
+      "transfers_out": [
+        565,
+        471,
+        480,
+        41,
+        464,
+        154,
+        166,
+        289,
+        94,
+        174,
+        367,
+        581,
+        4,
+        427,
+        346,
+        552,
+        165,
+        426,
+        40,
+        173,
+        8,
+        418,
+        534,
+        1,
+        110
+      ],
+      "bank": 0,
+      "team_value": 1004,
+      "timestamp": 1788952620279
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 365592,
+      "manager_name": "alaa abu samara",
+      "team_name": "SaMaRa MaN uNiTeD",
+      "overall_rank": 228,
+      "gw_rank": 1452279,
+      "total_points": 279,
+      "gw_points": 63,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-20T08:30:46.793015Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-08-22T21:02:26.327236Z",
+          "event": 2
+        },
+        {
+          "name": "freehit",
+          "time": "2026-08-28T21:34:52.385992Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        82,
+        388,
+        87,
+        254,
+        367,
+        398,
+        426,
+        368,
+        379,
+        411,
+        569,
+        301,
+        605,
+        586,
+        277
+      ],
+      "starting_xi": [
+        82,
+        388,
+        87,
+        254,
+        367,
+        398,
+        426,
+        368,
+        379,
+        411,
+        569
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 426,
+      "transfers_in": [
+        368,
+        87,
+        388,
+        82,
+        399,
+        362,
+        84,
+        391,
+        109,
+        277,
+        368,
+        388,
+        379,
+        399,
+        362,
+        82,
+        569,
+        254,
+        412,
+        31,
+        88,
+        250,
+        106,
+        398,
+        449,
+        82,
+        464,
+        368,
+        397,
+        254,
+        387,
+        569,
+        605,
+        426,
+        357,
+        567,
+        379,
+        398,
+        454,
+        109,
+        593,
+        362,
+        388,
+        82,
+        321,
+        427,
+        12,
+        154,
+        367,
+        316,
+        398,
+        88,
+        449,
+        106,
+        368,
+        387,
+        567,
+        454,
+        109,
+        388,
+        83,
+        279,
+        411,
+        464,
+        567,
+        289,
+        367,
+        453,
+        399,
+        357,
+        586,
+        301
+      ],
+      "transfers_out": [
+        399,
+        84,
+        362,
+        109,
+        368,
+        391,
+        88,
+        388,
+        82,
+        31,
+        399,
+        362,
+        106,
+        368,
+        387,
+        412,
+        464,
+        449,
+        250,
+        279,
+        254,
+        82,
+        569,
+        397,
+        357,
+        567,
+        379,
+        454,
+        398,
+        593,
+        388,
+        321,
+        12,
+        154,
+        362,
+        109,
+        464,
+        399,
+        427,
+        82,
+        88,
+        449,
+        357,
+        567,
+        316,
+        368,
+        398,
+        426,
+        289,
+        106,
+        454,
+        115,
+        387,
+        379,
+        367,
+        388,
+        109,
+        453,
+        83,
+        391,
+        567,
+        502,
+        165,
+        552,
+        1,
+        15,
+        397,
+        427,
+        398,
+        8,
+        418,
+        496
+      ],
+      "bank": 0,
+      "team_value": 1007,
+      "timestamp": 1788952620500
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 444666,
+      "manager_name": "Liam Fernandez",
+      "team_name": "Farke",
+      "overall_rank": 228,
+      "gw_rank": 217413,
+      "total_points": 279,
+      "gw_points": 74,
+      "chips_used": [
+        {
+          "name": "freehit",
+          "time": "2026-09-02T20:32:24.914366Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        597,
+        115,
+        391,
+        88,
+        399,
+        94,
+        367,
+        426,
+        166,
+        411,
+        379,
+        497,
+        277,
+        51,
+        586
+      ],
+      "starting_xi": [
+        597,
+        115,
+        391,
+        88,
+        399,
+        94,
+        367,
+        426,
+        166,
+        411,
+        379
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 399,
+      "transfers_in": [
+        367,
+        368,
+        166,
+        379,
+        51,
+        426,
+        367,
+        586,
+        277,
+        391,
+        88,
+        597,
+        411,
+        94,
+        399
+      ],
+      "transfers_out": [
+        368,
+        367,
+        346,
+        165,
+        154,
+        127,
+        12,
+        423,
+        334,
+        173,
+        8,
+        1,
+        379,
+        427,
+        426
+      ],
+      "bank": 0,
+      "team_value": 1007,
+      "timestamp": 1788952620720
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 610518,
+      "manager_name": "Vegard Sjaastad",
+      "team_name": "Veggie United",
+      "overall_rank": 228,
+      "gw_rank": 56683,
+      "total_points": 279,
+      "gw_points": 80,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-20T11:00:32.813921Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-08-28T16:59:11.862051Z",
+          "event": 2
+        },
+        {
+          "name": "freehit",
+          "time": "2026-09-01T14:09:14.460072Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        597,
+        115,
+        391,
+        356,
+        399,
+        366,
+        41,
+        268,
+        379,
+        411,
+        106,
+        82,
+        84,
+        290,
+        277
+      ],
+      "starting_xi": [
+        597,
+        115,
+        391,
+        356,
+        399,
+        366,
+        41,
+        268,
+        379,
+        411,
+        106
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 379,
+      "transfers_in": [
+        597,
+        356,
+        391,
+        106,
+        290,
+        41,
+        399,
+        387,
+        334,
+        84,
+        82,
+        109,
+        379,
+        565,
+        166,
+        268,
+        366,
+        384,
+        445,
+        321,
+        356,
+        411,
+        41,
+        469,
+        28,
+        401,
+        399,
+        166,
+        87,
+        84,
+        427,
+        480,
+        464,
+        379,
+        605,
+        277,
+        391,
+        411,
+        169,
+        398,
+        94,
+        115,
+        449,
+        82
+      ],
+      "transfers_out": [
+        109,
+        334,
+        387,
+        166,
+        94,
+        565,
+        398,
+        445,
+        356,
+        87,
+        384,
+        28,
+        321,
+        480,
+        379,
+        399,
+        41,
+        82,
+        449,
+        401,
+        469,
+        166,
+        427,
+        391,
+        412,
+        411,
+        605,
+        464,
+        84,
+        423,
+        426,
+        124,
+        346,
+        169,
+        557,
+        469,
+        229,
+        552,
+        165,
+        237,
+        154,
+        356,
+        4,
+        1
+      ],
+      "bank": 0,
+      "team_value": 1002,
+      "timestamp": 1788952620949
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 644637,
+      "manager_name": "Stephen Scrivens",
+      "team_name": "It's Carrick u know",
+      "overall_rank": 228,
+      "gw_rank": 8431604,
+      "total_points": 279,
+      "gw_points": 42,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-21T09:30:49.748387Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-08-27T21:58:46.547271Z",
+          "event": 2
+        },
+        {
+          "name": "freehit",
+          "time": "2026-09-01T19:19:26.619897Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        82,
+        391,
+        449,
+        88,
+        12,
+        399,
+        426,
+        454,
+        565,
+        411,
+        464,
+        497,
+        279,
+        320,
+        305
+      ],
+      "starting_xi": [
+        82,
+        391,
+        449,
+        88,
+        12,
+        399,
+        426,
+        454,
+        565,
+        411,
+        464
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 12,
+      "transfers_in": [
+        565,
+        279,
+        12,
+        464,
+        391,
+        259,
+        335,
+        277,
+        82,
+        87,
+        593,
+        320,
+        279,
+        384,
+        411,
+        127,
+        454,
+        399,
+        88,
+        449,
+        497
+      ],
+      "transfers_out": [
+        335,
+        259,
+        154,
+        165,
+        277,
+        279,
+        127,
+        87,
+        384,
+        593,
+        115,
+        491,
+        418,
+        109,
+        26,
+        368,
+        427,
+        40,
+        391,
+        8,
+        1
+      ],
+      "bank": 0,
+      "team_value": 1007,
+      "timestamp": 1788952621184
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 1321595,
+      "manager_name": "Tony Heaton",
+      "team_name": "Kobbie and Paste",
+      "overall_rank": 228,
+      "gw_rank": 26677,
+      "total_points": 279,
+      "gw_points": 83,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-20T22:06:41.194632Z",
+          "event": 1
+        },
+        {
+          "name": "freehit",
+          "time": "2026-09-01T22:08:23.713302Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        597,
+        586,
+        112,
+        8,
+        115,
+        98,
+        368,
+        399,
+        480,
+        411,
+        379,
+        496,
+        464,
+        427,
+        473
+      ],
+      "starting_xi": [
+        597,
+        586,
+        112,
+        8,
+        115,
+        98,
+        368,
+        399,
+        480,
+        411,
+        379
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 399,
+      "transfers_in": [
+        115,
+        464,
+        411,
+        399,
+        480,
+        98,
+        586,
+        597
+      ],
+      "transfers_out": [
+        423,
+        552,
+        165,
+        426,
+        237,
+        154,
+        10,
+        226
+      ],
+      "bank": 0,
+      "team_value": 1003,
+      "timestamp": 1788952621410
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 1488293,
+      "manager_name": "Scott Pickles",
+      "team_name": "Sesko Meal Deal",
+      "overall_rank": 228,
+      "gw_rank": 1452279,
+      "total_points": 279,
+      "gw_points": 63,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-16T19:48:16.023337Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-08-28T15:18:56.646457Z",
+          "event": 2
+        },
+        {
+          "name": "freehit",
+          "time": "2026-09-01T05:47:40.356866Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        109,
+        115,
+        259,
+        88,
+        268,
+        368,
+        399,
+        480,
+        106,
+        379,
+        411,
+        496,
+        454,
+        387,
+        175
+      ],
+      "starting_xi": [
+        109,
+        115,
+        259,
+        88,
+        268,
+        368,
+        399,
+        480,
+        106,
+        379,
+        411
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 399,
+      "transfers_in": [
+        268,
+        259,
+        175,
+        368,
+        423,
+        480,
+        379,
+        268,
+        464,
+        106,
+        411,
+        399,
+        454,
+        480,
+        124,
+        88,
+        387,
+        115
+      ],
+      "transfers_out": [
+        94,
+        423,
+        469,
+        268,
+        8,
+        124,
+        464,
+        480,
+        379,
+        346,
+        165,
+        427,
+        426,
+        368,
+        154,
+        418,
+        334,
+        10
+      ],
+      "bank": 0,
+      "team_value": 1005,
+      "timestamp": 1788952621629
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 2098553,
+      "manager_name": "Krzysztof O",
+      "team_name": "SUNRISE",
+      "overall_rank": 228,
+      "gw_rank": 3758653,
+      "total_points": 279,
+      "gw_points": 55,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-07T21:03:38.162192Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-08-26T12:52:59.349161Z",
+          "event": 2
+        },
+        {
+          "name": "freehit",
+          "time": "2026-09-04T16:12:26.891053Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        82,
+        88,
+        32,
+        87,
+        398,
+        399,
+        368,
+        480,
+        366,
+        379,
+        411,
+        497,
+        115,
+        464,
+        445
+      ],
+      "starting_xi": [
+        82,
+        88,
+        32,
+        87,
+        398,
+        399,
+        368,
+        480,
+        366,
+        379,
+        411
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 379,
+      "transfers_in": [
+        464,
+        411,
+        480,
+        398,
+        399,
+        366,
+        445,
+        88,
+        87,
+        32,
+        497,
+        82
+      ],
+      "transfers_out": [
+        346,
+        165,
+        557,
+        427,
+        426,
+        154,
+        532,
+        418,
+        10,
+        8,
+        496,
+        109
+      ],
+      "bank": 0,
+      "team_value": 1007,
+      "timestamp": 1788952621853
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 2207389,
+      "manager_name": "David Eie",
+      "team_name": "Def contribution FC",
+      "overall_rank": 228,
+      "gw_rank": 2440564,
+      "total_points": 279,
+      "gw_points": 59,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-05T14:22:30.017336Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-08-23T07:56:20.586846Z",
+          "event": 2
+        },
+        {
+          "name": "freehit",
+          "time": "2026-08-28T19:19:27.255716Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        109,
+        84,
+        115,
+        356,
+        397,
+        94,
+        480,
+        398,
+        379,
+        411,
+        106,
+        301,
+        277,
+        279,
+        51
+      ],
+      "starting_xi": [
+        109,
+        84,
+        115,
+        356,
+        397,
+        94,
+        480,
+        398,
+        379,
+        411,
+        106
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 109,
+      "transfers_in": [
+        109,
+        398,
+        397,
+        84,
+        399,
+        391,
+        368,
+        387,
+        398,
+        356,
+        387,
+        368,
+        8,
+        399,
+        397,
+        398,
+        356,
+        94,
+        41,
+        387,
+        399,
+        449,
+        398,
+        277,
+        397,
+        356,
+        82,
+        480,
+        106,
+        8,
+        391,
+        399,
+        87,
+        356,
+        321,
+        109,
+        398,
+        569,
+        426,
+        82,
+        480,
+        469,
+        356,
+        94,
+        368,
+        397,
+        51,
+        565,
+        115,
+        277,
+        279,
+        301,
+        387,
+        411
+      ],
+      "transfers_out": [
+        82,
+        399,
+        368,
+        391,
+        398,
+        387,
+        399,
+        8,
+        368,
+        387,
+        356,
+        398,
+        449,
+        397,
+        399,
+        368,
+        387,
+        41,
+        397,
+        87,
+        398,
+        356,
+        399,
+        391,
+        565,
+        8,
+        109,
+        426,
+        321,
+        356,
+        387,
+        398,
+        277,
+        469,
+        569,
+        82,
+        397,
+        106,
+        480,
+        109,
+        94,
+        356,
+        8,
+        398,
+        15,
+        426,
+        237,
+        427,
+        10,
+        534,
+        469,
+        412,
+        229,
+        165
+      ],
+      "bank": 0,
+      "team_value": 1005,
+      "timestamp": 1788952622071
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 2232963,
+      "manager_name": "Joseph R",
+      "team_name": "Joseph's Team",
+      "overall_rank": 228,
+      "gw_rank": 927475,
+      "total_points": 279,
+      "gw_points": 66,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-21T13:32:02.781416Z",
+          "event": 1
+        },
+        {
+          "name": "freehit",
+          "time": "2026-09-02T07:52:50.682519Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        82,
+        87,
+        391,
+        115,
+        367,
+        366,
+        398,
+        12,
+        106,
+        379,
+        411,
+        497,
+        277,
+        605,
+        586
+      ],
+      "starting_xi": [
+        82,
+        87,
+        391,
+        115,
+        367,
+        366,
+        398,
+        12,
+        106,
+        379,
+        411
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 12,
+      "transfers_in": [
+        366,
+        367,
+        586,
+        391,
+        82,
+        290,
+        480,
+        605,
+        387,
+        572,
+        109,
+        127,
+        399,
+        87,
+        94,
+        387,
+        115,
+        31,
+        87,
+        305,
+        84,
+        367,
+        397,
+        87,
+        88,
+        236,
+        391,
+        572,
+        366,
+        84,
+        109,
+        399,
+        358,
+        367,
+        87,
+        82,
+        236,
+        391,
+        366,
+        586,
+        605,
+        258,
+        127,
+        399,
+        84,
+        480,
+        368,
+        391,
+        399,
+        366,
+        84,
+        586,
+        109,
+        12,
+        31,
+        87,
+        480,
+        368,
+        469,
+        84,
+        367,
+        368,
+        397,
+        32,
+        87,
+        605,
+        387,
+        31,
+        367,
+        127,
+        12,
+        368,
+        84,
+        391,
+        497,
+        124,
+        397,
+        115,
+        4,
+        87,
+        12,
+        586,
+        88,
+        366,
+        32,
+        84,
+        82,
+        115,
+        109,
+        411,
+        106,
+        12,
+        367,
+        398,
+        605,
+        586,
+        277,
+        88,
+        32,
+        391,
+        58,
+        82,
+        464,
+        480
+      ],
+      "transfers_out": [
+        480,
+        290,
+        387,
+        84,
+        572,
+        399,
+        367,
+        127,
+        586,
+        109,
+        572,
+        605,
+        94,
+        387,
+        397,
+        87,
+        31,
+        305,
+        115,
+        88,
+        87,
+        366,
+        236,
+        391,
+        84,
+        399,
+        87,
+        109,
+        367,
+        358,
+        82,
+        366,
+        391,
+        236,
+        84,
+        109,
+        399,
+        87,
+        368,
+        258,
+        127,
+        586,
+        605,
+        480,
+        391,
+        399,
+        366,
+        84,
+        397,
+        368,
+        32,
+        31,
+        82,
+        480,
+        469,
+        84,
+        367,
+        12,
+        87,
+        31,
+        368,
+        367,
+        124,
+        387,
+        84,
+        127,
+        391,
+        32,
+        368,
+        605,
+        397,
+        367,
+        87,
+        4,
+        58,
+        480,
+        12,
+        586,
+        391,
+        88,
+        366,
+        115,
+        84,
+        12,
+        586,
+        88,
+        109,
+        32,
+        82,
+        464,
+        165,
+        426,
+        237,
+        154,
+        127,
+        469,
+        423,
+        229,
+        10,
+        8,
+        109,
+        1,
+        491,
+        427
+      ],
+      "bank": 0,
+      "team_value": 1004,
+      "timestamp": 1788952622300
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 2796466,
+      "manager_name": "นัท ตาแหวง",
+      "team_name": "Tawaeng FC",
+      "overall_rank": 228,
+      "gw_rank": 560785,
+      "total_points": 279,
+      "gw_points": 69,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-10T09:12:02.912622Z",
+          "event": 1
+        },
+        {
+          "name": "freehit",
+          "time": "2026-08-28T20:15:46.399205Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        82,
+        88,
+        8,
+        391,
+        115,
+        557,
+        399,
+        367,
+        379,
+        411,
+        106,
+        109,
+        454,
+        127,
+        277
+      ],
+      "starting_xi": [
+        82,
+        88,
+        8,
+        391,
+        115,
+        557,
+        399,
+        367,
+        379,
+        411,
+        106
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 106,
+      "transfers_in": [
+        557,
+        367,
+        277,
+        109,
+        454,
+        15,
+        391,
+        497,
+        82,
+        357,
+        387,
+        88,
+        115,
+        127,
+        368,
+        41,
+        399,
+        453,
+        106,
+        411
+      ],
+      "transfers_out": [
+        15,
+        368,
+        357,
+        497,
+        41,
+        453,
+        387,
+        109,
+        140,
+        10,
+        229,
+        305,
+        418,
+        237,
+        427,
+        15,
+        154,
+        426,
+        249,
+        165
+      ],
+      "bank": 5,
+      "team_value": 1005,
+      "timestamp": 1788952622528
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 2946372,
+      "manager_name": "Thomas Davies",
+      "team_name": "Sakaville-Bagginses",
+      "overall_rank": 228,
+      "gw_rank": 389904,
+      "total_points": 279,
+      "gw_points": 71,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-21T11:07:48.613052Z",
+          "event": 1
+        },
+        {
+          "name": "freehit",
+          "time": "2026-09-04T15:16:21.122153Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        597,
+        84,
+        115,
+        356,
+        367,
+        94,
+        398,
+        399,
+        379,
+        106,
+        411,
+        497,
+        127,
+        277,
+        32
+      ],
+      "starting_xi": [
+        597,
+        84,
+        115,
+        356,
+        367,
+        94,
+        398,
+        399,
+        379,
+        106,
+        411
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 106,
+      "transfers_in": [
+        367,
+        497,
+        84,
+        366,
+        399,
+        398,
+        94,
+        32,
+        597,
+        379,
+        106,
+        411,
+        480,
+        290,
+        127,
+        397,
+        277,
+        87,
+        356,
+        109,
+        82
+      ],
+      "transfers_out": [
+        366,
+        109,
+        87,
+        368,
+        480,
+        397,
+        290,
+        8,
+        82,
+        527,
+        346,
+        165,
+        427,
+        426,
+        237,
+        154,
+        469,
+        423,
+        4,
+        564,
+        1
+      ],
+      "bank": 0,
+      "team_value": 1006,
+      "timestamp": 1788952622750
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 4969939,
+      "manager_name": "Callum Doswell",
+      "team_name": "Back of the Neto",
+      "overall_rank": 228,
+      "gw_rank": 788693,
+      "total_points": 279,
+      "gw_points": 67,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-21T11:35:47.401781Z",
+          "event": 1
+        },
+        {
+          "name": "freehit",
+          "time": "2026-09-02T11:02:08.322246Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        82,
+        115,
+        8,
+        36,
+        367,
+        399,
+        366,
+        94,
+        106,
+        379,
+        411,
+        111,
+        127,
+        387,
+        38
+      ],
+      "starting_xi": [
+        82,
+        115,
+        8,
+        36,
+        367,
+        399,
+        366,
+        94,
+        106,
+        379,
+        411
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 399,
+      "transfers_in": [
+        8,
+        106,
+        366,
+        399,
+        367,
+        387,
+        38,
+        111,
+        356,
+        94,
+        36,
+        127,
+        379,
+        411,
+        398,
+        397,
+        12,
+        449,
+        87,
+        82
+      ],
+      "transfers_out": [
+        449,
+        464,
+        398,
+        397,
+        12,
+        356,
+        423,
+        564,
+        87,
+        368,
+        469,
+        237,
+        165,
+        346,
+        427,
+        154,
+        426,
+        8,
+        4,
+        1
+      ],
+      "bank": 0,
+      "team_value": 1008,
+      "timestamp": 1788952622971
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 5337554,
+      "manager_name": "Jacob Solbrekke",
+      "team_name": "Gräddhyllan FC",
+      "overall_rank": 228,
+      "gw_rank": 666928,
+      "total_points": 279,
+      "gw_points": 68,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-21T16:50:21.315027Z",
+          "event": 1
+        },
+        {
+          "name": "freehit",
+          "time": "2026-09-04T15:19:42.465059Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        82,
+        391,
+        8,
+        115,
+        94,
+        399,
+        12,
+        367,
+        480,
+        379,
+        411,
+        497,
+        586,
+        277,
+        272
+      ],
+      "starting_xi": [
+        82,
+        391,
+        8,
+        115,
+        94,
+        399,
+        12,
+        367,
+        480,
+        379,
+        411
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 12,
+      "transfers_in": [
+        94,
+        497,
+        367,
+        379,
+        82,
+        366,
+        586,
+        277,
+        268,
+        480,
+        391,
+        399,
+        12,
+        411,
+        272
+      ],
+      "transfers_out": [
+        268,
+        109,
+        366,
+        106,
+        496,
+        368,
+        362,
+        418,
+        427,
+        40,
+        10,
+        426,
+        15,
+        165,
+        379
+      ],
+      "bank": 0,
+      "team_value": 1007,
+      "timestamp": 1788952623195
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 7562871,
+      "manager_name": "Pranav Solase",
+      "team_name": "Gabriel Singh Dhoni",
+      "overall_rank": 228,
+      "gw_rank": 666928,
+      "total_points": 279,
+      "gw_points": 68,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-21T04:56:22.404842Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-08-28T15:28:39.497180Z",
+          "event": 2
+        },
+        {
+          "name": "freehit",
+          "time": "2026-09-03T16:01:51.477122Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        82,
+        391,
+        115,
+        87,
+        84,
+        399,
+        480,
+        367,
+        368,
+        411,
+        379,
+        250,
+        464,
+        127,
+        586
+      ],
+      "starting_xi": [
+        82,
+        391,
+        115,
+        87,
+        84,
+        399,
+        480,
+        367,
+        368,
+        411,
+        379
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 480,
+      "transfers_in": [
+        464,
+        391,
+        399,
+        250,
+        379,
+        411,
+        367,
+        480,
+        127,
+        84,
+        87,
+        115,
+        586,
+        82
+      ],
+      "transfers_out": [
+        346,
+        532,
+        237,
+        109,
+        552,
+        165,
+        427,
+        154,
+        426,
+        469,
+        418,
+        8,
+        4,
+        529
+      ],
+      "bank": 0,
+      "team_value": 1004,
+      "timestamp": 1788952623415
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 360262,
+      "manager_name": "Almanna Alamin",
+      "team_name": "الغانرز",
+      "overall_rank": 247,
+      "gw_rank": 2160192,
+      "total_points": 279,
+      "gw_points": 60,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-21T15:44:42.217765Z",
+          "event": 1
+        },
+        {
+          "name": "freehit",
+          "time": "2026-09-01T08:42:58.863026Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        82,
+        593,
+        8,
+        356,
+        367,
+        399,
+        398,
+        12,
+        464,
+        411,
+        379,
+        111,
+        586,
+        605,
+        509
+      ],
+      "starting_xi": [
+        82,
+        593,
+        8,
+        356,
+        367,
+        399,
+        398,
+        12,
+        464,
+        411,
+        379
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 379,
+      "transfers_in": [
+        605,
+        367,
+        8,
+        593,
+        602,
+        12,
+        509,
+        586,
+        111,
+        464,
+        411,
+        98,
+        480,
+        366,
+        332,
+        258,
+        356,
+        449,
+        611,
+        82
+      ],
+      "transfers_out": [
+        602,
+        366,
+        449,
+        258,
+        98,
+        480,
+        332,
+        611,
+        109,
+        249,
+        165,
+        236,
+        426,
+        12,
+        329,
+        423,
+        533,
+        8,
+        10,
+        385
+      ],
+      "bank": 5,
+      "team_value": 1006,
+      "timestamp": 1788952623632
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 711337,
+      "manager_name": "Rahib Aliyev",
+      "team_name": "Rahib's Team",
+      "overall_rank": 247,
+      "gw_rank": 666928,
+      "total_points": 279,
+      "gw_points": 68,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-20T05:46:26.008351Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-08-23T18:06:26.156472Z",
+          "event": 2
+        },
+        {
+          "name": "freehit",
+          "time": "2026-08-31T13:52:05.759502Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        82,
+        115,
+        305,
+        356,
+        367,
+        427,
+        605,
+        398,
+        411,
+        106,
+        379,
+        497,
+        454,
+        387,
+        173
+      ],
+      "starting_xi": [
+        82,
+        115,
+        305,
+        356,
+        367,
+        427,
+        605,
+        398,
+        411,
+        106,
+        379
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 379,
+      "transfers_in": [
+        367,
+        261,
+        387,
+        82,
+        427,
+        454,
+        356,
+        106,
+        428,
+        250,
+        464,
+        605,
+        497,
+        357,
+        567,
+        272,
+        94,
+        350,
+        346,
+        411,
+        454,
+        51,
+        368,
+        115,
+        305,
+        173,
+        111,
+        109
+      ],
+      "transfers_out": [
+        261,
+        368,
+        391,
+        250,
+        428,
+        94,
+        357,
+        464,
+        426,
+        567,
+        272,
+        454,
+        111,
+        87,
+        350,
+        346,
+        51,
+        109,
+        165,
+        526,
+        427,
+        367,
+        15,
+        204,
+        36,
+        8,
+        140,
+        1
+      ],
+      "bank": 15,
+      "team_value": 1005,
+      "timestamp": 1788952623864
+    },
+    {
+      "season": "2026-27",
+      "gameweek": 3,
+      "manager_id": 1430919,
+      "manager_name": "Nzar Nezo",
+      "team_name": "البحراوي",
+      "overall_rank": 247,
+      "gw_rank": 1083284,
+      "total_points": 279,
+      "gw_points": 65,
+      "chips_used": [
+        {
+          "name": "bboost",
+          "time": "2026-08-02T09:55:56.186836Z",
+          "event": 1
+        },
+        {
+          "name": "3xc",
+          "time": "2026-08-22T19:55:42.584593Z",
+          "event": 2
+        },
+        {
+          "name": "freehit",
+          "time": "2026-08-30T07:14:15.912081Z",
+          "event": 3
+        }
+      ],
+      "active_chip": "freehit",
+      "squad_15": [
+        467,
+        277,
+        115,
+        469,
+        399,
+        368,
+        480,
+        565,
+        106,
+        411,
+        379,
+        572,
+        387,
+        88,
+        286
+      ],
+      "starting_xi": [
+        467,
+        277,
+        115,
+        469,
+        399,
+        368,
+        480,
+        565,
+        106,
+        411,
+        379
+      ],
+      "captain_id": 411,
+      "vice_captain_id": 399,
+      "transfers_in": [
+        399,
+        106,
+        88,
+        572,
+        411,
+        565,
+        286,
+        387,
+        469,
+        277,
+        467
+      ],
+      "transfers_out": [
+        260,
+        165,
+        130,
+        497,
+        346,
+        427,
+        426,
+        392,
+        31,
+        534,
+        1
+      ],
+      "bank": 20,
+      "team_value": 1000,
+      "timestamp": 1788952624084
     },
     {
       "season": "2026-27",
@@ -21335,7 +26949,7 @@
       "transfers_out": [],
       "bank": 0,
       "team_value": 1000,
-      "timestamp": 1788952229628
+      "timestamp": 1788952636349
     },
     {
       "season": "2026-27",
@@ -21389,7 +27003,7 @@
       "transfers_out": [],
       "bank": 0,
       "team_value": 1000,
-      "timestamp": 1788952229628
+      "timestamp": 1788952636349
     }
   ]
 }
