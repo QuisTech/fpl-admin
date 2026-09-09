@@ -1596,8 +1596,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       const targetGw = req.query?.gw ? parseInt(req.query.gw as string, 10) : undefined;
-      const result = await FPLService.syncTeam(teamId, riskMode, tier, fuel, targetGw);
-      return res.status(200).json(result);
+      try {
+        const result = await FPLService.syncTeam(teamId, riskMode, tier, fuel, targetGw);
+        return res.status(200).json(result);
+      } catch (err: any) {
+        const isNotFound = err.message?.includes('not found') || err.message?.includes('locked');
+        return res.status(isNotFound ? 404 : 400).json({ error: err.message });
+      }
     }
 
     if (url.includes('/api/live')) {

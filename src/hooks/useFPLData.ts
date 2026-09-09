@@ -78,7 +78,7 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
             setTier(res.data.tier);
           }
           if (res.data?.fplTeamId) {
-            setTeamId(res.data.fplTeamId);
+            setTeamId(String(res.data.fplTeamId));
           }
           if (res.data?.isAdmin || res.data?.tier === 'admin') {
             setIsTeamIdLocked(false);
@@ -96,7 +96,8 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
   // Fetch backend performance snapshots once profile is loaded or teamId changes
   useEffect(() => {
     if (authInitialized && userId && profileLoaded) {
-      const keyToFetch = teamId ? `team_${teamId.trim()}` : userId;
+      const cleanTeam = typeof teamId === 'string' ? teamId.trim() : (teamId ? String(teamId).trim() : '');
+      const keyToFetch = cleanTeam ? `team_${cleanTeam}` : userId;
       axios.get(`/api/snapshots?userId=${keyToFetch}`)
         .then(res => {
           const rawHistory = (res.data?.history && typeof res.data.history === 'object') ? res.data.history : {};
@@ -342,7 +343,8 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
     localStorage.setItem('fpl_optimizer_history', JSON.stringify(sanitizedHistory));
 
     // Persist to backend Firestore endpoint for cross-device access
-    const keyToSave = teamId ? `team_${teamId.trim()}` : userId;
+    const cleanTeam = typeof teamId === 'string' ? teamId.trim() : (teamId ? String(teamId).trim() : '');
+    const keyToSave = cleanTeam ? `team_${cleanTeam}` : userId;
     if (keyToSave) {
       axios.post('/api/snapshots', { userId: keyToSave, history: sanitizedHistory, season: '2026/27' })
         .catch(err => console.warn("[Snapshots API] Backend save notice:", err));
@@ -363,10 +365,15 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
   };
 
   const reconcileUserSquad = async (gwId: number): Promise<boolean> => {
-    if (!teamId) return false;
+    const cleanTeam = typeof teamId === 'string' ? teamId.trim() : (teamId ? String(teamId).trim() : '');
+    if (!cleanTeam) return false;
+    // Skip future gameweeks before deadline
+    if (data?.nextEventId && gwId >= data.nextEventId) {
+      return false;
+    }
     try {
       // Query official FPL picks specifically for this gameweek (unlocked after deadline)
-      const res = await axios.get(`/api/sync/${teamId.trim()}?gw=${gwId}&riskMode=${riskMode}&fuel=${fuel}&userId=${userId}&tier=${tier}`);
+      const res = await axios.get(`/api/sync/${cleanTeam}?gw=${gwId}&riskMode=${riskMode}&fuel=${fuel}&userId=${userId}&tier=${tier}`);
       const squad = res.data?.squad;
       const managerInfo = res.data?.managerInfo;
       if (!squad || squad.length < 11) return false;
@@ -421,7 +428,7 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
       setHistory(sanitized);
       localStorage.setItem('fpl_optimizer_history', JSON.stringify(sanitized));
 
-      const keyToSave = teamId ? `team_${teamId.trim()}` : userId;
+      const keyToSave = cleanTeam ? `team_${cleanTeam}` : userId;
       if (keyToSave) {
         axios.post('/api/snapshots', { userId: keyToSave, history: sanitized, season: '2026/27' })
           .catch(err => console.warn("[Snapshots API] Reconcile save notice:", err));
@@ -435,17 +442,19 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
     }
   };
 
-  const syncTeam = async (overrideTeamId?: string) => {
-    const targetId = overrideTeamId || teamId;
-    if (!targetId) return;
+  const syncTeam = async (overrideTeamId?: unknown) => {
+    const cleanOverride = typeof overrideTeamId === 'string' ? overrideTeamId.trim() : (overrideTeamId ? String(overrideTeamId).trim() : '');
+    const cleanCurrent = typeof teamId === 'string' ? teamId.trim() : (teamId ? String(teamId).trim() : '');
+    const targetId = cleanOverride || cleanCurrent;
+    if (!targetId) return false;
     setSyncing(true);
     try {
-      const res = await axios.get(`/api/sync/${targetId.trim()}?riskMode=${riskMode}&fuel=${fuel}&userId=${userId}&tier=${tier}`);
+      const res = await axios.get(`/api/sync/${targetId}?riskMode=${riskMode}&fuel=${fuel}&userId=${userId}&tier=${tier}`);
       setSyncedData(res.data);
       setError(null);
 
       // Fetch performance snapshots for the target teamId (allows Super Admin to inspect any team's history)
-      axios.get(`/api/snapshots?userId=team_${teamId.trim()}`)
+      axios.get(`/api/snapshots?userId=team_${targetId}`)
         .then(snapRes => {
           const rawHistory = (snapRes.data?.history && typeof snapRes.data.history === 'object') ? snapRes.data.history : {};
           const sanitized = sanitizeHistory(rawHistory);

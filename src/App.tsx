@@ -104,9 +104,12 @@ function FPLApp() {
 
   const isSuperAdmin = (authUser?.email || '').toLowerCase().trim() === 'michquis@gmail.com' || tier === 'admin';
 
-  const handleSync = async (explicitId?: string) => {
-    const target = explicitId || (teamId ? teamId.trim() : undefined);
-    if (explicitId) setTeamId(explicitId);
+  const handleSync = async (explicitId?: unknown) => {
+    const cleanExplicit = typeof explicitId === 'string' && explicitId.trim() ? explicitId.trim() : undefined;
+    const cleanCurrent = typeof teamId === 'string' ? teamId.trim() : (teamId ? String(teamId).trim() : '');
+    const target = cleanExplicit || (cleanCurrent || undefined);
+
+    if (cleanExplicit) setTeamId(cleanExplicit);
     if (!isSuperAdmin && tier !== 'free' && tier !== 'admin' && !isTeamIdLocked) {
       alert("Premium Account: Please link your FPL Team ID in your Settings profile before running an analysis.");
       if (authUser) setProfileTab('fpl');
@@ -216,7 +219,7 @@ function FPLApp() {
                     )}
                   />
                   <button 
-                    onClick={handleSync}
+                    onClick={() => handleSync()}
                     disabled={syncing}
                     className="bg-fpl-purple hover:bg-fpl-purple/80 disabled:opacity-50 text-white text-[10px] font-black px-3 py-1 rounded-lg transition-colors"
                   >
