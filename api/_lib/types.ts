@@ -223,12 +223,18 @@ export interface EliteConsensusDetail {
 export interface TopManagerInsight {
   noChipLeaderCount: number;
   eligibleManagers: number;
+  pureZeroChipCount?: number;
+  normalizedChipCount?: number;
   sampleLeaders: Array<{
     rank: number;
     entry: number;
     manager_name: string;
     team_name: string;
     total_points: number;
+    normalized_total_points?: number;
+    chip_deduction?: number;
+    is_chip_normalized?: boolean;
+    chips_used?: Array<{ name: string; time: string; event: number }>;
   }>;
   marketDisagreementRating: number;
   eliteConsensusPicks: string[];

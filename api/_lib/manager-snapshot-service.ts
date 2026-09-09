@@ -108,15 +108,25 @@ export class ManagerSnapshotService {
   /**
    * Capture live pre-deadline manager decision snapshots for top 0-chip / elite veteran managers
    */
-  public static async captureTopManagerSnapshots(season: string = '2026-27', targetGw: number = 3, sampleLimit: number = 50): Promise<ManagerGWDecisionSnapshot[]> {
+  public static async captureTopManagerSnapshots(season: string = '2026-27', targetGw: number = 3, sampleLimit: number = 150): Promise<ManagerGWDecisionSnapshot[]> {
     const decisions: ManagerGWDecisionSnapshot[] = [];
     try {
-      const standingsUrl = `${this.FPL_BASE_URL}/leagues-classic/314/standings/?page_standings=1`;
-      const standingsRes = await axios.get(standingsUrl, { headers: this.getHeaders(), timeout: 10000 });
-      const results = standingsRes.data.standings?.results || [];
+      const maxPages = Math.min(5, Math.ceil(sampleLimit / 50));
+      const allResults: any[] = [];
 
-      for (let i = 0; i < Math.min(sampleLimit, results.length); i++) {
-        const mgr = results[i];
+      for (let page = 1; page <= maxPages; page++) {
+        try {
+          const standingsUrl = `${this.FPL_BASE_URL}/leagues-classic/314/standings/?page_standings=${page}`;
+          const standingsRes = await axios.get(standingsUrl, { headers: this.getHeaders(), timeout: 10000 });
+          const results = standingsRes.data.standings?.results || [];
+          allResults.push(...results);
+        } catch (pageErr: any) {
+          console.warn(`[ManagerSnapshotService] Standings page ${page} fetch notice:`, pageErr.message);
+        }
+      }
+
+      for (let i = 0; i < Math.min(sampleLimit, allResults.length); i++) {
+        const mgr = allResults[i];
         try {
           const [histRes, picksRes, xfersRes] = await Promise.all([
             axios.get(`${this.FPL_BASE_URL}/entry/${mgr.entry}/history/`, { headers: this.getHeaders(), timeout: 8000 }),
@@ -316,12 +326,16 @@ export class ManagerSnapshotService {
     }
 
     const eligibleManagers = leadersToUse.length;
-    const sampleLeaders = leadersToUse.slice(0, 3).map(d => ({
+    const sampleLeaders = leadersToUse.slice(0, 50).map(d => ({
       rank: d.overall_rank,
       entry: d.manager_id,
       manager_name: d.manager_name || 'Elite Manager',
       team_name: d.team_name || 'FPL Squad',
-      total_points: d.total_points
+      total_points: d.total_points,
+      normalized_total_points: d.normalized_total_points ?? d.total_points,
+      chip_deduction: d.chip_deduction ?? 0,
+      is_chip_normalized: Boolean(d.is_chip_normalized || (d.chip_deduction && d.chip_deduction > 0)),
+      chips_used: d.chips_used || []
     }));
 
     const playerMap = new Map(players.map(p => [p.id, p]));
@@ -465,9 +479,14 @@ export class ManagerSnapshotService {
       .slice(0, 10)
       .map(d => d.web_name);
 
+    const pureZeroChipCount = leadersToUse.filter(m => (!m.chips_used || m.chips_used.length === 0) && !m.chip_deduction).length;
+    const normalizedChipCount = leadersToUse.filter(m => m.chip_deduction && m.chip_deduction > 0).length;
+
     return {
       noChipLeaderCount: leadersToUse.length,
       eligibleManagers,
+      pureZeroChipCount,
+      normalizedChipCount,
       sampleLeaders: sampleLeaders.length > 0 ? sampleLeaders : [
         { rank: 587, entry: 4148445, manager_name: "Abhishek Raj", team_name: "Gunnerball", total_points: 273 },
         { rank: 956, entry: 5662742, manager_name: "Tony Elliott", team_name: "Shetland Tonys", total_points: 270 }
