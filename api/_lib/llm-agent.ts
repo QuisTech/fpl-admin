@@ -101,6 +101,14 @@ export async function getLLMTransferDecision(
     CRITICAL FPL TRANSFER RULES:
     1. If suggesting a single transfer, the incoming player MUST have the EXACT SAME POSITION (e.g., DEF for DEF, MID for MID) as the outgoing player. Do not suggest swapping a Midfielder for a Defender.
 
+    CRITICAL CAPTAINCY RULES (MANDATORY):
+    1. Captain selection is NEVER calculated by dividing expected points by price (PPM). In FPL, captain points are doubled (2x) regardless of player cost, so player price is COMPLETELY IRRELEVANT for captain selection!
+    2. Captaincy MUST ALWAYS be based on RAW MAXIMUM EXPECTED POINTS (Max xP) and High-Conviction Elite Consensus Anchors (e.g. Haaland £15.5M, Isak £9.1M, Bruno Fernandes £12.0M).
+    3. If the user asks a question about Captaincy (e.g., "Who should I captain in GW 4?"):
+       - Answer the captaincy question directly in the reasoning! State the #1 Captain choice (e.g. Haaland with 9.2 xP and 60% elite cohort captaincy) and Vice-Captain choice (e.g. Isak / Bruno Fernandes).
+       - NEVER claim that cheaper players are better captains because of PPM.
+       - Address captaincy, starting lineup, or chip questions directly without defaulting to transfer jargon.
+
     OFFICIAL 2026/27 PREMIER LEAGUE TWO-SET CHIP SYSTEM (MANDATORY KNOWLEDGE):
     1. TWO INDEPENDENT SETS OF 4 CHIPS:
        - Set 1: Gameweeks 1 to 19 (1x Wildcard, 1x Free Hit, 1x Bench Boost, 1x Triple Captain).
@@ -121,7 +129,7 @@ export async function getLLMTransferDecision(
     CRITICAL RISK MODE INSTRUCTIONS:
     ${riskMode === 'safe' ? '- You are in SAFE mode. You MUST prioritize highly-owned "template" players to defend rank. Avoid wild punts. Do NOT burn chips prematurely.' : ''}
     ${riskMode === 'aggressive' ? '- You are in AGGRESSIVE mode. You MUST prioritize low-ownership "differential" players (under 10% ownership) to catch up in rank. HOWEVER, you must PROTECT premium players (£10.0M+). Do NOT suggest transferring out a premium captaincy option just because they are highly owned.' : ''}
-    ${riskMode === 'value' ? '- You are in VALUE mode. Prioritize cheap enablers and players with the highest expected points per million (PPM). Build long-term budget.' : ''}
+    ${riskMode === 'value' ? '- You are in VALUE mode. Squad building locks high-conviction consensus starting weapons for rank protection, then optimizes remaining open budget slots for maximum PPM capital efficiency. NOTE: Captain selection is ALWAYS based on raw Max xP and consensus anchors, NEVER dividing captain xP by price.' : ''}
     
     CURRENT SQUAD:
     ${squadSummary}
