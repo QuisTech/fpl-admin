@@ -7,6 +7,8 @@ interface PlayerCardProps {
   player: ScoredPlayer;
   isCaptain?: boolean;
   isViceCaptain?: boolean;
+  isConsensusCaptain?: boolean;
+  consensusCaptainRate?: number;
   isLocked?: boolean;
   isExcluded?: boolean;
   onToggleLock?: (id: number) => void;
@@ -78,6 +80,8 @@ export const PlayerCard = ({
   player, 
   isCaptain, 
   isViceCaptain, 
+  isConsensusCaptain,
+  consensusCaptainRate,
   isLocked, 
   isExcluded, 
   onToggleLock, 
@@ -158,16 +162,27 @@ export const PlayerCard = ({
       )}
     >
 
-      {/* Official Captain / Vice-Captain Circular Badge */}
+      {/* Official Captain / Vice-Captain / Consensus Captain Circular Badge */}
       {isCaptain && (
         <div 
-          title="Captain (2x Points)"
-          className="absolute -top-1.5 -left-1 sm:-top-2 sm:-left-1.5 z-30 flex items-center justify-center w-4.5 h-4.5 sm:w-6 sm:h-6 rounded-full bg-[#37003c] text-white border-2 border-white/80 font-black text-[9px] sm:text-xs shadow-lg"
+          title={isConsensusCaptain ? `Consensus & Optimal Captain (2x Points • ${Math.round((consensusCaptainRate || 0.4) * 100)}% of Top Managers)` : "Captain (2x Points)"}
+          className={cn(
+            "absolute -top-1.5 -left-1 sm:-top-2 sm:-left-1.5 z-30 flex items-center justify-center w-4.5 h-4.5 sm:w-6 sm:h-6 rounded-full bg-[#37003c] text-white border-2 border-white/80 font-black text-[9px] sm:text-xs shadow-lg",
+            isConsensusCaptain && "ring-2 ring-amber-400 shadow-amber-500/50 text-amber-300"
+          )}
         >
-          C
+          {isConsensusCaptain ? "👑" : "C"}
         </div>
       )}
-      {isViceCaptain && !isCaptain && (
+      {isConsensusCaptain && !isCaptain && (
+        <div 
+          title={`Elite Consensus Captain (${Math.round((consensusCaptainRate || 0.4) * 100)}% of Top Managers)`}
+          className="absolute -top-1.5 -left-1 sm:-top-2 sm:-left-1.5 z-30 flex items-center justify-center w-4.5 h-4.5 sm:w-6 sm:h-6 rounded-full bg-purple-950 text-amber-300 border-2 border-purple-400/80 font-black text-[9px] sm:text-xs shadow-lg"
+        >
+          👑
+        </div>
+      )}
+      {isViceCaptain && !isCaptain && !isConsensusCaptain && (
         <div 
           title="Vice Captain"
           className="absolute -top-1.5 -left-1 sm:-top-2 sm:-left-1.5 z-30 flex items-center justify-center w-4.5 h-4.5 sm:w-6 sm:h-6 rounded-full bg-[#37003c] text-[#00ff87] border-2 border-white/80 font-black text-[8px] sm:text-[11px] shadow-lg flex items-center gap-0.5"
@@ -362,6 +377,12 @@ export const PlayerCard = ({
             <span className="text-slate-400">Value Efficiency:</span>
             <span className="text-amber-400 font-mono">{((player.xP || 0) / (player.now_cost / 10)).toFixed(2)} xP/£M</span>
           </div>
+          {isConsensusCaptain && (
+            <div className="flex items-center justify-between py-1 px-2 rounded-lg bg-purple-950/60 border border-purple-500/30 text-[8.5px] mt-1">
+              <span className="text-purple-300 font-bold flex items-center gap-1">👑 Elite Consensus</span>
+              <span className="font-mono font-black text-amber-300">{Math.round((consensusCaptainRate || 0.4) * 100)}% Herd</span>
+            </div>
+          )}
         </div>
       </div>
 

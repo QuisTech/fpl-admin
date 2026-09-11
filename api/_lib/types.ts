@@ -191,6 +191,13 @@ export interface EliteConsensusDetail {
   position: string;
   cost: number;
   
+  // Optional rich display metadata
+  code?: number;
+  team_code?: number;
+  team_name?: string;
+  team_short_name?: string;
+  full_name?: string;
+
   // Raw decision counts
   squadCount: number;
   startCount: number;
@@ -220,6 +227,38 @@ export interface EliteConsensusDetail {
   qualifiesForHardLock: boolean;
 }
 
+export interface ConsensusCaptainDetail {
+  id: number;
+  web_name: string;
+  full_name?: string;
+  code?: number;
+  team_code?: number;
+  team_name?: string;
+  team_short_name?: string;
+  position: string;
+  cost: number;
+  captainRate: number;
+  captainPercentage: number;
+  captainCount: number;
+  eligibleManagers: number;
+  isQuantCaptainMatch?: boolean;
+}
+
+export interface CaptaincyDistributionItem {
+  id: number;
+  web_name: string;
+  full_name?: string;
+  code?: number;
+  team_code?: number;
+  team_name?: string;
+  team_short_name?: string;
+  position: string;
+  cost: number;
+  captainRate: number;
+  captainPercentage: number;
+  captainCount: number;
+}
+
 export interface TopManagerInsight {
   noChipLeaderCount: number;
   eligibleManagers: number;
@@ -239,6 +278,9 @@ export interface TopManagerInsight {
   marketDisagreementRating: number;
   eliteConsensusPicks: string[];
   consensusDetails: EliteConsensusDetail[];
+  consensusCaptain?: ConsensusCaptainDetail;
+  consensusViceCaptain?: ConsensusCaptainDetail;
+  captaincyDistribution?: CaptaincyDistributionItem[];
 }
 
 export interface TransferRecommendation {

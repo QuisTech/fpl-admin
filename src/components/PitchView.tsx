@@ -137,6 +137,29 @@ export const PitchView = ({
   const entryHistory = syncedData?.entryHistory;
   const managerInfo = syncedData?.managerInfo;
 
+  // Derive Elite Consensus Captain (from direct API field or dynamically from consensusDetails)
+  const consensusCaptain = data?.topManagerInsight?.consensusCaptain || (() => {
+    const details = data?.topManagerInsight?.consensusDetails;
+    if (!details || details.length === 0) return undefined;
+    const captainSorted = [...details]
+      .filter(d => (d.captainRate || 0) > 0 || (d.captainCount || 0) > 0)
+      .sort((a, b) => b.captainCount - a.captainCount || b.captainRate - a.captainRate);
+    if (!captainSorted[0]) return undefined;
+    const totalCount = data?.topManagerInsight?.eligibleManagers || data?.topManagerInsight?.noChipLeaderCount || 1;
+    return {
+      id: captainSorted[0].id,
+      web_name: captainSorted[0].web_name,
+      full_name: captainSorted[0].full_name || captainSorted[0].web_name,
+      position: captainSorted[0].position,
+      cost: captainSorted[0].cost,
+      captainRate: captainSorted[0].captainRate,
+      captainPercentage: Math.round(captainSorted[0].captainRate * 100),
+      captainCount: captainSorted[0].captainCount,
+      eligibleManagers: totalCount,
+      isQuantCaptainMatch: captain === captainSorted[0].web_name,
+    };
+  })();
+
   return (
     <motion.div 
       key="pitch-view"
@@ -240,16 +263,41 @@ export const PitchView = ({
           </div>
 
           {/* Captain & Status Banner */}
-          <div className="flex items-center justify-between sm:justify-end gap-1.5 text-[9px] font-mono">
+          <div className="flex items-center justify-between sm:justify-end gap-1.5 text-[9px] font-mono flex-wrap">
             {managerInfo?.managerName && (
               <span className="bg-slate-900 border border-slate-800 px-2 py-0.5 rounded text-slate-300 hidden md:inline-block">
                 {managerInfo.managerName}
               </span>
             )}
-            <span className="bg-slate-900/90 border border-slate-800 px-2 py-0.5 rounded text-emerald-400 font-bold flex items-center gap-1">
+            {/* 1. Optimal Captain Badge */}
+            <span 
+              title={`Engine Recommended Captain: ${captain}`}
+              className="bg-slate-900/90 border border-slate-800 px-2 py-0.5 rounded text-emerald-400 font-bold flex items-center gap-1 shadow-sm"
+            >
               <span className="w-3.5 h-3.5 rounded-full bg-[#37003c] text-white flex items-center justify-center text-[7.5px] font-black border border-white/60">C</span>
-              {captain}
+              <span className="text-slate-400 font-normal">Pick:</span> {captain}
             </span>
+
+            {/* 2. Elite Consensus Captain Badge */}
+            {consensusCaptain && (
+              <span
+                title={`Elite Consensus Captain: ${consensusCaptain.full_name || consensusCaptain.web_name} (${consensusCaptain.captainPercentage}% of Elite Managers)`}
+                className={`border px-2 py-0.5 rounded font-bold flex items-center gap-1 shadow-sm ${
+                  consensusCaptain.isQuantCaptainMatch || captain === consensusCaptain.web_name
+                    ? "bg-amber-500/15 border-amber-400/40 text-amber-300"
+                    : "bg-purple-950/60 border-purple-500/40 text-purple-300"
+                }`}
+              >
+                <span>👑</span>
+                <span className="text-slate-400 font-normal">Consensus C:</span> {consensusCaptain.full_name || consensusCaptain.web_name}
+                <span className="text-[8px] bg-white/10 px-1 rounded font-mono">
+                  {consensusCaptain.captainPercentage}%
+                </span>
+                {(consensusCaptain.isQuantCaptainMatch || captain === consensusCaptain.web_name) && (
+                  <span className="text-amber-400 text-[8px] font-black uppercase">🔥 Match</span>
+                )}
+              </span>
+            )}
           </div>
         </div>
 
@@ -562,6 +610,8 @@ export const PitchView = ({
                     showFixtures={showFixtures}
                     isCaptain={p.isCaptain}
                     isViceCaptain={p.isViceCaptain}
+                    isConsensusCaptain={!isSyncedView && (p.id === consensusCaptain?.id || p.web_name === consensusCaptain?.web_name)}
+                    consensusCaptainRate={consensusCaptain?.captainRate}
                     isLocked={lockedPlayerIds.includes(p.id)}
                     isExcluded={excludedPlayerIds.includes(p.id)}
                     onToggleLock={onToggleLock}
@@ -579,6 +629,8 @@ export const PitchView = ({
                     showFixtures={showFixtures}
                     isCaptain={p.isCaptain}
                     isViceCaptain={p.isViceCaptain}
+                    isConsensusCaptain={!isSyncedView && (p.id === consensusCaptain?.id || p.web_name === consensusCaptain?.web_name)}
+                    consensusCaptainRate={consensusCaptain?.captainRate}
                     isLocked={lockedPlayerIds.includes(p.id)}
                     isExcluded={excludedPlayerIds.includes(p.id)}
                     onToggleLock={onToggleLock}
@@ -596,6 +648,8 @@ export const PitchView = ({
                     showFixtures={showFixtures}
                     isCaptain={p.isCaptain}
                     isViceCaptain={p.isViceCaptain}
+                    isConsensusCaptain={!isSyncedView && (p.id === consensusCaptain?.id || p.web_name === consensusCaptain?.web_name)}
+                    consensusCaptainRate={consensusCaptain?.captainRate}
                     isLocked={lockedPlayerIds.includes(p.id)}
                     isExcluded={excludedPlayerIds.includes(p.id)}
                     onToggleLock={onToggleLock}
@@ -613,6 +667,8 @@ export const PitchView = ({
                     showFixtures={showFixtures}
                     isCaptain={p.isCaptain}
                     isViceCaptain={p.isViceCaptain}
+                    isConsensusCaptain={!isSyncedView && (p.id === consensusCaptain?.id || p.web_name === consensusCaptain?.web_name)}
+                    consensusCaptainRate={consensusCaptain?.captainRate}
                     isLocked={lockedPlayerIds.includes(p.id)}
                     isExcluded={excludedPlayerIds.includes(p.id)}
                     onToggleLock={onToggleLock}
@@ -646,6 +702,8 @@ export const PitchView = ({
                           compact 
                           benchIndex={idx}
                           showFixtures={showFixtures}
+                          isConsensusCaptain={!isSyncedView && (p.id === consensusCaptain?.id || p.web_name === consensusCaptain?.web_name)}
+                          consensusCaptainRate={consensusCaptain?.captainRate}
                           isLocked={lockedPlayerIds.includes(p.id)}
                           isExcluded={excludedPlayerIds.includes(p.id)}
                           onToggleLock={onToggleLock}

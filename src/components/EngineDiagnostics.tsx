@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ShieldCheck, AlertTriangle, Code2, HelpCircle, ChevronDown, ChevronUp, Sparkles, Lock, Ban } from 'lucide-react';
+import { ShieldCheck, AlertTriangle, Code2, HelpCircle, ChevronDown, ChevronUp, Sparkles, Lock, Ban, Crown } from 'lucide-react';
 import { RecommendationResponse } from '../types';
+import { PlayerPhoto } from './PlayerPhoto';
 
 interface EngineDiagnosticsProps {
   data: RecommendationResponse | null;
   onSyncTeamId?: (teamId: string) => void;
 }
+
+const formatCost = (cost: number) => (cost > 30 ? (cost / 10).toFixed(1) : cost.toFixed(1));
 
 const getPositionBadge = (pos: string) => {
   switch (pos) {
@@ -33,6 +36,62 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
   const isOptimal = solverStatus === 'optimal';
   const swapAnalysis = metrics?.swapAnalysis;
   const omissionAnalysis = metrics?.omissionAnalysis || [];
+
+  const topInsight = data.topManagerInsight;
+  const eligibleManagers = topInsight?.eligibleManagers || topInsight?.noChipLeaderCount || 1;
+
+  const captainSorted = topInsight?.consensusDetails
+    ? [...topInsight.consensusDetails]
+        .filter(d => (d.captainRate || 0) > 0 || (d.captainCount || 0) > 0)
+        .sort((a, b) => b.captainCount - a.captainCount || b.captainRate - a.captainRate)
+    : [];
+
+  const consensusCaptain = topInsight?.consensusCaptain || (captainSorted[0] ? {
+    id: captainSorted[0].id,
+    web_name: captainSorted[0].web_name,
+    full_name: captainSorted[0].full_name || captainSorted[0].web_name,
+    code: captainSorted[0].code,
+    team_code: captainSorted[0].team_code,
+    team_name: captainSorted[0].team_name,
+    team_short_name: captainSorted[0].team_short_name,
+    position: captainSorted[0].position,
+    cost: captainSorted[0].cost,
+    captainRate: captainSorted[0].captainRate,
+    captainPercentage: Math.round(captainSorted[0].captainRate * 100),
+    captainCount: captainSorted[0].captainCount,
+    eligibleManagers,
+  } : undefined);
+
+  const consensusViceCaptain = topInsight?.consensusViceCaptain || (captainSorted[1] ? {
+    id: captainSorted[1].id,
+    web_name: captainSorted[1].web_name,
+    full_name: captainSorted[1].full_name || captainSorted[1].web_name,
+    code: captainSorted[1].code,
+    team_code: captainSorted[1].team_code,
+    team_name: captainSorted[1].team_name,
+    team_short_name: captainSorted[1].team_short_name,
+    position: captainSorted[1].position,
+    cost: captainSorted[1].cost,
+    captainRate: captainSorted[1].captainRate,
+    captainPercentage: Math.round(captainSorted[1].captainRate * 100),
+    captainCount: captainSorted[1].captainCount,
+    eligibleManagers,
+  } : undefined);
+
+  const captaincyDistribution = topInsight?.captaincyDistribution || captainSorted.slice(0, 5).map(d => ({
+    id: d.id,
+    web_name: d.web_name,
+    full_name: d.full_name || d.web_name,
+    code: d.code,
+    team_code: d.team_code,
+    team_name: d.team_name,
+    team_short_name: d.team_short_name,
+    position: d.position,
+    cost: d.cost,
+    captainRate: d.captainRate,
+    captainPercentage: Math.round(d.captainRate * 100),
+    captainCount: d.captainCount,
+  }));
 
   return (
     <motion.div
@@ -272,9 +331,16 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
                           <span className="text-[9.5px] font-black font-mono text-amber-400 bg-amber-400/10 border border-amber-400/20 px-1.5 py-0.5 rounded shrink-0">
                             #{m.rank}
                           </span>
-                          <span className="text-[11px] font-bold text-slate-100 truncate" title={m.manager_name}>
-                            {m.manager_name}
-                          </span>
+                          <div className="min-w-0">
+                            <span className="text-[11px] font-bold text-slate-100 block truncate" title={`${m.manager_name}${m.team_name ? ` (${m.team_name})` : ''}`}>
+                              {m.manager_name}
+                            </span>
+                            {m.team_name && (
+                              <span className="text-[9px] text-slate-400 block truncate font-normal">
+                                {m.team_name}
+                              </span>
+                            )}
+                          </div>
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0 font-mono text-[10.5px]">
                           {isNorm && (
@@ -337,6 +403,174 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
                     Elite cohort: {data.topManagerInsight.eligibleManagers || data.topManagerInsight.noChipLeaderCount} managers
                   </span>
                 </div>
+
+                {/* 👑 Consensus Captaincy Intelligence Hub */}
+                {consensusCaptain && (
+                  <div className="p-3 rounded-2xl bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-slate-900/90 border border-amber-500/30 shadow-lg space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-amber-300">
+                        <Crown className="w-4 h-4 text-amber-400" />
+                        <span>Elite Consensus Captaincy Hub</span>
+                      </div>
+                      <span className="text-[8.5px] font-mono font-bold bg-amber-400/15 text-amber-300 border border-amber-400/30 px-2 py-0.5 rounded-full">
+                        {consensusCaptain.captainPercentage}% Herd Armband
+                      </span>
+                    </div>
+
+                    {/* Spotlight Cards: Consensus Captain & Vice-Captain */}
+                    <div className="grid grid-cols-1 gap-2 text-xs">
+                      {/* #1 Consensus Captain */}
+                      <div className="p-2.5 rounded-xl bg-slate-950/80 border border-amber-400/40 shadow-sm space-y-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <span className="text-[10px] font-black text-amber-400 bg-amber-400/10 border border-amber-400/30 px-1.5 py-0.5 rounded uppercase whitespace-nowrap">
+                              #1 CAPTAIN
+                            </span>
+                            <span className={`text-[8px] font-mono font-black px-1.5 py-0.5 rounded ${getPositionBadge(consensusCaptain.position)}`}>
+                              {consensusCaptain.position}
+                            </span>
+                            {(consensusCaptain.team_short_name || consensusCaptain.team_code) && (
+                              <span className="text-[8px] font-black text-slate-300 bg-slate-800 border border-slate-700 px-1.5 py-0.5 rounded uppercase font-mono">
+                                {consensusCaptain.team_short_name || consensusCaptain.team_code}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-right shrink-0">
+                            <span className="text-base font-black font-mono text-amber-300">
+                              {consensusCaptain.captainPercentage}%
+                            </span>
+                            <span className="text-[8px] text-slate-400 font-bold uppercase ml-1">Vote</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <PlayerPhoto
+                            playerId={consensusCaptain.id}
+                            playerCode={consensusCaptain.code}
+                            teamCode={consensusCaptain.team_code}
+                            teamShortName={consensusCaptain.team_short_name}
+                            playerName={consensusCaptain.full_name || consensusCaptain.web_name}
+                            position={consensusCaptain.position}
+                            sizeClassName="w-10 h-10"
+                            roundedClassName="rounded-xl"
+                            showSpotlight={true}
+                            className="border border-amber-400/40 shrink-0"
+                          />
+                          <div className="min-w-0">
+                            <div className="font-extrabold text-white text-[13.5px] truncate drop-shadow-sm leading-tight">
+                              {consensusCaptain.full_name || consensusCaptain.web_name}
+                            </div>
+                            <div className="text-[9px] text-slate-400 font-mono mt-0.5 flex items-center gap-1.5 whitespace-nowrap">
+                              <span className="text-slate-200 font-bold">
+                                £{formatCost(consensusCaptain.cost)}M
+                              </span>
+                              <span>•</span>
+                              <span>{consensusCaptain.captainCount} of {eligibleManagers} managers</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* #2 Consensus Vice-Captain */}
+                      {consensusViceCaptain && (
+                        <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-700/80 shadow-sm space-y-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <span className="text-[10px] font-black text-cyan-400 bg-cyan-400/10 border border-cyan-400/30 px-1.5 py-0.5 rounded uppercase whitespace-nowrap">
+                                #2 RUNNER-UP
+                              </span>
+                              <span className={`text-[8px] font-mono font-black px-1.5 py-0.5 rounded ${getPositionBadge(consensusViceCaptain.position)}`}>
+                                {consensusViceCaptain.position}
+                              </span>
+                              {(consensusViceCaptain.team_short_name || consensusViceCaptain.team_code) && (
+                                <span className="text-[8px] font-black text-slate-300 bg-slate-800 border border-slate-700 px-1.5 py-0.5 rounded uppercase font-mono">
+                                  {consensusViceCaptain.team_short_name || consensusViceCaptain.team_code}
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-right shrink-0">
+                              <span className="text-base font-black font-mono text-cyan-300">
+                                {consensusViceCaptain.captainPercentage}%
+                              </span>
+                              <span className="text-[8px] text-slate-400 font-bold uppercase ml-1">Vote</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <PlayerPhoto
+                              playerId={consensusViceCaptain.id}
+                              playerCode={consensusViceCaptain.code}
+                              teamCode={consensusViceCaptain.team_code}
+                              teamShortName={consensusViceCaptain.team_short_name}
+                              playerName={consensusViceCaptain.full_name || consensusViceCaptain.web_name}
+                              position={consensusViceCaptain.position}
+                              sizeClassName="w-10 h-10"
+                              roundedClassName="rounded-xl"
+                              className="border border-slate-700 shrink-0"
+                            />
+                            <div className="min-w-0">
+                              <div className="font-extrabold text-white text-[13.5px] truncate drop-shadow-sm leading-tight">
+                                {consensusViceCaptain.full_name || consensusViceCaptain.web_name}
+                              </div>
+                              <div className="text-[9px] text-slate-400 font-mono mt-0.5 flex items-center gap-1.5 whitespace-nowrap">
+                                <span className="text-slate-200 font-bold">
+                                  £{formatCost(consensusViceCaptain.cost)}M
+                                </span>
+                                <span>•</span>
+                                <span>{consensusViceCaptain.captainCount} of {eligibleManagers} managers</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Captaincy Vote Share Distribution Bars */}
+                    {captaincyDistribution.length > 0 && (
+                      <div className="space-y-1.5 pt-1 border-t border-slate-800/80">
+                        <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                          <span>Top 5 Captaincy Vote Share</span>
+                          <span>Sum: {captaincyDistribution.reduce((acc, c) => acc + c.captainPercentage, 0)}%</span>
+                        </div>
+                        <div className="space-y-1.5">
+                          {captaincyDistribution.map(c => (
+                            <div key={c.id} className="flex items-center justify-between gap-2 text-[10px] bg-slate-950/40 p-1.5 rounded-lg border border-slate-800">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <PlayerPhoto
+                                  playerId={c.id}
+                                  playerCode={c.code}
+                                  teamCode={c.team_code}
+                                  teamShortName={c.team_short_name}
+                                  playerName={c.full_name || c.web_name}
+                                  position={c.position}
+                                  sizeClassName="w-5 h-5"
+                                  roundedClassName="rounded shrink-0"
+                                />
+                                <span className="font-extrabold text-slate-200 text-[11px] whitespace-nowrap truncate">
+                                  {c.full_name || c.web_name}
+                                </span>
+                                {(c.team_short_name || c.team_code) && (
+                                  <span className="text-[8px] font-mono text-slate-400 bg-slate-900 border border-slate-800 px-1 py-0.2 rounded uppercase shrink-0">
+                                    {c.team_short_name || c.team_code}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                <div className="w-16 h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800 shrink-0">
+                                  <div
+                                    className="h-full bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"
+                                    style={{ width: `${Math.min(100, c.captainPercentage * 2.5)}%` }}
+                                  />
+                                </div>
+                                <span className="w-8 text-right font-mono font-black text-amber-300 shrink-0 whitespace-nowrap">{c.captainPercentage}%</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Starting Weapons */}
                 {(() => {

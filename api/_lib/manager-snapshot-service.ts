@@ -428,10 +428,17 @@ export class ManagerSnapshotService {
 
       const position = p?.element_type ? (posMap[p.element_type] || 'MID') : 'MID';
       const cost = p?.now_cost || p?.cost || 0;
+      const rawP = p as any;
+      const fullName = rawP?.first_name && rawP?.second_name ? `${rawP.first_name} ${rawP.second_name}` : (p?.web_name || `Player ${pid}`);
 
       consensusDetails.push({
         id: pid,
         web_name: p?.web_name || `Player ${pid}`,
+        full_name: fullName,
+        code: rawP?.code,
+        team_code: rawP?.team_code || rawP?.team,
+        team_name: rawP?.team_name,
+        team_short_name: rawP?.team_short_name,
         position,
         cost,
         squadCount: t.squadCount,
@@ -459,6 +466,58 @@ export class ManagerSnapshotService {
 
     // Rank by convictionScore descending, then ownershipRate descending
     consensusDetails.sort((a, b) => b.convictionScore - a.convictionScore || b.ownershipRate - a.ownershipRate);
+
+    // Extract Consensus Captain & Captaincy Distribution across Elite Cohort
+    const captainSorted = [...consensusDetails]
+      .filter(d => (d.captainRate || 0) > 0 || (d.captainCount || 0) > 0)
+      .sort((a, b) => b.captainCount - a.captainCount || b.captainRate - a.captainRate);
+
+    const consensusCaptain = captainSorted[0] ? {
+      id: captainSorted[0].id,
+      web_name: captainSorted[0].web_name,
+      full_name: captainSorted[0].full_name || captainSorted[0].web_name,
+      code: captainSorted[0].code,
+      team_code: captainSorted[0].team_code,
+      team_name: captainSorted[0].team_name,
+      team_short_name: captainSorted[0].team_short_name,
+      position: captainSorted[0].position,
+      cost: captainSorted[0].cost,
+      captainRate: captainSorted[0].captainRate,
+      captainPercentage: Math.round(captainSorted[0].captainRate * 100),
+      captainCount: captainSorted[0].captainCount,
+      eligibleManagers,
+    } : undefined;
+
+    const consensusViceCaptain = captainSorted[1] ? {
+      id: captainSorted[1].id,
+      web_name: captainSorted[1].web_name,
+      full_name: captainSorted[1].full_name || captainSorted[1].web_name,
+      code: captainSorted[1].code,
+      team_code: captainSorted[1].team_code,
+      team_name: captainSorted[1].team_name,
+      team_short_name: captainSorted[1].team_short_name,
+      position: captainSorted[1].position,
+      cost: captainSorted[1].cost,
+      captainRate: captainSorted[1].captainRate,
+      captainPercentage: Math.round(captainSorted[1].captainRate * 100),
+      captainCount: captainSorted[1].captainCount,
+      eligibleManagers,
+    } : undefined;
+
+    const captaincyDistribution = captainSorted.slice(0, 5).map(d => ({
+      id: d.id,
+      web_name: d.web_name,
+      full_name: d.full_name || d.web_name,
+      code: d.code,
+      team_code: d.team_code,
+      team_name: d.team_name,
+      team_short_name: d.team_short_name,
+      position: d.position,
+      cost: d.cost,
+      captainRate: d.captainRate,
+      captainPercentage: Math.round(d.captainRate * 100),
+      captainCount: d.captainCount,
+    }));
 
     // Calculate market disagreement rating (0.0 to 1.0)
     let totalDiff = 0;
@@ -497,7 +556,10 @@ export class ManagerSnapshotService {
       eliteConsensusPicks: eliteConsensusPicks.length > 0 ? eliteConsensusPicks : [
         "Gvardiol", "Calafiori", "Palmer", "B.Fernandes", "Szoboszlai", "Ødegaard", "Cherki", "João Pedro", "Isak"
       ],
-      consensusDetails
+      consensusDetails,
+      consensusCaptain,
+      consensusViceCaptain,
+      captaincyDistribution
     };
   }
 }

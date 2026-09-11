@@ -18,6 +18,28 @@ export const MetricsColumn = ({ data, syncedData, riskMode, tab, onSyncTeamId }:
     : Math.max(0, 1000 - (data?.totalCost || 0));
   const badgeText = isViewingMySquad ? "MY SQUAD" : "OPTIMAL";
 
+  // Derive Elite Consensus Captain (from direct API field or dynamically from consensusDetails)
+  const consensusCaptain = data?.topManagerInsight?.consensusCaptain || (() => {
+    const details = data?.topManagerInsight?.consensusDetails;
+    if (!details || details.length === 0) return undefined;
+    const captainSorted = [...details]
+      .filter(d => (d.captainRate || 0) > 0 || (d.captainCount || 0) > 0)
+      .sort((a, b) => b.captainCount - a.captainCount || b.captainRate - a.captainRate);
+    if (!captainSorted[0]) return undefined;
+    const totalCount = data?.topManagerInsight?.eligibleManagers || data?.topManagerInsight?.noChipLeaderCount || 1;
+    return {
+      id: captainSorted[0].id,
+      web_name: captainSorted[0].web_name,
+      full_name: captainSorted[0].full_name || captainSorted[0].web_name,
+      position: captainSorted[0].position,
+      cost: captainSorted[0].cost,
+      captainRate: captainSorted[0].captainRate,
+      captainPercentage: Math.round(captainSorted[0].captainRate * 100),
+      captainCount: captainSorted[0].captainCount,
+      eligibleManagers: totalCount,
+    };
+  })();
+
   return (
     <div className="col-span-12 lg:col-span-3 grid grid-cols-1 gap-4">
       {/* Squad Metrics Card */}
@@ -59,19 +81,53 @@ export const MetricsColumn = ({ data, syncedData, riskMode, tab, onSyncTeamId }:
         </div>
       </div>
 
-      {/* Captain Card */}
-      <div className="bg-card-bg border border-fpl-border rounded-3xl p-5 shadow-sm">
-        <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Top Recommendation</h2>
-        <div className="flex items-center gap-4 bg-slate-950/50 p-3 rounded-2xl border border-fpl-border">
-          <div className="w-10 h-10 bg-fpl-pink rounded-xl flex items-center justify-center shadow-lg shadow-fpl-pink/20">
-            <Star className="w-5 h-5 text-white" />
+      {/* Captain Card with Elite Consensus Armband */}
+      <div className="bg-card-bg border border-fpl-border rounded-3xl p-5 shadow-sm space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Top Recommendation</h2>
+          {consensusCaptain && (
+            <span className="text-[9px] font-mono font-bold bg-amber-400/10 text-amber-300 border border-amber-400/30 px-2 py-0.5 rounded-full flex items-center gap-1">
+              👑 {consensusCaptain.captainPercentage}% Herd Pick
+            </span>
+          )}
+        </div>
+
+        {/* Optimal Pick */}
+        <div className="flex items-center gap-3 bg-slate-950/60 p-3 rounded-2xl border border-fpl-border">
+          <div className="w-10 h-10 bg-gradient-to-tr from-amber-500 to-orange-500 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/20 shrink-0">
+            <Star className="w-5 h-5 text-slate-950 font-black" />
           </div>
-          <div>
-            <p className="text-[10px] text-slate-500 uppercase font-black">{data?.captain?.team_name || "Unknown"}</p>
-            <p className="text-sm font-black text-white">{data?.captain?.web_name || "Unknown"}</p>
-            <p className="text-[10px] text-fpl-green font-bold">Captain Pick</p>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] text-slate-400 uppercase font-black truncate">{data?.captain?.team_name || "Top Club"}</p>
+              {data?.captain?.xP !== undefined && (
+                <span className="text-[9px] font-mono font-black text-cyan-400 shrink-0">{data.captain.xP.toFixed(1)} xP</span>
+              )}
+            </div>
+            <p className="text-sm font-black text-white truncate">{data?.captain?.web_name || "Top Pick"}</p>
+            <p className="text-[9.5px] text-emerald-400 font-bold">Optimal Engine Captain (2×)</p>
           </div>
         </div>
+
+        {/* Elite Consensus Captain Widget */}
+        {consensusCaptain && (
+          <div className="flex items-center gap-3 bg-purple-950/30 p-2.5 rounded-2xl border border-purple-500/30 text-xs">
+            <div className="w-8 h-8 rounded-xl bg-purple-500/20 border border-purple-400/40 flex items-center justify-center text-amber-300 shrink-0 text-sm">
+              👑
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] font-bold uppercase text-purple-300">Elite Consensus</span>
+                <span className="text-[9px] font-mono font-black text-amber-300">
+                  {consensusCaptain.captainPercentage}% Armband
+                </span>
+              </div>
+              <p className="text-xs font-black text-white truncate">
+                {consensusCaptain.full_name || consensusCaptain.web_name} (£{consensusCaptain.cost > 30 ? (consensusCaptain.cost / 10).toFixed(1) : consensusCaptain.cost.toFixed(1)}M)
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Engine Diagnostics */}
