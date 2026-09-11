@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "ignoreCommand": "git log -1 --pretty=format:\"%s\" | grep -q \"\\[skip ci\\]\"",
   "rewrites": [
     {
       "source": "/api/decision-logs",
