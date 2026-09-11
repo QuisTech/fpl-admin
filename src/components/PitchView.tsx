@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { PlayerCard } from './PlayerCard';
+import { SyncedSquadBanner } from './SyncedSquadBanner';
 import { RecommendationResponse, ScoredPlayer, TeamSyncResponse } from '../types';
 import { Zap, Shield, Lock, Ban, X, ArrowRightLeft, Calendar, Eye, EyeOff, Activity, Trophy, Coins, Users, Layout, List } from 'lucide-react';
 import { cn } from '../lib/utils';
@@ -21,6 +22,9 @@ interface PitchViewProps {
   onToggleLock?: (id: number) => void;
   onToggleExclude?: (id: number) => void;
   onClearConstraints?: () => void;
+  squadViewSource?: 'optimum' | 'synced';
+  onResetToOptimum?: () => void;
+  teamId?: string;
 }
 
 const getFdrBadgeColor = (difficulty?: number) => {
@@ -64,13 +68,38 @@ export const PitchView = ({
   excludedPlayerIds = [],
   onToggleLock,
   onToggleExclude,
-  onClearConstraints
+  onClearConstraints,
+  squadViewSource = 'optimum',
+  onResetToOptimum,
+  teamId
 }: PitchViewProps) => {
   const [showFixtures, setShowFixtures] = useState(true);
   const [viewMode, setViewMode] = useState<'pitch' | 'list'>('pitch');
 
   const scenarioComp = (data as any)?.engineDiagnostics?.metrics?.scenarioComparison;
   const delta = scenarioComp?.delta;
+
+  // === Synced Squad Display Logic ===
+  const isSyncedView = squadViewSource === 'synced' && syncedData?.squad && syncedData.squad.length > 0;
+
+  // Compute synced formation from syncedData.squad when in synced view
+  const syncedStarters = isSyncedView
+    ? syncedData!.squad.filter(p => (p.position_in_squad ?? 0) <= 11)
+    : [];
+  const syncedBench = isSyncedView
+    ? syncedData!.squad.filter(p => (p.position_in_squad ?? 0) >= 12)
+    : [];
+
+  const syncedFormation = isSyncedView ? {
+    gkp: syncedStarters.filter(p => p.position === 'GKP' || p.element_type === 1),
+    def: syncedStarters.filter(p => p.position === 'DEF' || p.element_type === 2),
+    mid: syncedStarters.filter(p => p.position === 'MID' || p.element_type === 3),
+    fwd: syncedStarters.filter(p => p.position === 'FWD' || p.element_type === 4),
+  } : null;
+
+  // Select which formation and bench to render
+  const displayFormation = isSyncedView && syncedFormation ? syncedFormation : formation;
+  const displayBench = isSyncedView ? syncedBench : (data?.bench?.filter(Boolean) || []);
 
   const allPlayersMap = new Map<number, ScoredPlayer>();
   data?.squad?.forEach(p => allPlayersMap.set(p.id, p));
@@ -80,19 +109,31 @@ export const PitchView = ({
   data?.topPicks?.fwd?.forEach(p => allPlayersMap.set(p.id, p));
 
   const hasConstraints = lockedPlayerIds.length > 0 || excludedPlayerIds.length > 0;
-  const benchPlayers = data?.bench?.filter(Boolean) || [];
+  const benchPlayers = displayBench;
 
   // Matchday & Squad Diagnostics Calculations
   const nextGw = data?.nextEventId || syncedData?.gameweek || 3;
-  const expectedPoints = data?.expectedPoints || data?.startingXI?.reduce((s, p) => s + (p.xP || 0), 0) || 0;
-  const avgEo = data?.engineDiagnostics?.metrics?.averageXiEo ?? (
-    data?.startingXI && data.startingXI.length > 0 
-      ? Math.round(data.startingXI.reduce((s, p) => s + (p.eo || 0), 0) / data.startingXI.length) 
-      : 0
-  );
-  const totalCost = data?.totalCost ? (data.totalCost / 10).toFixed(1) : '100.0';
+  const displayStarters = isSyncedView && syncedFormation
+    ? [...syncedFormation.gkp, ...syncedFormation.def, ...syncedFormation.mid, ...syncedFormation.fwd]
+    : (data?.startingXI || []);
+  const expectedPoints = isSyncedView
+    ? displayStarters.reduce((s, p) => s + (p.xP || 0), 0)
+    : (data?.expectedPoints || data?.startingXI?.reduce((s, p) => s + (p.xP || 0), 0) || 0);
+  const avgEo = isSyncedView
+    ? (displayStarters.length > 0 ? Math.round(displayStarters.reduce((s, p) => s + (p.eo || 0), 0) / displayStarters.length) : 0)
+    : (data?.engineDiagnostics?.metrics?.averageXiEo ?? (
+        data?.startingXI && data.startingXI.length > 0 
+          ? Math.round(data.startingXI.reduce((s, p) => s + (p.eo || 0), 0) / data.startingXI.length) 
+          : 0
+      ));
+  const totalCost = isSyncedView
+    ? ((syncedData?.totalCost || syncedData?.squad?.reduce((s, p) => s + (p.now_cost || p.cost || 0), 0) || 1000) / 10).toFixed(1)
+    : (data?.totalCost ? (data.totalCost / 10).toFixed(1) : '100.0');
   const bank = syncedData?.bank !== undefined ? (syncedData.bank / 10).toFixed(1) : '0.0';
-  const captain = data?.captain?.web_name || data?.startingXI?.find(p => p.isCaptain)?.web_name || 'TBD';
+  const syncedCaptain = isSyncedView ? displayStarters.find(p => p.isCaptain || p.is_captain) : null;
+  const captain = isSyncedView
+    ? (syncedCaptain?.web_name || 'TBD')
+    : (data?.captain?.web_name || data?.startingXI?.find(p => p.isCaptain)?.web_name || 'TBD');
   const entryHistory = syncedData?.entryHistory;
   const managerInfo = syncedData?.managerInfo;
 
@@ -104,8 +145,19 @@ export const PitchView = ({
       exit={{ opacity: 0 }}
       className="flex-grow flex flex-col justify-start space-y-2 py-1 sm:py-2 w-full max-w-5xl mx-auto"
     >
-      {/* Top Controls: Scenario Switcher & Delta Comparison Bar (Only rendered when onSelectScenario is provided) */}
-      {onSelectScenario && (
+      {/* Synced Squad Banner (renders when viewing a synced manager's squad) */}
+      {isSyncedView && onResetToOptimum && (
+        <SyncedSquadBanner
+          teamName={syncedData?.managerInfo?.teamName || ''}
+          managerName={syncedData?.managerInfo?.managerName}
+          teamId={teamId || ''}
+          playerCount={syncedData?.squad?.length || 15}
+          onResetToOptimum={onResetToOptimum}
+        />
+      )}
+
+      {/* Top Controls: Scenario Switcher & Delta Comparison Bar (Only rendered when onSelectScenario is provided and NOT in synced view) */}
+      {onSelectScenario && !isSyncedView && (
         <div className="space-y-2 mb-2">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2 bg-slate-950/90 p-2 rounded-xl border border-fpl-border/80 backdrop-blur-md shadow-lg">
             
@@ -312,7 +364,7 @@ export const PitchView = ({
       <div className="flex flex-wrap items-center justify-between gap-2 mb-2 px-1 max-w-2xl sm:max-w-4xl mx-auto w-full">
         <div className="flex items-center gap-2">
           <span className="bg-slate-900 border border-slate-800 text-slate-300 font-mono font-bold text-[10px] sm:text-xs px-2.5 py-1 rounded-lg uppercase tracking-wider">
-            {formation.def.length}-{formation.mid.length}-{formation.fwd.length} Formation
+            {displayFormation.def.length}-{displayFormation.mid.length}-{displayFormation.fwd.length} Formation
           </span>
           <span className="text-slate-600 hidden sm:inline">•</span>
           <span className="text-[10px] text-slate-400 font-mono hidden sm:inline">
@@ -503,7 +555,7 @@ export const PitchView = ({
               
               {/* Row 1: Goalkeeper (Inside Goalmouth & 18-Yard Box) */}
               <div className="flex justify-center items-center w-full my-0 sm:my-0.5">
-                {formation.gkp.map(p => (
+                {displayFormation.gkp.map(p => (
                   <PlayerCard 
                     key={p.id} 
                     player={p} 
@@ -520,7 +572,7 @@ export const PitchView = ({
 
               {/* Row 2: Defenders (Upper Pitch between Penalty Box & Midfield) */}
               <div className="flex justify-around items-center w-full max-w-[88%] mx-auto my-0 sm:my-0.5">
-                {formation.def.map(p => (
+                {displayFormation.def.map(p => (
                   <PlayerCard 
                     key={p.id} 
                     player={p} 
@@ -537,7 +589,7 @@ export const PitchView = ({
 
               {/* Row 3: Midfielders (Wider Middle Pitch above Halfway Line) */}
               <div className="flex justify-around items-center w-full max-w-[98%] mx-auto my-0 sm:my-0.5">
-                {formation.mid.map(p => (
+                {displayFormation.mid.map(p => (
                   <PlayerCard 
                     key={p.id} 
                     player={p} 
@@ -554,7 +606,7 @@ export const PitchView = ({
 
               {/* Row 4: Forwards (Inside the Center Circle & Over Halfway Line) */}
               <div className="flex justify-around items-center w-full max-w-[80%] mx-auto my-0 sm:my-0.5">
-                {formation.fwd.map(p => (
+                {displayFormation.fwd.map(p => (
                   <PlayerCard 
                     key={p.id} 
                     player={p} 
@@ -633,12 +685,12 @@ export const PitchView = ({
                   Starting XI
                 </span>
                 <span className="text-[10px] font-mono bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-bold border border-slate-700">
-                  {formation.gkp.length + formation.def.length + formation.mid.length + formation.fwd.length} Players
+                  {displayFormation.gkp.length + displayFormation.def.length + displayFormation.mid.length + displayFormation.fwd.length} Players
                 </span>
               </div>
               <div className="flex items-center gap-3 text-[10px] sm:text-xs font-mono">
                 <span className="text-slate-400">
-                  Cost: <span className="text-slate-200 font-bold">£{((formation.gkp.concat(formation.def, formation.mid, formation.fwd).reduce((sum, p) => sum + (p.now_cost || p.cost || 0), 0)) / 10).toFixed(1)}M</span>
+                  Cost: <span className="text-slate-200 font-bold">£{((displayFormation.gkp.concat(displayFormation.def, displayFormation.mid, displayFormation.fwd).reduce((sum, p) => sum + (p.now_cost || p.cost || 0), 0)) / 10).toFixed(1)}M</span>
                 </span>
                 <span className="text-slate-600">•</span>
                 <span className="text-slate-400">
@@ -665,7 +717,7 @@ export const PitchView = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/40 text-xs">
-                  {[...formation.gkp, ...formation.def, ...formation.mid, ...formation.fwd].map(p => {
+                  {[...displayFormation.gkp, ...displayFormation.def, ...displayFormation.mid, ...displayFormation.fwd].map(p => {
                     const isLocked = lockedPlayerIds.includes(p.id);
                     const isExcluded = excludedPlayerIds.includes(p.id);
                     const nextFix = p.next_fixtures?.[0];

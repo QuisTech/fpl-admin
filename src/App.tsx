@@ -51,6 +51,7 @@ function FPLApp() {
   const [tab, setTab] = useState<'optimizer' | 'pitch' | 'picks' | 'transfers' | 'chips' | 'performance' | 'backtest' | 'agent'>('optimizer');
   const [snapshotToast, setSnapshotToast] = useState<SnapshotToastData | null>(null);
   const [isSnapshotModalOpen, setIsSnapshotModalOpen] = useState(false);
+  const [squadViewSource, setSquadViewSource] = useState<'optimum' | 'synced'>('optimum');
 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [profileTab, setProfileTab] = useState<string | null>(null);
@@ -117,7 +118,10 @@ function FPLApp() {
       return;
     }
     const success = await syncTeam(target);
-    if (success) setTab('transfers');
+    if (success) {
+      setSquadViewSource('synced');
+      setTab('pitch');
+    }
   };
 
   const executeManualSnapshot = async () => {
@@ -206,6 +210,7 @@ function FPLApp() {
                     placeholder={!isSuperAdmin && tier !== 'free' && tier !== 'admin' && !isTeamIdLocked ? "LINK ID" : "TEAM ID"} 
                     value={teamId}
                     onChange={(e) => setTeamId(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleSync(); }}
                     disabled={!isSuperAdmin && tier !== 'free' && tier !== 'admin' && isTeamIdLocked}
                     onClick={() => {
                       if (!isSuperAdmin && tier !== 'free' && tier !== 'admin' && !isTeamIdLocked) {
@@ -244,6 +249,9 @@ function FPLApp() {
                   onToggleLock={toggleLock}
                   onToggleExclude={toggleExclude}
                   onClearConstraints={clearConstraints}
+                  squadViewSource={squadViewSource}
+                  onResetToOptimum={() => setSquadViewSource('optimum')}
+                  teamId={teamId}
                 />
               ) : tab === 'picks' ? (
                 <DataGrid 
