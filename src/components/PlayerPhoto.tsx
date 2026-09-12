@@ -69,14 +69,13 @@ export interface PlayerPhotoProps {
   sizeClassName?: string;
   roundedClassName?: string;
   showSpotlight?: boolean;
+  preferShirt?: boolean;
 }
 
 /**
- * HD Player Photo component using Official Premier League portrait assets.
- * Gracefully cascades:
- * 1. Official PL player studio portrait (p{code}.png)
- * 2. Official FPL club shirt WebP (shirt_{teamCode}-110.webp)
- * 3. Scalable vector team jersey fallback
+ * HD Player Photo component using Official Premier League & FPL club assets.
+ * Guarantees that players always display their LATEST official team kit/jersey
+ * corresponding to their active club.
  */
 export const PlayerPhoto: React.FC<PlayerPhotoProps> = ({
   playerId,
@@ -90,31 +89,35 @@ export const PlayerPhoto: React.FC<PlayerPhotoProps> = ({
   sizeClassName = 'w-10 h-10',
   roundedClassName = 'rounded-xl',
   showSpotlight = false,
+  preferShirt = true,
 }) => {
-  const [photoStage, setPhotoStage] = useState<'portrait' | 'shirt' | 'fallback'>('portrait');
+  const [photoStage, setPhotoStage] = useState<'shirt' | 'portrait' | 'fallback'>(
+    preferShirt ? 'shirt' : 'portrait'
+  );
 
   useEffect(() => {
-    setPhotoStage('portrait');
-  }, [playerId, playerCode]);
+    setPhotoStage(preferShirt ? 'shirt' : 'portrait');
+  }, [playerId, playerCode, teamCode, teamShortName, preferShirt]);
 
   const teamShort = (teamShortName || 'FPL').toUpperCase();
   const effectiveTeamCode = teamCode || TEAM_SHIRT_CODES[teamShort] || 1;
   const isGkp = position === 'GKP';
   const colors = TEAM_COLORS[teamShort] || { primary: '#37003c', secondary: '#00ff87' };
 
-  // PL portrait URL
+  // Official FPL club shirt URL (always 100% up to date with player's active team kit)
+  const shirtUrl = `https://fantasy.premierleague.com/dist/img/shirts/standard/shirt_${effectiveTeamCode}${isGkp ? '_1' : ''}-220.webp`;
+  const shirtSrcSet = `https://fantasy.premierleague.com/dist/img/shirts/standard/shirt_${effectiveTeamCode}${isGkp ? '_1' : ''}-66.webp 66w, https://fantasy.premierleague.com/dist/img/shirts/standard/shirt_${effectiveTeamCode}${isGkp ? '_1' : ''}-110.webp 110w, https://fantasy.premierleague.com/dist/img/shirts/standard/shirt_${effectiveTeamCode}${isGkp ? '_1' : ''}-220.webp 220w`;
+
+  // PL portrait URL fallback
   const portraitUrl = playerCode
     ? `https://resources.premierleague.com/premierleague/photos/players/110x140/p${playerCode}.png`
     : `https://resources.premierleague.com/premierleague/photos/players/110x140/p${playerId}.png`;
 
-  // Official FPL club shirt URL
-  const shirtUrl = `https://fantasy.premierleague.com/dist/img/shirts/standard/shirt_${effectiveTeamCode}${isGkp ? '_1' : ''}-110.webp`;
-
-  const handlePortraitError = () => {
-    setPhotoStage('shirt');
+  const handleShirtError = () => {
+    setPhotoStage('portrait');
   };
 
-  const handleShirtError = () => {
+  const handlePortraitError = () => {
     setPhotoStage('fallback');
   };
 
@@ -125,9 +128,22 @@ export const PlayerPhoto: React.FC<PlayerPhotoProps> = ({
           ? 'bg-gradient-to-b from-white/20 via-white/10 to-white/5 border border-white/25 backdrop-blur-md p-0.5 shadow-md drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]'
           : 'bg-slate-900/90 border border-white/15 shadow-inner'
       } ${className}`}
-      title={playerName}
+      title={`${playerName} (${teamShort})`}
     >
-      {photoStage === 'portrait' ? (
+      {photoStage === 'shirt' ? (
+        <picture className="w-full h-full flex items-center justify-center p-0.5">
+          <source type="image/webp" srcSet={shirtSrcSet} sizes="(min-width: 768px) 110px, 66px" />
+          <img
+            src={shirtUrl}
+            srcSet={shirtSrcSet}
+            alt={`${playerName} (${teamShort})`}
+            onError={handleShirtError}
+            loading="lazy"
+            decoding="async"
+            className={`w-full h-full object-contain p-0.5 filter hover:brightness-110 transition-all pointer-events-none ${imgClassName}`}
+          />
+        </picture>
+      ) : photoStage === 'portrait' ? (
         <img
           src={portraitUrl}
           alt={playerName}
@@ -135,15 +151,6 @@ export const PlayerPhoto: React.FC<PlayerPhotoProps> = ({
           loading="lazy"
           decoding="async"
           className={`w-full h-full object-cover object-top filter contrast-[1.05] brightness-[1.02] pointer-events-none ${roundedClassName} ${imgClassName}`}
-        />
-      ) : photoStage === 'shirt' ? (
-        <img
-          src={shirtUrl}
-          alt={teamShort}
-          onError={handleShirtError}
-          loading="lazy"
-          decoding="async"
-          className={`w-full h-full object-contain p-1 pointer-events-none ${imgClassName}`}
         />
       ) : (
         <div className="w-full h-full flex items-center justify-center p-1" aria-hidden="true">

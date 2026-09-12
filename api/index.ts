@@ -321,6 +321,7 @@ export class FPLService {
     return {
       ...p,
       position,
+      team_code: team?.code || team?.id || (p as any).team_code || 1,
       team_name: team?.name || "Unknown",
       team_short_name: team?.short_name || "UNK",
       score: this.calculatePlayerScore(baseXp, p, riskMode, fuel, fixtures, nextEventId),
