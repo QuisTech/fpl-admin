@@ -160,12 +160,12 @@ export class ManagerSnapshotService {
   }
 
   /**
-   * Capture live pre-deadline manager decision snapshots for top 0-chip / elite veteran managers
+   * Capture live pre-deadline or post-deadline manager decision snapshots for top managers
    */
-  public static async captureTopManagerSnapshots(season: string = '2026-27', targetGw: number = 3, sampleLimit: number = 150): Promise<ManagerGWDecisionSnapshot[]> {
+  public static async captureTopManagerSnapshots(season: string = '2026-27', targetGw: number = 4, sampleLimit: number = 200): Promise<ManagerGWDecisionSnapshot[]> {
     const decisions: ManagerGWDecisionSnapshot[] = [];
     try {
-      const maxPages = Math.min(5, Math.ceil(sampleLimit / 50));
+      const maxPages = Math.min(10, Math.ceil(sampleLimit / 50));
       const allResults: any[] = [];
 
       for (let page = 1; page <= maxPages; page++) {
@@ -179,54 +179,70 @@ export class ManagerSnapshotService {
         }
       }
 
-      for (let i = 0; i < Math.min(sampleLimit, allResults.length); i++) {
-        const mgr = allResults[i];
-        try {
-          const [histRes, picksRes, xfersRes] = await Promise.all([
-            axios.get(`${this.FPL_BASE_URL}/entry/${mgr.entry}/history/`, { headers: this.getHeaders(), timeout: 8000 }),
-            axios.get(`${this.FPL_BASE_URL}/entry/${mgr.entry}/event/${targetGw}/picks/`, { headers: this.getHeaders(), timeout: 8000 }),
-            axios.get(`${this.FPL_BASE_URL}/entry/${mgr.entry}/transfers/`, { headers: this.getHeaders(), timeout: 8000 })
-          ]);
+      const batchSize = 10;
+      const targetCount = Math.min(sampleLimit, allResults.length);
 
-          const chipsUsed = histRes.data.chips || [];
-          const currentPickData = picksRes.data;
-          const picks = currentPickData.picks || [];
+      for (let i = 0; i < targetCount; i += batchSize) {
+        const batch = allResults.slice(i, i + batchSize);
+        const batchPromises = batch.map(async (mgr) => {
+          try {
+            const [histRes, picksRes, xfersRes] = await Promise.all([
+              axios.get(`${this.FPL_BASE_URL}/entry/${mgr.entry}/history/`, { headers: this.getHeaders(), timeout: 8000 }),
+              axios.get(`${this.FPL_BASE_URL}/entry/${mgr.entry}/event/${targetGw}/picks/`, { headers: this.getHeaders(), timeout: 8000 }),
+              axios.get(`${this.FPL_BASE_URL}/entry/${mgr.entry}/transfers/`, { headers: this.getHeaders(), timeout: 8000 })
+            ]);
 
-          const squad_15 = picks.map((p: any) => p.element);
-          const starting_xi = picks.filter((p: any) => p.position <= 11).map((p: any) => p.element);
-          const capObj = picks.find((p: any) => p.is_captain);
-          const vcObj = picks.find((p: any) => p.is_vice_captain);
+            const chipsUsed = histRes.data?.chips || [];
+            const currentPickData = picksRes.data || {};
+            const picks = currentPickData.picks || [];
 
-          const gwTransfers = (xfersRes.data || []).filter((t: any) => t.event === targetGw);
-          const transfers_in = gwTransfers.map((t: any) => t.element_in);
-          const transfers_out = gwTransfers.map((t: any) => t.element_out);
+            if (picks.length === 0) return null;
 
-          const snap: ManagerGWDecisionSnapshot = {
-            season,
-            gameweek: targetGw,
-            manager_id: mgr.entry,
-            manager_name: mgr.player_name,
-            team_name: mgr.entry_name,
-            overall_rank: mgr.rank,
-            gw_rank: currentPickData.entry_history?.rank,
-            total_points: mgr.total,
-            gw_points: currentPickData.entry_history?.points,
-            chips_used: chipsUsed,
-            active_chip: currentPickData.active_chip || null,
-            squad_15,
-            starting_xi,
-            captain_id: capObj ? capObj.element : null,
-            vice_captain_id: vcObj ? vcObj.element : null,
-            transfers_in,
-            transfers_out,
-            bank: currentPickData.entry_history?.bank || 0,
-            team_value: currentPickData.entry_history?.value || 1000,
-            timestamp: Date.now()
-          };
+            const squad_15 = picks.map((p: any) => p.element);
+            const starting_xi = picks.filter((p: any) => p.position <= 11).map((p: any) => p.element);
+            const capObj = picks.find((p: any) => p.is_captain);
+            const vcObj = picks.find((p: any) => p.is_vice_captain);
 
-          decisions.push(snap);
-        } catch (mgrErr: any) {
-          // ignore rate limits per manager
+            const gwTransfers = (xfersRes.data || []).filter((t: any) => t.event === targetGw);
+            const transfers_in = gwTransfers.map((t: any) => t.element_in);
+            const transfers_out = gwTransfers.map((t: any) => t.element_out);
+
+            const snap: ManagerGWDecisionSnapshot = {
+              season,
+              gameweek: targetGw,
+              manager_id: mgr.entry,
+              manager_name: mgr.player_name,
+              team_name: mgr.entry_name,
+              overall_rank: mgr.rank,
+              gw_rank: currentPickData.entry_history?.rank,
+              total_points: mgr.total,
+              gw_points: currentPickData.entry_history?.points,
+              chips_used: chipsUsed,
+              active_chip: currentPickData.active_chip || null,
+              squad_15,
+              starting_xi,
+              captain_id: capObj ? capObj.element : null,
+              vice_captain_id: vcObj ? vcObj.element : null,
+              transfers_in,
+              transfers_out,
+              bank: currentPickData.entry_history?.bank || 0,
+              team_value: currentPickData.entry_history?.value || 1000,
+              timestamp: Date.now()
+            };
+
+            return snap;
+          } catch (mgrErr: any) {
+            return null;
+          }
+        });
+
+        const batchResults = await Promise.all(batchPromises);
+        batchResults.forEach(res => {
+          if (res) decisions.push(res);
+        });
+
+        if (i + batchSize < targetCount) {
+          await new Promise(r => setTimeout(r, 150));
         }
       }
 

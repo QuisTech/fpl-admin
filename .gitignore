@@ -24,3 +24,4 @@ scratch/
 data/vaastav/
 backtests/
 data/backtest_results_*.json
+data/temp_*.csv
