@@ -57,7 +57,7 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
     position: captainSorted[0].position,
     cost: captainSorted[0].cost,
     captainRate: captainSorted[0].captainRate,
-    captainPercentage: Math.round(captainSorted[0].captainRate * 100),
+    captainPercentage: Math.min(100, Math.round(captainSorted[0].captainRate * 100)),
     captainCount: captainSorted[0].captainCount,
     eligibleManagers,
   } : undefined);
@@ -73,7 +73,7 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
     position: captainSorted[1].position,
     cost: captainSorted[1].cost,
     captainRate: captainSorted[1].captainRate,
-    captainPercentage: Math.round(captainSorted[1].captainRate * 100),
+    captainPercentage: Math.min(100, Math.round(captainSorted[1].captainRate * 100)),
     captainCount: captainSorted[1].captainCount,
     eligibleManagers,
   } : undefined);
@@ -89,7 +89,7 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
     position: d.position,
     cost: d.cost,
     captainRate: d.captainRate,
-    captainPercentage: Math.round(d.captainRate * 100),
+    captainPercentage: Math.min(100, Math.round(d.captainRate * 100)),
     captainCount: d.captainCount,
   }));
 
@@ -621,7 +621,7 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
                           <div 
                             key={p.id} 
                             className="flex items-center justify-between px-2.5 py-1.5 bg-slate-950/80 hover:bg-slate-900 rounded-xl border border-slate-800/80 hover:border-amber-500/30 transition-all text-[10px]"
-                            title={`${p.web_name}: ${p.startCount}/${p.eligibleManagers} starts (${Math.round(p.startRate * 100)}%), ${p.captainCount}/${p.eligibleManagers} captains (${Math.round(p.captainRate * 100)}%), Conviction: ${p.convictionScore}`}
+                            title={`${p.web_name}: ${p.startCount}/${p.eligibleManagers} starts (${Math.min(100, Math.round(p.startRate * 100))}%), ${p.captainCount}/${p.eligibleManagers} captains (${Math.min(100, Math.round(p.captainRate * 100))}%), Conviction: ${p.convictionScore}`}
                           >
                             <div className="flex items-center gap-2 min-w-0 pr-2">
                               <span className={`text-[8px] font-mono font-black px-1.5 py-0.5 rounded border shrink-0 ${getPositionBadge(p.position)}`}>
@@ -635,11 +635,11 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
                                   ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/25' 
                                   : 'text-slate-300 bg-slate-800/80 border-slate-700/60'
                               }`}>
-                                {Math.round(p.startRate * 100)}% Start
+                                {Math.min(100, Math.round(p.startRate * 100))}% Start
                               </span>
                               {p.captainRate > 0 && (
                                 <span className="text-amber-300 font-bold bg-amber-400/10 border border-amber-400/25 px-1.5 py-0.5 rounded">
-                                  {Math.round(p.captainRate * 100)}% Cap
+                                  {Math.min(100, Math.round(p.captainRate * 100))}% Cap
                                 </span>
                               )}
                             </div>
@@ -670,7 +670,7 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
                           <div 
                             key={p.id} 
                             className="flex items-center justify-between px-2.5 py-1.5 bg-slate-950/80 hover:bg-slate-900 rounded-xl border border-slate-800/80 hover:border-cyan-500/30 transition-all text-[10px]"
-                            title={`${p.web_name}: £${(p.cost / 10).toFixed(1)}m, ${p.benchCount}/${p.eligibleManagers} benched (${Math.round(p.benchRate * 100)}%), ${p.startCount}/${p.eligibleManagers} starts (${Math.round(p.startRate * 100)}%), Conviction: ${p.convictionScore}`}
+                            title={`${p.web_name}: £${(p.cost / 10).toFixed(1)}m, ${p.benchCount}/${p.eligibleManagers} benched (${Math.min(100, Math.round(p.benchRate * 100))}%), ${p.startCount}/${p.eligibleManagers} starts (${Math.min(100, Math.round(p.startRate * 100))}%), Conviction: ${p.convictionScore}`}
                           >
                             <div className="flex items-center gap-2 min-w-0 pr-2">
                               <span className={`text-[8px] font-mono font-black px-1.5 py-0.5 rounded border shrink-0 ${getPositionBadge(p.position)}`}>
@@ -689,7 +689,7 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
                                   ? 'text-cyan-300 bg-cyan-500/10 border-cyan-500/25' 
                                   : 'text-slate-300 bg-slate-800/80 border-slate-700/60'
                               }`}>
-                                {Math.round(p.benchRate * 100)}% Bench
+                                {Math.min(100, Math.round(p.benchRate * 100))}% Bench
                               </span>
                             </div>
                           </div>
