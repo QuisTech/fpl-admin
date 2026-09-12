@@ -67,7 +67,7 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
       syncTeam();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [riskMode, fuel]);
+  }, [riskMode, fuel, activeScenario]);
 
   // Load user tier and profile ONCE on login/auth init
   useEffect(() => {
@@ -449,7 +449,7 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
     if (!targetId) return false;
     setSyncing(true);
     try {
-      const res = await axios.get(`/api/sync/${targetId}?riskMode=${riskMode}&fuel=${fuel}&userId=${userId}&tier=${tier}`);
+      const res = await axios.get(`/api/sync/${targetId}?riskMode=${riskMode}&fuel=${fuel}&scenario=${activeScenario}&userId=${userId}&tier=${tier}`);
       setSyncedData(res.data);
       setError(null);
 
