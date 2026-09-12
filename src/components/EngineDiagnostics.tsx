@@ -299,7 +299,7 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
                       : 'text-slate-400 hover:text-slate-200 bg-slate-950/60 border border-slate-800'
                   }`}
                 >
-                  TC/BB Normalized ({data.topManagerInsight.sampleLeaders.filter(m => m.chip_deduction && m.chip_deduction > 0).length})
+                  Normalized ({data.topManagerInsight.sampleLeaders.filter(m => m.chip_deduction && m.chip_deduction > 0).length})
                 </button>
               </div>
 
@@ -361,7 +361,7 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
                             ? 'bg-sky-500/10 text-sky-400 border-sky-500/20'
                             : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                         }`}>
-                          {isNorm ? `TC/BB Normalized (-${m.chip_deduction} pts)` : 'Pure 0-Chips'}
+                          {isNorm ? `Normalized (-${m.chip_deduction} pts)` : 'Pure 0-Chips'}
                         </span>
                         <div className="flex items-center gap-1.5 shrink-0">
                           {onSyncTeamId && (

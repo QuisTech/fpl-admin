@@ -293,6 +293,10 @@ export class ManagerSnapshotService {
         } else {
           deduction += 15; // Average BB bench haul deduction
         }
+      } else if (chip.name === 'freehit') {
+        deduction += 15; // Average Free Hit haul advantage deduction
+      } else if (chip.name === 'wildcard') {
+        deduction += 10; // Average Wildcard squad optimization advantage deduction
       }
     }
 
