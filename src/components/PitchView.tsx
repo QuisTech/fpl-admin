@@ -135,8 +135,10 @@ export const PitchView = ({
   const displayStarters = isSyncedView && syncedFormation
     ? [...syncedFormation.gkp, ...syncedFormation.def, ...syncedFormation.mid, ...syncedFormation.fwd]
     : (data?.startingXI || []);
+  const syncedCaptain = isSyncedView ? displayStarters.find(p => p.isCaptain || p.is_captain) : null;
+  const captainBonus = syncedCaptain ? (syncedCaptain.xP || 0) : 0;
   const expectedPoints = isSyncedView
-    ? displayStarters.reduce((s, p) => s + (p.xP || 0), 0)
+    ? (displayStarters.reduce((s, p) => s + (p.xP || 0), 0) + captainBonus)
     : (data?.expectedPoints || data?.startingXI?.reduce((s, p) => s + (p.xP || 0), 0) || 0);
   const avgEo = isSyncedView
     ? (displayStarters.length > 0 ? Math.round(displayStarters.reduce((s, p) => s + (p.eo || 0), 0) / displayStarters.length) : 0)
@@ -149,7 +151,6 @@ export const PitchView = ({
     ? ((syncedData?.totalCost || syncedData?.squad?.reduce((s, p) => s + (p.now_cost || p.cost || 0), 0) || 1000) / 10).toFixed(1)
     : (data?.totalCost ? (data.totalCost / 10).toFixed(1) : '100.0');
   const bank = syncedData?.bank !== undefined ? (syncedData.bank / 10).toFixed(1) : '0.0';
-  const syncedCaptain = isSyncedView ? displayStarters.find(p => p.isCaptain || p.is_captain) : null;
   const captain = isSyncedView
     ? (syncedCaptain?.web_name || 'TBD')
     : (data?.captain?.web_name || data?.startingXI?.find(p => p.isCaptain)?.web_name || 'TBD');
