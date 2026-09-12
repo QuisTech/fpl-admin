@@ -266,6 +266,18 @@ export const PitchView = ({
   const entryHistory = syncedData?.entryHistory;
   const managerInfo = syncedData?.managerInfo;
 
+  const liveLatestPoints = (managerInfo?.summary_event_points !== undefined && managerInfo.summary_event_points !== null)
+    ? managerInfo.summary_event_points
+    : (entryHistory?.points ?? 0);
+
+  const liveTotalPoints = (managerInfo?.summary_overall_points !== undefined && managerInfo.summary_overall_points !== null)
+    ? managerInfo.summary_overall_points
+    : (entryHistory?.total_points ?? (syncedData?.squad ? syncedData.squad.reduce((sum, p) => sum + (p.total_points || 0), 0) : 0));
+
+  const liveOverallRank = (managerInfo?.summary_overall_rank !== undefined && managerInfo.summary_overall_rank !== null)
+    ? managerInfo.summary_overall_rank
+    : entryHistory?.overall_rank;
+
   // Derive Elite Consensus Captain (from direct API field or dynamically from consensusDetails)
   const consensusCaptain = data?.topManagerInsight?.consensusCaptain || (() => {
     const details = data?.topManagerInsight?.consensusDetails;
@@ -307,6 +319,8 @@ export const PitchView = ({
           lineupMode={syncedLineupMode}
           onToggleLineupMode={() => setSyncedLineupMode(prev => prev === 'optimized' ? 'official' : 'optimized')}
           onResetToOptimum={onResetToOptimum}
+          latestPoints={liveLatestPoints}
+          overallRank={liveOverallRank}
         />
       )}
 
@@ -467,30 +481,34 @@ export const PitchView = ({
           {/* 4. Latest Points (or Bank) */}
           <div className="bg-slate-900/90 border border-slate-800/80 rounded-lg p-1.5 flex flex-col justify-center shadow-inner">
             <span className="text-xs sm:text-sm font-black font-mono text-amber-400 leading-none">
-              {entryHistory ? `${entryHistory.points} pts` : `£${bank}M`}
+              {isSyncedView || entryHistory || managerInfo ? `${liveLatestPoints} pts` : `£${bank}M`}
             </span>
             <span className="text-[8px] font-mono uppercase text-slate-400 mt-1 tracking-tight">
-              {entryHistory ? 'Latest Points' : 'In The Bank'}
+              {isSyncedView || entryHistory || managerInfo ? 'Latest Points' : 'In The Bank'}
             </span>
           </div>
 
           {/* 5. Overall Rank (or Starters) */}
           <div className="bg-slate-900/90 border border-slate-800/80 rounded-lg p-1.5 flex flex-col justify-center shadow-inner">
             <span className="text-xs sm:text-sm font-black font-mono text-purple-300 leading-none truncate px-0.5">
-              {entryHistory ? `#${entryHistory.overall_rank.toLocaleString()}` : `${data?.startingXI?.length || 11} Starters`}
+              {isSyncedView || entryHistory || managerInfo
+                ? (liveOverallRank ? `#${liveOverallRank.toLocaleString()}` : 'N/A')
+                : `${data?.startingXI?.length || 11} Starters`}
             </span>
             <span className="text-[8px] font-mono uppercase text-slate-400 mt-1 tracking-tight">
-              {entryHistory ? 'Overall Rank' : 'Active XI'}
+              {isSyncedView || entryHistory || managerInfo ? 'Overall Rank' : 'Active XI'}
             </span>
           </div>
 
           {/* 6. Total Season Points (or Subs) */}
           <div className="bg-slate-900/90 border border-slate-800/80 rounded-lg p-1.5 flex flex-col justify-center shadow-inner">
             <span className="text-xs sm:text-sm font-black font-mono text-emerald-400 leading-none">
-              {entryHistory ? `${entryHistory.total_points}` : `${data?.bench?.length || 4} Subs`}
+              {isSyncedView || entryHistory || managerInfo
+                ? `${liveTotalPoints}`
+                : `${data?.bench?.length || 4} Subs`}
             </span>
             <span className="text-[8px] font-mono uppercase text-slate-400 mt-1 tracking-tight">
-              {entryHistory ? 'Total Points' : 'Bench Dugout'}
+              {isSyncedView || entryHistory || managerInfo ? 'Total Points' : 'Bench Dugout'}
             </span>
           </div>
         </div>

@@ -8,6 +8,8 @@ interface SyncedSquadBannerProps {
   lineupMode?: 'optimized' | 'official';
   onToggleLineupMode?: () => void;
   onResetToOptimum: () => void;
+  latestPoints?: number | null;
+  overallRank?: number | null;
 }
 
 export const SyncedSquadBanner: React.FC<SyncedSquadBannerProps> = ({
@@ -18,6 +20,8 @@ export const SyncedSquadBanner: React.FC<SyncedSquadBannerProps> = ({
   lineupMode = 'optimized',
   onToggleLineupMode,
   onResetToOptimum,
+  latestPoints,
+  overallRank,
 }) => {
   return (
     <div className="w-full mb-3 p-3 sm:p-3.5 bg-cyan-950/80 border border-cyan-500/40 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg backdrop-blur-md transition-all">
@@ -34,6 +38,16 @@ export const SyncedSquadBanner: React.FC<SyncedSquadBannerProps> = ({
             <span className="text-[10px] font-mono bg-cyan-500/20 text-cyan-200 px-2 py-0.5 rounded border border-cyan-500/30 shrink-0">
               ID #{teamId}
             </span>
+            {latestPoints !== undefined && latestPoints !== null && (
+              <span className="text-[10px] font-mono bg-amber-400/20 text-amber-300 px-2 py-0.5 rounded border border-amber-400/40 font-black shrink-0">
+                GW Live: {latestPoints} pts
+              </span>
+            )}
+            {overallRank !== undefined && overallRank !== null && overallRank > 0 && (
+              <span className="text-[10px] font-mono bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded border border-purple-500/40 font-bold shrink-0">
+                Rank: #{overallRank.toLocaleString()}
+              </span>
+            )}
           </div>
           <p className="text-[10px] text-slate-300 font-mono mt-0.5 truncate">
             Manager: {managerName || `Manager #${teamId}`} • {playerCount} Squad Players • {lineupMode === 'optimized' ? 'Matrix-Optimized XI Active' : 'Official FPL Submission Active'}
