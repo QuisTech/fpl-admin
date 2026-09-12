@@ -400,8 +400,17 @@ export class ManagerSnapshotService {
       ];
     }
 
-    const eligibleManagers = leadersToUse.length;
-    const sampleLeaders = leadersToUse.slice(0, 50).map(d => ({
+    // Deduplicate leaders by manager_id to ensure strictly unique entries
+    const seenManagerIds = new Set<number>();
+    const uniqueLeaders = leadersToUse.filter(d => {
+      const id = d.manager_id;
+      if (!id || seenManagerIds.has(id)) return false;
+      seenManagerIds.add(id);
+      return true;
+    });
+
+    const eligibleManagers = uniqueLeaders.length;
+    const sampleLeaders = uniqueLeaders.slice(0, 50).map(d => ({
       rank: d.overall_rank,
       entry: d.manager_id,
       manager_name: d.manager_name || 'Elite Manager',

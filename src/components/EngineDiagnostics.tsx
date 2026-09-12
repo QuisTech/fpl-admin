@@ -269,60 +269,91 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
 
           <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 space-y-2">
             {/* Filter Tabs Header */}
-            <div className="flex items-center justify-between gap-1 text-[10px] border-b border-slate-800/60 pb-2">
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setCohortTab('all')}
-                  className={`px-2 py-0.5 rounded text-[8.5px] font-bold uppercase transition-all ${
-                    cohortTab === 'all'
-                      ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
-                      : 'text-slate-400 hover:text-slate-200 bg-slate-950/60 border border-slate-800'
-                  }`}
-                >
-                  All ({data.topManagerInsight.sampleLeaders.length})
-                </button>
-                <button
-                  onClick={() => setCohortTab('zero')}
-                  className={`px-2 py-0.5 rounded text-[8.5px] font-bold uppercase transition-all ${
-                    cohortTab === 'zero'
-                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                      : 'text-slate-400 hover:text-slate-200 bg-slate-950/60 border border-slate-800'
-                  }`}
-                >
-                  Pure 0-Chips ({data.topManagerInsight.sampleLeaders.filter(m => (!m.chips_used || m.chips_used.length === 0) && !m.chip_deduction).length})
-                </button>
-                <button
-                  onClick={() => setCohortTab('normalized')}
-                  className={`px-2 py-0.5 rounded text-[8.5px] font-bold uppercase transition-all ${
-                    cohortTab === 'normalized'
-                      ? 'bg-sky-500/20 text-sky-300 border border-sky-500/30'
-                      : 'text-slate-400 hover:text-slate-200 bg-slate-950/60 border border-slate-800'
-                  }`}
-                >
-                  Normalized ({data.topManagerInsight.sampleLeaders.filter(m => m.chip_deduction && m.chip_deduction > 0).length})
-                </button>
+            <div className="flex flex-col gap-1.5 border-b border-slate-800/60 pb-2">
+              <div className="flex items-center justify-between gap-1 text-[10px]">
+                <div className="flex items-center gap-1 bg-slate-950/80 p-0.5 rounded-lg border border-slate-800/60">
+                  <button
+                    type="button"
+                    onClick={() => setCohortTab('all')}
+                    className={`px-2 py-1 rounded-md text-[9px] font-bold uppercase transition-all cursor-pointer ${
+                      cohortTab === 'all'
+                        ? 'bg-cyan-500/25 text-cyan-300 border border-cyan-500/40 shadow-sm'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 border border-transparent'
+                    }`}
+                  >
+                    All ({data.topManagerInsight.sampleLeaders.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCohortTab('zero')}
+                    className={`px-2 py-1 rounded-md text-[9px] font-bold uppercase transition-all cursor-pointer ${
+                      cohortTab === 'zero'
+                        ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 shadow-sm'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 border border-transparent'
+                    }`}
+                  >
+                    Pure 0-Chips ({data.topManagerInsight.sampleLeaders.filter(m => (!m.chips_used || m.chips_used.length === 0) && !m.chip_deduction).length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCohortTab('normalized')}
+                    className={`px-2 py-1 rounded-md text-[9px] font-bold uppercase transition-all cursor-pointer ${
+                      cohortTab === 'normalized'
+                        ? 'bg-sky-500/25 text-sky-300 border border-sky-500/40 shadow-sm'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 border border-transparent'
+                    }`}
+                  >
+                    Normalized ({data.topManagerInsight.sampleLeaders.filter(m => Boolean((m.chips_used && m.chips_used.length > 0) || (m.chip_deduction && m.chip_deduction > 0))).length})
+                  </button>
+                </div>
+
+                {data.topManagerInsight.sampleLeaders.length > 2 && (
+                  <span className="text-[8px] text-slate-500 font-mono hidden sm:block">Scroll for more ▾</span>
+                )}
               </div>
 
-              {data.topManagerInsight.sampleLeaders.length > 2 && (
-                <span className="text-[8px] text-slate-500 font-mono hidden sm:block">Scroll for more ▾</span>
-              )}
+              {/* Active Cohort Indicator Banner */}
+              <div className="flex items-center justify-between px-1 text-[8.5px] font-mono">
+                {cohortTab === 'all' && (
+                  <span className="text-cyan-400/90 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+                    Displaying All Leaders (Combined 0-Chip + Normalized)
+                  </span>
+                )}
+                {cohortTab === 'zero' && (
+                  <span className="text-emerald-400/90 flex items-center gap-1 font-bold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    Displaying Pure 0-Chips Only (Zero Chips Used)
+                  </span>
+                )}
+                {cohortTab === 'normalized' && (
+                  <span className="text-sky-400/90 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span>
+                    Displaying Chip-Normalized Leaders (Deductions Applied)
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2 max-h-80 overflow-y-auto pr-1 text-[11px] border border-slate-800/40 rounded-xl p-1 bg-slate-950/40">
               {data.topManagerInsight.sampleLeaders
                 .filter(m => {
-                  const isNorm = Boolean(m.chip_deduction && m.chip_deduction > 0);
-                  if (cohortTab === 'zero') return !isNorm && (!m.chips_used || m.chips_used.length === 0);
-                  if (cohortTab === 'normalized') return isNorm;
+                  const hasChips = Boolean(
+                    (m.chips_used && m.chips_used.length > 0) || 
+                    (m.chip_deduction && m.chip_deduction > 0) || 
+                    m.is_chip_normalized
+                  );
+                  if (cohortTab === 'zero') return !hasChips;
+                  if (cohortTab === 'normalized') return hasChips;
                   return true;
                 })
-                .map(m => {
+                .map((m, idx) => {
                   const isNorm = Boolean(m.chip_deduction && m.chip_deduction > 0);
                   const normPts = m.normalized_total_points || (m.total_points - (m.chip_deduction || 0));
 
                   return (
                     <div 
-                      key={m.entry} 
+                      key={`${m.entry}-${m.rank}-${idx}`} 
                       className="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800/80 hover:border-slate-700/80 transition-all space-y-2"
                     >
                       {/* Top row: Manager info + Points */}
@@ -344,7 +375,7 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0 font-mono text-[10.5px]">
                           {isNorm && (
-                            <span className="text-slate-400 line-through text-[9.5px]" title="Raw Points before TC/BB deduction">
+                            <span className="text-slate-400 line-through text-[9.5px]" title="Raw Points before chip deduction">
                               {m.total_points}
                             </span>
                           )}
