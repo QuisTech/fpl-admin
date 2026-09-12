@@ -68,7 +68,7 @@ export function solveOptimalSquad(
     ints: {},
     options: {
       timeout: 3000,
-      tolerance: 0.02
+      tolerance: 0.0
     }
   };
 
@@ -450,7 +450,7 @@ export function solveOptimalTransfers(
     ints: {},
     options: {
       timeout: 3000,
-      tolerance: 0.02
+      tolerance: 0.0
     }
   };
 

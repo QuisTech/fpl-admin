@@ -106,6 +106,60 @@ export class ManagerSnapshotService {
   }
 
   /**
+   * Look up a manager profile by ID from archived decisions or fallback cohort
+   */
+  public static getLeaderProfile(managerId: number, targetGw: number = 3): ManagerGWDecisionSnapshot | null {
+    const archive = this.loadSnapshot(targetGw);
+    if (archive?.decisions) {
+      const match = archive.decisions.find(d => d.manager_id === managerId);
+      if (match) return match;
+    }
+    const defaults: ManagerGWDecisionSnapshot[] = [
+      {
+        season: '2026-27',
+        gameweek: targetGw,
+        manager_id: 4148445,
+        manager_name: "Abhishek Raj",
+        team_name: "Gunnerball",
+        overall_rank: 587,
+        total_points: 273,
+        chips_used: [],
+        active_chip: null,
+        squad_15: [1, 279, 8, 391, 426, 399, 368, 15, 154, 165, 379, 497, 272, 233, 377],
+        starting_xi: [1, 279, 8, 391, 426, 399, 368, 15, 154, 165, 379],
+        captain_id: 379,
+        vice_captain_id: 399,
+        transfers_in: [8, 399],
+        transfers_out: [],
+        bank: 0,
+        team_value: 1000,
+        timestamp: Date.now()
+      },
+      {
+        season: '2026-27',
+        gameweek: targetGw,
+        manager_id: 5662742,
+        manager_name: "Tony Elliott",
+        team_name: "Shetland Tonys",
+        overall_rank: 956,
+        total_points: 270,
+        chips_used: [],
+        active_chip: null,
+        squad_15: [28, 115, 391, 8, 368, 426, 15, 399, 154, 379, 464, 497, 165, 31, 508],
+        starting_xi: [28, 115, 391, 8, 368, 426, 15, 399, 154, 379, 464],
+        captain_id: 399,
+        vice_captain_id: 464,
+        transfers_in: [368, 399],
+        transfers_out: [],
+        bank: 0,
+        team_value: 1000,
+        timestamp: Date.now()
+      }
+    ];
+    return defaults.find(d => d.manager_id === managerId) || null;
+  }
+
+  /**
    * Capture live pre-deadline manager decision snapshots for top 0-chip / elite veteran managers
    */
   public static async captureTopManagerSnapshots(season: string = '2026-27', targetGw: number = 3, sampleLimit: number = 150): Promise<ManagerGWDecisionSnapshot[]> {

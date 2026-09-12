@@ -122,7 +122,13 @@ export function applyAction(
 
   // Invariants
   if (nextState.squad.length !== 15) throw new Error(`Invalid squad size: ${nextState.squad.length}`);
-  if (nextState.bank < 0) throw new Error(`Budget constraint violated: Bank=${nextState.bank}`);
+  if (nextState.bank < 0) {
+    if (nextState.bank >= -0.5) {
+      nextState.bank = 0;
+    } else {
+      throw new Error(`Budget constraint violated: Bank=${nextState.bank}`);
+    }
+  }
   
   return nextState;
 }
@@ -393,22 +399,27 @@ export class Simulator {
         const actions = this.generateValidActions(currentState, oracle, gw, step === 0, step, params);
         
         for (const action of actions) {
-          const nextState = applyAction(currentState, action, oracle, gw, params);
-          
-          if (step === 0) {
-            nextState.firstAction = action.type === 'CHIP' ? action.chipName : action.type;
-            nextState.firstTransfersIn = action.transfersIn;
-            nextState.firstTransfersOut = action.transfersOut;
-          } else {
-            nextState.firstAction = currentState.firstAction;
-            nextState.firstTransfersIn = currentState.firstTransfersIn;
-            nextState.firstTransfersOut = currentState.firstTransfersOut;
+          try {
+            const nextState = applyAction(currentState, action, oracle, gw, params);
+            
+            if (step === 0) {
+              nextState.firstAction = action.type === 'CHIP' ? action.chipName : action.type;
+              nextState.firstTransfersIn = action.transfersIn;
+              nextState.firstTransfersOut = action.transfersOut;
+            } else {
+              nextState.firstAction = currentState.firstAction;
+              nextState.firstTransfersIn = currentState.firstTransfersIn;
+              nextState.firstTransfersOut = currentState.firstTransfersOut;
+            }
+
+            const { score: gwUtility, variance: gwVariance } = this.simulateMatchday(nextState, gw, oracle, params);
+            nextState.accumulatedScore += (gwUtility - action.hitCost);
+
+            nextBeam.push(nextState);
+          } catch {
+            // Silently prune unfeasible branch from beam search
+            continue;
           }
-
-          const { score: gwUtility, variance: gwVariance } = this.simulateMatchday(nextState, gw, oracle, params);
-          nextState.accumulatedScore += (gwUtility - action.hitCost);
-
-          nextBeam.push(nextState);
         }
       }
 

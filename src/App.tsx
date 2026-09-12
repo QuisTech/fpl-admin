@@ -111,10 +111,8 @@ function FPLApp() {
     const target = cleanExplicit || (cleanCurrent || undefined);
 
     if (cleanExplicit) setTeamId(cleanExplicit);
-    if (!isSuperAdmin && tier !== 'free' && tier !== 'admin' && !isTeamIdLocked) {
-      alert("Premium Account: Please link your FPL Team ID in your Settings profile before running an analysis.");
-      if (authUser) setProfileTab('fpl');
-      else setIsAuthModalOpen(true);
+    if (!target) {
+      alert("Please enter a valid Team ID to sync.");
       return;
     }
     const success = await syncTeam(target);
@@ -207,26 +205,16 @@ function FPLApp() {
                 <div className="flex items-center gap-2">
                   <input 
                     type="text" 
-                    placeholder={!isSuperAdmin && tier !== 'free' && tier !== 'admin' && !isTeamIdLocked ? "LINK ID" : "TEAM ID"} 
+                    placeholder="TEAM ID" 
                     value={teamId}
                     onChange={(e) => setTeamId(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') handleSync(); }}
-                    disabled={!isSuperAdmin && tier !== 'free' && tier !== 'admin' && isTeamIdLocked}
-                    onClick={() => {
-                      if (!isSuperAdmin && tier !== 'free' && tier !== 'admin' && !isTeamIdLocked) {
-                        if (authUser) setProfileTab('fpl');
-                        else setIsAuthModalOpen(true);
-                      }
-                    }}
-                    className={cn("bg-slate-950 border border-fpl-border rounded-lg px-3 py-1 text-[10px] font-mono text-fpl-green w-24 focus:outline-none focus:border-fpl-green",
-                      !isSuperAdmin && tier !== 'free' && tier !== 'admin' && isTeamIdLocked ? "opacity-50 cursor-not-allowed" : "",
-                      !isSuperAdmin && tier !== 'free' && tier !== 'admin' && !isTeamIdLocked ? "cursor-pointer hover:bg-slate-900 text-rose-400" : ""
-                    )}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleSync(teamId); }}
+                    className="bg-slate-950 border border-fpl-border rounded-lg px-3 py-1 text-[10px] font-mono text-fpl-green w-24 focus:outline-none focus:border-fpl-green transition-all"
                   />
                   <button 
-                    onClick={() => handleSync()}
+                    onClick={() => handleSync(teamId)}
                     disabled={syncing}
-                    className="bg-fpl-purple hover:bg-fpl-purple/80 disabled:opacity-50 text-white text-[10px] font-black px-3 py-1 rounded-lg transition-colors"
+                    className="bg-fpl-purple hover:bg-fpl-purple/80 disabled:opacity-50 text-white text-[10px] font-black px-3 py-1 rounded-lg transition-colors cursor-pointer active:scale-95"
                   >
                     {syncing ? 'SYNCING...' : 'SYNC TEAM'}
                   </button>

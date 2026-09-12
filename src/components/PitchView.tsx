@@ -83,18 +83,37 @@ export const PitchView = ({
   const isSyncedView = squadViewSource === 'synced' && syncedData?.squad && syncedData.squad.length > 0;
 
   // Compute synced formation from syncedData.squad when in synced view
+  const rawSquad = syncedData?.squad || [];
+  const hasValidPositions = rawSquad.some(p => typeof p.position_in_squad === 'number' && p.position_in_squad > 0);
   const syncedStarters = isSyncedView
-    ? syncedData!.squad.filter(p => (p.position_in_squad ?? 0) <= 11)
+    ? (hasValidPositions 
+        ? rawSquad.filter(p => (p.position_in_squad ?? 0) <= 11)
+        : rawSquad.slice(0, 11))
     : [];
   const syncedBench = isSyncedView
-    ? syncedData!.squad.filter(p => (p.position_in_squad ?? 0) >= 12)
+    ? (hasValidPositions
+        ? rawSquad.filter(p => (p.position_in_squad ?? 0) >= 12)
+        : rawSquad.slice(11, 15))
     : [];
 
+  let syncedGkp = syncedStarters.filter(p => p.position === 'GKP' || p.element_type === 1);
+  const syncedDef = syncedStarters.filter(p => p.position === 'DEF' || p.element_type === 2);
+  const syncedMid = syncedStarters.filter(p => p.position === 'MID' || p.element_type === 3);
+  const syncedFwd = syncedStarters.filter(p => p.position === 'FWD' || p.element_type === 4);
+
+  // If no goalkeeper in starters, swap one from bench if available
+  if (syncedGkp.length === 0 && syncedBench.length > 0) {
+    const benchGkpIdx = syncedBench.findIndex(p => p.position === 'GKP' || p.element_type === 1);
+    if (benchGkpIdx !== -1) {
+      syncedGkp = [syncedBench.splice(benchGkpIdx, 1)[0]];
+    }
+  }
+
   const syncedFormation = isSyncedView ? {
-    gkp: syncedStarters.filter(p => p.position === 'GKP' || p.element_type === 1),
-    def: syncedStarters.filter(p => p.position === 'DEF' || p.element_type === 2),
-    mid: syncedStarters.filter(p => p.position === 'MID' || p.element_type === 3),
-    fwd: syncedStarters.filter(p => p.position === 'FWD' || p.element_type === 4),
+    gkp: syncedGkp,
+    def: syncedDef,
+    mid: syncedMid,
+    fwd: syncedFwd,
   } : null;
 
   // Select which formation and bench to render
