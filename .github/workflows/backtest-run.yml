@@ -20,6 +20,7 @@ on:
 
 jobs:
   backtest:
+    if: github.repository == 'QuisTech/fpl-admin'
     runs-on: ubuntu-latest
 
     steps:

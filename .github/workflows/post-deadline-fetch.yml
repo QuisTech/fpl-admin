@@ -16,6 +16,7 @@ on:
 
 jobs:
   post-deadline-capture:
+    if: github.repository == 'QuisTech/fpl-admin'
     runs-on: ubuntu-latest
 
     steps:
