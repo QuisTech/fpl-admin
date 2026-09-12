@@ -278,13 +278,13 @@ export const PitchView = ({
               Gameweek {nextGw}
             </span>
             <span className="text-[10px] sm:text-xs font-bold text-white truncate">
-              {managerInfo?.teamName ? managerInfo.teamName : (activeScenario === 'template' ? 'Risky Template Shield' : 'Quant Optimal Lineup')}
+              {isSyncedView && managerInfo?.teamName ? managerInfo.teamName : (activeScenario === 'template' ? 'Risky Template Shield' : 'Quant Optimal Lineup')}
             </span>
           </div>
 
           {/* Captain & Status Banner */}
           <div className="flex items-center justify-between sm:justify-end gap-1.5 text-[9px] font-mono flex-wrap">
-            {managerInfo?.managerName && (
+            {isSyncedView && managerInfo?.managerName && (
               <span className="bg-slate-900 border border-slate-800 px-2 py-0.5 rounded text-slate-300 hidden md:inline-block">
                 {managerInfo.managerName}
               </span>
