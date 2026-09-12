@@ -82,9 +82,17 @@ export async function runCapture(targetGwOverride?: number, sampleLimit: number 
     process.exit(1);
   }
 
+  // Deduplicate standings managers by entry ID (avoids overlaps across standings pages)
+  const seenStandingsIds = new Set<number>();
+  const deduplicatedStandings = standingsManagers.filter(m => {
+    if (!m?.entry || seenStandingsIds.has(m.entry)) return false;
+    seenStandingsIds.add(m.entry);
+    return true;
+  });
+
   // Known top 0-chip purist leaders to guarantee representation even when early chips dominate top 250
   const tracked0ChipIds = [4148445, 5662742];
-  const targetList = standingsManagers.slice(0, sampleLimit);
+  const targetList = deduplicatedStandings.slice(0, sampleLimit);
 
   // Append tracked 0-chip leaders if not already present in the top standings
   for (const tid of tracked0ChipIds) {
@@ -186,14 +194,22 @@ export async function runCapture(targetGwOverride?: number, sampleLimit: number 
     fs.mkdirSync(snapshotDir, { recursive: true });
   }
 
+  // Strictly deduplicate decisions by manager_id before saving
+  const seenDecisionIds = new Set<number>();
+  const uniqueDecisions = decisions.filter(d => {
+    if (!d.manager_id || seenDecisionIds.has(d.manager_id)) return false;
+    seenDecisionIds.add(d.manager_id);
+    return true;
+  });
+
   const archivePath = path.join(snapshotDir, 'manager_decisions.json');
   const archive: EliteCohortArchive = {
     season,
     gameweek: targetGw,
-    sample_size: decisions.length,
+    sample_size: uniqueDecisions.length,
     is_finalized: isFinalized,
     last_updated: Date.now(),
-    decisions
+    decisions: uniqueDecisions
   };
 
   fs.writeFileSync(archivePath, JSON.stringify(archive, null, 2));

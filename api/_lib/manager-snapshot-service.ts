@@ -66,15 +66,23 @@ export class ManagerSnapshotService {
       fs.mkdirSync(dir, { recursive: true });
     }
     const archivePath = path.join(dir, 'manager_decisions.json');
+    // Ensure strict deduplication by manager_id
+    const seenIds = new Set<number>();
+    const uniqueDecisions = decisions.filter(d => {
+      if (!d.manager_id || seenIds.has(d.manager_id)) return false;
+      seenIds.add(d.manager_id);
+      return true;
+    });
+
     const archive: EliteCohortArchive = {
       season,
       gameweek,
-      sample_size: decisions.length,
+      sample_size: uniqueDecisions.length,
       last_updated: Date.now(),
-      decisions
+      decisions: uniqueDecisions
     };
     fs.writeFileSync(archivePath, JSON.stringify(archive, null, 2));
-    console.log(`[ManagerSnapshotService] Archived ${decisions.length} raw manager decision records to ${archivePath}`);
+    console.log(`[ManagerSnapshotService] Archived ${uniqueDecisions.length} raw manager decision records to ${archivePath}`);
   }
 
   /**
@@ -402,15 +410,15 @@ export class ManagerSnapshotService {
 
     // Deduplicate leaders by manager_id to ensure strictly unique entries
     const seenManagerIds = new Set<number>();
-    const uniqueLeaders = leadersToUse.filter(d => {
+    leadersToUse = leadersToUse.filter(d => {
       const id = d.manager_id;
       if (!id || seenManagerIds.has(id)) return false;
       seenManagerIds.add(id);
       return true;
     });
 
-    const eligibleManagers = uniqueLeaders.length;
-    const sampleLeaders = uniqueLeaders.slice(0, 50).map(d => ({
+    const eligibleManagers = leadersToUse.length;
+    const sampleLeaders = leadersToUse.slice(0, 50).map(d => ({
       rank: d.overall_rank,
       entry: d.manager_id,
       manager_name: d.manager_name || 'Elite Manager',
@@ -487,14 +495,14 @@ export class ManagerSnapshotService {
       const p = playerMap.get(pid);
       const benchCount = Math.max(0, t.squadCount - t.startCount);
 
-      const ownershipRate = eligibleManagers > 0 ? t.squadCount / eligibleManagers : 0;
-      const startRate = eligibleManagers > 0 ? t.startCount / eligibleManagers : 0;
-      const benchRate = eligibleManagers > 0 ? benchCount / eligibleManagers : 0;
-      const captainRate = eligibleManagers > 0 ? t.captainCount / eligibleManagers : 0;
-      const viceCaptainRate = eligibleManagers > 0 ? t.viceCaptainCount / eligibleManagers : 0;
+      const ownershipRate = eligibleManagers > 0 ? Math.min(1.0, Math.max(0, t.squadCount / eligibleManagers)) : 0;
+      const startRate = eligibleManagers > 0 ? Math.min(1.0, Math.max(0, t.startCount / eligibleManagers)) : 0;
+      const benchRate = eligibleManagers > 0 ? Math.min(1.0, Math.max(0, benchCount / eligibleManagers)) : 0;
+      const captainRate = eligibleManagers > 0 ? Math.min(1.0, Math.max(0, t.captainCount / eligibleManagers)) : 0;
+      const viceCaptainRate = eligibleManagers > 0 ? Math.min(1.0, Math.max(0, t.viceCaptainCount / eligibleManagers)) : 0;
       // Manager participation rates (managers who made the transfer / eligible managers)
-      const transfersInRate = eligibleManagers > 0 ? t.transfersInCount / eligibleManagers : 0;
-      const transfersOutRate = eligibleManagers > 0 ? t.transfersOutCount / eligibleManagers : 0;
+      const transfersInRate = eligibleManagers > 0 ? Math.min(1.0, Math.max(0, t.transfersInCount / eligibleManagers)) : 0;
+      const transfersOutRate = eligibleManagers > 0 ? Math.min(1.0, Math.max(0, t.transfersOutCount / eligibleManagers)) : 0;
 
       // Conviction model (ordinal score)
       const rawConviction = (startRate * config.startWeight) + (captainRate * config.captainWeight) - (benchRate * config.benchPenalty);
@@ -567,7 +575,7 @@ export class ManagerSnapshotService {
       position: captainSorted[0].position,
       cost: captainSorted[0].cost,
       captainRate: captainSorted[0].captainRate,
-      captainPercentage: Math.round(captainSorted[0].captainRate * 100),
+      captainPercentage: Math.min(100, Math.round((captainSorted[0].captainRate || 0) * 100)),
       captainCount: captainSorted[0].captainCount,
       eligibleManagers,
     } : undefined;
@@ -583,7 +591,7 @@ export class ManagerSnapshotService {
       position: captainSorted[1].position,
       cost: captainSorted[1].cost,
       captainRate: captainSorted[1].captainRate,
-      captainPercentage: Math.round(captainSorted[1].captainRate * 100),
+      captainPercentage: Math.min(100, Math.round((captainSorted[1].captainRate || 0) * 100)),
       captainCount: captainSorted[1].captainCount,
       eligibleManagers,
     } : undefined;
@@ -599,7 +607,7 @@ export class ManagerSnapshotService {
       position: d.position,
       cost: d.cost,
       captainRate: d.captainRate,
-      captainPercentage: Math.round(d.captainRate * 100),
+      captainPercentage: Math.min(100, Math.round((d.captainRate || 0) * 100)),
       captainCount: d.captainCount,
     }));
 
