@@ -310,8 +310,8 @@ export const PitchView = ({
         />
       )}
 
-      {/* Top Controls: Scenario Switcher & Delta Comparison Bar (Only rendered when onSelectScenario is provided and NOT in synced view) */}
-      {onSelectScenario && !isSyncedView && (
+      {/* Top Controls: Scenario Switcher & Delta Comparison Bar */}
+      {onSelectScenario && (
         <div className="space-y-2 mb-2">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2 bg-slate-950/90 p-2 rounded-xl border border-fpl-border/80 backdrop-blur-md shadow-lg">
             
