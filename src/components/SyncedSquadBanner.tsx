@@ -5,6 +5,8 @@ interface SyncedSquadBannerProps {
   managerName?: string;
   teamId: string | number;
   playerCount?: number;
+  lineupMode?: 'optimized' | 'official';
+  onToggleLineupMode?: () => void;
   onResetToOptimum: () => void;
 }
 
@@ -13,6 +15,8 @@ export const SyncedSquadBanner: React.FC<SyncedSquadBannerProps> = ({
   managerName,
   teamId,
   playerCount = 15,
+  lineupMode = 'optimized',
+  onToggleLineupMode,
   onResetToOptimum,
 }) => {
   return (
@@ -32,17 +36,33 @@ export const SyncedSquadBanner: React.FC<SyncedSquadBannerProps> = ({
             </span>
           </div>
           <p className="text-[10px] text-slate-300 font-mono mt-0.5 truncate">
-            Manager: {managerName || `Manager #${teamId}`} • {playerCount} Squad Players loaded into pitch layout
+            Manager: {managerName || `Manager #${teamId}`} • {playerCount} Squad Players • {lineupMode === 'optimized' ? 'Matrix-Optimized XI Active' : 'Official FPL Submission Active'}
           </p>
         </div>
       </div>
-      <button
-        onClick={onResetToOptimum}
-        className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all shrink-0 cursor-pointer active:scale-95 shadow-sm"
-        title="Switch pitch back to global mathematical optimum"
-      >
-        Reset to Global Optimum
-      </button>
+      <div className="flex items-center gap-2 shrink-0 flex-wrap sm:flex-nowrap">
+        {onToggleLineupMode && (
+          <button
+            onClick={onToggleLineupMode}
+            className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer active:scale-95 shadow-sm border ${
+              lineupMode === 'optimized'
+                ? 'bg-cyan-500/20 text-cyan-200 border-cyan-500/40 hover:bg-cyan-500/30'
+                : 'bg-amber-500/20 text-amber-200 border-amber-500/40 hover:bg-amber-500/30'
+            }`}
+            title="Toggle between Matrix-Optimized XI and Official Live FPL Lineup"
+          >
+            {lineupMode === 'optimized' ? '⚡ Matrix XI (Auto-Moved)' : '📋 Official FPL XI'}
+          </button>
+        )}
+        <button
+          onClick={onResetToOptimum}
+          className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all shrink-0 cursor-pointer active:scale-95 shadow-sm"
+          title="Switch pitch back to global mathematical optimum"
+        >
+          Reset to Global Optimum
+        </button>
+      </div>
     </div>
   );
 };
+

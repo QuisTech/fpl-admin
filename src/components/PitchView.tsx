@@ -75,25 +75,134 @@ export const PitchView = ({
 }: PitchViewProps) => {
   const [showFixtures, setShowFixtures] = useState(true);
   const [viewMode, setViewMode] = useState<'pitch' | 'list'>('pitch');
+  const [syncedLineupMode, setSyncedLineupMode] = useState<'optimized' | 'official'>('optimized');
 
   const scenarioComp = (data as any)?.engineDiagnostics?.metrics?.scenarioComparison;
   const delta = scenarioComp?.delta;
 
+  const computeOptimizedSyncedLineup = (squadList: ScoredPlayer[]) => {
+    if (!squadList || squadList.length === 0) {
+      return { starters: [], bench: [], captain: null, viceCaptain: null };
+    }
+
+    const gkps = squadList
+      .filter(p => p.position === 'GKP' || p.element_type === 1)
+      .sort((a, b) => (b.score ?? b.xP ?? 0) - (a.score ?? a.xP ?? 0));
+    const defs = squadList
+      .filter(p => p.position === 'DEF' || p.element_type === 2)
+      .sort((a, b) => (b.score ?? b.xP ?? 0) - (a.score ?? a.xP ?? 0));
+    const mids = squadList
+      .filter(p => p.position === 'MID' || p.element_type === 3)
+      .sort((a, b) => (b.score ?? b.xP ?? 0) - (a.score ?? a.xP ?? 0));
+    const fwds = squadList
+      .filter(p => p.position === 'FWD' || p.element_type === 4)
+      .sort((a, b) => (b.score ?? b.xP ?? 0) - (a.score ?? a.xP ?? 0));
+
+    if (gkps.length < 1 || defs.length < 3 || mids.length < 2 || fwds.length < 1) {
+      const hasValidPositions = squadList.some(p => typeof p.position_in_squad === 'number' && p.position_in_squad > 0);
+      const starters = hasValidPositions ? squadList.filter(p => (p.position_in_squad ?? 0) <= 11) : squadList.slice(0, 11);
+      const bench = hasValidPositions ? squadList.filter(p => (p.position_in_squad ?? 0) >= 12) : squadList.slice(11, 15);
+      const captain = starters.find(p => p.isCaptain || p.is_captain) || (starters[0] || null);
+      const viceCaptain = starters.find(p => p.isViceCaptain || p.is_vice_captain) || null;
+      return { starters, bench, captain, viceCaptain };
+    }
+
+    // Base mandatory 1 GKP, 3 DEF, 2 MID, 1 FWD
+    const starters: ScoredPlayer[] = [
+      gkps[0],
+      defs[0], defs[1], defs[2],
+      mids[0], mids[1],
+      fwds[0]
+    ];
+    const starterIdSet = new Set(starters.map(p => p.id));
+
+    const flexPool = [
+      ...defs.slice(3),
+      ...mids.slice(2),
+      ...fwds.slice(1)
+    ].sort((a, b) => (b.score ?? b.xP ?? 0) - (a.score ?? a.xP ?? 0));
+
+    let defCount = 3;
+    let midCount = 2;
+    let fwdCount = 1;
+
+    for (const player of flexPool) {
+      if (starters.length >= 11) break;
+      const pos = player.position || (player.element_type === 2 ? 'DEF' : player.element_type === 3 ? 'MID' : 'FWD');
+      if (pos === 'DEF' && defCount < 5) {
+        starters.push(player);
+        starterIdSet.add(player.id);
+        defCount++;
+      } else if (pos === 'MID' && midCount < 5) {
+        starters.push(player);
+        starterIdSet.add(player.id);
+        midCount++;
+      } else if (pos === 'FWD' && fwdCount < 3) {
+        starters.push(player);
+        starterIdSet.add(player.id);
+        fwdCount++;
+      }
+    }
+
+    const bench = squadList
+      .filter(p => !starterIdSet.has(p.id))
+      .sort((a, b) => {
+        const aIsGk = a.position === 'GKP' || a.element_type === 1;
+        const bIsGk = b.position === 'GKP' || b.element_type === 1;
+        if (aIsGk && !bIsGk) return -1;
+        if (!aIsGk && bIsGk) return 1;
+        return (b.score ?? b.xP ?? 0) - (a.score ?? a.xP ?? 0);
+      });
+
+    const sortedStarters = [...starters].sort((a, b) => (b.score ?? b.xP ?? 0) - (a.score ?? a.xP ?? 0));
+    const capId = sortedStarters[0]?.id;
+    const vcId = sortedStarters[1]?.id;
+
+    const finalStarters = starters.map(p => ({
+      ...p,
+      isCaptain: p.id === capId,
+      is_captain: p.id === capId,
+      isViceCaptain: p.id === vcId,
+      is_vice_captain: p.id === vcId
+    }));
+
+    const finalBench = bench.map(p => ({
+      ...p,
+      isCaptain: false,
+      is_captain: false,
+      isViceCaptain: false,
+      is_vice_captain: false
+    }));
+
+    const captain = finalStarters.find(p => p.id === capId) || null;
+    const viceCaptain = finalStarters.find(p => p.id === vcId) || null;
+
+    return { starters: finalStarters, bench: finalBench, captain, viceCaptain };
+  };
+
   // === Synced Squad Display Logic ===
   const isSyncedView = squadViewSource === 'synced' && syncedData?.squad && syncedData.squad.length > 0;
-
-  // Compute synced formation from syncedData.squad when in synced view
   const rawSquad = syncedData?.squad || [];
+
+  const optimizedSynced = isSyncedView ? computeOptimizedSyncedLineup(rawSquad) : null;
+
   const hasValidPositions = rawSquad.some(p => typeof p.position_in_squad === 'number' && p.position_in_squad > 0);
-  const syncedStarters = isSyncedView
+  const officialStarters = isSyncedView
     ? (hasValidPositions 
         ? rawSquad.filter(p => (p.position_in_squad ?? 0) <= 11)
         : rawSquad.slice(0, 11))
     : [];
-  const syncedBench = isSyncedView
+  const officialBench = isSyncedView
     ? (hasValidPositions
         ? rawSquad.filter(p => (p.position_in_squad ?? 0) >= 12)
         : rawSquad.slice(11, 15))
+    : [];
+
+  const syncedStarters = isSyncedView
+    ? (syncedLineupMode === 'optimized' && optimizedSynced ? optimizedSynced.starters : officialStarters)
+    : [];
+  const syncedBench = isSyncedView
+    ? (syncedLineupMode === 'optimized' && optimizedSynced ? optimizedSynced.bench : officialBench)
     : [];
 
   let syncedGkp = syncedStarters.filter(p => p.position === 'GKP' || p.element_type === 1);
@@ -195,6 +304,8 @@ export const PitchView = ({
           managerName={syncedData?.managerInfo?.managerName}
           teamId={teamId || ''}
           playerCount={syncedData?.squad?.length || 15}
+          lineupMode={syncedLineupMode}
+          onToggleLineupMode={() => setSyncedLineupMode(prev => prev === 'optimized' ? 'official' : 'optimized')}
           onResetToOptimum={onResetToOptimum}
         />
       )}
