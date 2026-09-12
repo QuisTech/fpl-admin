@@ -42,6 +42,7 @@ export interface EliteCohortArchive {
   season: string;
   gameweek: number;
   sample_size: number;
+  is_finalized?: boolean;
   last_updated: number;
   decisions: ManagerGWDecisionSnapshot[];
 }

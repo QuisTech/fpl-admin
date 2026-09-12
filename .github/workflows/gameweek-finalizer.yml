@@ -1,0 +1,56 @@
+name: FPL Post-Gameweek Table Finalizer
+
+permissions:
+  contents: write
+
+on:
+  schedule:
+    # Runs every 30 minutes to catch the exact moment FPL finishes the 10.5M global ranking batch job
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force run finalization regardless of check'
+        required: false
+        default: 'false'
+
+jobs:
+  finalize-gameweek:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: true
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Check If Gameweek Is Done And Dusted
+        id: finalizer
+        env:
+          INPUT_FORCE: ${{ github.event.inputs.force }}
+        run: node scripts/check-gameweek-finalized.cjs
+
+      - name: Install Dependencies
+        if: steps.finalizer.outputs.should_run == 'true'
+        run: npm ci
+
+      - name: Capture Finalized Gameweek Standings
+        if: steps.finalizer.outputs.should_run == 'true'
+        run: npx tsx scripts/capture-top-managers.ts --gw ${{ steps.finalizer.outputs.gw }} --limit 250 --finalized
+
+      - name: Commit and Push Finalized Standings
+        if: steps.finalizer.outputs.should_run == 'true'
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/snapshots/
+          git diff --staged --quiet || git commit -m "Auto-update: Finalized official post-GW${{ steps.finalizer.outputs.gw }} Top Manager Standings [skip ci]"
+          git pull --rebase origin main
+          git push

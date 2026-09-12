@@ -49,7 +49,7 @@ async function detectActiveGameweek(): Promise<{ currentGw: number; season: stri
   return { currentGw: 4, season: '2026-27' };
 }
 
-export async function runCapture(targetGwOverride?: number, sampleLimit: number = 250): Promise<void> {
+export async function runCapture(targetGwOverride?: number, sampleLimit: number = 250, isFinalized: boolean = false): Promise<void> {
   const { currentGw: detectedGw, season } = await detectActiveGameweek();
   const targetGw = targetGwOverride || detectedGw;
 
@@ -191,6 +191,7 @@ export async function runCapture(targetGwOverride?: number, sampleLimit: number 
     season,
     gameweek: targetGw,
     sample_size: decisions.length,
+    is_finalized: isFinalized,
     last_updated: Date.now(),
     decisions
   };
@@ -205,6 +206,7 @@ export async function runCapture(targetGwOverride?: number, sampleLimit: number 
 
   console.log(`\n======================================================`);
   console.log(`✅ Snapshot successfully saved to: ${archivePath}`);
+  console.log(`   Status: ${isFinalized ? 'OFFICIALLY FINALIZED STANDINGS' : 'POST-DEADLINE TACTICAL SNAPSHOT'}`);
   console.log(`   Total Managers Captured: ${decisions.length}`);
   console.log(`   Pure 0-Chip Managers: ${pureZeroChips.length}`);
   console.log(`   TC / BB Chip-Normalized: ${chipNormalized.length}`);
@@ -213,13 +215,14 @@ export async function runCapture(targetGwOverride?: number, sampleLimit: number 
   console.log(`======================================================\n`);
 }
 
-// Support CLI execution: npx tsx scripts/capture-top-managers.ts [--gw 4] [--limit 250]
+// Support CLI execution: npx tsx scripts/capture-top-managers.ts [--gw 4] [--limit 250] [--finalized]
 const isMain = import.meta.url === `file://${process.argv[1]}` || 
                process.argv[1]?.endsWith('capture-top-managers.ts');
 
 if (isMain) {
   let targetGw: number | undefined;
   let limit = 250;
+  const isFinalized = process.argv.includes('--finalized');
 
   for (let i = 2; i < process.argv.length; i++) {
     if (process.argv[i] === '--gw' && process.argv[i + 1]) {
@@ -230,7 +233,7 @@ if (isMain) {
     }
   }
 
-  runCapture(targetGw, limit).catch((err) => {
+  runCapture(targetGw, limit, isFinalized).catch((err) => {
     console.error('Fatal capture error:', err);
     process.exit(1);
   });
