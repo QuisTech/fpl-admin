@@ -194,6 +194,21 @@ export async function runCapture(targetGwOverride?: number, sampleLimit: number 
     fs.mkdirSync(snapshotDir, { recursive: true });
   }
 
+  // Fetch and archive live player points matrix for targetGw
+  try {
+    const liveRes = await axios.get(`${FPL_BASE_URL}/event/${targetGw}/live/`, { headers, timeout: 10000 });
+    if (liveRes.data?.elements && Array.isArray(liveRes.data.elements)) {
+      const ptsMap: Record<number, number> = {};
+      liveRes.data.elements.forEach((el: any) => {
+        ptsMap[el.id] = el.stats?.total_points || 0;
+      });
+      fs.writeFileSync(path.join(snapshotDir, 'player_points.json'), JSON.stringify(ptsMap, null, 2));
+      console.log(`   Saved player_points.json (${Object.keys(ptsMap).length} players)`);
+    }
+  } catch (e: any) {
+    console.warn(`   Could not fetch event ${targetGw} live player points:`, e.message);
+  }
+
   // Strictly deduplicate decisions by manager_id before saving
   const seenDecisionIds = new Set<number>();
   const uniqueDecisions = decisions.filter(d => {
@@ -201,6 +216,55 @@ export async function runCapture(targetGwOverride?: number, sampleLimit: number 
     seenDecisionIds.add(d.manager_id);
     return true;
   });
+
+  // Enrich chips with exact authentic points_deducted using cached/historical points
+  const cachePath = path.resolve(process.cwd(), 'data', 'snapshots', 'chip_deductions_cache.json');
+  let cache: Record<string, number> = {};
+  if (fs.existsSync(cachePath)) {
+    try { cache = JSON.parse(fs.readFileSync(cachePath, 'utf8')); } catch {}
+  }
+
+  const ptsMaps: Record<number, Record<number, number>> = {};
+  for (let gw = 1; gw <= targetGw; gw++) {
+    const pPath = path.resolve(process.cwd(), 'data', 'snapshots', `gw_${gw}`, 'player_points.json');
+    if (fs.existsSync(pPath)) {
+      try { ptsMaps[gw] = JSON.parse(fs.readFileSync(pPath, 'utf8')); } catch {}
+    }
+  }
+
+  for (const d of uniqueDecisions) {
+    for (const chip of (d.chips_used || [])) {
+      if (chip.name === 'bboost' || chip.name === '3xc') {
+        const key = `${d.manager_id}:${chip.event}:${chip.name}`;
+        if (typeof cache[key] === 'number') {
+          (chip as any).points_deducted = cache[key];
+        } else {
+          try {
+            const pRes = await axios.get(`${FPL_BASE_URL}/entry/${d.manager_id}/event/${chip.event}/picks/`, { headers, timeout: 8000 });
+            const pData = pRes.data;
+            const pts = ptsMaps[chip.event] || {};
+            if (chip.name === 'bboost') {
+              const bench = (pData.picks || []).filter((p: any) => p.position >= 12);
+              const benchPts = bench.reduce((sum: number, p: any) => sum + (pts[p.element] || 0), 0);
+              cache[key] = benchPts;
+              (chip as any).points_deducted = benchPts;
+            } else if (chip.name === '3xc') {
+              const cap = (pData.picks || []).find((p: any) => p.is_captain || p.multiplier > 1);
+              const capPts = cap ? (pts[cap.element] || 0) : 0;
+              cache[key] = capPts;
+              (chip as any).points_deducted = capPts;
+            }
+          } catch {
+            (chip as any).points_deducted = 0;
+          }
+        }
+      } else {
+        (chip as any).points_deducted = 0;
+      }
+    }
+  }
+
+  fs.writeFileSync(cachePath, JSON.stringify(cache, null, 2));
 
   const archivePath = path.join(snapshotDir, 'manager_decisions.json');
   const archive: EliteCohortArchive = {
