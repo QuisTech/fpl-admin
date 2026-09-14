@@ -327,6 +327,12 @@ export class ManagerSnapshotService {
         continue;
       }
 
+      // If exact authentic points_deducted is already resolved and stored on the chip
+      if (typeof (chip as any).points_deducted === 'number') {
+        deduction += (chip as any).points_deducted;
+        continue;
+      }
+
       if (chip.name === '3xc') {
         const eventPoints = chip.event === snap.gameweek 
           ? (playerPointsMap || this.loadPlayerPoints(chip.event))
@@ -367,11 +373,10 @@ export class ManagerSnapshotService {
         }
 
         deduction += (benchPts !== null ? benchPts : 15);
-      } else if (chip.name === 'freehit') {
-        deduction += 15; // Average Free Hit haul advantage deduction
-      } else if (chip.name === 'wildcard') {
-        deduction += 10; // Average Wildcard squad optimization advantage deduction
       }
+      // Note: Free Hit and Wildcard do not grant bonus points or extra player slots;
+      // when active in the target gameweek, they are excluded from the organic cohort via the active_chip check.
+      // In subsequent gameweeks, past Free Hit or Wildcard does not incur any deduction.
     }
 
     const normalizedScore = Math.max(0, snap.total_points - deduction);

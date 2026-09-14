@@ -495,9 +495,16 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
                         <span className={`font-mono text-[8.5px] px-1.5 py-0.5 rounded border ${
                           isNorm
                             ? 'bg-sky-500/10 text-sky-400 border-sky-500/20'
-                            : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                            : (m.chips_used && m.chips_used.length > 0)
+                              ? 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20'
+                              : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                         }`}>
-                          {isNorm ? `Normalized (-${m.chip_deduction} pts)` : 'Pure 0-Chips'}
+                          {isNorm 
+                            ? `Normalized (-${m.chip_deduction} pts)` 
+                            : (m.chips_used && m.chips_used.length > 0)
+                              ? `${m.chips_used.map(c => c.name === 'freehit' ? 'FH' : c.name === 'wildcard' ? 'WC' : c.name.toUpperCase()).join('+')} (0 pts deducted)`
+                              : 'Pure 0-Chips'
+                          }
                         </span>
                         <div className="flex items-center gap-1.5 shrink-0">
                           {onSyncTeamId && (

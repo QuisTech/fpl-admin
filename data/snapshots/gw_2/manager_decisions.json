@@ -3,7 +3,7 @@
   "gameweek": 2,
   "sample_size": 50,
   "is_finalized": true,
-  "last_updated": 1789384095362,
+  "last_updated": 1789390362336,
   "decisions": [
     {
       "season": "2026-27",
@@ -19,12 +19,14 @@
         {
           "name": "bboost",
           "time": "2026-08-20T15:16:17.923814Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 30
         },
         {
           "name": "3xc",
           "time": "2026-08-23T19:20:23.727916Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 23
         }
       ],
       "active_chip": "3xc",
@@ -80,7 +82,8 @@
         {
           "name": "bboost",
           "time": "2026-08-21T13:34:42.958037Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 25
         }
       ],
       "active_chip": null,
@@ -136,12 +139,14 @@
         {
           "name": "bboost",
           "time": "2026-07-28T05:52:46.607103Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 20
         },
         {
           "name": "3xc",
           "time": "2026-08-27T08:36:17.063926Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 23
         }
       ],
       "active_chip": "3xc",
@@ -197,12 +202,14 @@
         {
           "name": "bboost",
           "time": "2026-08-20T23:19:54.498903Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 17
         },
         {
           "name": "3xc",
           "time": "2026-08-27T15:54:13.379549Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 23
         }
       ],
       "active_chip": "3xc",
@@ -258,12 +265,14 @@
         {
           "name": "bboost",
           "time": "2026-08-17T04:18:14.715237Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 11
         },
         {
           "name": "3xc",
           "time": "2026-08-23T21:32:45.785309Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 23
         }
       ],
       "active_chip": "3xc",
@@ -319,7 +328,8 @@
         {
           "name": "bboost",
           "time": "2026-07-25T21:30:12.192517Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 43
         }
       ],
       "active_chip": null,
@@ -375,12 +385,14 @@
         {
           "name": "bboost",
           "time": "2026-08-12T21:11:07.699433Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 20
         },
         {
           "name": "3xc",
           "time": "2026-08-25T04:37:47.867412Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 23
         }
       ],
       "active_chip": "3xc",
@@ -436,12 +448,14 @@
         {
           "name": "bboost",
           "time": "2026-08-16T17:56:46.511898Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 41
         },
         {
           "name": "3xc",
           "time": "2026-08-24T11:26:32.976950Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 23
         }
       ],
       "active_chip": "3xc",
@@ -497,12 +511,14 @@
         {
           "name": "bboost",
           "time": "2026-08-11T22:04:58.269680Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 23
         },
         {
           "name": "3xc",
           "time": "2026-08-23T13:43:20.178615Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 23
         }
       ],
       "active_chip": "3xc",
@@ -558,12 +574,14 @@
         {
           "name": "bboost",
           "time": "2026-08-17T17:56:47.915501Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 33
         },
         {
           "name": "3xc",
           "time": "2026-08-28T13:55:41.892487Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 23
         }
       ],
       "active_chip": "3xc",
@@ -619,7 +637,8 @@
         {
           "name": "bboost",
           "time": "2026-08-19T21:27:50.408468Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 23
         }
       ],
       "active_chip": null,
@@ -675,7 +694,8 @@
         {
           "name": "bboost",
           "time": "2026-08-18T20:47:02.498731Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 25
         }
       ],
       "active_chip": null,
@@ -731,12 +751,14 @@
         {
           "name": "bboost",
           "time": "2026-08-20T12:04:55.788357Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 28
         },
         {
           "name": "3xc",
           "time": "2026-08-24T13:04:08.820208Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 23
         }
       ],
       "active_chip": "3xc",
@@ -792,12 +814,14 @@
         {
           "name": "bboost",
           "time": "2026-08-18T10:48:29.889242Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 17
         },
         {
           "name": "3xc",
           "time": "2026-08-28T15:53:22.460374Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 23
         }
       ],
       "active_chip": "3xc",
@@ -853,7 +877,8 @@
         {
           "name": "bboost",
           "time": "2026-08-19T16:23:51.708083Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 33
         }
       ],
       "active_chip": null,
@@ -909,7 +934,8 @@
         {
           "name": "bboost",
           "time": "2026-08-21T14:42:13.714549Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 27
         }
       ],
       "active_chip": null,
@@ -965,12 +991,14 @@
         {
           "name": "bboost",
           "time": "2026-08-11T13:29:11.232987Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 17
         },
         {
           "name": "3xc",
           "time": "2026-08-22T14:46:32.153110Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 23
         }
       ],
       "active_chip": "3xc",
@@ -1026,12 +1054,14 @@
         {
           "name": "bboost",
           "time": "2026-08-16T19:48:16.023337Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 17
         },
         {
           "name": "3xc",
           "time": "2026-08-28T15:18:56.646457Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 23
         }
       ],
       "active_chip": "3xc",
@@ -1087,12 +1117,14 @@
         {
           "name": "bboost",
           "time": "2026-08-21T17:06:02.069090Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 20
         },
         {
           "name": "3xc",
           "time": "2026-08-23T15:14:24.455030Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 23
         }
       ],
       "active_chip": "3xc",
@@ -1148,12 +1180,14 @@
         {
           "name": "bboost",
           "time": "2026-08-14T17:57:31.926299Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 29
         },
         {
           "name": "3xc",
           "time": "2026-08-24T10:21:54.070596Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 23
         }
       ],
       "active_chip": "3xc",
@@ -1209,7 +1243,8 @@
         {
           "name": "bboost",
           "time": "2026-08-28T00:32:39.357239Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 25
         }
       ],
       "active_chip": "bboost",
@@ -1265,7 +1300,8 @@
         {
           "name": "bboost",
           "time": "2026-08-21T15:03:19.196901Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 20
         }
       ],
       "active_chip": null,
@@ -1321,7 +1357,8 @@
         {
           "name": "bboost",
           "time": "2026-08-18T14:46:54.117780Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 11
         }
       ],
       "active_chip": null,
@@ -1377,7 +1414,8 @@
         {
           "name": "bboost",
           "time": "2026-08-18T19:29:56.926066Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 13
         }
       ],
       "active_chip": null,
@@ -1433,7 +1471,8 @@
         {
           "name": "bboost",
           "time": "2026-08-28T16:04:15.965381Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 9
         }
       ],
       "active_chip": "bboost",
@@ -1489,7 +1528,8 @@
         {
           "name": "bboost",
           "time": "2026-08-28T11:08:34.188283Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 36
         }
       ],
       "active_chip": "bboost",
@@ -1545,12 +1585,14 @@
         {
           "name": "bboost",
           "time": "2026-08-17T10:35:20.610101Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 16
         },
         {
           "name": "3xc",
           "time": "2026-08-21T19:11:45.114983Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 23
         }
       ],
       "active_chip": "3xc",
@@ -1606,7 +1648,8 @@
         {
           "name": "bboost",
           "time": "2026-08-17T07:29:33.056386Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 14
         }
       ],
       "active_chip": null,
@@ -1662,12 +1705,14 @@
         {
           "name": "bboost",
           "time": "2026-08-21T06:13:51.018072Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 30
         },
         {
           "name": "3xc",
           "time": "2026-08-26T11:20:10.906838Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 23
         }
       ],
       "active_chip": "3xc",
@@ -1723,7 +1768,8 @@
         {
           "name": "bboost",
           "time": "2026-08-20T15:52:27.186323Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 25
         }
       ],
       "active_chip": null,
@@ -1779,12 +1825,14 @@
         {
           "name": "bboost",
           "time": "2026-08-16T10:50:22.105349Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 17
         },
         {
           "name": "3xc",
           "time": "2026-08-27T20:02:35.149656Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 23
         }
       ],
       "active_chip": "3xc",
@@ -1840,12 +1888,14 @@
         {
           "name": "bboost",
           "time": "2026-08-18T11:09:07.495612Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 29
         },
         {
           "name": "3xc",
           "time": "2026-08-28T15:55:39.814169Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 23
         }
       ],
       "active_chip": "3xc",
@@ -1901,7 +1951,8 @@
         {
           "name": "bboost",
           "time": "2026-08-21T16:50:21.315027Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 28
         }
       ],
       "active_chip": null,
@@ -1957,7 +2008,8 @@
         {
           "name": "bboost",
           "time": "2026-08-21T08:46:52.460439Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 11
         }
       ],
       "active_chip": null,
@@ -2013,7 +2065,8 @@
         {
           "name": "bboost",
           "time": "2026-08-21T15:27:07.023874Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 26
         }
       ],
       "active_chip": null,
@@ -2069,12 +2122,14 @@
         {
           "name": "bboost",
           "time": "2026-08-21T12:06:35.996519Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 34
         },
         {
           "name": "3xc",
           "time": "2026-08-28T08:13:28.091902Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 13
         }
       ],
       "active_chip": "3xc",
@@ -2130,12 +2185,14 @@
         {
           "name": "bboost",
           "time": "2026-08-21T14:11:22.912208Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 19
         },
         {
           "name": "3xc",
           "time": "2026-08-25T17:47:53.834638Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 23
         }
       ],
       "active_chip": "3xc",
@@ -2191,7 +2248,8 @@
         {
           "name": "3xc",
           "time": "2026-08-28T17:13:18.313788Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 23
         }
       ],
       "active_chip": "3xc",
@@ -2247,7 +2305,8 @@
         {
           "name": "bboost",
           "time": "2026-08-21T15:25:16.758301Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 34
         }
       ],
       "active_chip": null,
@@ -2303,7 +2362,8 @@
         {
           "name": "bboost",
           "time": "2026-08-21T15:52:08.764682Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 20
         }
       ],
       "active_chip": null,
@@ -2359,12 +2419,14 @@
         {
           "name": "bboost",
           "time": "2026-08-21T15:05:29.620726Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 12
         },
         {
           "name": "3xc",
           "time": "2026-08-24T11:56:23.828913Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 23
         }
       ],
       "active_chip": "3xc",
@@ -2420,12 +2482,14 @@
         {
           "name": "bboost",
           "time": "2026-08-21T12:32:26.891896Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 12
         },
         {
           "name": "3xc",
           "time": "2026-08-27T12:03:57.888292Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 23
         }
       ],
       "active_chip": "3xc",
@@ -2481,7 +2545,8 @@
         {
           "name": "bboost",
           "time": "2026-08-21T06:18:30.399280Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 15
         }
       ],
       "active_chip": null,
@@ -2537,7 +2602,8 @@
         {
           "name": "bboost",
           "time": "2026-08-24T17:58:15.018707Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 23
         }
       ],
       "active_chip": "bboost",
@@ -2593,7 +2659,8 @@
         {
           "name": "bboost",
           "time": "2026-08-21T21:17:35.349895Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 16
         }
       ],
       "active_chip": "bboost",
@@ -2649,7 +2716,8 @@
         {
           "name": "bboost",
           "time": "2026-08-20T07:56:42.067914Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 26
         }
       ],
       "active_chip": null,
@@ -2705,12 +2773,14 @@
         {
           "name": "bboost",
           "time": "2026-08-19T13:47:16.006622Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 12
         },
         {
           "name": "3xc",
           "time": "2026-08-26T08:41:20.941681Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 23
         }
       ],
       "active_chip": "3xc",
@@ -2766,7 +2836,8 @@
         {
           "name": "bboost",
           "time": "2026-08-21T14:36:22.927629Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 6
         }
       ],
       "active_chip": null,
@@ -2822,12 +2893,14 @@
         {
           "name": "bboost",
           "time": "2026-08-16T05:43:29.861602Z",
-          "event": 1
+          "event": 1,
+          "points_deducted": 21
         },
         {
           "name": "3xc",
           "time": "2026-08-25T15:24:30.019334Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 23
         }
       ],
       "active_chip": "3xc",
@@ -2883,7 +2956,8 @@
         {
           "name": "3xc",
           "time": "2026-08-24T22:09:43.267079Z",
-          "event": 2
+          "event": 2,
+          "points_deducted": 23
         }
       ],
       "active_chip": "3xc",
