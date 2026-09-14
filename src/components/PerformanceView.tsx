@@ -133,6 +133,11 @@ export const PerformanceView = ({ history, fetchLivePoints, reconcileUserSquad, 
 
       // Special handling for the user's real synced squad (stored per fuel e.g. user_synced_squad_native)
       if (key.startsWith('user_synced_squad') || item.isUserSquad) {
+        // If explicit per-fuel user squads exist, ignore the legacy unsuffixed 'user_synced_squad'
+        if (key === 'user_synced_squad' && keys.some(k => k.startsWith('user_synced_squad_'))) {
+          return;
+        }
+
         const itemFuel = item.fuel && item.fuel !== 'user' 
           ? item.fuel 
           : key.includes('native') ? 'native' : key.includes('eye-test') ? 'eye-test' : 'fplform';
@@ -201,12 +206,15 @@ export const PerformanceView = ({ history, fetchLivePoints, reconcileUserSquad, 
       const baseFuel = existingUser.fuel || 'fplform';
       const baseExpected = existingUser.xP || 53.2;
 
-      // Normalize base expected points to FPLForm scale
-      const baseFplformValue = baseFuel === 'native' 
-        ? baseExpected / (nativeAvg / (fplformAvg || 1))
-        : baseFuel === 'eye-test'
-        ? baseExpected / (eyeTestAvg / (fplformAvg || 1))
-        : baseExpected;
+      // Guard against double inflation: if baseExpected is already high (> 70), it's not on FPLForm scale
+      const isAlreadyScaled = baseExpected > 70;
+      const baseFplformValue = isAlreadyScaled
+        ? (baseExpected / (nativeAvg / (fplformAvg || 1)))
+        : (baseFuel === 'native' 
+          ? baseExpected / (nativeAvg / (fplformAvg || 1))
+          : baseFuel === 'eye-test'
+          ? baseExpected / (eyeTestAvg / (fplformAvg || 1))
+          : baseExpected);
 
       const fuelsToEnsure = [
         { f: 'fplform', label: 'FPLForm', mult: 1.0 },

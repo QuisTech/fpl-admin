@@ -18,8 +18,9 @@ async function startServer() {
     next();
   });
 
-  // Body parser for POST requests
-  app.use(express.json());
+  // Body parser for POST requests (support full multi-gameweek snapshot history)
+  app.use(express.json({ limit: '50mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
   // Local API Proxies to the Unified FPLService
 

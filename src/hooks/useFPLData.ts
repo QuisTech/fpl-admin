@@ -383,30 +383,40 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
   const reconcileUserSquad = async (gwId: number): Promise<boolean> => {
     const cleanTeam = typeof teamId === 'string' ? teamId.trim() : (teamId ? String(teamId).trim() : '');
     if (!cleanTeam) return false;
-    // Skip future gameweeks before deadline
-    if (data?.nextEventId && gwId >= data.nextEventId) {
-      return false;
-    }
-    try {
-      // Query official FPL picks specifically for this gameweek (unlocked after deadline)
-      const res = await axios.get(`/api/sync/${cleanTeam}?gw=${gwId}&riskMode=${riskMode}&fuel=${fuel}&userId=${userId}&tier=${tier}`);
-      const squad = res.data?.squad;
-      const managerInfo = res.data?.managerInfo;
-      if (!squad || squad.length < 11) return false;
 
-      const startingXI = squad.filter((p: any) => (p.position_in_squad ?? 0) <= 11);
-      const bench = squad.filter((p: any) => (p.position_in_squad ?? 0) >= 12);
-      const captain = squad.find((p: any) => p.isCaptain || p.is_captain) || (startingXI.length > 0 ? startingXI[0] : null);
-      const viceCaptain = squad.find((p: any) => p.isViceCaptain || p.is_vice_captain);
-      const captainBonus = captain ? (captain.xP || 0) : 0;
-      const startingTotalXp = startingXI.reduce((sum: number, p: any) => sum + (p.xP || 0), 0) + captainBonus;
+    // For past gameweeks whose deadline passed, official picks are queried with ?gw=${gwId}
+    const isPastGw = Boolean(data?.nextEventId && gwId < data.nextEventId);
+    const gwParam = isPastGw ? `&gw=${gwId}` : '';
+
+    try {
+      const fuelsToEval: Array<'fplform' | 'native' | 'eye-test'> = ['fplform', 'native', 'eye-test'];
+      
+      const syncFuelPromises = fuelsToEval.map(f => {
+        return axios.get(`/api/sync/${cleanTeam}?riskMode=${riskMode}&fuel=${f}&userId=${userId}&tier=${tier}${gwParam}`)
+          .then(res => ({ fuel: f, squad: res.data?.squad, managerInfo: res.data?.managerInfo }))
+          .catch(err => {
+            console.warn(`[Reconcile] Notice syncing squad for ${f}:`, err.message);
+            return null;
+          });
+      });
+
+      const syncedResults = await Promise.all(syncFuelPromises);
+      const validResults = syncedResults.filter(Boolean) as Array<{ fuel: 'fplform' | 'native' | 'eye-test'; squad: any[]; managerInfo: any }>;
+      if (validResults.length === 0) return false;
 
       const now = Date.now();
       const currentHistory = { ...history };
       const gwHistory = { ...(currentHistory[gwId] || {}) };
 
-      const fuelsToEval: Array<'fplform' | 'native' | 'eye-test'> = ['fplform', 'native', 'eye-test'];
-      fuelsToEval.forEach(f => {
+      validResults.forEach(({ fuel: f, squad, managerInfo }) => {
+        if (!squad || squad.length < 11) return;
+        const startingXI = squad.filter((p: any) => (p.position_in_squad ?? 0) <= 11);
+        const bench = squad.filter((p: any) => (p.position_in_squad ?? 0) >= 12);
+        const captain = squad.find((p: any) => p.isCaptain || p.is_captain) || (startingXI.length > 0 ? startingXI[0] : null);
+        const viceCaptain = squad.find((p: any) => p.isViceCaptain || p.is_vice_captain);
+        const captainBonus = captain ? (captain.xP || 0) : 0;
+        const startingTotalXp = startingXI.reduce((sum: number, p: any) => sum + (p.xP || 0), 0) + captainBonus;
+
         const userKey = `user_synced_squad_${f}`;
         const existing = gwHistory[userKey];
         gwHistory[userKey] = {
@@ -421,13 +431,13 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
           players: startingXI.map((p: any) => ({
             id: p.id,
             web_name: p.web_name,
-            score: p.xP || p.score || 0,
+            score: Math.round((p.xP || p.score || 0) * 10) / 10,
             position: p.position
           })),
           benchPlayers: bench.map((p: any) => ({
             id: p.id,
             web_name: p.web_name,
-            score: p.xP || p.score || 0,
+            score: Math.round((p.xP || p.score || 0) * 10) / 10,
             position: p.position,
             position_in_squad: p.position_in_squad
           })),
@@ -435,9 +445,12 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
           captainId: captain?.id,
           viceCaptainId: viceCaptain?.id,
           timestamp: now,
-          isReconciled: true
+          isReconciled: isPastGw
         };
       });
+
+      // Purge legacy unsuffixed key
+      delete gwHistory['user_synced_squad'];
 
       currentHistory[gwId] = gwHistory;
       const sanitized = sanitizeHistory(currentHistory);

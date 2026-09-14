@@ -81,7 +81,7 @@ export default async function handler(req: Request, res: Response) {
         history,
         season: season || '2026/27',
         updatedAt: new Date()
-      }, { merge: true });
+      });
 
       return res.json({ success: true, history });
     }
