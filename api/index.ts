@@ -1697,8 +1697,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       const result = await FPLService.getRecommendations(riskMode, budget, tier, fuel, scenario, lockedIds, excludedIds, undefined, skipComparison);
       return res.status(200).json(result);
-    } 
-    
+    }
+
+    if (url.includes('/api/top-manager-insight')) {
+      try {
+        const rawGw = (query.gw as string) || (req.body?.gw as string);
+        const targetGw = rawGw ? parseInt(rawGw, 10) : undefined;
+        const baseData = await FPLService.getBaseData();
+        const effectiveGw = (targetGw && !isNaN(targetGw)) ? targetGw : (baseData.nextEventId || 5);
+        
+        const topManagerInsight = await ManagerSnapshotService.getDynamicTopManagerInsight(baseData.players, effectiveGw);
+        
+        // Edge caching for Vercel Hobby Tier: Cache completed gameweeks aggressively
+        if (effectiveGw < (baseData.nextEventId || 5)) {
+          res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+        } else {
+          res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+        }
+
+        return res.status(200).json({
+          success: true,
+          gameweek: effectiveGw,
+          topManagerInsight
+        });
+      } catch (err: any) {
+        console.error('[TopManagerInsight API] Error:', err.message);
+        return res.status(500).json({ error: err.message });
+      }
+    }
+
     if (url.includes('/api/sync')) {
       const uid = await verifyAuth(req, res);
       if (!uid) return;

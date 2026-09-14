@@ -105,7 +105,7 @@ function FPLApp() {
 
   const isSuperAdmin = (authUser?.email || '').toLowerCase().trim() === 'michquis@gmail.com' || tier === 'admin';
 
-  const handleSync = async (explicitId?: unknown) => {
+  const handleSync = async (explicitId?: unknown, explicitGw?: number) => {
     const cleanExplicit = typeof explicitId === 'string' && explicitId.trim() ? explicitId.trim() : undefined;
     const cleanCurrent = typeof teamId === 'string' ? teamId.trim() : (teamId ? String(teamId).trim() : '');
     const target = cleanExplicit || (cleanCurrent || undefined);
@@ -115,7 +115,7 @@ function FPLApp() {
       alert("Please enter a valid Team ID to sync.");
       return;
     }
-    const success = await syncTeam(target);
+    const success = await syncTeam(target, explicitGw);
     if (success) {
       setSquadViewSource('synced');
       setTab('pitch');
@@ -171,7 +171,7 @@ function FPLApp() {
 
         <Header data={data} riskMode={riskMode} setRiskMode={setRiskMode} fuel={fuel} setFuel={setFuel} authUser={authUser} tier={tier} onOpenAuth={() => setIsAuthModalOpen(true)} onSignOut={() => signOut(auth)} setTeamId={setTeamId} profileTab={profileTab} setProfileTab={setProfileTab} />
 
-        <MetricsColumn data={data} syncedData={syncedData} riskMode={riskMode} tab={tab} onSyncTeamId={(id) => handleSync(id)} />
+        <MetricsColumn data={data} syncedData={syncedData} riskMode={riskMode} tab={tab} onSyncTeamId={(id, gw) => handleSync(id, gw)} />
 
         {/* Primary Content Area */}
         <div className="col-span-12 lg:col-span-6 bg-card-bg border border-fpl-border rounded-3xl overflow-hidden relative shadow-xl min-h-[600px]">

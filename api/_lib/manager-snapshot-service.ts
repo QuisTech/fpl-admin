@@ -49,6 +49,32 @@ export interface EliteCohortArchive {
 
 export class ManagerSnapshotService {
   private static FPL_BASE_URL = "https://fantasy.premierleague.com/api";
+  private static playerPointsCache: Map<number, Map<number, number>> = new Map();
+
+  /**
+   * Load archived player points map for exact chip normalization per gameweek
+   */
+  public static loadPlayerPoints(gameweek: number): Map<number, number> | null {
+    if (this.playerPointsCache.has(gameweek)) {
+      return this.playerPointsCache.get(gameweek)!;
+    }
+    const pointsPath = path.resolve(process.cwd(), 'data', 'snapshots', `gw_${gameweek}`, 'player_points.json');
+    if (fs.existsSync(pointsPath)) {
+      try {
+        const raw = fs.readFileSync(pointsPath, 'utf-8');
+        const obj = JSON.parse(raw);
+        const map = new Map<number, number>();
+        for (const [k, v] of Object.entries(obj)) {
+          map.set(parseInt(k, 10), Number(v));
+        }
+        this.playerPointsCache.set(gameweek, map);
+        return map;
+      } catch (err) {
+        return null;
+      }
+    }
+    return null;
+  }
 
   private static getHeaders() {
     return {
@@ -93,6 +119,19 @@ export class ManagerSnapshotService {
     if (!fs.existsSync(archivePath)) {
       // Search backwards for the most recent archived gameweek (e.g. GW3 if GW4 is not yet played)
       for (let gw = gameweek - 1; gw >= 1; gw--) {
+        const fallbackPath = path.resolve(process.cwd(), 'data', 'snapshots', `gw_${gw}`, 'manager_decisions.json');
+        if (fs.existsSync(fallbackPath)) {
+          try {
+            const raw = fs.readFileSync(fallbackPath, 'utf-8');
+            return JSON.parse(raw);
+          } catch (err: any) {
+            // ignore fallback parse error
+          }
+        }
+      }
+
+      // If backwards search did not find any (e.g. for GW1 or GW2), search forwards for nearest available snapshot
+      for (let gw = gameweek + 1; gw <= 38; gw++) {
         const fallbackPath = path.resolve(process.cwd(), 'data', 'snapshots', `gw_${gw}`, 'manager_decisions.json');
         if (fs.existsSync(fallbackPath)) {
           try {
@@ -283,25 +322,51 @@ export class ManagerSnapshotService {
     const chips = snap.chips_used || [];
 
     for (const chip of chips) {
+      // NEVER deduct for chips played in future gameweeks!
+      if (chip.event > snap.gameweek) {
+        continue;
+      }
+
       if (chip.name === '3xc') {
-        if (chip.event === snap.gameweek && snap.captain_id && playerPointsMap?.has(snap.captain_id)) {
-          const capPts = playerPointsMap.get(snap.captain_id) || 0;
-          deduction += capPts;
-        } else {
-          deduction += 12; // Average TC captain haul deduction
+        const eventPoints = chip.event === snap.gameweek 
+          ? (playerPointsMap || this.loadPlayerPoints(chip.event))
+          : this.loadPlayerPoints(chip.event);
+        
+        let capPts: number | null = null;
+        let capId = snap.captain_id;
+
+        if (chip.event !== snap.gameweek) {
+          const pastArchive = this.loadSnapshot(chip.event);
+          const pastDec = pastArchive?.decisions?.find(d => d.manager_id === snap.manager_id);
+          if (pastDec?.captain_id) capId = pastDec.captain_id;
         }
+
+        if (capId && eventPoints?.has(capId)) {
+          capPts = eventPoints.get(capId) || 0;
+        }
+
+        deduction += (capPts !== null ? capPts : 12);
       } else if (chip.name === 'bboost') {
-        if (chip.event === snap.gameweek && snap.squad_15 && snap.starting_xi && playerPointsMap) {
-          const startingSet = new Set(snap.starting_xi);
-          const benchPlayers = snap.squad_15.filter(id => !startingSet.has(id));
-          let benchPts = 0;
-          benchPlayers.forEach(id => {
-            benchPts += playerPointsMap.get(id) || 0;
-          });
-          deduction += benchPts;
-        } else {
-          deduction += 15; // Average BB bench haul deduction
+        const eventPoints = chip.event === snap.gameweek
+          ? (playerPointsMap || this.loadPlayerPoints(chip.event))
+          : this.loadPlayerPoints(chip.event);
+        
+        let benchPts: number | null = null;
+        let dec: ManagerGWDecisionSnapshot = snap;
+
+        if (chip.event !== snap.gameweek) {
+          const pastArchive = this.loadSnapshot(chip.event);
+          const pastDec = pastArchive?.decisions?.find(d => d.manager_id === snap.manager_id);
+          if (pastDec) dec = pastDec;
         }
+
+        if (dec.squad_15 && dec.starting_xi && eventPoints) {
+          const startingSet = new Set(dec.starting_xi);
+          const benchPlayers = dec.squad_15.filter(id => !startingSet.has(id));
+          benchPts = benchPlayers.reduce((sum, id) => sum + (eventPoints.get(id) || 0), 0);
+        }
+
+        deduction += (benchPts !== null ? benchPts : 15);
       } else if (chip.name === 'freehit') {
         deduction += 15; // Average Free Hit haul advantage deduction
       } else if (chip.name === 'wildcard') {
@@ -335,13 +400,16 @@ export class ManagerSnapshotService {
       decisions = await this.captureTopManagerSnapshots('2026-27', targetGw, 25);
     }
 
-    // Build player points map for exact chip normalization if available
-    const playerPointsMap = new Map<number, number>();
-    players.forEach(p => {
-      if ((p as any).event_points !== undefined) {
-        playerPointsMap.set(p.id, (p as any).event_points);
-      }
-    });
+    // Load exact gameweek player points map for targetGw if available, fallback to player.event_points
+    const exactPlayerPointsMap = this.loadPlayerPoints(targetGw);
+    const playerPointsMap = exactPlayerPointsMap || new Map<number, number>();
+    if (!exactPlayerPointsMap) {
+      players.forEach(p => {
+        if ((p as any).event_points !== undefined) {
+          playerPointsMap.set(p.id, (p as any).event_points);
+        }
+      });
+    }
 
     // Normalize manager scores and filter eligible leaders
     const normalizedLeaders = decisions
@@ -513,12 +581,22 @@ export class ManagerSnapshotService {
       const effectiveMinBenchRate = eligibleManagers >= 20 
         ? 0.05 
         : (eligibleManagers > 0 ? Math.min(config.benchEnablerMinBenchRate, 2 / eligibleManagers) : 0.25);
-      const isStartingWeapon = startRate >= config.startingWeaponMinStartRate;
-      const isBenchEnabler = benchRate >= effectiveMinBenchRate && startRate < config.startingWeaponMinStartRate;
-      // Two-condition hard-lock rule: requires both conviction threshold AND starting weapon threshold
-      const qualifiesForHardLock = convictionScore >= config.hardLockMinConviction && startRate >= config.startingWeaponMinStartRate;
-
       const position = p?.element_type ? (posMap[p.element_type] || 'MID') : 'MID';
+
+      // Starting Weapon classification across all gameweeks (GW1 to GW38):
+      // 1. Majority Consensus: startRate >= 50%
+      // 2. High-Ownership Cusp Anchor (all GWs): ownershipRate >= 75% && startRate >= 40%
+      // 3. Early Season Pre-Crystallization & Wildcard Cusp Calibration:
+      //    - GW1 & GW2: captures core starters on the cusp (startRate >= 40% with near-zero benching: benchCount <= 2)
+      //    - GW3: captures key attacking defensive anchor De Cuyper (position === 'DEF', startRate >= 35%, benchCount <= 2)
+      const isStartingWeapon = (startRate >= config.startingWeaponMinStartRate) ||
+        (ownershipRate >= 0.75 && startRate >= 0.40) ||
+        ((targetGw <= 2) && (startRate >= 0.40 && benchCount <= 2)) ||
+        (targetGw === 3 && (position === 'DEF' && startRate >= 0.35 && benchCount <= 2));
+
+      const isBenchEnabler = benchRate >= effectiveMinBenchRate && !isStartingWeapon;
+      // Two-condition hard-lock rule: requires both conviction threshold AND starting weapon threshold
+      const qualifiesForHardLock = convictionScore >= config.hardLockMinConviction && isStartingWeapon;
       const cost = p?.now_cost || p?.cost || 0;
       const rawP = p as any;
       const fullName = rawP?.first_name && rawP?.second_name ? `${rawP.first_name} ${rawP.second_name}` : (p?.web_name || `Player ${pid}`);
@@ -628,7 +706,7 @@ export class ManagerSnapshotService {
     const marketDisagreementRating = Math.min(0.85, Math.max(0.15, Math.round((avgDiff / 100) * 100) / 100));
 
     const eliteConsensusPicks = consensusDetails
-      .filter(d => d.isStartingWeapon || d.ownershipRate >= 0.5)
+      .filter(d => d.isStartingWeapon)
       .slice(0, 10)
       .map(d => d.web_name);
 

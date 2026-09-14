@@ -458,14 +458,15 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
     }
   };
 
-  const syncTeam = async (overrideTeamId?: unknown) => {
+  const syncTeam = async (overrideTeamId?: unknown, overrideGw?: number) => {
     const cleanOverride = typeof overrideTeamId === 'string' ? overrideTeamId.trim() : (overrideTeamId ? String(overrideTeamId).trim() : '');
     const cleanCurrent = typeof teamId === 'string' ? teamId.trim() : (teamId ? String(teamId).trim() : '');
     const targetId = cleanOverride || cleanCurrent;
     if (!targetId) return false;
     setSyncing(true);
     try {
-      const res = await axios.get(`/api/sync/${targetId}?riskMode=${riskMode}&fuel=${fuel}&scenario=${activeScenario}&userId=${userId}&tier=${tier}`);
+      const gwParam = overrideGw ? `&gw=${overrideGw}` : '';
+      const res = await axios.get(`/api/sync/${targetId}?riskMode=${riskMode}&fuel=${fuel}&scenario=${activeScenario}&userId=${userId}&tier=${tier}${gwParam}`);
       setSyncedData(res.data);
       setError(null);
 

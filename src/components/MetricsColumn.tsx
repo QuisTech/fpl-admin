@@ -7,7 +7,7 @@ interface MetricsColumnProps {
   data: RecommendationResponse | null;
   syncedData?: TeamSyncResponse | null;
   riskMode: 'safe' | 'aggressive' | 'value';
-  onSyncTeamId?: (teamId: string) => void;
+  onSyncTeamId?: (teamId: string, gameweek?: number) => void;
 }
 
 export const MetricsColumn = ({ data, syncedData, riskMode, tab, onSyncTeamId }: MetricsColumnProps & { tab: string }) => {

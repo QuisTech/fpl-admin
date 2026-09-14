@@ -137,6 +137,27 @@ async function startServer() {
     }
   });
 
+  app.all("/api/top-manager-insight", async (req, res) => {
+    try {
+      const rawGw = (req.query.gw || req.body?.gw) as string;
+      const targetGw = rawGw ? parseInt(rawGw, 10) : undefined;
+      const baseData = await FPLService.getBaseData();
+      const effectiveGw = (targetGw && !isNaN(targetGw)) ? targetGw : (baseData.nextEventId || 5);
+
+      const { ManagerSnapshotService } = await import("./api/_lib/manager-snapshot-service");
+      const topManagerInsight = await ManagerSnapshotService.getDynamicTopManagerInsight(baseData.players, effectiveGw);
+
+      res.json({
+        success: true,
+        gameweek: effectiveGw,
+        topManagerInsight
+      });
+    } catch (error: any) {
+      console.error("Local Dev Top Manager Insight Error:", error.message);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.all("/api/sync/:teamId", async (req, res) => {
     try {
       const { teamId } = req.params;

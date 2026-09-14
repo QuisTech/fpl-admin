@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { motion, AnimatePresence } from 'motion/react';
-import { ShieldCheck, AlertTriangle, Code2, HelpCircle, ChevronDown, ChevronUp, Sparkles, Lock, Ban, Crown } from 'lucide-react';
+import { ShieldCheck, AlertTriangle, Code2, HelpCircle, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Sparkles, Lock, Ban, Crown, RefreshCw } from 'lucide-react';
 import { RecommendationResponse } from '../types';
 import { PlayerPhoto } from './PlayerPhoto';
 
 interface EngineDiagnosticsProps {
   data: RecommendationResponse | null;
-  onSyncTeamId?: (teamId: string) => void;
+  onSyncTeamId?: (teamId: string, gameweek?: number) => void;
 }
 
 const formatCost = (cost: number) => (cost > 30 ? (cost / 10).toFixed(1) : cost.toFixed(1));
@@ -30,6 +31,44 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
   const [expandedOmission, setExpandedOmission] = useState<number | null>(null);
   const [cohortTab, setCohortTab] = useState<'all' | 'zero' | 'normalized'>('all');
 
+  const currentGw = data?.nextEventId || 5;
+  const [selectedGw, setSelectedGw] = useState<number>(currentGw);
+  const [insightCache, setInsightCache] = useState<Record<number, any>>(() => {
+    return data?.topManagerInsight ? { [currentGw]: data.topManagerInsight } : {};
+  });
+  const [loadingGw, setLoadingGw] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (data?.topManagerInsight && data?.nextEventId) {
+      setInsightCache(prev => ({
+        ...prev,
+        [data.nextEventId]: data.topManagerInsight
+      }));
+    }
+  }, [data?.topManagerInsight, data?.nextEventId]);
+
+  useEffect(() => {
+    if (insightCache[selectedGw]) return;
+    let isMounted = true;
+    setLoadingGw(true);
+    axios.get(`/api/top-manager-insight?gw=${selectedGw}`)
+      .then(res => {
+        if (isMounted && res.data?.topManagerInsight) {
+          setInsightCache(prev => ({
+            ...prev,
+            [selectedGw]: res.data.topManagerInsight
+          }));
+        }
+      })
+      .catch(err => {
+        console.warn(`Failed to fetch insight for GW${selectedGw}:`, err.message);
+      })
+      .finally(() => {
+        if (isMounted) setLoadingGw(false);
+      });
+    return () => { isMounted = false; };
+  }, [selectedGw, insightCache]);
+
   if (!data?.engineDiagnostics) return null;
 
   const { budgetUsed, budgetLimit, solverStatus, riskMode, activeConstraints, metrics } = data.engineDiagnostics;
@@ -37,7 +76,8 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
   const swapAnalysis = metrics?.swapAnalysis;
   const omissionAnalysis = metrics?.omissionAnalysis || [];
 
-  const topInsight = data.topManagerInsight;
+  const topInsight = insightCache[selectedGw] || (selectedGw === currentGw ? data.topManagerInsight : undefined);
+  const availableGws = Array.from({ length: currentGw }, (_, i) => currentGw - i);
   const eligibleManagers = topInsight?.eligibleManagers || topInsight?.noChipLeaderCount || 1;
 
   const captainSorted = topInsight?.consensusDetails
@@ -248,7 +288,7 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
       )}
 
       {/* Top Manager Intelligence HUD */}
-      {data.topManagerInsight && (
+      {topInsight && (
         <div className="relative z-10 mt-3 pt-3 border-t border-slate-800/80">
           <div className="flex items-center justify-between gap-2 mb-2">
             <div className="flex items-center gap-1.5 text-cyan-400 min-w-0">
@@ -257,17 +297,82 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
                 Top Manager Intelligence
               </span>
             </div>
-            <span className="text-[8.5px] font-mono font-bold text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-2 py-0.5 rounded shrink-0 whitespace-nowrap shadow-sm">
-              Edge: {(() => {
-                const r = data.topManagerInsight.marketDisagreementRating;
-                if (r > 100) return Math.round(r / 100);
-                if (r > 1.0) return Math.round(r);
-                return Math.round(r * 100);
-              })()}%
-            </span>
+            <div className="flex items-center gap-1.5 shrink-0">
+              {loadingGw && (
+                <span className="flex items-center gap-1 text-[8px] font-mono text-cyan-400 bg-cyan-950/60 border border-cyan-500/30 px-1.5 py-0.5 rounded animate-pulse">
+                  <RefreshCw className="w-2.5 h-2.5 animate-spin" /> Fetching...
+                </span>
+              )}
+              <span className="text-[8.5px] font-mono font-bold text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-2 py-0.5 rounded shrink-0 whitespace-nowrap shadow-sm">
+                Edge: {(() => {
+                  const r = topInsight.marketDisagreementRating;
+                  if (r > 100) return Math.round(r / 100);
+                  if (r > 1.0) return Math.round(r);
+                  return Math.round(r * 100);
+                })()}%
+              </span>
+            </div>
           </div>
 
           <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 space-y-2">
+            {/* Gameweek Time Travel Ribbon */}
+            <div className="flex items-center justify-between gap-1.5 p-1.5 bg-slate-950/90 rounded-lg border border-slate-800/80">
+              {/* Chevron Stepper */}
+              <div className="flex items-center gap-0.5 bg-slate-900 border border-slate-800 px-1 py-0.5 rounded-md shadow-inner shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setSelectedGw(prev => Math.max(1, prev - 1))}
+                  disabled={selectedGw <= 1 || loadingGw}
+                  className="p-1 rounded text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  title="Previous Gameweek"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                </button>
+                <div className="flex items-center gap-1 px-1 select-none">
+                  <span className="text-[9.5px] font-mono text-emerald-400 font-bold whitespace-nowrap">
+                    GW {selectedGw}
+                  </span>
+                  {selectedGw === currentGw ? (
+                    <span className="text-[7px] font-mono font-bold uppercase px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      Live
+                    </span>
+                  ) : (
+                    <span className="text-[7px] font-mono font-bold uppercase px-1 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                      Archived
+                    </span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedGw(prev => Math.min(currentGw, prev + 1))}
+                  disabled={selectedGw >= currentGw || loadingGw}
+                  className="p-1 rounded text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  title="Next Gameweek"
+                >
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Quick Gameweek Pills */}
+              <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
+                {availableGws.map(gw => (
+                  <button
+                    key={gw}
+                    type="button"
+                    onClick={() => setSelectedGw(gw)}
+                    disabled={loadingGw}
+                    className={`px-2 py-0.5 rounded text-[8.5px] font-mono transition-all cursor-pointer whitespace-nowrap ${
+                      selectedGw === gw
+                        ? 'bg-fpl-green text-slate-950 font-black shadow-sm'
+                        : 'font-bold text-slate-400 hover:text-white hover:bg-slate-900'
+                    }`}
+                  >
+                    GW{gw}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Filter Tabs Header */}
             <div className="flex flex-col gap-1.5 border-b border-slate-800/60 pb-2">
               <div className="flex items-center justify-between gap-1 text-[10px]">
@@ -281,7 +386,7 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
                         : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 border border-transparent'
                     }`}
                   >
-                    All ({data.topManagerInsight.sampleLeaders.length})
+                    All ({topInsight.sampleLeaders.length})
                   </button>
                   <button
                     type="button"
@@ -292,7 +397,7 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
                         : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 border border-transparent'
                     }`}
                   >
-                    Pure 0-Chips ({data.topManagerInsight.sampleLeaders.filter(m => (!m.chips_used || m.chips_used.length === 0) && !m.chip_deduction).length})
+                    Pure 0-Chips ({topInsight.sampleLeaders.filter(m => (!m.chips_used || m.chips_used.length === 0) && !m.chip_deduction).length})
                   </button>
                   <button
                     type="button"
@@ -303,11 +408,11 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
                         : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 border border-transparent'
                     }`}
                   >
-                    Normalized ({data.topManagerInsight.sampleLeaders.filter(m => Boolean((m.chips_used && m.chips_used.length > 0) || (m.chip_deduction && m.chip_deduction > 0))).length})
+                    Normalized ({topInsight.sampleLeaders.filter(m => Boolean((m.chips_used && m.chips_used.length > 0) || (m.chip_deduction && m.chip_deduction > 0))).length})
                   </button>
                 </div>
 
-                {data.topManagerInsight.sampleLeaders.length > 2 && (
+                {topInsight.sampleLeaders.length > 2 && (
                   <span className="text-[8px] text-slate-500 font-mono hidden sm:block">Scroll for more ▾</span>
                 )}
               </div>
@@ -336,7 +441,7 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
             </div>
 
             <div className="space-y-2 max-h-80 overflow-y-auto pr-1 text-[11px] border border-slate-800/40 rounded-xl p-1 bg-slate-950/40">
-              {data.topManagerInsight.sampleLeaders
+              {topInsight.sampleLeaders
                 .filter(m => {
                   const hasChips = Boolean(
                     (m.chips_used && m.chips_used.length > 0) || 
@@ -397,9 +502,9 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
                         <div className="flex items-center gap-1.5 shrink-0">
                           {onSyncTeamId && (
                             <button
-                              onClick={() => onSyncTeamId(m.entry.toString())}
+                              onClick={() => onSyncTeamId(m.entry.toString(), selectedGw)}
                               className="text-[8.5px] font-black uppercase tracking-wider text-slate-950 bg-fpl-green hover:bg-fpl-green/90 px-2 py-0.5 rounded-md transition-all shadow-[0_0_8px_rgba(0,255,133,0.25)] flex items-center gap-1 cursor-pointer active:scale-95"
-                              title={`Sync Team ID ${m.entry} directly into Horizon and analyze squad`}
+                              title={`Sync Team ID ${m.entry} directly into Horizon and analyze squad as of GW ${selectedGw}`}
                             >
                               ⚡ Sync Squad
                             </button>
@@ -421,7 +526,7 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
             </div>
 
             {/* Split Elite Consensus: Starting Weapons & Bench Enablers */}
-            {data.topManagerInsight.consensusDetails && data.topManagerInsight.consensusDetails.length > 0 ? (
+            {topInsight.consensusDetails && topInsight.consensusDetails.length > 0 ? (
               <div className="pt-2.5 space-y-3 border-t border-slate-800/80">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-black uppercase tracking-wider text-slate-200">
@@ -429,9 +534,9 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
                   </span>
                   <span 
                     className="text-[8.5px] font-mono font-bold text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-2 py-0.5 rounded cursor-help"
-                    title={`Calculated across ${data.topManagerInsight.eligibleManagers || data.topManagerInsight.noChipLeaderCount} active 0-chip elite managers`}
+                    title={`Calculated across ${topInsight.eligibleManagers || topInsight.noChipLeaderCount} active 0-chip elite managers`}
                   >
-                    Elite cohort: {data.topManagerInsight.eligibleManagers || data.topManagerInsight.noChipLeaderCount} managers
+                    Elite cohort: {topInsight.eligibleManagers || topInsight.noChipLeaderCount} managers
                   </span>
                 </div>
 
@@ -605,7 +710,7 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
 
                 {/* Starting Weapons */}
                 {(() => {
-                  const weapons = data.topManagerInsight.consensusDetails.filter(d => d.isStartingWeapon);
+                  const weapons = topInsight.consensusDetails.filter(d => d.isStartingWeapon);
                   if (weapons.length === 0) return null;
                   return (
                     <div className="space-y-1.5">
@@ -652,7 +757,7 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
 
                 {/* Bench Enablers */}
                 {(() => {
-                  const enablers = data.topManagerInsight.consensusDetails
+                  const enablers = topInsight.consensusDetails
                     .filter(d => d.isBenchEnabler)
                     .sort((a, b) => b.benchRate - a.benchRate || a.cost - b.cost || b.squadCount - a.squadCount);
                   if (enablers.length === 0) return null;
@@ -703,7 +808,7 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
               <div className="pt-1">
                 <span className="text-[8px] font-black uppercase text-slate-500 block mb-1">Elite Consensus Picks:</span>
                 <div className="flex flex-wrap gap-1">
-                  {data.topManagerInsight.eliteConsensusPicks.map(pick => (
+                  {topInsight.eliteConsensusPicks.map(pick => (
                     <span key={pick} className="bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 px-1.5 py-0.5 rounded text-[8px] font-mono font-bold">
                       {pick}
                     </span>
