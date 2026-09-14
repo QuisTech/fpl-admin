@@ -190,57 +190,6 @@ export const PerformanceView = ({ history, fetchLivePoints, reconcileUserSquad, 
       }
     });
 
-    // Ensure all 3 fuel evaluations (FPLForm, Native FPL, Eye Test) exist for the user squad if any user squad was captured
-    const allItems = Array.from(combinationMap.values());
-    const existingUser = allItems.find(i => i.isUserSquad);
-    
-    if (existingUser) {
-      const fplformAi = allItems.filter(i => !i.isUserSquad && i.fuel === 'fplform');
-      const nativeAi = allItems.filter(i => !i.isUserSquad && i.fuel === 'native');
-      const eyeTestAi = allItems.filter(i => !i.isUserSquad && i.fuel === 'eye-test');
-
-      const fplformAvg = fplformAi.length > 0 ? fplformAi.reduce((s, i) => s + (i.xP || 0), 0) / fplformAi.length : 54;
-      const nativeAvg = nativeAi.length > 0 ? nativeAi.reduce((s, i) => s + (i.xP || 0), 0) / nativeAi.length : 116;
-      const eyeTestAvg = eyeTestAi.length > 0 ? eyeTestAi.reduce((s, i) => s + (i.xP || 0), 0) / eyeTestAi.length : 84;
-
-      const baseFuel = existingUser.fuel || 'fplform';
-      const baseExpected = existingUser.xP || 53.2;
-
-      // Guard against double inflation: if baseExpected is already high (> 70), it's not on FPLForm scale
-      const isAlreadyScaled = baseExpected > 70;
-      const baseFplformValue = isAlreadyScaled
-        ? (baseExpected / (nativeAvg / (fplformAvg || 1)))
-        : (baseFuel === 'native' 
-          ? baseExpected / (nativeAvg / (fplformAvg || 1))
-          : baseFuel === 'eye-test'
-          ? baseExpected / (eyeTestAvg / (fplformAvg || 1))
-          : baseExpected);
-
-      const fuelsToEnsure = [
-        { f: 'fplform', label: 'FPLForm', mult: 1.0 },
-        { f: 'native', label: 'Native FPL', mult: nativeAvg / (fplformAvg || 1) },
-        { f: 'eye-test', label: 'Eye Test', mult: eyeTestAvg / (fplformAvg || 1) }
-      ] as const;
-
-      fuelsToEnsure.forEach(({ f, label, mult }) => {
-        const uKey = `user_synced_squad_${f}`;
-        if (!combinationMap.has(uKey)) {
-          const scaledXp = Math.round(baseFplformValue * mult * 10) / 10;
-          combinationMap.set(uKey, {
-            ...existingUser,
-            uniqueId: uKey,
-            key: uKey,
-            fuel: f,
-            scenario: 'user',
-            riskMode: 'user',
-            fuelLabel: `My Team (${label})`,
-            xP: scaledXp,
-            isUserSquad: true
-          });
-        }
-      });
-    }
-
     return Array.from(combinationMap.values()).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
   };
 
