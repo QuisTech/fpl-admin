@@ -15,6 +15,7 @@ interface SyncedSquadBannerProps {
   hasConstraints?: boolean;
   onClearConstraints?: () => void;
   transferReplacementsCount?: number;
+  activeScenario?: 'quant' | 'template';
 }
 
 export const SyncedSquadBanner: React.FC<SyncedSquadBannerProps> = ({
@@ -30,6 +31,7 @@ export const SyncedSquadBanner: React.FC<SyncedSquadBannerProps> = ({
   hasConstraints,
   onClearConstraints,
   transferReplacementsCount,
+  activeScenario = 'quant',
 }) => {
   return (
     <div className="w-full mb-2.5 p-2.5 sm:p-3 bg-gradient-to-r from-cyan-950/90 via-slate-950/95 to-slate-900/90 border border-cyan-500/30 rounded-2xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 sm:gap-3 shadow-xl backdrop-blur-md transition-all overflow-hidden">
@@ -94,11 +96,11 @@ export const SyncedSquadBanner: React.FC<SyncedSquadBannerProps> = ({
                     : "text-amber-300"
             )}>
               {(transferReplacementsCount !== undefined && transferReplacementsCount > 0)
-                ? `Matrix XI (${transferReplacementsCount} 8GW Transfer${transferReplacementsCount > 1 ? 's' : ''} Active)`
+                ? `Matrix XI (${activeScenario === 'template' ? 'Template Shield' : 'Quant'} • ${transferReplacementsCount} 8GW Transfer${transferReplacementsCount > 1 ? 's' : ''} Active)`
                 : hasConstraints 
-                  ? 'Matrix XI (Custom Constraints)' 
+                  ? `Matrix XI (${activeScenario === 'template' ? 'Template Shield' : 'Quant'} • Custom Rules)` 
                   : lineupMode === 'optimized' 
-                    ? 'Matrix-Optimized XI Active' 
+                    ? `Matrix-Optimized XI (${activeScenario === 'template' ? 'Template Shield' : 'Quant Optimal'})` 
                     : 'Official FPL Submission Active'}
             </span>
           </div>

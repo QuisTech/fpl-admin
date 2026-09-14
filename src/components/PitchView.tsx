@@ -120,6 +120,12 @@ export const PitchView = ({
         if (!aExcluded && bExcluded) return -1;
         if (aExcluded && !bExcluded) return 1;
 
+        if (activeScenario === 'template') {
+          const aShield = (a.score ?? a.xP ?? 0) + ((a.eo ?? 0) * 0.05);
+          const bShield = (b.score ?? b.xP ?? 0) + ((b.eo ?? 0) * 0.05);
+          return bShield - aShield;
+        }
+
         return (b.score ?? b.xP ?? 0) - (a.score ?? a.xP ?? 0);
       });
     };
@@ -212,6 +218,12 @@ export const PitchView = ({
       const bExcluded = excludedSet.has(b.id);
       if (!aExcluded && bExcluded) return -1;
       if (aExcluded && !bExcluded) return 1;
+
+      if (activeScenario === 'template') {
+        const aShield = (a.score ?? a.xP ?? 0) + ((a.eo ?? 0) * 0.08);
+        const bShield = (b.score ?? b.xP ?? 0) + ((b.eo ?? 0) * 0.08);
+        return bShield - aShield;
+      }
 
       return (b.score ?? b.xP ?? 0) - (a.score ?? a.xP ?? 0);
     });
@@ -323,6 +335,17 @@ export const PitchView = ({
 
           return true;
         }).sort((a, b) => {
+          if (activeScenario === 'template') {
+            // Template Shield: heavily weight consensus EO / template protection + 8GW horizon
+            const aEo = a.eo ?? 0;
+            const bEo = b.eo ?? 0;
+            const a8Gw = a.horizonXP || ((a.xP || 0) * 8);
+            const b8Gw = b.horizonXP || ((b.xP || 0) * 8);
+            const aScore = a8Gw + (aEo * 0.15) + (a.score || a.xP || 0);
+            const bScore = b8Gw + (bEo * 0.15) + (b.score || b.xP || 0);
+            return bScore - aScore;
+          }
+          // Quant Optimal: Pure mathematical expected points over 8GW lookahead
           const a8Gw = a.horizonXP || ((a.xP || 0) * 8);
           const b8Gw = b.horizonXP || ((b.xP || 0) * 8);
           const diff8Gw = b8Gw - a8Gw;
@@ -374,7 +397,7 @@ export const PitchView = ({
     });
 
     return { activeSyncedSquad: workingSquad, activeTransferReplacements: replacementsMap };
-  }, [isSyncedView, syncedData, excludedPlayerIds, data]);
+  }, [isSyncedView, syncedData, excludedPlayerIds, data, activeScenario]);
 
   const rawSquad = activeSyncedSquad;
   const optimizedSynced = isSyncedView ? computeOptimizedSyncedLineup(activeSyncedSquad) : null;
@@ -537,6 +560,7 @@ export const PitchView = ({
           hasConstraints={hasConstraints}
           onClearConstraints={onClearConstraints}
           transferReplacementsCount={activeTransferReplacements.size}
+          activeScenario={activeScenario}
         />
       )}
 

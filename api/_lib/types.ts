@@ -345,5 +345,6 @@ export interface TeamSyncResponse {
   entryHistory?: EntryHistory | null;
   managerInfo?: ManagerInfo | null;
   gameweek?: number;
+  scenario?: 'quant' | 'template';
 }
 

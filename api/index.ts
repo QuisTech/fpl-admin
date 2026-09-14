@@ -922,10 +922,18 @@ export class FPLService {
     return Math.round((localSignal + (0.35 * horizonDelta) + financialBonus + deadWeightBonus) * 10) / 10;
   }
 
-  static generateTransfers(squad: ScoredPlayer[], candidates: ScoredPlayer[], oracle: XPOracle, riskMode: string, gameweek: number, bank: number = 0): TransferRecommendation[] {
+  static generateTransfers(
+    squad: ScoredPlayer[], 
+    candidates: ScoredPlayer[], 
+    oracle: XPOracle, 
+    riskMode: string, 
+    gameweek: number, 
+    bank: number = 0,
+    scenario: 'quant' | 'template' = 'quant'
+  ): TransferRecommendation[] {
     const transfers: TransferRecommendation[] = [];
     const squadIds = new Set(squad.map(p => p.id));
-    const params = getParamsForRiskMode(riskMode, baseWeights);
+    const params = getParamsForRiskMode(riskMode, baseWeights, scenario);
     const enableDiversification = params.enableDefensiveDiversification !== false;
     const maxStandardDef = params.maxStandardDefendersPerTeam ?? 1;
     const maxEliteDef = params.maxEliteDefendersPerTeam ?? 2;
@@ -1043,7 +1051,14 @@ export class FPLService {
     ];
   }
 
-  static async syncTeam(teamId: string, riskMode: string, tier: string = 'free', fuel: string = 'fplform', targetGw?: number): Promise<TeamSyncResponse> {
+  static async syncTeam(
+    teamId: string, 
+    riskMode: string, 
+    tier: string = 'free', 
+    fuel: string = 'fplform', 
+    targetGw?: number,
+    scenario: 'quant' | 'template' = 'quant'
+  ): Promise<TeamSyncResponse> {
     const baseData = await this.getBaseData();
     const currentEvent = targetGw ? targetGw : (baseData.currentEventId || Math.max(1, baseData.nextEventId - 1));
     
@@ -1051,8 +1066,8 @@ export class FPLService {
     const csvFileName = fuel === 'native' ? 'fpl_native.csv' : 'fplform.csv';
     const oracle = OracleFactory.create(`data/${csvFileName}`, baseData.players, fuel, baseData.fixtures, baseData.teams, baseData.nextEventId, riskMode);
 
-    // 2. Fetch live user team & manager metadata (cached in-memory for 2 mins)
-    const picksCacheKey = `team_${teamId}_gw_${currentEvent}`;
+    // 2. Fetch live user team & manager metadata (cached in-memory for 2 mins, keyed by fuel, scenario, riskMode)
+    const picksCacheKey = `team_${teamId}_gw_${currentEvent}_${fuel}_${scenario}_${riskMode}`;
     let teamRes: any;
     let managerInfo: ManagerInfo | null = null;
 
@@ -1249,21 +1264,21 @@ export class FPLService {
       purchasePrices
     };
 
-    const params = getParamsForRiskMode(riskMode, baseWeights);
+    const params = getParamsForRiskMode(riskMode, baseWeights, scenario);
 
     // 3. Execute the Multi-Horizon Beam Search (Only for Grand Cru / Beta Pilot)
     let optimalFirstMove = 'ROLL';
     let bestFutures: any[] = [];
     
     if (tier === 'grandCru' || tier === 'aiAgent' || tier === 'betaPilot' || tier === 'admin') {
-      console.log(`[V3 Engine] Executing Beam Search for Team ${teamId}...`);
+      console.log(`[V3 Engine] Executing Beam Search for Team ${teamId} under ${scenario} scenario...`);
       bestFutures = simulator.simulateHorizon(initialState, oracle, params);
       if (bestFutures.length > 0) {
         optimalFirstMove = bestFutures[0].firstAction || 'ROLL';
       }
     }
 
-    const recommendations = await this.getRecommendations(riskMode, 1000, tier, fuel);
+    const recommendations = await this.getRecommendations(riskMode, 1000, tier, fuel, scenario);
     const candidates = [
       ...recommendations.topPicks.gkp,
       ...recommendations.topPicks.def,
@@ -1290,7 +1305,7 @@ export class FPLService {
       if (optimalFirstMove === 'TRANSFER' && bestFutures.length > 0 && bestFutures[0].firstTransfersIn && bestFutures[0].firstTransfersOut) {
         const ins = bestFutures[0].firstTransfersIn;
         const outs = bestFutures[0].firstTransfersOut;
-        const params = getParamsForRiskMode(riskMode, baseWeights);
+        const params = getParamsForRiskMode(riskMode, baseWeights, scenario);
         // Build team count map for 3-player-per-club constraint in LP transfers
         const lpTeamCounts: Record<number, number> = {};
         myPicks.forEach(p => { lpTeamCounts[p.team] = (lpTeamCounts[p.team] || 0) + 1; });
@@ -1358,10 +1373,10 @@ export class FPLService {
       }
 
       if (transfers.length === 0) {
-        transfers = this.generateTransfers(myPicks, candidates, oracle, riskMode, baseData.nextEventId, bank);
+        transfers = this.generateTransfers(myPicks, candidates, oracle, riskMode, baseData.nextEventId, bank, scenario);
       } else {
         // Append alternative independent swaps and rank the full pool by holistic strategic score
-        const alternativeSwaps = this.generateTransfers(myPicks, candidates, oracle, riskMode, baseData.nextEventId, bank);
+        const alternativeSwaps = this.generateTransfers(myPicks, candidates, oracle, riskMode, baseData.nextEventId, bank, scenario);
         
         const existingSwapSignatures = new Set(transfers.map(t => `${t.out.id}-${t.in.id}`));
         const allCandidates = [...transfers];
@@ -1476,7 +1491,8 @@ export class FPLService {
       totalCost,
       entryHistory,
       managerInfo,
-      gameweek: baseData.nextEventId
+      gameweek: baseData.nextEventId,
+      scenario
     };
   }
 }
@@ -1706,8 +1722,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       const targetGw = req.query?.gw ? parseInt(req.query.gw as string, 10) : undefined;
+      const scenario = (query.scenario === 'template' || req.body?.scenario === 'template' ? 'template' : 'quant') as 'quant' | 'template';
       try {
-        const result = await FPLService.syncTeam(teamId, riskMode, tier, fuel, targetGw);
+        const result = await FPLService.syncTeam(teamId, riskMode, tier, fuel, targetGw, scenario);
         return res.status(200).json(result);
       } catch (err: any) {
         const isNotFound = err.message?.includes('not found') || err.message?.includes('locked');
