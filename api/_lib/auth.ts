@@ -35,3 +35,27 @@ export async function verifyAuth(req: VercelRequest, res: VercelResponse): Promi
     return null;
   }
 }
+
+export async function tryVerifyAuth(req: any): Promise<string | null> {
+  const authHeader = req.headers?.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return null;
+  }
+  const token = authHeader.split('Bearer ')[1];
+  try {
+    if (getApps().length === 0) {
+      initializeApp({
+        credential: cert({
+          projectId: process.env.GOOGLE_CLOUD_PROJECT_ID?.trim() || '',
+          clientEmail: process.env.GOOGLE_CLOUD_CLIENT_EMAIL || '',
+          privateKey: (process.env.GOOGLE_CLOUD_PRIVATE_KEY || '').replace(/\\n/g, '\n')
+        })
+      });
+    }
+    const auth = getAuth();
+    const decodedToken = await auth.verifyIdToken(token);
+    return decodedToken.uid;
+  } catch {
+    return null;
+  }
+}

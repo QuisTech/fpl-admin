@@ -1,5 +1,5 @@
 import { getFirestore, isAdminUser, getUserProfileAndRole } from "../lib/firestore.js";
-import { verifyAuth } from "./_lib/auth.js";
+import { tryVerifyAuth } from "./_lib/auth.js";
 import type { Request, Response } from "express";
 
 export default async function handler(req: Request, res: Response) {
@@ -11,12 +11,7 @@ export default async function handler(req: Request, res: Response) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   
-  let uid: string | null = null;
-  try {
-    uid = await verifyAuth(req as any, res as any);
-  } catch (e) {
-    // ignore
-  }
+  let uid = await tryVerifyAuth(req);
 
   const isLocal = origin.includes('localhost') || !process.env.VERCEL;
   if (!uid) {
