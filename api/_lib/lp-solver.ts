@@ -244,7 +244,8 @@ export function solveStartingXI(
   gameweek: number,
   squadIds: number[],
   params: UtilityParameters = DEFAULT_PARAMETERS,
-  lockedIds?: Set<number>
+  lockedIds?: Set<number>,
+  excludedIds?: Set<number>
 ): number[] {
   // Score each player in the squad for the upcoming gameweek (horizon = 1)
   const scored = squadIds.map(id => {
@@ -254,24 +255,38 @@ export function solveStartingXI(
       id,
       pos,
       isLocked: lockedIds ? lockedIds.has(id) : false,
+      isExcluded: excludedIds ? excludedIds.has(id) : false,
       score: getPlayerScore(oracle, gameweek, id, 1, params)
     };
   });
 
-  const gkps = scored.filter(p => p.pos === 'GKP').sort((a, b) => b.score - a.score);
-  const defs = scored.filter(p => p.pos === 'DEF').sort((a, b) => b.score - a.score);
-  const mids = scored.filter(p => p.pos === 'MID').sort((a, b) => b.score - a.score);
-  const fwds = scored.filter(p => p.pos === 'FWD').sort((a, b) => b.score - a.score);
+  const sortPlayers = (a: typeof scored[0], b: typeof scored[0]) => {
+    // 1. Locked players MUST always be prioritized for Starting XI
+    if (a.isLocked && !b.isLocked) return -1;
+    if (!a.isLocked && b.isLocked) return 1;
+
+    // 2. Excluded players MUST always be deprioritized to bench
+    if (!a.isExcluded && b.isExcluded) return -1;
+    if (a.isExcluded && !b.isExcluded) return 1;
+
+    // 3. Otherwise sort descending by expected utility score
+    return b.score - a.score;
+  };
+
+  const gkps = scored.filter(p => p.pos === 'GKP').sort(sortPlayers);
+  const defs = scored.filter(p => p.pos === 'DEF').sort(sortPlayers);
+  const mids = scored.filter(p => p.pos === 'MID').sort(sortPlayers);
+  const fwds = scored.filter(p => p.pos === 'FWD').sort(sortPlayers);
 
   // Exact FPL formation rules: 1 GKP, 3 DEF, 2 MID, 1 FWD mandatory (7 players)
   if (gkps.length >= 1 && defs.length >= 3 && mids.length >= 2 && fwds.length >= 1) {
-    // 1. Mandatory base: 1 GKP
+    // 1. Mandatory base: 1 GKP (respects locked keeper first, non-excluded, then highest score)
     const starters: typeof scored = [gkps[0]];
 
     // 2. Add all locked consensus outfielders directly into starting XI (respecting FPL max: 5 DEF, 5 MID, 3 FWD)
-    const lockedDefs = defs.filter(p => p.isLocked).slice(0, 5);
-    const lockedMids = mids.filter(p => p.isLocked).slice(0, 5);
-    const lockedFwds = fwds.filter(p => p.isLocked).slice(0, 3);
+    const lockedDefs = defs.filter(p => p.isLocked && !p.isExcluded).slice(0, 5);
+    const lockedMids = mids.filter(p => p.isLocked && !p.isExcluded).slice(0, 5);
+    const lockedFwds = fwds.filter(p => p.isLocked && !p.isExcluded).slice(0, 3);
     starters.push(...lockedDefs, ...lockedMids, ...lockedFwds);
 
     const starterIdSet = new Set(starters.map(p => p.id));
@@ -316,7 +331,7 @@ export function solveStartingXI(
         ...defs.filter(p => !starterIdSet.has(p.id)),
         ...mids.filter(p => !starterIdSet.has(p.id)),
         ...fwds.filter(p => !starterIdSet.has(p.id))
-      ].sort((a, b) => b.score - a.score);
+      ].sort(sortPlayers);
 
       for (const candidate of flexPool) {
         if (starters.length >= 11) break;

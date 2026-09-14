@@ -598,7 +598,7 @@ export class FPLService {
     const buildStartingXI = (squadList: ScoredPlayer[], targetParams = params) => {
       const squadIds = squadList.map(p => p.id);
       try {
-        const xiIds = solveStartingXI(oracle, nextEventId, squadIds, targetParams, activeLockedSet);
+        const xiIds = solveStartingXI(oracle, nextEventId, squadIds, targetParams, activeLockedSet, excludedSet);
         const xiIdSet = new Set(xiIds);
         const starters = squadList.filter(p => xiIdSet.has(p.id));
 
@@ -608,11 +608,13 @@ export class FPLService {
       } catch (err: any) {
         console.warn("[FPLService] solveStartingXI fallback to utility score sort:", err?.message || err);
       }
-      // Failsafe: sort by utility score giving priority boost to active locked consensus picks
+      // Failsafe: sort by utility score giving priority boost to active locked consensus picks and deprioritizing excluded picks
       const consensusPrioritySort = (a: ScoredPlayer, b: ScoredPlayer) => {
-        const aLocked = activeLockedSet.has(a.id) ? 100 : 0;
-        const bLocked = activeLockedSet.has(b.id) ? 100 : 0;
-        return (b.score + bLocked) - (a.score + aLocked);
+        const aLocked = activeLockedSet.has(a.id) ? 1000 : 0;
+        const bLocked = activeLockedSet.has(b.id) ? 1000 : 0;
+        const aExcluded = excludedSet.has(a.id) ? -1000 : 0;
+        const bExcluded = excludedSet.has(b.id) ? -1000 : 0;
+        return (b.score + bLocked + bExcluded) - (a.score + aLocked + aExcluded);
       };
       const g = squadList.filter(p => p.position === "GKP").sort(consensusPrioritySort);
       const d = squadList.filter(p => p.position === "DEF").sort(consensusPrioritySort);
