@@ -33,10 +33,41 @@ export default async function handler(req: Request, res: Response) {
   try {
     if (req.method === 'GET') {
       const doc = await db.collection('user_snapshots').doc(userId).get();
-      if (!doc.exists) {
+      let history = (doc.exists && doc.data()?.history && typeof doc.data()?.history === 'object') ? doc.data()?.history : null;
+
+      // If user doc has no history, check fallbacks:
+      if (!history || Object.keys(history).length === 0) {
+        // 1. Check if user has a profile with a linked fplTeamId
+        try {
+          const profileDoc = await db.collection('user_profiles').doc(userId).get();
+          const profileTeamId = profileDoc.data()?.fplTeamId;
+          if (profileTeamId) {
+            const teamDoc = await db.collection('user_snapshots').doc(`team_${profileTeamId}`).get();
+            if (teamDoc.exists && teamDoc.data()?.history && Object.keys(teamDoc.data()?.history).length > 0) {
+              return res.json({ history: teamDoc.data()?.history });
+            }
+          }
+        } catch (e) {
+          // ignore
+        }
+
+        // 2. Local development fallback: load master team_532002 snapshots
+        const isLocal = origin.includes('localhost') || !process.env.VERCEL;
+        if (isLocal) {
+          try {
+            const masterDoc = await db.collection('user_snapshots').doc('team_532002').get();
+            if (masterDoc.exists && masterDoc.data()?.history && Object.keys(masterDoc.data()?.history).length > 0) {
+              return res.json({ history: masterDoc.data()?.history });
+            }
+          } catch (e) {
+            // ignore
+          }
+        }
+
         return res.json({ history: {} });
       }
-      return res.json({ history: doc.data()?.history || {} });
+
+      return res.json({ history });
     }
 
     if (req.method === 'POST') {

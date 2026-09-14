@@ -30,7 +30,13 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
   const [data, setData] = useState<RecommendationResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [teamId, setTeamId] = useState<string>('');
+  const [teamId, setTeamId] = useState<string>(() => {
+    try {
+      return localStorage.getItem('fpl_optimizer_team_id') || '532002';
+    } catch {
+      return '532002';
+    }
+  });
   const [syncedData, setSyncedData] = useState<TeamSyncResponse | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [tier, setTier] = useState<string>('free');
@@ -51,7 +57,15 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
   const [profileLoaded, setProfileLoaded] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem('fpl_optimizer_history', JSON.stringify(history));
+    if (teamId) {
+      localStorage.setItem('fpl_optimizer_team_id', teamId);
+    }
+  }, [teamId]);
+
+  useEffect(() => {
+    if (history && Object.keys(history).length > 0) {
+      localStorage.setItem('fpl_optimizer_history', JSON.stringify(history));
+    }
   }, [history]);
 
   useEffect(() => {
@@ -97,13 +111,15 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
   useEffect(() => {
     if (authInitialized && userId && profileLoaded) {
       const cleanTeam = typeof teamId === 'string' ? teamId.trim() : (teamId ? String(teamId).trim() : '');
-      const keyToFetch = cleanTeam ? `team_${cleanTeam}` : userId;
+      const keyToFetch = cleanTeam ? `team_${cleanTeam}` : (userId || 'team_532002');
       axios.get(`/api/snapshots?userId=${keyToFetch}`)
         .then(res => {
           const rawHistory = (res.data?.history && typeof res.data.history === 'object') ? res.data.history : {};
           const sanitized = sanitizeHistory(rawHistory);
-          setHistory(sanitized);
-          localStorage.setItem('fpl_optimizer_history', JSON.stringify(sanitized));
+          if (Object.keys(sanitized).length > 0) {
+            setHistory(sanitized);
+            localStorage.setItem('fpl_optimizer_history', JSON.stringify(sanitized));
+          }
         })
         .catch(err => console.warn("[Snapshots API] Backend fetch notice:", err));
     }
