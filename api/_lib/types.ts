@@ -66,6 +66,13 @@ export interface ScoredPlayer extends FPLPlayer {
   multiplier?: number;
   eo?: number;
   ownership?: number;
+  cost?: number;
+  team_id?: number;
+  isTransferIn?: boolean;
+  replacedPlayerName?: string;
+  replacedPlayerId?: number;
+  horizon8GwDelta?: number;
+  xPDelta?: number;
 }
 
 

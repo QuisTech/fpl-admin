@@ -68,12 +68,19 @@ export interface ScoredPlayer extends FPLPlayer {
   isCaptain?: boolean;
   is_captain?: boolean;
   isViceCaptain?: boolean;
+  is_vice_captain?: boolean;
   position_in_squad?: number;
   multiplier?: number;
   eo?: number;
   ownership?: number;
   cost?: number;
   horizonXP?: number;
+  team_id?: number;
+  isTransferIn?: boolean;
+  replacedPlayerName?: string;
+  replacedPlayerId?: number;
+  horizon8GwDelta?: number;
+  xPDelta?: number;
 }
 
 export interface OmissionAnalysis {

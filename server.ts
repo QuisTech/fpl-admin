@@ -96,35 +96,58 @@ async function startServer() {
     }
   });
 
-  app.get("/api/recommendations", async (req, res) => {
+  app.all("/api/recommendations", async (req, res) => {
     try {
-      const riskMode = (req.query.riskMode as string) || 'safe';
-      const budget = req.query.budget ? parseInt(req.query.budget as string) : 1000;
-      const fuel = (req.query.fuel as string) || 'fplform';
-      const userId = (req.query.userId as string) || 'unknown';
-      const tierParam = (req.query.tier as string) || 'ai-agent';
-      
-      // For local dev, use the tier from query parameter, fallback to ai-agent
+      const riskMode = ((req.query.riskMode || req.body?.riskMode) as string) || 'safe';
+      const budget = (req.query.budget || req.body?.budget) ? parseInt((req.query.budget || req.body?.budget) as string) : 1000;
+      const fuel = ((req.query.fuel || req.body?.fuel) as string) || 'fplform';
+      const userId = ((req.query.userId || req.body?.userId) as string) || 'unknown';
+      const tierParam = ((req.query.tier || req.body?.tier) as string) || 'ai-agent';
       const tier = tierParam === 'ai-agent' ? 'ai-agent' : 'free';
+      const scenario = ((req.query.scenario === 'template' || req.body?.scenario === 'template') ? 'template' : 'quant') as 'quant' | 'template';
+
+      const lockedStr = (req.query.locked as string) || req.body?.locked || '';
+      const excludedStr = (req.query.excluded as string) || req.body?.excluded || '';
+      const lockedIds = Array.isArray(req.body?.lockedIds) 
+        ? req.body.lockedIds 
+        : (lockedStr ? lockedStr.split(',').map((s: string) => parseInt(s.trim())).filter((n: number) => !isNaN(n)) : []);
+      const excludedIds = Array.isArray(req.body?.excludedIds) 
+        ? req.body.excludedIds 
+        : (excludedStr ? excludedStr.split(',').map((s: string) => parseInt(s.trim())).filter((n: number) => !isNaN(n)) : []);
+      const skipComparison = req.query.skipComparison === 'true' || req.body?.skipComparison === true;
+      const targetGw = (req.query.gw || req.body?.gw) ? parseInt((req.query.gw || req.body?.gw) as string, 10) : undefined;
       
-      console.log(`[Local Dev] Request: riskMode=${riskMode}, budget=${budget}, fuel=${fuel}, tier=${tier}`);
+      console.log(`[Local Dev] Recommendations: riskMode=${riskMode}, budget=${budget}, fuel=${fuel}, scenario=${scenario}, locked=${lockedIds.length}, excluded=${excludedIds.length}, tier=${tier}`);
       
-      const result = await FPLService.getRecommendations(riskMode, budget, tier, fuel);
+      const result = await FPLService.getRecommendations(
+        riskMode, 
+        budget, 
+        tier, 
+        fuel, 
+        scenario, 
+        lockedIds, 
+        excludedIds, 
+        targetGw, 
+        skipComparison
+      );
       res.json(result);
     } catch (error: any) {
-      console.error("Local Dev Error:", error.message);
+      console.error("Local Dev Recommendations Error:", error.message);
       res.status(500).json({ error: error.message });
     }
   });
 
-  app.get("/api/sync/:teamId", async (req, res) => {
+  app.all("/api/sync/:teamId", async (req, res) => {
     try {
       const { teamId } = req.params;
-      const riskMode = (req.query.riskMode as string) || 'safe';
-      const fuel = (req.query.fuel as string) || 'fplform';
-      const tier = (req.query.tier as string) || 'free';
-      const targetGw = req.query.gw ? parseInt(req.query.gw as string, 10) : undefined;
-      const result = await FPLService.syncTeam(teamId, riskMode, tier, fuel, targetGw);
+      const riskMode = ((req.query.riskMode || req.body?.riskMode) as string) || 'safe';
+      const fuel = ((req.query.fuel || req.body?.fuel) as string) || 'fplform';
+      const tier = ((req.query.tier || req.body?.tier) as string) || 'free';
+      const targetGw = (req.query.gw || req.body?.gw) ? parseInt((req.query.gw || req.body?.gw) as string, 10) : undefined;
+      const scenario = ((req.query.scenario === 'template' || req.body?.scenario === 'template') ? 'template' : 'quant') as 'quant' | 'template';
+
+      console.log(`[Local Dev] Sync: teamId=${teamId}, riskMode=${riskMode}, fuel=${fuel}, scenario=${scenario}, tier=${tier}`);
+      const result = await FPLService.syncTeam(teamId, riskMode, tier, fuel, targetGw, scenario);
       res.json(result);
     } catch (error: any) {
       console.error("Local Dev Sync Error:", error.message);
@@ -152,6 +175,10 @@ async function startServer() {
       console.error("Local Dev Live Error:", error.message);
       res.status(500).json({ error: error.message });
     }
+  });
+
+  app.get("/api/ping", (req, res) => {
+    res.json({ status: "ok", message: "Grand Cru Engine Online" });
   });
 
   // Serve data/ directory as static /data route (backtest results, CSV, etc.)
