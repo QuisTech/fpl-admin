@@ -80,23 +80,20 @@ export const PitchView = ({
   const scenarioComp = (data as any)?.engineDiagnostics?.metrics?.scenarioComparison;
   const delta = scenarioComp?.delta;
 
+  const hasConstraints = (lockedPlayerIds?.length ?? 0) > 0 || (excludedPlayerIds?.length ?? 0) > 0;
+
   const computeOptimizedSyncedLineup = (squadList: ScoredPlayer[]) => {
     if (!squadList || squadList.length === 0) {
       return { starters: [], bench: [], captain: null, viceCaptain: null };
     }
 
-    const gkps = squadList
-      .filter(p => p.position === 'GKP' || p.element_type === 1)
-      .sort((a, b) => (b.score ?? b.xP ?? 0) - (a.score ?? a.xP ?? 0));
-    const defs = squadList
-      .filter(p => p.position === 'DEF' || p.element_type === 2)
-      .sort((a, b) => (b.score ?? b.xP ?? 0) - (a.score ?? a.xP ?? 0));
-    const mids = squadList
-      .filter(p => p.position === 'MID' || p.element_type === 3)
-      .sort((a, b) => (b.score ?? b.xP ?? 0) - (a.score ?? a.xP ?? 0));
-    const fwds = squadList
-      .filter(p => p.position === 'FWD' || p.element_type === 4)
-      .sort((a, b) => (b.score ?? b.xP ?? 0) - (a.score ?? a.xP ?? 0));
+    const lockedSet = new Set(lockedPlayerIds || []);
+    const excludedSet = new Set(excludedPlayerIds || []);
+
+    const gkps = squadList.filter(p => p.position === 'GKP' || p.element_type === 1);
+    const defs = squadList.filter(p => p.position === 'DEF' || p.element_type === 2);
+    const mids = squadList.filter(p => p.position === 'MID' || p.element_type === 3);
+    const fwds = squadList.filter(p => p.position === 'FWD' || p.element_type === 4);
 
     if (gkps.length < 1 || defs.length < 3 || mids.length < 2 || fwds.length < 1) {
       const hasValidPositions = squadList.some(p => typeof p.position_in_squad === 'number' && p.position_in_squad > 0);
@@ -107,58 +104,122 @@ export const PitchView = ({
       return { starters, bench, captain, viceCaptain };
     }
 
-    // Base mandatory 1 GKP, 3 DEF, 2 MID, 1 FWD
-    const starters: ScoredPlayer[] = [
-      gkps[0],
-      defs[0], defs[1], defs[2],
-      mids[0], mids[1],
-      fwds[0]
+    // Rank players within each position respecting user constraints:
+    // 1. Locked players always preferred for Starting XI
+    // 2. Non-excluded players sorted by expected score / xP descending
+    // 3. Excluded players deprioritized to bench (only start if formation demands)
+    const rankPool = (pool: ScoredPlayer[]) => {
+      return [...pool].sort((a, b) => {
+        const aLocked = lockedSet.has(a.id);
+        const bLocked = lockedSet.has(b.id);
+        if (aLocked && !bLocked) return -1;
+        if (!aLocked && bLocked) return 1;
+
+        const aExcluded = excludedSet.has(a.id);
+        const bExcluded = excludedSet.has(b.id);
+        if (!aExcluded && bExcluded) return -1;
+        if (aExcluded && !bExcluded) return 1;
+
+        return (b.score ?? b.xP ?? 0) - (a.score ?? a.xP ?? 0);
+      });
+    };
+
+    const rankedGkps = rankPool(gkps);
+    const rankedDefs = rankPool(defs);
+    const rankedMids = rankPool(mids);
+    const rankedFwds = rankPool(fwds);
+
+    // Pick Goalkeeper: top-ranked GKP starts, second GKP to bench
+    const startingGkp = rankedGkps[0];
+    const benchGkp = rankedGkps.slice(1);
+
+    // All valid FPL outfield formations (DEF, MID, FWD) summing to 10:
+    const formations: [number, number, number][] = [
+      [3, 5, 2],
+      [3, 4, 3],
+      [4, 4, 2],
+      [4, 3, 3],
+      [4, 5, 1],
+      [5, 3, 2],
+      [5, 4, 1],
+      [5, 2, 3]
     ];
-    const starterIdSet = new Set(starters.map(p => p.id));
 
-    const flexPool = [
-      ...defs.slice(3),
-      ...mids.slice(2),
-      ...fwds.slice(1)
-    ].sort((a, b) => (b.score ?? b.xP ?? 0) - (a.score ?? a.xP ?? 0));
+    let bestScore = -Infinity;
+    let bestStarters: ScoredPlayer[] = [];
 
-    let defCount = 3;
-    let midCount = 2;
-    let fwdCount = 1;
+    for (const [dCount, mCount, fCount] of formations) {
+      if (dCount > defs.length || mCount > mids.length || fCount > fwds.length) {
+        continue;
+      }
 
-    for (const player of flexPool) {
-      if (starters.length >= 11) break;
-      const pos = player.position || (player.element_type === 2 ? 'DEF' : player.element_type === 3 ? 'MID' : 'FWD');
-      if (pos === 'DEF' && defCount < 5) {
-        starters.push(player);
-        starterIdSet.add(player.id);
-        defCount++;
-      } else if (pos === 'MID' && midCount < 5) {
-        starters.push(player);
-        starterIdSet.add(player.id);
-        midCount++;
-      } else if (pos === 'FWD' && fwdCount < 3) {
-        starters.push(player);
-        starterIdSet.add(player.id);
-        fwdCount++;
+      const selDefs = rankedDefs.slice(0, dCount);
+      const selMids = rankedMids.slice(0, mCount);
+      const selFwds = rankedFwds.slice(0, fCount);
+      const outfieldStarters = [...selDefs, ...selMids, ...selFwds];
+      const allStarters = [startingGkp, ...outfieldStarters];
+      const starterIdSet = new Set(allStarters.map(p => p.id));
+
+      // Heavily penalize leaving locked players out of Starting XI
+      let lockedPenalty = 0;
+      squadList.forEach(p => {
+        if (lockedSet.has(p.id) && !starterIdSet.has(p.id)) {
+          lockedPenalty += 10000;
+        }
+      });
+
+      // Heavily penalize putting excluded players into Starting XI
+      let excludedPenalty = 0;
+      allStarters.forEach(p => {
+        if (excludedSet.has(p.id)) {
+          excludedPenalty += 10000;
+        }
+      });
+
+      const totalXP = allStarters.reduce((sum, p) => sum + (p.score ?? p.xP ?? 0), 0);
+      const fitness = totalXP - lockedPenalty - excludedPenalty;
+
+      if (fitness > bestScore) {
+        bestScore = fitness;
+        bestStarters = allStarters;
       }
     }
 
-    const bench = squadList
-      .filter(p => !starterIdSet.has(p.id))
+    const starterIdSet = new Set(bestStarters.map(p => p.id));
+
+    // Bench: remaining outfielders sorted (non-excluded by score desc, then excluded by score desc)
+    const outfieldBench = squadList
+      .filter(p => !starterIdSet.has(p.id) && p.position !== 'GKP' && p.element_type !== 1)
       .sort((a, b) => {
-        const aIsGk = a.position === 'GKP' || a.element_type === 1;
-        const bIsGk = b.position === 'GKP' || b.element_type === 1;
-        if (aIsGk && !bIsGk) return -1;
-        if (!aIsGk && bIsGk) return 1;
+        const aExcluded = excludedSet.has(a.id);
+        const bExcluded = excludedSet.has(b.id);
+        if (!aExcluded && bExcluded) return -1;
+        if (aExcluded && !bExcluded) return 1;
         return (b.score ?? b.xP ?? 0) - (a.score ?? a.xP ?? 0);
       });
 
-    const sortedStarters = [...starters].sort((a, b) => (b.score ?? b.xP ?? 0) - (a.score ?? a.xP ?? 0));
-    const capId = sortedStarters[0]?.id;
-    const vcId = sortedStarters[1]?.id;
+    const bench = [...benchGkp, ...outfieldBench];
 
-    const finalStarters = starters.map(p => ({
+    // Determine Captain and Vice-Captain from Starters:
+    // Prioritize non-excluded starters with highest expected points
+    const captainCandidates = [...bestStarters].sort((a, b) => {
+      const aLocked = lockedSet.has(a.id);
+      const bLocked = lockedSet.has(b.id);
+      if (aLocked && !bLocked) return -1;
+      if (!aLocked && bLocked) return 1;
+
+      const aExcluded = excludedSet.has(a.id);
+      const bExcluded = excludedSet.has(b.id);
+      if (!aExcluded && bExcluded) return -1;
+      if (aExcluded && !bExcluded) return 1;
+
+      return (b.score ?? b.xP ?? 0) - (a.score ?? a.xP ?? 0);
+    });
+
+    const capId = captainCandidates[0]?.id;
+    const vcId = captainCandidates[1]?.id;
+
+    const finalStarters = bestStarters.map(p => ({
       ...p,
       isCaptain: p.id === capId,
       is_captain: p.id === capId,
@@ -198,11 +259,12 @@ export const PitchView = ({
         : rawSquad.slice(11, 15))
     : [];
 
+  // When constraints exist (locks/excludes), always use optimizedSynced to reflect user lineup intent
   const syncedStarters = isSyncedView
-    ? (syncedLineupMode === 'optimized' && optimizedSynced ? optimizedSynced.starters : officialStarters)
+    ? ((syncedLineupMode === 'optimized' || hasConstraints) && optimizedSynced ? optimizedSynced.starters : officialStarters)
     : [];
   const syncedBench = isSyncedView
-    ? (syncedLineupMode === 'optimized' && optimizedSynced ? optimizedSynced.bench : officialBench)
+    ? ((syncedLineupMode === 'optimized' || hasConstraints) && optimizedSynced ? optimizedSynced.bench : officialBench)
     : [];
 
   let syncedGkp = syncedStarters.filter(p => p.position === 'GKP' || p.element_type === 1);
@@ -236,7 +298,6 @@ export const PitchView = ({
   data?.topPicks?.mid?.forEach(p => allPlayersMap.set(p.id, p));
   data?.topPicks?.fwd?.forEach(p => allPlayersMap.set(p.id, p));
 
-  const hasConstraints = lockedPlayerIds.length > 0 || excludedPlayerIds.length > 0;
   const benchPlayers = displayBench;
 
   // Matchday & Squad Diagnostics Calculations
@@ -321,6 +382,8 @@ export const PitchView = ({
           onResetToOptimum={onResetToOptimum}
           latestPoints={liveLatestPoints}
           overallRank={liveOverallRank}
+          hasConstraints={hasConstraints}
+          onClearConstraints={onClearConstraints}
         />
       )}
 
