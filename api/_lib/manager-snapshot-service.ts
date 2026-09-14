@@ -50,6 +50,27 @@ export interface EliteCohortArchive {
 export class ManagerSnapshotService {
   private static FPL_BASE_URL = "https://fantasy.premierleague.com/api";
   private static playerPointsCache: Map<number, Map<number, number>> = new Map();
+  private static chipDeductionsCache: Record<string, number> | null = null;
+
+  /**
+   * Look up exact precomputed chip deduction from the global archive cache
+   */
+  public static getCachedChipDeduction(managerId: number, event: number, chipName: string): number | null {
+    if (this.chipDeductionsCache === null) {
+      const cachePath = path.resolve(process.cwd(), 'data', 'snapshots', 'chip_deductions_cache.json');
+      if (fs.existsSync(cachePath)) {
+        try {
+          this.chipDeductionsCache = JSON.parse(fs.readFileSync(cachePath, 'utf8'));
+        } catch {
+          this.chipDeductionsCache = {};
+        }
+      } else {
+        this.chipDeductionsCache = {};
+      }
+    }
+    const key = `${managerId}:${event}:${chipName}`;
+    return typeof this.chipDeductionsCache[key] === 'number' ? this.chipDeductionsCache[key] : null;
+  }
 
   /**
    * Load archived player points map for exact chip normalization per gameweek
@@ -156,55 +177,12 @@ export class ManagerSnapshotService {
   /**
    * Look up a manager profile by ID from archived decisions or fallback cohort
    */
-  public static getLeaderProfile(managerId: number, targetGw: number = 3): ManagerGWDecisionSnapshot | null {
+  public static getLeaderProfile(managerId: number, targetGw: number = 4): ManagerGWDecisionSnapshot | null {
     const archive = this.loadSnapshot(targetGw);
     if (archive?.decisions) {
-      const match = archive.decisions.find(d => d.manager_id === managerId);
-      if (match) return match;
+      return archive.decisions.find(d => d.manager_id === managerId) || null;
     }
-    const defaults: ManagerGWDecisionSnapshot[] = [
-      {
-        season: '2026-27',
-        gameweek: targetGw,
-        manager_id: 4148445,
-        manager_name: "Abhishek Raj",
-        team_name: "Gunnerball",
-        overall_rank: 587,
-        total_points: 273,
-        chips_used: [],
-        active_chip: null,
-        squad_15: [1, 279, 8, 391, 426, 399, 368, 15, 154, 165, 379, 497, 272, 233, 377],
-        starting_xi: [1, 279, 8, 391, 426, 399, 368, 15, 154, 165, 379],
-        captain_id: 379,
-        vice_captain_id: 399,
-        transfers_in: [8, 399],
-        transfers_out: [],
-        bank: 0,
-        team_value: 1000,
-        timestamp: Date.now()
-      },
-      {
-        season: '2026-27',
-        gameweek: targetGw,
-        manager_id: 5662742,
-        manager_name: "Tony Elliott",
-        team_name: "Shetland Tonys",
-        overall_rank: 956,
-        total_points: 270,
-        chips_used: [],
-        active_chip: null,
-        squad_15: [28, 115, 391, 8, 368, 426, 15, 399, 154, 379, 464, 497, 165, 31, 508],
-        starting_xi: [28, 115, 391, 8, 368, 426, 15, 399, 154, 379, 464],
-        captain_id: 399,
-        vice_captain_id: 464,
-        transfers_in: [368, 399],
-        transfers_out: [],
-        bank: 0,
-        team_value: 1000,
-        timestamp: Date.now()
-      }
-    ];
-    return defaults.find(d => d.manager_id === managerId) || null;
+    return null;
   }
 
   /**
@@ -327,12 +305,20 @@ export class ManagerSnapshotService {
         continue;
       }
 
-      // If exact authentic points_deducted is already resolved and stored on the chip
+      // 1. If exact authentic points_deducted is already resolved and stored on the chip
       if (typeof (chip as any).points_deducted === 'number') {
         deduction += (chip as any).points_deducted;
         continue;
       }
 
+      // 2. Check disk cache of authentic historical deductions
+      const cached = this.getCachedChipDeduction(snap.manager_id, chip.event, chip.name);
+      if (cached !== null) {
+        deduction += cached;
+        continue;
+      }
+
+      // 3. Dynamic derivation fallback for live un-cached events
       if (chip.name === '3xc') {
         const eventPoints = chip.event === snap.gameweek 
           ? (playerPointsMap || this.loadPlayerPoints(chip.event))
@@ -351,14 +337,14 @@ export class ManagerSnapshotService {
           capPts = eventPoints.get(capId) || 0;
         }
 
-        deduction += (capPts !== null ? capPts : 12);
+        deduction += (capPts !== null ? capPts : 0);
       } else if (chip.name === 'bboost') {
         const eventPoints = chip.event === snap.gameweek
           ? (playerPointsMap || this.loadPlayerPoints(chip.event))
           : this.loadPlayerPoints(chip.event);
         
         let benchPts: number | null = null;
-        let dec: ManagerGWDecisionSnapshot = snap;
+        let dec: ManagerGWDecisionSnapshot | null = chip.event === snap.gameweek ? snap : null;
 
         if (chip.event !== snap.gameweek) {
           const pastArchive = this.loadSnapshot(chip.event);
@@ -366,13 +352,13 @@ export class ManagerSnapshotService {
           if (pastDec) dec = pastDec;
         }
 
-        if (dec.squad_15 && dec.starting_xi && eventPoints) {
+        if (dec && dec.squad_15 && dec.starting_xi && eventPoints) {
           const startingSet = new Set(dec.starting_xi);
           const benchPlayers = dec.squad_15.filter(id => !startingSet.has(id));
           benchPts = benchPlayers.reduce((sum, id) => sum + (eventPoints.get(id) || 0), 0);
         }
 
-        deduction += (benchPts !== null ? benchPts : 15);
+        deduction += (benchPts !== null ? benchPts : 0);
       }
       // Note: Free Hit and Wildcard do not grant bonus points or extra player slots;
       // when active in the target gameweek, they are excluded from the organic cohort via the active_chip check.
@@ -435,50 +421,28 @@ export class ManagerSnapshotService {
 
     let leadersToUse = normalizedLeaders.length > 0 ? normalizedLeaders : decisions;
 
-    // Fallback if no snapshots captured yet (authentic top 2 0-chip managers baseline)
+    // Fallback if target gameweek snapshot not yet available: dynamically load latest available archived cohort
     if (leadersToUse.length === 0) {
-      leadersToUse = [
-        {
-          season: '2026-27',
-          gameweek: targetGw,
-          manager_id: 4148445,
-          manager_name: "Abhishek Raj",
-          team_name: "Gunnerball",
-          overall_rank: 587,
-          total_points: 273,
-          chips_used: [],
-          active_chip: null,
-          squad_15: [1, 279, 8, 391, 426, 399, 368, 15, 154, 165, 379, 497, 272, 233, 377],
-          starting_xi: [1, 279, 8, 391, 426, 399, 368, 15, 154, 165, 379],
-          captain_id: 379,
-          vice_captain_id: 399,
-          transfers_in: [8, 399],
-          transfers_out: [],
-          bank: 0,
-          team_value: 1000,
-          timestamp: Date.now()
-        },
-        {
-          season: '2026-27',
-          gameweek: targetGw,
-          manager_id: 5662742,
-          manager_name: "Tony Elliott",
-          team_name: "Shetland Tonys",
-          overall_rank: 956,
-          total_points: 270,
-          chips_used: [],
-          active_chip: null,
-          squad_15: [28, 115, 391, 8, 368, 426, 15, 399, 154, 379, 464, 497, 165, 31, 508],
-          starting_xi: [28, 115, 391, 8, 368, 426, 15, 399, 154, 379, 464],
-          captain_id: 399,
-          vice_captain_id: 464,
-          transfers_in: [368, 399],
-          transfers_out: [],
-          bank: 0,
-          team_value: 1000,
-          timestamp: Date.now()
+      for (let gw = 38; gw >= 1; gw--) {
+        const fallbackArchive = this.loadSnapshot(gw);
+        if (fallbackArchive?.decisions && fallbackArchive.decisions.length > 0) {
+          const fbDecisions = fallbackArchive.decisions;
+          const fbPoints = this.loadPlayerPoints(gw) || new Map<number, number>();
+          leadersToUse = fbDecisions
+            .map(d => {
+              const norm = this.calculateNormalizedScore(d, fbPoints);
+              return {
+                ...d,
+                normalized_total_points: norm.normalizedScore,
+                chip_deduction: norm.chipDeduction,
+                is_chip_normalized: norm.chipDeduction > 0,
+                is_eligible_cohort: norm.isEligibleForCohort
+              };
+            })
+            .filter(d => d.is_eligible_cohort);
+          if (leadersToUse.length > 0) break;
         }
-      ];
+      }
     }
 
     // Deduplicate leaders by manager_id to ensure strictly unique entries
@@ -588,16 +552,16 @@ export class ManagerSnapshotService {
         : (eligibleManagers > 0 ? Math.min(config.benchEnablerMinBenchRate, 2 / eligibleManagers) : 0.25);
       const position = p?.element_type ? (posMap[p.element_type] || 'MID') : 'MID';
 
-      // Starting Weapon classification across all gameweeks (GW1 to GW38):
+      // Universal Starting Weapon classification across all gameweeks (GW1 to GW38):
       // 1. Majority Consensus: startRate >= 50%
-      // 2. High-Ownership Cusp Anchor (all GWs): ownershipRate >= 75% && startRate >= 40%
-      // 3. Early Season Pre-Crystallization & Wildcard Cusp Calibration:
-      //    - GW1 & GW2: captures core starters on the cusp (startRate >= 40% with near-zero benching: benchCount <= 2)
-      //    - GW3: captures key attacking defensive anchor De Cuyper (position === 'DEF', startRate >= 35%, benchCount <= 2)
+      // 2. High-Ownership Cusp Anchor: ownershipRate >= 75% && startRate >= 40%
+      // 3. High-Conviction Core Starters on the Cusp (Near-Zero Benching):
+      //    - Outfield core starters with startRate >= 40% and near-zero benching (benchCount <= 2)
+      //    - Key defensive pillars with startRate >= 35% and near-zero benching (benchCount <= 2)
       const isStartingWeapon = (startRate >= config.startingWeaponMinStartRate) ||
         (ownershipRate >= 0.75 && startRate >= 0.40) ||
-        ((targetGw <= 2) && (startRate >= 0.40 && benchCount <= 2)) ||
-        (targetGw === 3 && (position === 'DEF' && startRate >= 0.35 && benchCount <= 2));
+        (startRate >= 0.40 && benchCount <= 2) ||
+        (position === 'DEF' && startRate >= 0.35 && benchCount <= 2);
 
       const isBenchEnabler = benchRate >= effectiveMinBenchRate && !isStartingWeapon;
       // Two-condition hard-lock rule: requires both conviction threshold AND starting weapon threshold
@@ -723,14 +687,11 @@ export class ManagerSnapshotService {
       eligibleManagers,
       pureZeroChipCount,
       normalizedChipCount,
-      sampleLeaders: sampleLeaders.length > 0 ? sampleLeaders : [
-        { rank: 587, entry: 4148445, manager_name: "Abhishek Raj", team_name: "Gunnerball", total_points: 273 },
-        { rank: 956, entry: 5662742, manager_name: "Tony Elliott", team_name: "Shetland Tonys", total_points: 270 }
-      ],
+      sampleLeaders,
       marketDisagreementRating,
-      eliteConsensusPicks: eliteConsensusPicks.length > 0 ? eliteConsensusPicks : [
-        "Gvardiol", "Calafiori", "Palmer", "B.Fernandes", "Szoboszlai", "Ødegaard", "Cherki", "João Pedro", "Isak"
-      ],
+      eliteConsensusPicks: eliteConsensusPicks.length > 0 
+        ? eliteConsensusPicks 
+        : consensusDetails.slice(0, 10).map(d => d.web_name),
       consensusDetails,
       consensusCaptain,
       consensusViceCaptain,
