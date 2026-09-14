@@ -66,10 +66,20 @@ async function startServer() {
 
   app.all("/api/snapshots*", async (req, res) => {
     try {
-      const handler = (await import("./api/index")).default;
+      const handler = (await import("./api/snapshots")).default;
       await handler(req as any, res as any);
     } catch (error: any) {
       console.error("Local Dev Snapshots Error:", error.message);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.all("/api/decision-logs*", async (req, res) => {
+    try {
+      const handler = (await import("./api/decision-logs")).default;
+      await handler(req as any, res as any);
+    } catch (error: any) {
+      console.error("Local Dev Decision Logs Error:", error.message);
       res.status(500).json({ error: error.message });
     }
   });

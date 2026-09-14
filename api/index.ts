@@ -1890,6 +1890,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return handleAutoSnapshot(req, res);
     }
 
+    if (url.includes('/api/snapshots')) {
+      const snapshotsHandler = (await import("./snapshots.js")).default;
+      return snapshotsHandler(req as any, res as any);
+    }
+
     if (url.includes('/api/ping')) {
       return res.status(200).json({ status: "ok", message: "Grand Cru Engine Online" });
     }
