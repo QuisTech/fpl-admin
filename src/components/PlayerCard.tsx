@@ -11,6 +11,8 @@ interface PlayerCardProps {
   consensusCaptainRate?: number;
   isLocked?: boolean;
   isExcluded?: boolean;
+  isTransferIn?: boolean;
+  replacedPlayerName?: string;
   onToggleLock?: (id: number) => void;
   onToggleExclude?: (id: number) => void;
   compact?: boolean;
@@ -84,6 +86,8 @@ export const PlayerCard = ({
   consensusCaptainRate,
   isLocked, 
   isExcluded, 
+  isTransferIn,
+  replacedPlayerName,
   onToggleLock, 
   onToggleExclude, 
   compact = false,
@@ -198,6 +202,16 @@ export const PlayerCard = ({
           className="absolute -top-1.5 -right-1 sm:-top-2 sm:-right-1.5 z-30 flex items-center justify-center w-4.5 h-4.5 sm:w-5 sm:h-5 rounded-full bg-amber-400 text-slate-950 shadow-md font-bold"
         >
           <Lock className="w-2.5 h-2.5 sm:w-3 sm:h-3 stroke-[2.5]" />
+        </div>
+      )}
+
+      {/* 8GW Engine Transfer Target Badge */}
+      {(isTransferIn || (player as any).isTransferIn) && !isLocked && (
+        <div 
+          title={`Engine 8GW Transfer: Replaces ${replacedPlayerName || (player as any).replacedPlayerName || 'Excluded Player'} (${(player as any).horizon8GwDelta !== undefined ? (((player as any).horizon8GwDelta > 0 ? '+' : '') + (player as any).horizon8GwDelta + ' xP 8GW') : ''})`}
+          className="absolute -top-1.5 -right-1 sm:-top-2 sm:-right-1.5 z-30 flex items-center justify-center w-4.5 h-4.5 sm:w-5.5 sm:h-5.5 rounded-full bg-emerald-500 text-slate-950 border-2 border-slate-950 shadow-md font-black text-[9px] sm:text-[10px] animate-pulse"
+        >
+          <span>🔄</span>
         </div>
       )}
 
@@ -377,6 +391,22 @@ export const PlayerCard = ({
             <span className="text-slate-400">Value Efficiency:</span>
             <span className="text-amber-400 font-mono">{((player.xP || 0) / (player.now_cost / 10)).toFixed(2)} xP/£M</span>
           </div>
+          {(isTransferIn || (player as any).isTransferIn) && (
+            <div className="flex flex-col py-1 px-2 rounded-lg bg-emerald-950/70 border border-emerald-500/40 text-[8.5px] mt-1 space-y-0.5">
+              <div className="flex items-center justify-between text-emerald-300 font-bold">
+                <span className="flex items-center gap-1">🔄 8GW Transfer In</span>
+                <span className="font-mono font-black text-emerald-400">
+                  {(player as any).horizon8GwDelta !== undefined 
+                    ? `${(player as any).horizon8GwDelta > 0 ? '+' : ''}${(player as any).horizon8GwDelta} xP 8GW`
+                    : 'Optimal Target'}
+                </span>
+              </div>
+              <div className="text-slate-400 text-[7.5px] flex items-center justify-between">
+                <span>Replaces:</span>
+                <span className="text-white font-bold">{replacedPlayerName || (player as any).replacedPlayerName || 'Excluded Player'}</span>
+              </div>
+            </div>
+          )}
           {isConsensusCaptain && (
             <div className="flex items-center justify-between py-1 px-2 rounded-lg bg-purple-950/60 border border-purple-500/30 text-[8.5px] mt-1">
               <span className="text-purple-300 font-bold flex items-center gap-1">👑 Elite Consensus</span>

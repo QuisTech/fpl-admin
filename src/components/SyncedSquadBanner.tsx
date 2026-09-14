@@ -14,6 +14,7 @@ interface SyncedSquadBannerProps {
   overallRank?: number | null;
   hasConstraints?: boolean;
   onClearConstraints?: () => void;
+  transferReplacementsCount?: number;
 }
 
 export const SyncedSquadBanner: React.FC<SyncedSquadBannerProps> = ({
@@ -28,6 +29,7 @@ export const SyncedSquadBanner: React.FC<SyncedSquadBannerProps> = ({
   overallRank,
   hasConstraints,
   onClearConstraints,
+  transferReplacementsCount,
 }) => {
   return (
     <div className="w-full mb-2.5 p-2.5 sm:p-3 bg-gradient-to-r from-cyan-950/90 via-slate-950/95 to-slate-900/90 border border-cyan-500/30 rounded-2xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 sm:gap-3 shadow-xl backdrop-blur-md transition-all overflow-hidden">
@@ -62,11 +64,15 @@ export const SyncedSquadBanner: React.FC<SyncedSquadBannerProps> = ({
               </span>
             )}
 
-            {hasConstraints && (
-              <span className="text-[9px] sm:text-[10px] font-mono bg-rose-500/20 text-rose-300 px-1.5 py-0.5 rounded border border-rose-500/40 font-black animate-pulse shrink-0 flex items-center gap-1 shadow-[0_0_8px_rgba(244,63,94,0.2)]">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-400" /> Custom Sub Active
+            {transferReplacementsCount !== undefined && transferReplacementsCount > 0 ? (
+              <span className="text-[9px] sm:text-[10px] font-mono bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded border border-emerald-500/40 font-black shrink-0 flex items-center gap-1 shadow-[0_0_8px_rgba(16,185,129,0.25)]">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> 8GW Transfer Active ({transferReplacementsCount} Swapped)
               </span>
-            )}
+            ) : hasConstraints ? (
+              <span className="text-[9px] sm:text-[10px] font-mono bg-rose-500/20 text-rose-300 px-1.5 py-0.5 rounded border border-rose-500/40 font-black animate-pulse shrink-0 flex items-center gap-1 shadow-[0_0_8px_rgba(244,63,94,0.2)]">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-400" /> Custom Rules Active
+              </span>
+            ) : null}
           </div>
 
           {/* Subtitle / Details Row */}
@@ -79,17 +85,21 @@ export const SyncedSquadBanner: React.FC<SyncedSquadBannerProps> = ({
             <span>•</span>
             <span className={cn(
               "font-bold truncate",
-              hasConstraints 
-                ? "text-rose-300" 
-                : lineupMode === 'optimized' 
-                  ? "text-cyan-300" 
-                  : "text-amber-300"
+              (transferReplacementsCount !== undefined && transferReplacementsCount > 0)
+                ? "text-emerald-300"
+                : hasConstraints 
+                  ? "text-rose-300" 
+                  : lineupMode === 'optimized' 
+                    ? "text-cyan-300" 
+                    : "text-amber-300"
             )}>
-              {hasConstraints 
-                ? 'Matrix XI (Sub Promoted)' 
-                : lineupMode === 'optimized' 
-                  ? 'Matrix-Optimized XI Active' 
-                  : 'Official FPL Submission Active'}
+              {(transferReplacementsCount !== undefined && transferReplacementsCount > 0)
+                ? `Matrix XI (${transferReplacementsCount} 8GW Transfer${transferReplacementsCount > 1 ? 's' : ''} Active)`
+                : hasConstraints 
+                  ? 'Matrix XI (Custom Constraints)' 
+                  : lineupMode === 'optimized' 
+                    ? 'Matrix-Optimized XI Active' 
+                    : 'Official FPL Submission Active'}
             </span>
           </div>
         </div>

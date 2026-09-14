@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { PlayerCard } from './PlayerCard';
 import { SyncedSquadBanner } from './SyncedSquadBanner';
@@ -241,22 +241,154 @@ export const PitchView = ({
     return { starters: finalStarters, bench: finalBench, captain, viceCaptain };
   };
 
-  // === Synced Squad Display Logic ===
+  // === 8GW Engine Transfer Lookahead Replacement for Synced Manager Squad ===
+  // When an active synced squad player is excluded by the user, the 8GW optimizer takes charge
+  // and replaces them with the top 8GW lookahead transfer target (respecting budget, team limits, and position)
   const isSyncedView = squadViewSource === 'synced' && syncedData?.squad && syncedData.squad.length > 0;
-  const rawSquad = syncedData?.squad || [];
 
-  const optimizedSynced = isSyncedView ? computeOptimizedSyncedLineup(rawSquad) : null;
+  const { activeSyncedSquad, activeTransferReplacements } = useMemo(() => {
+    if (!isSyncedView || !syncedData?.squad || syncedData.squad.length === 0) {
+      return { activeSyncedSquad: syncedData?.squad || [], activeTransferReplacements: new Map<number, any>() };
+    }
 
-  const hasValidPositions = rawSquad.some(p => typeof p.position_in_squad === 'number' && p.position_in_squad > 0);
+    const excludedSet = new Set(excludedPlayerIds || []);
+    const replacementsMap = new Map<number, any>();
+
+    if (excludedSet.size === 0) {
+      return { activeSyncedSquad: syncedData.squad, activeTransferReplacements: replacementsMap };
+    }
+
+    // Build candidate pool from recommendations (topPicks and optimal squad)
+    const candidatePool: ScoredPlayer[] = [];
+    const seenCandidateIds = new Set<number>();
+
+    const addCandidate = (p?: ScoredPlayer) => {
+      if (!p || seenCandidateIds.has(p.id)) return;
+      seenCandidateIds.add(p.id);
+      candidatePool.push(p);
+    };
+
+    data?.squad?.forEach(addCandidate);
+    data?.topPicks?.gkp?.forEach(addCandidate);
+    data?.topPicks?.def?.forEach(addCandidate);
+    data?.topPicks?.mid?.forEach(addCandidate);
+    data?.topPicks?.fwd?.forEach(addCandidate);
+
+    let workingSquad = [...syncedData.squad];
+    let workingBank = syncedData.bank ?? 0;
+
+    const currentTeamCounts: Record<number | string, number> = {};
+    workingSquad.forEach(p => {
+      const tKey = p.team || p.team_id || p.team_short_name;
+      currentTeamCounts[tKey] = (currentTeamCounts[tKey] || 0) + 1;
+    });
+
+    const activeSquadIds = new Set(workingSquad.map(p => p.id));
+
+    workingSquad = workingSquad.map(outPlayer => {
+      if (!excludedSet.has(outPlayer.id)) return outPlayer;
+
+      const outTeam = outPlayer.team || outPlayer.team_id || outPlayer.team_short_name;
+      const outCost = outPlayer.now_cost || outPlayer.cost || 0;
+      const maxAffordableCost = outCost + workingBank;
+
+      // 1. Check if engine transfer recommendation already exists for this player
+      const transferMatch = (syncedData.transfers || []).find(t => 
+        t.out.id === outPlayer.id &&
+        !activeSquadIds.has(t.in.id) &&
+        !excludedSet.has(t.in.id) &&
+        (t.in.now_cost || t.in.cost || 0) <= maxAffordableCost
+      );
+
+      let chosenIn: ScoredPlayer | null = null;
+      let horizon8GwDelta = 0;
+      let xPDelta = 0;
+
+      if (transferMatch) {
+        chosenIn = transferMatch.in;
+        horizon8GwDelta = transferMatch.horizon8GwDelta ?? 0;
+        xPDelta = transferMatch.xPDelta ?? 0;
+      } else {
+        // 2. Search candidate pool for best 8GW replacement
+        const matchingCandidates = candidatePool.filter(c => {
+          if (c.position !== outPlayer.position) return false;
+          if (activeSquadIds.has(c.id)) return false;
+          if (excludedSet.has(c.id)) return false;
+          const cCost = c.now_cost || c.cost || 0;
+          if (cCost > maxAffordableCost) return false;
+
+          const cTeam = c.team || c.team_id || c.team_short_name;
+          const teamCountAfterOut = (currentTeamCounts[cTeam] || 0) - (cTeam === outTeam ? 1 : 0);
+          if (teamCountAfterOut >= 3) return false;
+
+          return true;
+        }).sort((a, b) => {
+          const a8Gw = a.horizonXP || ((a.xP || 0) * 8);
+          const b8Gw = b.horizonXP || ((b.xP || 0) * 8);
+          const diff8Gw = b8Gw - a8Gw;
+          if (Math.abs(diff8Gw) > 0.1) return diff8Gw;
+          return (b.score || b.xP || 0) - (a.score || a.xP || 0);
+        });
+
+        if (matchingCandidates.length > 0) {
+          chosenIn = matchingCandidates[0];
+          const in8Gw = chosenIn.horizonXP || ((chosenIn.xP || 0) * 8);
+          const out8Gw = outPlayer.horizonXP || ((outPlayer.xP || 0) * 8);
+          horizon8GwDelta = Math.round((in8Gw - out8Gw) * 10) / 10;
+          xPDelta = Math.round(((chosenIn.xP || 0) - (outPlayer.xP || 0)) * 10) / 10;
+        }
+      }
+
+      if (chosenIn) {
+        activeSquadIds.delete(outPlayer.id);
+        activeSquadIds.add(chosenIn.id);
+
+        currentTeamCounts[outTeam] = Math.max(0, (currentTeamCounts[outTeam] || 1) - 1);
+        const inTeam = chosenIn.team || chosenIn.team_id || chosenIn.team_short_name;
+        currentTeamCounts[inTeam] = (currentTeamCounts[inTeam] || 0) + 1;
+
+        const inCost = chosenIn.now_cost || chosenIn.cost || 0;
+        workingBank = workingBank + outCost - inCost;
+
+        const replacedPlayerCard: ScoredPlayer = {
+          ...chosenIn,
+          isTransferIn: true,
+          replacedPlayerName: outPlayer.web_name,
+          replacedPlayerId: outPlayer.id,
+          horizon8GwDelta,
+          xPDelta,
+          position_in_squad: outPlayer.position_in_squad
+        };
+
+        replacementsMap.set(chosenIn.id, {
+          outPlayer,
+          inPlayer: replacedPlayerCard,
+          horizon8GwDelta,
+          xPDelta
+        });
+
+        return replacedPlayerCard;
+      }
+
+      return outPlayer;
+    });
+
+    return { activeSyncedSquad: workingSquad, activeTransferReplacements: replacementsMap };
+  }, [isSyncedView, syncedData, excludedPlayerIds, data]);
+
+  const rawSquad = activeSyncedSquad;
+  const optimizedSynced = isSyncedView ? computeOptimizedSyncedLineup(activeSyncedSquad) : null;
+
+  const hasValidPositions = activeSyncedSquad.some(p => typeof p.position_in_squad === 'number' && p.position_in_squad > 0);
   const officialStarters = isSyncedView
     ? (hasValidPositions 
-        ? rawSquad.filter(p => (p.position_in_squad ?? 0) <= 11)
-        : rawSquad.slice(0, 11))
+        ? activeSyncedSquad.filter(p => (p.position_in_squad ?? 0) <= 11)
+        : activeSyncedSquad.slice(0, 11))
     : [];
   const officialBench = isSyncedView
     ? (hasValidPositions
-        ? rawSquad.filter(p => (p.position_in_squad ?? 0) >= 12)
-        : rawSquad.slice(11, 15))
+        ? activeSyncedSquad.filter(p => (p.position_in_squad ?? 0) >= 12)
+        : activeSyncedSquad.slice(11, 15))
     : [];
 
   // When constraints exist (locks/excludes), always use optimizedSynced to reflect user lineup intent
@@ -297,6 +429,12 @@ export const PitchView = ({
   data?.topPicks?.def?.forEach(p => allPlayersMap.set(p.id, p));
   data?.topPicks?.mid?.forEach(p => allPlayersMap.set(p.id, p));
   data?.topPicks?.fwd?.forEach(p => allPlayersMap.set(p.id, p));
+  syncedData?.squad?.forEach(p => allPlayersMap.set(p.id, p));
+  syncedData?.transfers?.forEach(t => {
+    allPlayersMap.set(t.out.id, t.out);
+    allPlayersMap.set(t.in.id, t.in);
+  });
+  activeSyncedSquad.forEach(p => allPlayersMap.set(p.id, p));
 
   const benchPlayers = displayBench;
 
@@ -317,10 +455,24 @@ export const PitchView = ({
           ? Math.round(data.startingXI.reduce((s, p) => s + (p.eo || 0), 0) / data.startingXI.length) 
           : 0
       ));
+
+  const activeBank = isSyncedView && activeTransferReplacements.size > 0
+    ? (() => {
+        let netDiff = 0;
+        activeTransferReplacements.forEach(({ outPlayer, inPlayer }: any) => {
+          const outC = outPlayer.now_cost || outPlayer.cost || 0;
+          const inC = inPlayer.now_cost || inPlayer.cost || 0;
+          netDiff += (outC - inC);
+        });
+        const currentB = syncedData?.bank ?? 0;
+        return ((currentB + netDiff) / 10).toFixed(1);
+      })()
+    : (syncedData?.bank !== undefined ? (syncedData.bank / 10).toFixed(1) : '0.0');
+
   const totalCost = isSyncedView
-    ? ((syncedData?.totalCost || syncedData?.squad?.reduce((s, p) => s + (p.now_cost || p.cost || 0), 0) || 1000) / 10).toFixed(1)
+    ? ((activeSyncedSquad.reduce((s, p) => s + (p.now_cost || p.cost || 0), 0)) / 10).toFixed(1)
     : (data?.totalCost ? (data.totalCost / 10).toFixed(1) : '100.0');
-  const bank = syncedData?.bank !== undefined ? (syncedData.bank / 10).toFixed(1) : '0.0';
+  const bank = activeBank;
   const captain = isSyncedView
     ? (syncedCaptain?.web_name || 'TBD')
     : (data?.captain?.web_name || data?.startingXI?.find(p => p.isCaptain)?.web_name || 'TBD');
@@ -384,6 +536,7 @@ export const PitchView = ({
           overallRank={liveOverallRank}
           hasConstraints={hasConstraints}
           onClearConstraints={onClearConstraints}
+          transferReplacementsCount={activeTransferReplacements.size}
         />
       )}
 
@@ -826,6 +979,8 @@ export const PitchView = ({
                     consensusCaptainRate={consensusCaptain?.captainRate}
                     isLocked={lockedPlayerIds.includes(p.id)}
                     isExcluded={excludedPlayerIds.includes(p.id)}
+                    isTransferIn={Boolean(p.isTransferIn)}
+                    replacedPlayerName={p.replacedPlayerName}
                     onToggleLock={onToggleLock}
                     onToggleExclude={onToggleExclude}
                   />
@@ -845,6 +1000,8 @@ export const PitchView = ({
                     consensusCaptainRate={consensusCaptain?.captainRate}
                     isLocked={lockedPlayerIds.includes(p.id)}
                     isExcluded={excludedPlayerIds.includes(p.id)}
+                    isTransferIn={Boolean(p.isTransferIn)}
+                    replacedPlayerName={p.replacedPlayerName}
                     onToggleLock={onToggleLock}
                     onToggleExclude={onToggleExclude}
                   />
@@ -864,6 +1021,8 @@ export const PitchView = ({
                     consensusCaptainRate={consensusCaptain?.captainRate}
                     isLocked={lockedPlayerIds.includes(p.id)}
                     isExcluded={excludedPlayerIds.includes(p.id)}
+                    isTransferIn={Boolean(p.isTransferIn)}
+                    replacedPlayerName={p.replacedPlayerName}
                     onToggleLock={onToggleLock}
                     onToggleExclude={onToggleExclude}
                   />
@@ -883,6 +1042,8 @@ export const PitchView = ({
                     consensusCaptainRate={consensusCaptain?.captainRate}
                     isLocked={lockedPlayerIds.includes(p.id)}
                     isExcluded={excludedPlayerIds.includes(p.id)}
+                    isTransferIn={Boolean(p.isTransferIn)}
+                    replacedPlayerName={p.replacedPlayerName}
                     onToggleLock={onToggleLock}
                     onToggleExclude={onToggleExclude}
                   />
@@ -918,6 +1079,8 @@ export const PitchView = ({
                           consensusCaptainRate={consensusCaptain?.captainRate}
                           isLocked={lockedPlayerIds.includes(p.id)}
                           isExcluded={excludedPlayerIds.includes(p.id)}
+                          isTransferIn={Boolean(p.isTransferIn)}
+                          replacedPlayerName={p.replacedPlayerName}
                           onToggleLock={onToggleLock}
                           onToggleExclude={onToggleExclude}
                         />
@@ -1014,6 +1177,19 @@ export const PitchView = ({
                             <div className="flex flex-col">
                               <div className="flex items-center gap-1.5 flex-wrap">
                                 <span className="font-bold text-white text-xs sm:text-sm">{p.web_name}</span>
+                                {p.isTransferIn && (
+                                  <span 
+                                    className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[8.5px] font-mono font-bold flex items-center gap-1 shadow-sm"
+                                    title={`Engine 8GW Transfer: Replaces ${p.replacedPlayerName}`}
+                                  >
+                                    <span>🔄 Replaces {p.replacedPlayerName}</span>
+                                    {p.horizon8GwDelta !== undefined && (
+                                      <span className="text-emerald-400 font-black">
+                                        ({p.horizon8GwDelta > 0 ? '+' : ''}{p.horizon8GwDelta} 8GW)
+                                      </span>
+                                    )}
+                                  </span>
+                                )}
                                 {p.isCaptain && (
                                   <span className="w-4 h-4 rounded-full bg-[#37003c] text-white flex items-center justify-center text-[9px] font-black border border-white/70 shadow-sm" title="Captain (2x Points)">
                                     C
@@ -1210,6 +1386,19 @@ export const PitchView = ({
                             <div className="flex flex-col">
                               <div className="flex items-center gap-1.5 flex-wrap">
                                 <span className="font-bold text-white text-xs sm:text-sm">{p.web_name}</span>
+                                {p.isTransferIn && (
+                                  <span 
+                                    className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[8.5px] font-mono font-bold flex items-center gap-1 shadow-sm"
+                                    title={`Engine 8GW Transfer: Replaces ${p.replacedPlayerName}`}
+                                  >
+                                    <span>🔄 Replaces {p.replacedPlayerName}</span>
+                                    {p.horizon8GwDelta !== undefined && (
+                                      <span className="text-emerald-400 font-black">
+                                        ({p.horizon8GwDelta > 0 ? '+' : ''}{p.horizon8GwDelta} 8GW)
+                                      </span>
+                                    )}
+                                  </span>
+                                )}
                                 {p.chance_of_playing_next_round !== undefined && p.chance_of_playing_next_round !== null && p.chance_of_playing_next_round < 100 && (
                                   <span className="bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[8px] font-mono px-1 rounded font-bold">
                                     {p.chance_of_playing_next_round}%
