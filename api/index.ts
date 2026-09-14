@@ -253,7 +253,7 @@ export class FPLService {
                            { id: 1 };
       const nextEvent = staticRes.data.events.find((e: any) => e.is_next) ||
                         staticRes.data.events.find((e: any) => new Date(e.deadline_time) > new Date()) || 
-                        { id: (currentEvent?.id || 2) + 1 };
+                        { id: (currentEvent?.id || 1) + 1 };
       
       const result = { players, teams, fixtures, nextEventId: nextEvent.id, currentEventId: currentEvent.id };
       this.cache = { data: result, timestamp: Date.now() };
@@ -1101,8 +1101,8 @@ export class FPLService {
           }
         } else {
           // Check if manager is known in elite cohort archives
-          const numericId = parseInt(teamId, 10) || 101001;
-          const leaderSnap = ManagerSnapshotService.getLeaderProfile(numericId, currentEvent);
+          const numericId = parseInt(teamId, 10);
+          const leaderSnap = !isNaN(numericId) ? ManagerSnapshotService.getLeaderProfile(numericId, currentEvent) : null;
           
           if (leaderSnap && leaderSnap.squad_15 && leaderSnap.squad_15.length === 15) {
             const startersSet = new Set(leaderSnap.starting_xi || leaderSnap.squad_15.slice(0, 11));
@@ -1120,12 +1120,12 @@ export class FPLService {
               data: {
                 picks,
                 entry_history: {
-                  points: leaderSnap.gw_points || 65,
-                  total_points: leaderSnap.total_points || 270,
-                  overall_rank: leaderSnap.overall_rank || 1000,
-                  rank: leaderSnap.gw_rank || 15000,
-                  bank: leaderSnap.bank || 0,
-                  value: leaderSnap.team_value || 1000
+                  points: leaderSnap.gw_points ?? 0,
+                  total_points: leaderSnap.total_points ?? 0,
+                  overall_rank: leaderSnap.overall_rank ?? 0,
+                  rank: leaderSnap.gw_rank ?? 0,
+                  bank: leaderSnap.bank ?? 0,
+                  value: leaderSnap.team_value ?? 1000
                 }
               }
             };
@@ -1433,8 +1433,12 @@ export class FPLService {
     const setHeader = isSet1 ? "Set 1 (GW1–19)" : "Set 2 (GW20–38)";
 
     const topCapPick = [...myPicks].sort((a, b) => (b.xP ?? b.score ?? 0) - (a.xP ?? a.score ?? 0))[0];
-    const topCapXp = topCapPick ? Number(topCapPick.xP ?? topCapPick.score ?? 0).toFixed(1) : "10.8";
-    const topCapName = topCapPick?.web_name || "Haaland";
+    const topCapXp = topCapPick ? Number(topCapPick.xP ?? topCapPick.score ?? 0).toFixed(1) : "0.0";
+    const topCapName = topCapPick?.web_name || "Top Captain";
+    const nextFix = topCapPick?.next_fixtures?.[0];
+    const fixVenue = nextFix ? (nextFix.is_home ? "at Home" : "Away") : "";
+    const oppStr = nextFix?.opponent ? ` vs ${nextFix.opponent}` : "";
+    const capFixtureDesc = nextFix ? `${oppStr} ${fixVenue}` : "";
 
     const chips: ChipAdvice[] = [
       {
@@ -1470,8 +1474,8 @@ export class FPLService {
         reason: optimalFirstMove === 'TC' 
           ? "V3 Engine detects an elite captaincy outlier (>= 9.5 xP). Go for the kill!" 
           : isSet1 
-            ? `Set 1 Triple Captain expires at GW19 (${remainingGwsInSet} GWs left; fresh TC arrives in GW20). Optimal window: ${topCapName} at Home (GW${targetEvent}) where projected xP is ${topCapXp}!`
-            : "Set 2 Triple Captain active. Save for Haaland in a spring Double Gameweek."
+            ? `Set 1 Triple Captain expires at GW19 (${remainingGwsInSet} GWs left; fresh TC arrives in GW20). Optimal window: ${topCapName}${capFixtureDesc} (GW${targetEvent}) where projected xP is ${topCapXp}!`
+            : "Set 2 Triple Captain active. Save for your premier captain in a spring Double Gameweek."
       }
     ];
 
@@ -1757,12 +1761,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const rawGw = (query.gw as string) || (req.body?.gw as string);
         const targetGw = rawGw ? parseInt(rawGw, 10) : undefined;
         const baseData = await FPLService.getBaseData();
-        const effectiveGw = (targetGw && !isNaN(targetGw)) ? targetGw : (baseData.nextEventId || 5);
+        const nextEventId = baseData.nextEventId || baseData.currentEventId || 1;
+        const effectiveGw = (targetGw && !isNaN(targetGw)) ? targetGw : nextEventId;
         
         const topManagerInsight = await ManagerSnapshotService.getDynamicTopManagerInsight(baseData.players, effectiveGw);
         
         // Edge caching for Vercel Hobby Tier: Cache completed gameweeks aggressively
-        if (effectiveGw < (baseData.nextEventId || 5)) {
+        if (effectiveGw < nextEventId) {
           res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
         } else {
           res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
@@ -1881,7 +1886,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       // Fetch fixtures & upcoming gameweek context
       const baseData = await FPLService.getBaseData();
       const teamsList = baseData.teams || [];
-      const effectiveGw = gameweek || baseData.nextEventId || 3;
+      const effectiveGw = gameweek || baseData.nextEventId || baseData.currentEventId || 1;
       const allFixtures = (baseData.fixtures && baseData.fixtures.length > 0) ? baseData.fixtures : [];
       let rawUpcoming = allFixtures.filter((f: any) => f.event >= effectiveGw && f.event < effectiveGw + 5);
       if (rawUpcoming.length === 0) rawUpcoming = allFixtures.slice(0, 5); // Fallback if no exact match

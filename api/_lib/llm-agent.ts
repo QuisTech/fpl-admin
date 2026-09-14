@@ -103,9 +103,9 @@ export async function getLLMTransferDecision(
 
     CRITICAL CAPTAINCY RULES (MANDATORY):
     1. Captain selection is NEVER calculated by dividing expected points by price (PPM). In FPL, captain points are doubled (2x) regardless of player cost, so player price is COMPLETELY IRRELEVANT for captain selection!
-    2. Captaincy MUST ALWAYS be based on RAW MAXIMUM EXPECTED POINTS (Max xP) and High-Conviction Elite Consensus Anchors (e.g. Haaland £15.5M, Isak £9.1M, Bruno Fernandes £12.0M).
-    3. If the user asks a question about Captaincy (e.g., "Who should I captain in GW 4?"):
-       - Answer the captaincy question directly in the reasoning! State the #1 Captain choice (e.g. Haaland with 9.2 xP and 60% elite cohort captaincy) and Vice-Captain choice (e.g. Isak / Bruno Fernandes).
+    2. Captaincy MUST ALWAYS be based on RAW MAXIMUM EXPECTED POINTS (Max xP) and High-Conviction Elite Consensus Anchors from the active squad data.
+    3. If the user asks a question about Captaincy (e.g., "Who should I captain?"):
+       - Answer the captaincy question directly in the reasoning! State the #1 Captain choice (the squad's highest xP starter) and Vice-Captain choice.
        - NEVER claim that cheaper players are better captains because of PPM.
        - Address captaincy, starting lineup, or chip questions directly without defaulting to transfer jargon.
 
@@ -119,7 +119,7 @@ export async function getLLMTransferDecision(
            : `CURRENT HALF: Set 2 is active (GW20–38). All Set 1 chips have expired. Set 2 chips run until Gameweek 38 (${Math.max(0, 38 - gameweek)} GWs left).`}
        - A manager can only play ONE chip per gameweek. Therefore, holding unplayed Set 1 chips as GW19 approaches causes a chip bottleneck. Managers must deploy them before the GW19 cutoff!
     3. 2026/27 CHIP STRATEGY PLAYBOOK:
-       - TRIPLE CAPTAIN (TC): In Set 1, DO NOT hold back for spring Double Gameweeks because Set 2 has its own Triple Captain! Use Set 1 TC on premier single-fixture outliers with elite assets (e.g. Haaland vs newly promoted sides or bottom-tier defenses at Home with xP >= 10.0+ such as GW5 vs Sunderland where projected xP is 10.8).
+       - TRIPLE CAPTAIN (TC): In Set 1, DO NOT hold back for spring Double Gameweeks because Set 2 has its own Triple Captain! Use Set 1 TC on premier single-fixture outliers with elite assets (xP >= 10.0+ on a prime fixture).
        - BENCH BOOST (BB): In Set 1, no need to save for spring DGWs because Set 2 has its own Bench Boost! Deploy Set 1 BB immediately following your Wildcard when all 15 squad players have active starting spots and favorable fixtures (bench xP >= 14.0+). Never waste BB on a low-minute budget bench (< 10 xP).
        - WILDCARD (WC): In Set 1, prime window is GW6–GW8 during the international break for early structural squad fixes, or ahead of fixture swings before GW19. In Set 2, hold for late-season DGW planning (GW30–33).
        - FREE HIT (FH): In Set 1, deploy on autumn European rotation weeks, postponed fixtures, or short-term injury crises before GW19. In Set 2, reserve for the major spring Blank Gameweek (GW29/30).
@@ -205,7 +205,7 @@ export async function getLLMChipAdvice(
     
     2026/27 TWO-SET CHIP RULES:
     1. BENCH BOOST: In Set 1, play when bench xP >= 14.0 (often post-Wildcard). In Set 2, reserve for spring DGWs.
-    2. TRIPLE CAPTAIN: In Set 1, play on single fixture outliers (xP >= 10.0 e.g. Haaland vs Sunderland in GW5). Fresh TC awarded in GW20.
+    2. TRIPLE CAPTAIN: In Set 1, play on single fixture outliers (xP >= 10.0 on a prime fixture). Fresh TC awarded in GW20.
     3. FREE HIT: Save for autumn fixture clashes/rotation in Set 1; save for spring BGW in Set 2.
     4. WILDCARD: Target GW6-8 international break in Set 1; target GW30-33 in Set 2.
     
