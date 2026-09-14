@@ -1432,6 +1432,10 @@ export class FPLService {
     const remainingGwsInSet = isSet1 ? Math.max(0, 19 - targetEvent) : Math.max(0, 38 - targetEvent);
     const setHeader = isSet1 ? "Set 1 (GW1–19)" : "Set 2 (GW20–38)";
 
+    const topCapPick = [...myPicks].sort((a, b) => (b.xP ?? b.score ?? 0) - (a.xP ?? a.score ?? 0))[0];
+    const topCapXp = topCapPick ? Number(topCapPick.xP ?? topCapPick.score ?? 0).toFixed(1) : "10.8";
+    const topCapName = topCapPick?.web_name || "Haaland";
+
     const chips: ChipAdvice[] = [
       {
         chip: `Wildcard (${setHeader})`,
@@ -1466,7 +1470,7 @@ export class FPLService {
         reason: optimalFirstMove === 'TC' 
           ? "V3 Engine detects an elite captaincy outlier (>= 9.5 xP). Go for the kill!" 
           : isSet1 
-            ? `Set 1 Triple Captain expires at GW19 (${remainingGwsInSet} GWs left; fresh TC arrives in GW20). Optimal window: Haaland vs Sunderland at Home (GW5) where projected xP is 11.2!`
+            ? `Set 1 Triple Captain expires at GW19 (${remainingGwsInSet} GWs left; fresh TC arrives in GW20). Optimal window: ${topCapName} at Home (GW${targetEvent}) where projected xP is ${topCapXp}!`
             : "Set 2 Triple Captain active. Save for Haaland in a spring Double Gameweek."
       }
     ];
