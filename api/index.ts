@@ -1764,7 +1764,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const nextEventId = baseData.nextEventId || baseData.currentEventId || 1;
         const effectiveGw = (targetGw && !isNaN(targetGw)) ? targetGw : nextEventId;
         
-        const topManagerInsight = await ManagerSnapshotService.getDynamicTopManagerInsight(baseData.players, effectiveGw);
+        let topManagerInsight;
+        try {
+          topManagerInsight = await ManagerSnapshotService.getDynamicTopManagerInsight(baseData.players, effectiveGw);
+        } catch (innerErr: any) {
+          console.warn(`[TopManagerInsight API] Error fetching GW${effectiveGw}, falling back to current GW:`, innerErr.message);
+          topManagerInsight = await ManagerSnapshotService.getDynamicTopManagerInsight(baseData.players, nextEventId);
+        }
         
         // Edge caching for Vercel Hobby Tier: Cache completed gameweeks aggressively
         if (effectiveGw < nextEventId) {

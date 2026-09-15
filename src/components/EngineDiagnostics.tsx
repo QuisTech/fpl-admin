@@ -76,7 +76,9 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
   const swapAnalysis = metrics?.swapAnalysis;
   const omissionAnalysis = metrics?.omissionAnalysis || [];
 
-  const topInsight = insightCache[selectedGw] || (selectedGw === currentGw ? data.topManagerInsight : undefined);
+  const hasTopInsightCapability = Boolean(data?.topManagerInsight || Object.keys(insightCache).length > 0);
+  const topInsight = insightCache[selectedGw] || (selectedGw === currentGw ? data?.topManagerInsight : undefined) || data?.topManagerInsight;
+  const isFallbackData = !insightCache[selectedGw] && selectedGw !== currentGw;
   const availableGws = Array.from({ length: currentGw }, (_, i) => currentGw - i);
   const eligibleManagers = topInsight?.eligibleManagers || topInsight?.noChipLeaderCount || 1;
 
@@ -288,7 +290,7 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
       )}
 
       {/* Top Manager Intelligence HUD */}
-      {topInsight && (
+      {hasTopInsightCapability && topInsight && (
         <div className="relative z-10 mt-3 pt-3 border-t border-slate-800/80">
           <div className="flex items-center justify-between gap-2 mb-2">
             <div className="flex items-center gap-1.5 text-cyan-400 min-w-0">
@@ -300,12 +302,17 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
             <div className="flex items-center gap-1.5 shrink-0">
               {loadingGw && (
                 <span className="flex items-center gap-1 text-[8px] font-mono text-cyan-400 bg-cyan-950/60 border border-cyan-500/30 px-1.5 py-0.5 rounded animate-pulse">
-                  <RefreshCw className="w-2.5 h-2.5 animate-spin" /> Fetching...
+                  <RefreshCw className="w-2.5 h-2.5 animate-spin" /> Fetching GW{selectedGw}...
+                </span>
+              )}
+              {isFallbackData && !loadingGw && (
+                <span className="text-[8px] font-mono font-bold text-amber-300 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded" title={`GW${selectedGw} specific snapshot unavailable. Displaying nearest available cohort.`}>
+                  GW{currentGw} Fallback
                 </span>
               )}
               <span className="text-[8.5px] font-mono font-bold text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-2 py-0.5 rounded shrink-0 whitespace-nowrap shadow-sm">
                 Edge: {(() => {
-                  const r = topInsight.marketDisagreementRating;
+                  const r = topInsight.marketDisagreementRating || 0;
                   if (r > 100) return Math.round(r / 100);
                   if (r > 1.0) return Math.round(r);
                   return Math.round(r * 100);

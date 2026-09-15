@@ -146,7 +146,13 @@ async function startServer() {
       const effectiveGw = (targetGw && !isNaN(targetGw)) ? targetGw : (baseData.nextEventId || 5);
 
       const { ManagerSnapshotService } = await import("./api/_lib/manager-snapshot-service");
-      const topManagerInsight = await ManagerSnapshotService.getDynamicTopManagerInsight(baseData.players, effectiveGw);
+      let topManagerInsight;
+      try {
+        topManagerInsight = await ManagerSnapshotService.getDynamicTopManagerInsight(baseData.players, effectiveGw);
+      } catch (innerErr: any) {
+        console.warn(`[TopManagerInsight] Error fetching GW${effectiveGw}, falling back to current GW:`, innerErr.message);
+        topManagerInsight = await ManagerSnapshotService.getDynamicTopManagerInsight(baseData.players, baseData.nextEventId || 5);
+      }
 
       res.json({
         success: true,
