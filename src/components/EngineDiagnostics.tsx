@@ -77,8 +77,8 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
   const omissionAnalysis = metrics?.omissionAnalysis || [];
 
   const hasTopInsightCapability = Boolean(data?.topManagerInsight || Object.keys(insightCache).length > 0);
-  const topInsight = insightCache[selectedGw] || (selectedGw === currentGw ? data?.topManagerInsight : undefined) || data?.topManagerInsight;
-  const isFallbackData = !insightCache[selectedGw] && selectedGw !== currentGw;
+  const topInsight = insightCache[selectedGw] || (selectedGw === currentGw ? data?.topManagerInsight : undefined);
+  const isFallbackData = Boolean(selectedGw === currentGw && topInsight?.gameweek && topInsight.gameweek !== currentGw);
   const availableGws = Array.from({ length: currentGw }, (_, i) => currentGw - i);
   const eligibleManagers = topInsight?.eligibleManagers || topInsight?.noChipLeaderCount || 1;
 
@@ -290,7 +290,7 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
       )}
 
       {/* Top Manager Intelligence HUD */}
-      {hasTopInsightCapability && topInsight && (
+      {hasTopInsightCapability && (
         <div className="relative z-10 mt-3 pt-3 border-t border-slate-800/80">
           <div className="flex items-center justify-between gap-2 mb-2">
             <div className="flex items-center gap-1.5 text-cyan-400 min-w-0">
@@ -306,18 +306,20 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
                 </span>
               )}
               {isFallbackData && !loadingGw && (
-                <span className="text-[8px] font-mono font-bold text-amber-300 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded" title={`GW${selectedGw} specific snapshot unavailable. Displaying nearest available cohort.`}>
-                  GW{currentGw} Fallback
+                <span className="text-[8px] font-mono font-bold text-amber-300 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded" title={`GW${currentGw} matches not yet played. Displaying GW${topInsight?.gameweek || currentGw - 1} baseline cohort.`}>
+                  GW{topInsight?.gameweek || currentGw - 1} Baseline
                 </span>
               )}
-              <span className="text-[8.5px] font-mono font-bold text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-2 py-0.5 rounded shrink-0 whitespace-nowrap shadow-sm">
-                Edge: {(() => {
-                  const r = topInsight.marketDisagreementRating || 0;
-                  if (r > 100) return Math.round(r / 100);
-                  if (r > 1.0) return Math.round(r);
-                  return Math.round(r * 100);
-                })()}%
-              </span>
+              {topInsight && (
+                <span className="text-[8.5px] font-mono font-bold text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-2 py-0.5 rounded shrink-0 whitespace-nowrap shadow-sm">
+                  Edge: {(() => {
+                    const r = topInsight.marketDisagreementRating || 0;
+                    if (r > 100) return Math.round(r / 100);
+                    if (r > 1.0) return Math.round(r);
+                    return Math.round(r * 100);
+                  })()}%
+                </span>
+              )}
             </div>
           </div>
 
@@ -329,8 +331,8 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
                 <button
                   type="button"
                   onClick={() => setSelectedGw(prev => Math.max(1, prev - 1))}
-                  disabled={selectedGw <= 1 || loadingGw}
-                  className="p-1 rounded text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  disabled={selectedGw <= 1}
+                  className="p-1 rounded text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
                   title="Previous Gameweek"
                 >
                   <ChevronLeft className="w-3.5 h-3.5" />
@@ -352,8 +354,8 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
                 <button
                   type="button"
                   onClick={() => setSelectedGw(prev => Math.min(currentGw, prev + 1))}
-                  disabled={selectedGw >= currentGw || loadingGw}
-                  className="p-1 rounded text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  disabled={selectedGw >= currentGw}
+                  className="p-1 rounded text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
                   title="Next Gameweek"
                 >
                   <ChevronRight className="w-3.5 h-3.5" />
@@ -367,7 +369,6 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
                     key={gw}
                     type="button"
                     onClick={() => setSelectedGw(gw)}
-                    disabled={loadingGw}
                     className={`px-2 py-0.5 rounded text-[8.5px] font-mono transition-all cursor-pointer whitespace-nowrap ${
                       selectedGw === gw
                         ? 'bg-fpl-green text-slate-950 font-black shadow-sm'
@@ -380,454 +381,469 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
               </div>
             </div>
 
-            {/* Filter Tabs Header */}
-            <div className="flex flex-col gap-1.5 border-b border-slate-800/60 pb-2">
-              <div className="flex items-center justify-between gap-1 text-[10px]">
-                <div className="flex items-center gap-1 bg-slate-950/80 p-0.5 rounded-lg border border-slate-800/60">
-                  <button
-                    type="button"
-                    onClick={() => setCohortTab('all')}
-                    className={`px-2 py-1 rounded-md text-[9px] font-bold uppercase transition-all cursor-pointer ${
-                      cohortTab === 'all'
-                        ? 'bg-cyan-500/25 text-cyan-300 border border-cyan-500/40 shadow-sm'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 border border-transparent'
-                    }`}
-                  >
-                    All ({topInsight.sampleLeaders.length})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCohortTab('zero')}
-                    className={`px-2 py-1 rounded-md text-[9px] font-bold uppercase transition-all cursor-pointer ${
-                      cohortTab === 'zero'
-                        ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 shadow-sm'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 border border-transparent'
-                    }`}
-                  >
-                    Pure 0-Chips ({topInsight.sampleLeaders.filter(m => (!m.chips_used || m.chips_used.length === 0) && !m.chip_deduction).length})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCohortTab('normalized')}
-                    className={`px-2 py-1 rounded-md text-[9px] font-bold uppercase transition-all cursor-pointer ${
-                      cohortTab === 'normalized'
-                        ? 'bg-sky-500/25 text-sky-300 border border-sky-500/40 shadow-sm'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 border border-transparent'
-                    }`}
-                  >
-                    Normalized ({topInsight.sampleLeaders.filter(m => Boolean((m.chips_used && m.chips_used.length > 0) || (m.chip_deduction && m.chip_deduction > 0))).length})
-                  </button>
-                </div>
-
-                {topInsight.sampleLeaders.length > 2 && (
-                  <span className="text-[8px] text-slate-500 font-mono hidden sm:block">Scroll for more ▾</span>
-                )}
+            {loadingGw && !topInsight ? (
+              <div className="flex flex-col items-center justify-center py-12 space-y-2 text-center bg-slate-950/60 rounded-xl border border-slate-800/80 my-2">
+                <RefreshCw className="w-5 h-5 text-cyan-400 animate-spin" />
+                <span className="text-[11px] font-mono text-slate-300 font-bold">Loading GW {selectedGw} Intelligence...</span>
+                <span className="text-[9px] text-slate-500 font-mono">Fetching elite cohort decision history</span>
               </div>
-
-              {/* Active Cohort Indicator Banner */}
-              <div className="flex items-center justify-between px-1 text-[8.5px] font-mono">
-                {cohortTab === 'all' && (
-                  <span className="text-cyan-400/90 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
-                    Displaying All Leaders (Combined 0-Chip + Normalized)
-                  </span>
-                )}
-                {cohortTab === 'zero' && (
-                  <span className="text-emerald-400/90 flex items-center gap-1 font-bold">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    Displaying Pure 0-Chips Only (Zero Chips Used)
-                  </span>
-                )}
-                {cohortTab === 'normalized' && (
-                  <span className="text-sky-400/90 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span>
-                    Displaying Chip-Normalized Leaders (Deductions Applied)
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2 max-h-80 overflow-y-auto pr-1 text-[11px] border border-slate-800/40 rounded-xl p-1 bg-slate-950/40">
-              {topInsight.sampleLeaders
-                .filter(m => {
-                  const hasChips = Boolean(
-                    (m.chips_used && m.chips_used.length > 0) || 
-                    (m.chip_deduction && m.chip_deduction > 0) || 
-                    m.is_chip_normalized
-                  );
-                  if (cohortTab === 'zero') return !hasChips;
-                  if (cohortTab === 'normalized') return hasChips;
-                  return true;
-                })
-                .map((m, idx) => {
-                  const isNorm = Boolean(m.chip_deduction && m.chip_deduction > 0);
-                  const normPts = m.normalized_total_points || (m.total_points - (m.chip_deduction || 0));
-
-                  return (
-                    <div 
-                      key={`${m.entry}-${m.rank}-${idx}`} 
-                      className="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800/80 hover:border-slate-700/80 transition-all space-y-2"
-                    >
-                      {/* Top row: Manager info + Points */}
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <span className="text-[9.5px] font-black font-mono text-amber-400 bg-amber-400/10 border border-amber-400/20 px-1.5 py-0.5 rounded shrink-0">
-                            #{m.rank}
-                          </span>
-                          <div className="min-w-0">
-                            <span className="text-[11px] font-bold text-slate-100 block truncate" title={`${m.manager_name}${m.team_name ? ` (${m.team_name})` : ''}`}>
-                              {m.manager_name}
-                            </span>
-                            {m.team_name && (
-                              <span className="text-[9px] text-slate-400 block truncate font-normal">
-                                {m.team_name}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1.5 shrink-0 font-mono text-[10.5px]">
-                          {isNorm && (
-                            <span className="text-slate-400 line-through text-[9.5px]" title="Raw Points before chip deduction">
-                              {m.total_points}
-                            </span>
-                          )}
-                          <span className="text-fpl-green font-black bg-fpl-green/10 border border-fpl-green/20 px-2 py-0.5 rounded">
-                            {normPts} pts
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Bottom row: Chip status & Actions */}
-                      <div className="flex items-center justify-between pt-1 border-t border-slate-900/90 text-[9px]">
-                        <span className={`font-mono text-[8.5px] px-1.5 py-0.5 rounded border ${
-                          isNorm
-                            ? 'bg-sky-500/10 text-sky-400 border-sky-500/20'
-                            : (m.chips_used && m.chips_used.length > 0)
-                              ? 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20'
-                              : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                        }`}>
-                          {isNorm 
-                            ? `Normalized (-${m.chip_deduction} pts)` 
-                            : (m.chips_used && m.chips_used.length > 0)
-                              ? `${m.chips_used.map(c => c.name === 'freehit' ? 'FH' : c.name === 'wildcard' ? 'WC' : c.name.toUpperCase()).join('+')} (0 pts deducted)`
-                              : 'Pure 0-Chips'
-                          }
-                        </span>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          {onSyncTeamId && (
-                            <button
-                              onClick={() => onSyncTeamId(m.entry.toString(), selectedGw)}
-                              className="text-[8.5px] font-black uppercase tracking-wider text-slate-950 bg-fpl-green hover:bg-fpl-green/90 px-2 py-0.5 rounded-md transition-all shadow-[0_0_8px_rgba(0,255,133,0.25)] flex items-center gap-1 cursor-pointer active:scale-95"
-                              title={`Sync Team ID ${m.entry} directly into Horizon and analyze squad as of GW ${selectedGw}`}
-                            >
-                              ⚡ Sync Squad
-                            </button>
-                          )}
-                          <a 
-                            href={`https://fantasy.premierleague.com/entry/${m.entry}/history`} 
-                            target="_blank" 
-                            rel="noopener noreferrer" 
-                            className="text-[8.5px] font-mono text-cyan-300 bg-slate-900 border border-slate-700/80 hover:border-cyan-500/40 px-2 py-0.5 rounded-md hover:bg-slate-800 transition-all flex items-center gap-1"
-                            title="Open Manager Account on Official FPL Website"
-                          >
-                            ID: {m.entry} ↗
-                          </a>
-                        </div>
-                      </div>
+            ) : topInsight ? (
+              <>
+                {/* Filter Tabs Header */}
+                <div className="flex flex-col gap-1.5 border-b border-slate-800/60 pb-2">
+                  <div className="flex items-center justify-between gap-1 text-[10px]">
+                    <div className="flex items-center gap-1 bg-slate-950/80 p-0.5 rounded-lg border border-slate-800/60">
+                      <button
+                        type="button"
+                        onClick={() => setCohortTab('all')}
+                        className={`px-2 py-1 rounded-md text-[9px] font-bold uppercase transition-all cursor-pointer ${
+                          cohortTab === 'all'
+                            ? 'bg-cyan-500/25 text-cyan-300 border border-cyan-500/40 shadow-sm'
+                            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 border border-transparent'
+                        }`}
+                      >
+                        All ({(topInsight?.sampleLeaders || []).length})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCohortTab('zero')}
+                        className={`px-2 py-1 rounded-md text-[9px] font-bold uppercase transition-all cursor-pointer ${
+                          cohortTab === 'zero'
+                            ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 shadow-sm'
+                            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 border border-transparent'
+                        }`}
+                      >
+                        Pure 0-Chips ({(topInsight?.sampleLeaders || []).filter(m => (!m.chips_used || m.chips_used.length === 0) && !m.chip_deduction).length})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCohortTab('normalized')}
+                        className={`px-2 py-1 rounded-md text-[9px] font-bold uppercase transition-all cursor-pointer ${
+                          cohortTab === 'normalized'
+                            ? 'bg-sky-500/25 text-sky-300 border border-sky-500/40 shadow-sm'
+                            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 border border-transparent'
+                        }`}
+                      >
+                        Normalized ({(topInsight?.sampleLeaders || []).filter(m => Boolean((m.chips_used && m.chips_used.length > 0) || (m.chip_deduction && m.chip_deduction > 0))).length})
+                      </button>
                     </div>
-                  );
-                })}
-            </div>
 
-            {/* Split Elite Consensus: Starting Weapons & Bench Enablers */}
-            {topInsight.consensusDetails && topInsight.consensusDetails.length > 0 ? (
-              <div className="pt-2.5 space-y-3 border-t border-slate-800/80">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-200">
-                    Elite Consensus
-                  </span>
-                  <span 
-                    className="text-[8.5px] font-mono font-bold text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-2 py-0.5 rounded cursor-help"
-                    title={`Calculated across ${topInsight.eligibleManagers || topInsight.noChipLeaderCount} active 0-chip elite managers`}
-                  >
-                    Elite cohort: {topInsight.eligibleManagers || topInsight.noChipLeaderCount} managers
-                  </span>
-                </div>
+                    {(topInsight?.sampleLeaders || []).length > 2 && (
+                      <span className="text-[8px] text-slate-500 font-mono hidden sm:block">Scroll for more ▾</span>
+                    )}
+                  </div>
 
-                {/* 👑 Consensus Captaincy Intelligence Hub */}
-                {consensusCaptain && (
-                  <div className="p-3 rounded-2xl bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-slate-900/90 border border-amber-500/30 shadow-lg space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-amber-300">
-                        <Crown className="w-4 h-4 text-amber-400" />
-                        <span>Elite Consensus Captaincy Hub</span>
-                      </div>
-                      <span className="text-[8.5px] font-mono font-bold bg-amber-400/15 text-amber-300 border border-amber-400/30 px-2 py-0.5 rounded-full">
-                        {consensusCaptain.captainPercentage}% Herd Armband
+                  {/* Active Cohort Indicator Banner */}
+                  <div className="flex items-center justify-between px-1 text-[8.5px] font-mono">
+                    {cohortTab === 'all' && (
+                      <span className="text-cyan-400/90 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+                        Displaying All Leaders (Combined 0-Chip + Normalized)
                       </span>
-                    </div>
+                    )}
+                    {cohortTab === 'zero' && (
+                      <span className="text-emerald-400/90 flex items-center gap-1 font-bold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        Displaying Pure 0-Chips Only (Zero Chips Used)
+                      </span>
+                    )}
+                    {cohortTab === 'normalized' && (
+                      <span className="text-sky-400/90 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span>
+                        Displaying Chip-Normalized Leaders (Deductions Applied)
+                      </span>
+                    )}
+                  </div>
+                </div>
 
-                    {/* Spotlight Cards: Consensus Captain & Vice-Captain */}
-                    <div className="grid grid-cols-1 gap-2 text-xs">
-                      {/* #1 Consensus Captain */}
-                      <div className="p-2.5 rounded-xl bg-slate-950/80 border border-amber-400/40 shadow-sm space-y-2">
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-1.5 min-w-0">
-                            <span className="text-[10px] font-black text-amber-400 bg-amber-400/10 border border-amber-400/30 px-1.5 py-0.5 rounded uppercase whitespace-nowrap">
-                              #1 CAPTAIN
-                            </span>
-                            <span className={`text-[8px] font-mono font-black px-1.5 py-0.5 rounded ${getPositionBadge(consensusCaptain.position)}`}>
-                              {consensusCaptain.position}
-                            </span>
-                            {(consensusCaptain.team_short_name || consensusCaptain.team_code) && (
-                              <span className="text-[8px] font-black text-slate-300 bg-slate-800 border border-slate-700 px-1.5 py-0.5 rounded uppercase font-mono">
-                                {consensusCaptain.team_short_name || consensusCaptain.team_code}
-                              </span>
-                            )}
-                          </div>
-                          <div className="text-right shrink-0">
-                            <span className="text-base font-black font-mono text-amber-300">
-                              {consensusCaptain.captainPercentage}%
-                            </span>
-                            <span className="text-[8px] text-slate-400 font-bold uppercase ml-1">Vote</span>
-                          </div>
-                        </div>
+                <div className="space-y-2 max-h-80 overflow-y-auto pr-1 text-[11px] border border-slate-800/40 rounded-xl p-1 bg-slate-950/40">
+                  {(topInsight?.sampleLeaders || [])
+                    .filter(m => {
+                      const hasChips = Boolean(
+                        (m.chips_used && m.chips_used.length > 0) || 
+                        (m.chip_deduction && m.chip_deduction > 0) || 
+                        m.is_chip_normalized
+                      );
+                      if (cohortTab === 'zero') return !hasChips;
+                      if (cohortTab === 'normalized') return hasChips;
+                      return true;
+                    })
+                    .map((m, idx) => {
+                      const isNorm = Boolean(m.chip_deduction && m.chip_deduction > 0);
+                      const normPts = m.normalized_total_points || (m.total_points - (m.chip_deduction || 0));
 
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <PlayerPhoto
-                            playerId={consensusCaptain.id}
-                            playerCode={consensusCaptain.code}
-                            teamCode={consensusCaptain.team_code}
-                            teamShortName={consensusCaptain.team_short_name}
-                            playerName={consensusCaptain.full_name || consensusCaptain.web_name}
-                            position={consensusCaptain.position}
-                            sizeClassName="w-10 h-10"
-                            roundedClassName="rounded-xl"
-                            showSpotlight={true}
-                            className="border border-amber-400/40 shrink-0"
-                          />
-                          <div className="min-w-0">
-                            <div className="font-extrabold text-white text-[13.5px] truncate drop-shadow-sm leading-tight">
-                              {consensusCaptain.full_name || consensusCaptain.web_name}
-                            </div>
-                            <div className="text-[9px] text-slate-400 font-mono mt-0.5 flex items-center gap-1.5 whitespace-nowrap">
-                              <span className="text-slate-200 font-bold">
-                                £{formatCost(consensusCaptain.cost)}M
-                              </span>
-                              <span>•</span>
-                              <span>{consensusCaptain.captainCount} of {eligibleManagers} managers</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* #2 Consensus Vice-Captain */}
-                      {consensusViceCaptain && (
-                        <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-700/80 shadow-sm space-y-2">
+                      return (
+                        <div 
+                          key={`${m.entry}-${m.rank}-${idx}`} 
+                          className="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800/80 hover:border-slate-700/80 transition-all space-y-2"
+                        >
+                          {/* Top row: Manager info + Points */}
                           <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center gap-1.5 min-w-0">
-                              <span className="text-[10px] font-black text-cyan-400 bg-cyan-400/10 border border-cyan-400/30 px-1.5 py-0.5 rounded uppercase whitespace-nowrap">
-                                #2 RUNNER-UP
+                              <span className="text-[9.5px] font-black font-mono text-amber-400 bg-amber-400/10 border border-amber-400/20 px-1.5 py-0.5 rounded shrink-0">
+                                #{m.rank}
                               </span>
-                              <span className={`text-[8px] font-mono font-black px-1.5 py-0.5 rounded ${getPositionBadge(consensusViceCaptain.position)}`}>
-                                {consensusViceCaptain.position}
-                              </span>
-                              {(consensusViceCaptain.team_short_name || consensusViceCaptain.team_code) && (
-                                <span className="text-[8px] font-black text-slate-300 bg-slate-800 border border-slate-700 px-1.5 py-0.5 rounded uppercase font-mono">
-                                  {consensusViceCaptain.team_short_name || consensusViceCaptain.team_code}
+                              <div className="min-w-0">
+                                <span className="text-[11px] font-bold text-slate-100 block truncate" title={`${m.manager_name}${m.team_name ? ` (${m.team_name})` : ''}`}>
+                                  {m.manager_name}
                                 </span>
-                              )}
-                            </div>
-                            <div className="text-right shrink-0">
-                              <span className="text-base font-black font-mono text-cyan-300">
-                                {consensusViceCaptain.captainPercentage}%
-                              </span>
-                              <span className="text-[8px] text-slate-400 font-bold uppercase ml-1">Vote</span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <PlayerPhoto
-                              playerId={consensusViceCaptain.id}
-                              playerCode={consensusViceCaptain.code}
-                              teamCode={consensusViceCaptain.team_code}
-                              teamShortName={consensusViceCaptain.team_short_name}
-                              playerName={consensusViceCaptain.full_name || consensusViceCaptain.web_name}
-                              position={consensusViceCaptain.position}
-                              sizeClassName="w-10 h-10"
-                              roundedClassName="rounded-xl"
-                              className="border border-slate-700 shrink-0"
-                            />
-                            <div className="min-w-0">
-                              <div className="font-extrabold text-white text-[13.5px] truncate drop-shadow-sm leading-tight">
-                                {consensusViceCaptain.full_name || consensusViceCaptain.web_name}
-                              </div>
-                              <div className="text-[9px] text-slate-400 font-mono mt-0.5 flex items-center gap-1.5 whitespace-nowrap">
-                                <span className="text-slate-200 font-bold">
-                                  £{formatCost(consensusViceCaptain.cost)}M
-                                </span>
-                                <span>•</span>
-                                <span>{consensusViceCaptain.captainCount} of {eligibleManagers} managers</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Captaincy Vote Share Distribution Bars */}
-                    {captaincyDistribution.length > 0 && (
-                      <div className="space-y-1.5 pt-1 border-t border-slate-800/80">
-                        <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
-                          <span>Top 5 Captaincy Vote Share</span>
-                          <span>Sum: {captaincyDistribution.reduce((acc, c) => acc + c.captainPercentage, 0)}%</span>
-                        </div>
-                        <div className="space-y-1.5">
-                          {captaincyDistribution.map(c => (
-                            <div key={c.id} className="flex items-center justify-between gap-2 text-[10px] bg-slate-950/40 p-1.5 rounded-lg border border-slate-800">
-                              <div className="flex items-center gap-2 min-w-0">
-                                <PlayerPhoto
-                                  playerId={c.id}
-                                  playerCode={c.code}
-                                  teamCode={c.team_code}
-                                  teamShortName={c.team_short_name}
-                                  playerName={c.full_name || c.web_name}
-                                  position={c.position}
-                                  sizeClassName="w-5 h-5"
-                                  roundedClassName="rounded shrink-0"
-                                />
-                                <span className="font-extrabold text-slate-200 text-[11px] whitespace-nowrap truncate">
-                                  {c.full_name || c.web_name}
-                                </span>
-                                {(c.team_short_name || c.team_code) && (
-                                  <span className="text-[8px] font-mono text-slate-400 bg-slate-900 border border-slate-800 px-1 py-0.2 rounded uppercase shrink-0">
-                                    {c.team_short_name || c.team_code}
+                                {m.team_name && (
+                                  <span className="text-[9px] text-slate-400 block truncate font-normal">
+                                    {m.team_name}
                                   </span>
                                 )}
                               </div>
-                              <div className="flex items-center gap-2 shrink-0">
-                                <div className="w-16 h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800 shrink-0">
-                                  <div
-                                    className="h-full bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"
-                                    style={{ width: `${Math.min(100, c.captainPercentage * 2.5)}%` }}
-                                  />
-                                </div>
-                                <span className="w-8 text-right font-mono font-black text-amber-300 shrink-0 whitespace-nowrap">{c.captainPercentage}%</span>
-                              </div>
                             </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Starting Weapons */}
-                {(() => {
-                  const weapons = topInsight.consensusDetails.filter(d => d.isStartingWeapon);
-                  if (weapons.length === 0) return null;
-                  return (
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between text-[9px]">
-                        <span className="flex items-center gap-1 font-black uppercase text-amber-400 tracking-wider">
-                          <span>🔥</span>
-                          <span>Starting Weapons ({weapons.length})</span>
-                        </span>
-                        <span className="text-[8px] text-slate-500 font-mono">Ranked by Conviction</span>
-                      </div>
-                      <div className="space-y-1 max-h-60 overflow-y-auto pr-1">
-                        {weapons.map(p => (
-                          <div 
-                            key={p.id} 
-                            className="flex items-center justify-between px-2.5 py-1.5 bg-slate-950/80 hover:bg-slate-900 rounded-xl border border-slate-800/80 hover:border-amber-500/30 transition-all text-[10px]"
-                            title={`${p.web_name}: ${p.startCount}/${p.eligibleManagers} starts (${Math.min(100, Math.round(p.startRate * 100))}%), ${p.captainCount}/${p.eligibleManagers} captains (${Math.min(100, Math.round(p.captainRate * 100))}%), Conviction: ${p.convictionScore}`}
-                          >
-                            <div className="flex items-center gap-2 min-w-0 pr-2">
-                              <span className={`text-[8px] font-mono font-black px-1.5 py-0.5 rounded border shrink-0 ${getPositionBadge(p.position)}`}>
-                                {p.position}
-                              </span>
-                              <span className="text-slate-200 font-bold truncate">{p.web_name}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 font-mono text-[8.5px] shrink-0 whitespace-nowrap">
-                              <span className={`font-bold px-1.5 py-0.5 rounded border ${
-                                p.startRate >= 1.0 
-                                  ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/25' 
-                                  : 'text-slate-300 bg-slate-800/80 border-slate-700/60'
-                              }`}>
-                                {Math.min(100, Math.round(p.startRate * 100))}% Start
-                              </span>
-                              {p.captainRate > 0 && (
-                                <span className="text-amber-300 font-bold bg-amber-400/10 border border-amber-400/25 px-1.5 py-0.5 rounded">
-                                  {Math.min(100, Math.round(p.captainRate * 100))}% Cap
+                            <div className="flex items-center gap-1.5 shrink-0 font-mono text-[10.5px]">
+                              {isNorm && (
+                                <span className="text-slate-400 line-through text-[9.5px]" title="Raw Points before chip deduction">
+                                  {m.total_points}
                                 </span>
                               )}
+                              <span className="text-fpl-green font-black bg-fpl-green/10 border border-fpl-green/20 px-2 py-0.5 rounded">
+                                {normPts} pts
+                              </span>
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })()}
 
-                {/* Bench Enablers */}
-                {(() => {
-                  const enablers = topInsight.consensusDetails
-                    .filter(d => d.isBenchEnabler)
-                    .sort((a, b) => b.benchRate - a.benchRate || a.cost - b.cost || b.squadCount - a.squadCount);
-                  if (enablers.length === 0) return null;
-                  return (
-                    <div className="space-y-1.5 pt-1">
-                      <div className="flex items-center justify-between text-[9px]">
-                        <span className="flex items-center gap-1 font-black uppercase text-cyan-400 tracking-wider">
-                          <span>🪑</span>
-                          <span>Bench Enablers ({enablers.length})</span>
-                        </span>
-                        <span className="text-[8px] text-slate-400 font-mono">Ranked by Bench % & Value</span>
-                      </div>
-                      <div className="space-y-1 max-h-44 overflow-y-auto pr-1">
-                        {enablers.map(p => (
-                          <div 
-                            key={p.id} 
-                            className="flex items-center justify-between px-2.5 py-1.5 bg-slate-950/80 hover:bg-slate-900 rounded-xl border border-slate-800/80 hover:border-cyan-500/30 transition-all text-[10px]"
-                            title={`${p.web_name}: £${(p.cost / 10).toFixed(1)}m, ${p.benchCount}/${p.eligibleManagers} benched (${Math.min(100, Math.round(p.benchRate * 100))}%), ${p.startCount}/${p.eligibleManagers} starts (${Math.min(100, Math.round(p.startRate * 100))}%), Conviction: ${p.convictionScore}`}
-                          >
-                            <div className="flex items-center gap-2 min-w-0 pr-2">
-                              <span className={`text-[8px] font-mono font-black px-1.5 py-0.5 rounded border shrink-0 ${getPositionBadge(p.position)}`}>
-                                {p.position}
-                              </span>
-                              <span className="text-slate-300 font-semibold truncate">{p.web_name}</span>
-                              <span className="text-[8.5px] text-slate-400 font-mono bg-slate-900/90 px-1.5 py-0.5 rounded border border-slate-800 shrink-0">
-                                £{(p.cost / 10).toFixed(1)}m
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1 font-mono text-[8.5px] shrink-0 whitespace-nowrap">
-                              <span className={`font-bold px-1.5 py-0.5 rounded border ${
-                                p.benchRate >= 0.20
-                                  ? 'text-emerald-300 bg-emerald-500/15 border-emerald-500/30'
-                                  : p.benchRate >= 0.10 
-                                  ? 'text-cyan-300 bg-cyan-500/10 border-cyan-500/25' 
-                                  : 'text-slate-300 bg-slate-800/80 border-slate-700/60'
-                              }`}>
-                                {Math.min(100, Math.round(p.benchRate * 100))}% Bench
-                              </span>
+                          {/* Bottom row: Chip status & Actions */}
+                          <div className="flex items-center justify-between pt-1 border-t border-slate-900/90 text-[9px]">
+                            <span className={`font-mono text-[8.5px] px-1.5 py-0.5 rounded border ${
+                              isNorm
+                                ? 'bg-sky-500/10 text-sky-400 border-sky-500/20'
+                                : (m.chips_used && m.chips_used.length > 0)
+                                  ? 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20'
+                                  : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                            }`}>
+                              {isNorm 
+                                ? `Normalized (-${m.chip_deduction} pts)` 
+                                : (m.chips_used && m.chips_used.length > 0)
+                                  ? `${m.chips_used.map(c => c.name === 'freehit' ? 'FH' : c.name === 'wildcard' ? 'WC' : c.name.toUpperCase()).join('+')} (0 pts deducted)`
+                                  : 'Pure 0-Chips'
+                              }
+                            </span>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              {onSyncTeamId && (
+                                <button
+                                  onClick={() => onSyncTeamId(m.entry.toString(), selectedGw)}
+                                  className="text-[8.5px] font-black uppercase tracking-wider text-slate-950 bg-fpl-green hover:bg-fpl-green/90 px-2 py-0.5 rounded-md transition-all shadow-[0_0_8px_rgba(0,255,133,0.25)] flex items-center gap-1 cursor-pointer active:scale-95"
+                                  title={`Sync Team ID ${m.entry} directly into Horizon and analyze squad as of GW ${selectedGw}`}
+                                >
+                                  ⚡ Sync Squad
+                                </button>
+                              )}
+                              <a 
+                                href={`https://fantasy.premierleague.com/entry/${m.entry}/history`} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="text-[8.5px] font-mono text-cyan-300 bg-slate-900 border border-slate-700/80 hover:border-cyan-500/40 px-2 py-0.5 rounded-md hover:bg-slate-800 transition-all flex items-center gap-1"
+                                title="Open Manager Account on Official FPL Website"
+                              >
+                                ID: {m.entry} ↗
+                              </a>
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-            ) : (
-              <div className="pt-1">
-                <span className="text-[8px] font-black uppercase text-slate-500 block mb-1">Elite Consensus Picks:</span>
-                <div className="flex flex-wrap gap-1">
-                  {topInsight.eliteConsensusPicks.map(pick => (
-                    <span key={pick} className="bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 px-1.5 py-0.5 rounded text-[8px] font-mono font-bold">
-                      {pick}
-                    </span>
-                  ))}
+                        </div>
+                      );
+                    })}
                 </div>
+
+                {/* Split Elite Consensus: Starting Weapons & Bench Enablers */}
+                {topInsight?.consensusDetails && topInsight.consensusDetails.length > 0 ? (
+                  <div className="pt-2.5 space-y-3 border-t border-slate-800/80">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-slate-200">
+                        Elite Consensus
+                      </span>
+                      <span 
+                        className="text-[8.5px] font-mono font-bold text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-2 py-0.5 rounded cursor-help"
+                        title={`Calculated across ${topInsight?.eligibleManagers || topInsight?.noChipLeaderCount || 0} active 0-chip elite managers`}
+                      >
+                        Elite cohort: {topInsight?.eligibleManagers || topInsight?.noChipLeaderCount || 0} managers
+                      </span>
+                    </div>
+
+                    {/* 👑 Consensus Captaincy Intelligence Hub */}
+                    {consensusCaptain && (
+                      <div className="p-3 rounded-2xl bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-slate-900/90 border border-amber-500/30 shadow-lg space-y-2.5">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-amber-300">
+                            <Crown className="w-4 h-4 text-amber-400" />
+                            <span>Elite Consensus Captaincy Hub</span>
+                          </div>
+                          <span className="text-[8.5px] font-mono font-bold bg-amber-400/15 text-amber-300 border border-amber-400/30 px-2 py-0.5 rounded-full">
+                            {consensusCaptain.captainPercentage}% Herd Armband
+                          </span>
+                        </div>
+
+                        {/* Spotlight Cards: Consensus Captain & Vice-Captain */}
+                        <div className="grid grid-cols-1 gap-2 text-xs">
+                          {/* #1 Consensus Captain */}
+                          <div className="p-2.5 rounded-xl bg-slate-950/80 border border-amber-400/40 shadow-sm space-y-2">
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span className="text-[10px] font-black text-amber-400 bg-amber-400/10 border border-amber-400/30 px-1.5 py-0.5 rounded uppercase whitespace-nowrap">
+                                  #1 CAPTAIN
+                                </span>
+                                <span className={`text-[8px] font-mono font-black px-1.5 py-0.5 rounded ${getPositionBadge(consensusCaptain.position)}`}>
+                                  {consensusCaptain.position}
+                                </span>
+                                {(consensusCaptain.team_short_name || consensusCaptain.team_code) && (
+                                  <span className="text-[8px] font-black text-slate-300 bg-slate-800 border border-slate-700 px-1.5 py-0.5 rounded uppercase font-mono">
+                                    {consensusCaptain.team_short_name || consensusCaptain.team_code}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-right shrink-0">
+                                <span className="text-base font-black font-mono text-amber-300">
+                                  {consensusCaptain.captainPercentage}%
+                                </span>
+                                <span className="text-[8px] text-slate-400 font-bold uppercase ml-1">Vote</span>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <PlayerPhoto
+                                playerId={consensusCaptain.id}
+                                playerCode={consensusCaptain.code}
+                                teamCode={consensusCaptain.team_code}
+                                teamShortName={consensusCaptain.team_short_name}
+                                playerName={consensusCaptain.full_name || consensusCaptain.web_name}
+                                position={consensusCaptain.position}
+                                sizeClassName="w-10 h-10"
+                                roundedClassName="rounded-xl"
+                                showSpotlight={true}
+                                className="border border-amber-400/40 shrink-0"
+                              />
+                              <div className="min-w-0">
+                                <div className="font-extrabold text-white text-[13.5px] truncate drop-shadow-sm leading-tight">
+                                  {consensusCaptain.full_name || consensusCaptain.web_name}
+                                </div>
+                                <div className="text-[9px] text-slate-400 font-mono mt-0.5 flex items-center gap-1.5 whitespace-nowrap">
+                                  <span className="text-slate-200 font-bold">
+                                    £{formatCost(consensusCaptain.cost)}M
+                                  </span>
+                                  <span>•</span>
+                                  <span>{consensusCaptain.captainCount} of {eligibleManagers} managers</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* #2 Consensus Vice-Captain */}
+                          {consensusViceCaptain && (
+                            <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-700/80 shadow-sm space-y-2">
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                  <span className="text-[10px] font-black text-cyan-400 bg-cyan-400/10 border border-cyan-400/30 px-1.5 py-0.5 rounded uppercase whitespace-nowrap">
+                                    #2 RUNNER-UP
+                                  </span>
+                                  <span className={`text-[8px] font-mono font-black px-1.5 py-0.5 rounded ${getPositionBadge(consensusViceCaptain.position)}`}>
+                                    {consensusViceCaptain.position}
+                                  </span>
+                                  {(consensusViceCaptain.team_short_name || consensusViceCaptain.team_code) && (
+                                    <span className="text-[8px] font-black text-slate-300 bg-slate-800 border border-slate-700 px-1.5 py-0.5 rounded uppercase font-mono">
+                                      {consensusViceCaptain.team_short_name || consensusViceCaptain.team_code}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-right shrink-0">
+                                  <span className="text-base font-black font-mono text-cyan-300">
+                                    {consensusViceCaptain.captainPercentage}%
+                                  </span>
+                                  <span className="text-[8px] text-slate-400 font-bold uppercase ml-1">Vote</span>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <PlayerPhoto
+                                  playerId={consensusViceCaptain.id}
+                                  playerCode={consensusViceCaptain.code}
+                                  teamCode={consensusViceCaptain.team_code}
+                                  teamShortName={consensusViceCaptain.team_short_name}
+                                  playerName={consensusViceCaptain.full_name || consensusViceCaptain.web_name}
+                                  position={consensusViceCaptain.position}
+                                  sizeClassName="w-10 h-10"
+                                  roundedClassName="rounded-xl"
+                                  className="border border-slate-700 shrink-0"
+                                />
+                                <div className="min-w-0">
+                                  <div className="font-extrabold text-white text-[13.5px] truncate drop-shadow-sm leading-tight">
+                                    {consensusViceCaptain.full_name || consensusViceCaptain.web_name}
+                                  </div>
+                                  <div className="text-[9px] text-slate-400 font-mono mt-0.5 flex items-center gap-1.5 whitespace-nowrap">
+                                    <span className="text-slate-200 font-bold">
+                                      £{formatCost(consensusViceCaptain.cost)}M
+                                    </span>
+                                    <span>•</span>
+                                    <span>{consensusViceCaptain.captainCount} of {eligibleManagers} managers</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Captaincy Vote Share Distribution Bars */}
+                        {captaincyDistribution.length > 0 && (
+                          <div className="space-y-1.5 pt-1 border-t border-slate-800/80">
+                            <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                              <span>Top 5 Captaincy Vote Share</span>
+                              <span>Sum: {captaincyDistribution.reduce((acc, c) => acc + c.captainPercentage, 0)}%</span>
+                            </div>
+                            <div className="space-y-1.5">
+                              {captaincyDistribution.map(c => (
+                                <div key={c.id} className="flex items-center justify-between gap-2 text-[10px] bg-slate-950/40 p-1.5 rounded-lg border border-slate-800">
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <PlayerPhoto
+                                      playerId={c.id}
+                                      playerCode={c.code}
+                                      teamCode={c.team_code}
+                                      teamShortName={c.team_short_name}
+                                      playerName={c.full_name || c.web_name}
+                                      position={c.position}
+                                      sizeClassName="w-5 h-5"
+                                      roundedClassName="rounded shrink-0"
+                                    />
+                                    <span className="font-extrabold text-slate-200 text-[11px] whitespace-nowrap truncate">
+                                      {c.full_name || c.web_name}
+                                    </span>
+                                    {(c.team_short_name || c.team_code) && (
+                                      <span className="text-[8px] font-mono text-slate-400 bg-slate-900 border border-slate-800 px-1 py-0.2 rounded uppercase shrink-0">
+                                        {c.team_short_name || c.team_code}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="flex items-center gap-2 shrink-0">
+                                    <div className="w-16 h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800 shrink-0">
+                                      <div
+                                        className="h-full bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"
+                                        style={{ width: `${Math.min(100, c.captainPercentage * 2.5)}%` }}
+                                      />
+                                    </div>
+                                    <span className="w-8 text-right font-mono font-black text-amber-300 shrink-0 whitespace-nowrap">{c.captainPercentage}%</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Starting Weapons */}
+                    {(() => {
+                      const weapons = (topInsight?.consensusDetails || []).filter(d => d.isStartingWeapon);
+                      if (weapons.length === 0) return null;
+                      return (
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between text-[9px]">
+                            <span className="flex items-center gap-1 font-black uppercase text-amber-400 tracking-wider">
+                              <span>🔥</span>
+                              <span>Starting Weapons ({weapons.length})</span>
+                            </span>
+                            <span className="text-[8px] text-slate-500 font-mono">Ranked by Conviction</span>
+                          </div>
+                          <div className="space-y-1 max-h-60 overflow-y-auto pr-1">
+                            {weapons.map(p => (
+                              <div 
+                                key={p.id} 
+                                className="flex items-center justify-between px-2.5 py-1.5 bg-slate-950/80 hover:bg-slate-900 rounded-xl border border-slate-800/80 hover:border-amber-500/30 transition-all text-[10px]"
+                                title={`${p.web_name}: ${p.startCount}/${p.eligibleManagers} starts (${Math.min(100, Math.round(p.startRate * 100))}%), ${p.captainCount}/${p.eligibleManagers} captains (${Math.min(100, Math.round(p.captainRate * 100))}%), Conviction: ${p.convictionScore}`}
+                              >
+                                <div className="flex items-center gap-2 min-w-0 pr-2">
+                                  <span className={`text-[8px] font-mono font-black px-1.5 py-0.5 rounded border shrink-0 ${getPositionBadge(p.position)}`}>
+                                    {p.position}
+                                  </span>
+                                  <span className="text-slate-200 font-bold truncate">{p.web_name}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 font-mono text-[8.5px] shrink-0 whitespace-nowrap">
+                                  <span className={`font-bold px-1.5 py-0.5 rounded border ${
+                                    p.startRate >= 1.0 
+                                      ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/25' 
+                                      : 'text-slate-300 bg-slate-800/80 border-slate-700/60'
+                                  }`}>
+                                    {Math.min(100, Math.round(p.startRate * 100))}% Start
+                                  </span>
+                                  {p.captainRate > 0 && (
+                                    <span className="text-amber-300 font-bold bg-amber-400/10 border border-amber-400/25 px-1.5 py-0.5 rounded">
+                                      {Math.min(100, Math.round(p.captainRate * 100))}% Cap
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Bench Enablers */}
+                    {(() => {
+                      const enablers = (topInsight?.consensusDetails || [])
+                        .filter(d => d.isBenchEnabler)
+                        .sort((a, b) => b.benchRate - a.benchRate || a.cost - b.cost || b.squadCount - a.squadCount);
+                      if (enablers.length === 0) return null;
+                      return (
+                        <div className="space-y-1.5 pt-1">
+                          <div className="flex items-center justify-between text-[9px]">
+                            <span className="flex items-center gap-1 font-black uppercase text-cyan-400 tracking-wider">
+                              <span>🪑</span>
+                              <span>Bench Enablers ({enablers.length})</span>
+                            </span>
+                            <span className="text-[8px] text-slate-400 font-mono">Ranked by Bench % & Value</span>
+                          </div>
+                          <div className="space-y-1 max-h-44 overflow-y-auto pr-1">
+                            {enablers.map(p => (
+                              <div 
+                                key={p.id} 
+                                className="flex items-center justify-between px-2.5 py-1.5 bg-slate-950/80 hover:bg-slate-900 rounded-xl border border-slate-800/80 hover:border-cyan-500/30 transition-all text-[10px]"
+                                title={`${p.web_name}: £${(p.cost / 10).toFixed(1)}m, ${p.benchCount}/${p.eligibleManagers} benched (${Math.min(100, Math.round(p.benchRate * 100))}%), ${p.startCount}/${p.eligibleManagers} starts (${Math.min(100, Math.round(p.startRate * 100))}%), Conviction: ${p.convictionScore}`}
+                              >
+                                <div className="flex items-center gap-2 min-w-0 pr-2">
+                                  <span className={`text-[8px] font-mono font-black px-1.5 py-0.5 rounded border shrink-0 ${getPositionBadge(p.position)}`}>
+                                    {p.position}
+                                  </span>
+                                  <span className="text-slate-300 font-semibold truncate">{p.web_name}</span>
+                                  <span className="text-[8.5px] text-slate-400 font-mono bg-slate-900/90 px-1.5 py-0.5 rounded border border-slate-800 shrink-0">
+                                    £{(p.cost / 10).toFixed(1)}m
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1 font-mono text-[8.5px] shrink-0 whitespace-nowrap">
+                                  <span className={`font-bold px-1.5 py-0.5 rounded border ${
+                                    p.benchRate >= 0.20
+                                      ? 'text-emerald-300 bg-emerald-500/15 border-emerald-500/30'
+                                      : p.benchRate >= 0.10 
+                                      ? 'text-cyan-300 bg-cyan-500/10 border-cyan-500/25' 
+                                      : 'text-slate-300 bg-slate-800/80 border-slate-700/60'
+                                  }`}>
+                                    {Math.min(100, Math.round(p.benchRate * 100))}% Bench
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                ) : (
+                  <div className="pt-1">
+                    <span className="text-[8px] font-black uppercase text-slate-500 block mb-1">Elite Consensus Picks:</span>
+                    <div className="flex flex-wrap gap-1">
+                      {(topInsight?.eliteConsensusPicks || []).map(pick => (
+                        <span key={pick} className="bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 px-1.5 py-0.5 rounded text-[8px] font-mono font-bold">
+                          {pick}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="p-4 text-center bg-slate-950/60 border border-slate-800/80 rounded-xl my-2">
+                <p className="text-xs text-amber-400 font-mono font-bold">GW {selectedGw} snapshot data is unavailable.</p>
+                <p className="text-[9px] text-slate-500 font-mono mt-1">Select another Gameweek above to view archived manager intelligence.</p>
               </div>
             )}
           </div>

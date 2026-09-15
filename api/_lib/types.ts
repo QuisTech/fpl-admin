@@ -267,6 +267,7 @@ export interface CaptaincyDistributionItem {
 }
 
 export interface TopManagerInsight {
+  gameweek?: number;
   noChipLeaderCount: number;
   eligibleManagers: number;
   pureZeroChipCount?: number;

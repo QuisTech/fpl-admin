@@ -683,6 +683,7 @@ export class ManagerSnapshotService {
     const normalizedChipCount = leadersToUse.filter(m => m.chip_deduction && m.chip_deduction > 0).length;
 
     return {
+      gameweek: targetGw,
       noChipLeaderCount: leadersToUse.length,
       eligibleManagers,
       pureZeroChipCount,
