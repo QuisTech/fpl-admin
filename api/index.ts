@@ -1775,8 +1775,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         try {
           topManagerInsight = await ManagerSnapshotService.getDynamicTopManagerInsight(players, effectiveGw);
         } catch (innerErr: any) {
-          console.warn(`[TopManagerInsight API] Error fetching GW${effectiveGw}, falling back to current GW:`, innerErr.message);
-          topManagerInsight = await ManagerSnapshotService.getDynamicTopManagerInsight(players, nextEventId);
+          console.warn(`[TopManagerInsight API] Error fetching GW${effectiveGw}:`, innerErr.message);
+          topManagerInsight = {
+            gameweek: effectiveGw,
+            noChipLeaderCount: 0,
+            eligibleManagers: 0,
+            pureZeroChipCount: 0,
+            normalizedChipCount: 0,
+            sampleLeaders: [],
+            marketDisagreementRating: 0.25,
+            eliteConsensusPicks: [],
+            consensusDetails: [],
+            captaincyDistribution: []
+          };
         }
         
         // Edge caching for Vercel Hobby Tier: Cache completed gameweeks aggressively

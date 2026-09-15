@@ -158,8 +158,19 @@ async function startServer() {
       try {
         topManagerInsight = await ManagerSnapshotService.getDynamicTopManagerInsight(players, effectiveGw);
       } catch (innerErr: any) {
-        console.warn(`[TopManagerInsight] Error fetching GW${effectiveGw}, falling back to current GW:`, innerErr.message);
-        topManagerInsight = await ManagerSnapshotService.getDynamicTopManagerInsight(players, currentGw);
+        console.warn(`[TopManagerInsight] Error fetching GW${effectiveGw}:`, innerErr.message);
+        topManagerInsight = {
+          gameweek: effectiveGw,
+          noChipLeaderCount: 0,
+          eligibleManagers: 0,
+          pureZeroChipCount: 0,
+          normalizedChipCount: 0,
+          sampleLeaders: [],
+          marketDisagreementRating: 0.25,
+          eliteConsensusPicks: [],
+          consensusDetails: [],
+          captaincyDistribution: []
+        };
       }
 
       res.json({
