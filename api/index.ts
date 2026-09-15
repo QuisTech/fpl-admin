@@ -1760,16 +1760,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       try {
         const rawGw = (query.gw as string) || (req.body?.gw as string);
         const targetGw = rawGw ? parseInt(rawGw, 10) : undefined;
-        const baseData = await FPLService.getBaseData();
-        const nextEventId = baseData.nextEventId || baseData.currentEventId || 1;
+        let players: any[] = [];
+        let nextEventId = 5;
+        try {
+          const baseData = await FPLService.getBaseData();
+          players = baseData.players || [];
+          nextEventId = baseData.nextEventId || baseData.currentEventId || 5;
+        } catch (e: any) {
+          console.warn('[TopManagerInsight API] BaseData fetch warning:', e.message);
+        }
         const effectiveGw = (targetGw && !isNaN(targetGw)) ? targetGw : nextEventId;
         
         let topManagerInsight;
         try {
-          topManagerInsight = await ManagerSnapshotService.getDynamicTopManagerInsight(baseData.players, effectiveGw);
+          topManagerInsight = await ManagerSnapshotService.getDynamicTopManagerInsight(players, effectiveGw);
         } catch (innerErr: any) {
           console.warn(`[TopManagerInsight API] Error fetching GW${effectiveGw}, falling back to current GW:`, innerErr.message);
-          topManagerInsight = await ManagerSnapshotService.getDynamicTopManagerInsight(baseData.players, nextEventId);
+          topManagerInsight = await ManagerSnapshotService.getDynamicTopManagerInsight(players, nextEventId);
         }
         
         // Edge caching for Vercel Hobby Tier: Cache completed gameweeks aggressively

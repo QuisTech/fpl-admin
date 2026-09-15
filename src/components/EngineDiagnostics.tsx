@@ -53,10 +53,11 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
     setLoadingGw(true);
     axios.get(`/api/top-manager-insight?gw=${selectedGw}`)
       .then(res => {
-        if (isMounted && res.data?.topManagerInsight) {
+        const payload = res.data?.topManagerInsight || (res.data?.sampleLeaders ? res.data : undefined);
+        if (isMounted && payload) {
           setInsightCache(prev => ({
             ...prev,
-            [selectedGw]: res.data.topManagerInsight
+            [selectedGw]: payload
           }));
         }
       })
@@ -77,8 +78,14 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
   const omissionAnalysis = metrics?.omissionAnalysis || [];
 
   const hasTopInsightCapability = Boolean(data?.topManagerInsight || Object.keys(insightCache).length > 0);
-  const topInsight = insightCache[selectedGw] || (selectedGw === currentGw ? data?.topManagerInsight : undefined);
-  const isFallbackData = Boolean(selectedGw === currentGw && topInsight?.gameweek && topInsight.gameweek !== currentGw);
+  const topInsight = insightCache[selectedGw] || 
+                     (selectedGw === currentGw ? data?.topManagerInsight : undefined) ||
+                     Object.values(insightCache)[0] || 
+                     data?.topManagerInsight;
+  const isFallbackData = Boolean(
+    !insightCache[selectedGw] || 
+    (selectedGw === currentGw && topInsight?.gameweek && topInsight.gameweek !== currentGw)
+  );
   const availableGws = Array.from({ length: currentGw }, (_, i) => currentGw - i);
   const eligibleManagers = topInsight?.eligibleManagers || topInsight?.noChipLeaderCount || 1;
 

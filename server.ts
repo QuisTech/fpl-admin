@@ -142,16 +142,24 @@ async function startServer() {
     try {
       const rawGw = (req.query.gw || req.body?.gw) as string;
       const targetGw = rawGw ? parseInt(rawGw, 10) : undefined;
-      const baseData = await FPLService.getBaseData();
-      const effectiveGw = (targetGw && !isNaN(targetGw)) ? targetGw : (baseData.nextEventId || 5);
+      let players: any[] = [];
+      let currentGw = 5;
+      try {
+        const baseData = await FPLService.getBaseData();
+        players = baseData.players || [];
+        currentGw = baseData.nextEventId || 5;
+      } catch (e: any) {
+        console.warn("[TopManagerInsight] BaseData fetch warning:", e.message);
+      }
+      const effectiveGw = (targetGw && !isNaN(targetGw)) ? targetGw : currentGw;
 
       const { ManagerSnapshotService } = await import("./api/_lib/manager-snapshot-service");
       let topManagerInsight;
       try {
-        topManagerInsight = await ManagerSnapshotService.getDynamicTopManagerInsight(baseData.players, effectiveGw);
+        topManagerInsight = await ManagerSnapshotService.getDynamicTopManagerInsight(players, effectiveGw);
       } catch (innerErr: any) {
         console.warn(`[TopManagerInsight] Error fetching GW${effectiveGw}, falling back to current GW:`, innerErr.message);
-        topManagerInsight = await ManagerSnapshotService.getDynamicTopManagerInsight(baseData.players, baseData.nextEventId || 5);
+        topManagerInsight = await ManagerSnapshotService.getDynamicTopManagerInsight(players, currentGw);
       }
 
       res.json({

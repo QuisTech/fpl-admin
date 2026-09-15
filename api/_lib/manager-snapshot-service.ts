@@ -387,8 +387,13 @@ export class ManagerSnapshotService {
     if (archive && archive.decisions && archive.decisions.length > 0) {
       decisions = archive.decisions;
     } else {
-      // Perform fast live sample of top 25 leaders
-      decisions = await this.captureTopManagerSnapshots('2026-27', targetGw, 25);
+      try {
+        // Perform fast live sample of top 25 leaders
+        decisions = await this.captureTopManagerSnapshots('2026-27', targetGw, 25);
+      } catch (err: any) {
+        console.warn(`[ManagerSnapshotService] Live capture failed for GW${targetGw}:`, err.message);
+        decisions = [];
+      }
     }
 
     // Load exact gameweek player points map for targetGw if available, fallback to player.event_points
