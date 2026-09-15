@@ -158,19 +158,8 @@ async function startServer() {
       try {
         topManagerInsight = await ManagerSnapshotService.getDynamicTopManagerInsight(players, effectiveGw);
       } catch (innerErr: any) {
-        console.warn(`[TopManagerInsight] Error fetching GW${effectiveGw}:`, innerErr.message);
-        topManagerInsight = {
-          gameweek: effectiveGw,
-          noChipLeaderCount: 0,
-          eligibleManagers: 0,
-          pureZeroChipCount: 0,
-          normalizedChipCount: 0,
-          sampleLeaders: [],
-          marketDisagreementRating: 0.25,
-          eliteConsensusPicks: [],
-          consensusDetails: [],
-          captaincyDistribution: []
-        };
+        console.warn(`[TopManagerInsight] Fallback disk loading for GW${effectiveGw}:`, innerErr.message);
+        topManagerInsight = await ManagerSnapshotService.getDynamicTopManagerInsight([], effectiveGw);
       }
 
       res.json({
