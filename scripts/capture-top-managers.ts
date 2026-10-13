@@ -91,7 +91,8 @@ export async function runCapture(targetGwOverride?: number, sampleLimit: number 
   });
 
   // Known top 0-chip purist leaders to guarantee representation even when early chips dominate top 250
-  const tracked0ChipIds = [4148445, 5662742];
+  // 808431 (Henrik Svensson, Rank 485), 5584970 (Azamat Aynabekov, Rank 485), 5554203 (parthiv 13, Rank 509), 4148445 (Abhishek Raj)
+  const tracked0ChipIds = [808431, 5584970, 5554203, 4148445];
   const targetList = deduplicatedStandings.slice(0, sampleLimit);
 
   // Append tracked 0-chip leaders if not already present in the top standings

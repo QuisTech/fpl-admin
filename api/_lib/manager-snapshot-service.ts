@@ -460,7 +460,30 @@ export class ManagerSnapshotService {
     });
 
     const eligibleManagers = leadersToUse.length;
-    const sampleLeaders = leadersToUse.slice(0, 50).map(d => ({
+
+    // Ensure sampleLeaders includes top normalized leaders AND guarantees representation of pure 0-chip managers
+    const topNormalized = leadersToUse.filter(d => Boolean((d.chips_used && d.chips_used.length > 0) || (d.chip_deduction && d.chip_deduction > 0) || d.is_chip_normalized));
+    const zeroChipLeaders = leadersToUse.filter(d => (!d.chips_used || d.chips_used.length === 0) && !d.chip_deduction && !d.is_chip_normalized);
+
+    // Merge: Top 50 normalized leaders + all pure 0-chip leaders in the cohort (deduplicated)
+    const combinedSample: ManagerGWDecisionSnapshot[] = [];
+    const addedIds = new Set<number>();
+
+    for (const m of topNormalized.slice(0, 50)) {
+      if (!addedIds.has(m.manager_id)) {
+        combinedSample.push(m);
+        addedIds.add(m.manager_id);
+      }
+    }
+
+    for (const m of zeroChipLeaders) {
+      if (!addedIds.has(m.manager_id)) {
+        combinedSample.push(m);
+        addedIds.add(m.manager_id);
+      }
+    }
+
+    const sampleLeaders = combinedSample.map(d => ({
       rank: d.overall_rank,
       entry: d.manager_id,
       manager_name: d.manager_name || 'Elite Manager',
