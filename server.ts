@@ -1,14 +1,71 @@
 import "dotenv/config";
 import express from "express";
+import http from "http";
+import net from "net";
 import { createServer as createViteServer } from "vite";
 import { FPLService } from "./api/index";
 
 const app = express();
-const PORT = 3000;
+
+function isPortAvailable(port: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    const tester = net.createServer()
+      .once("error", () => resolve(false))
+      .once("listening", () => {
+        tester.once("close", () => resolve(true)).close();
+      })
+      .listen(port, "0.0.0.0");
+  });
+}
+
+function parsePortArg(): number | null {
+  for (let i = 2; i < process.argv.length; i++) {
+    const arg = process.argv[i];
+    if (arg === "--port" || arg === "-p") {
+      const next = process.argv[i + 1];
+      if (next && !isNaN(Number(next))) {
+        return Number(next);
+      }
+    } else if (arg.startsWith("--port=")) {
+      const val = arg.split("=")[1];
+      if (val && !isNaN(Number(val))) {
+        return Number(val);
+      }
+    }
+  }
+  if (process.env.PORT && !isNaN(Number(process.env.PORT))) {
+    return Number(process.env.PORT);
+  }
+  return null;
+}
+
+async function resolvePort(): Promise<number> {
+  const explicitPort = parsePortArg();
+  if (explicitPort !== null) {
+    const available = await isPortAvailable(explicitPort);
+    if (!available) {
+      console.warn(`[GRAND CRU] Warning: Specified port ${explicitPort} is already in use.`);
+    }
+    return explicitPort;
+  }
+
+  let candidate = 3000;
+  while (!(await isPortAvailable(candidate))) {
+    console.log(`[GRAND CRU] Port ${candidate} is already in use, trying ${candidate + 1}...`);
+    candidate++;
+  }
+  return candidate;
+}
 
 async function startServer() {
+  const port = await resolvePort();
+  const server = http.createServer(app);
+
   const vite = await createViteServer({
-    server: { middlewareMode: true },
+    server: {
+      middlewareMode: true,
+      hmr: process.env.DISABLE_HMR === 'true' ? false : { server },
+    },
     appType: "spa",
   });
 
@@ -222,8 +279,8 @@ async function startServer() {
 
   app.use(vite.middlewares);
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`[GRAND CRU] Development server running on http://localhost:${PORT}`);
+  server.listen(port, "0.0.0.0", () => {
+    console.log(`[GRAND CRU] Development server running on http://localhost:${port}`);
   });
 }
 
