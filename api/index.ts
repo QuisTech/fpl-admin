@@ -465,7 +465,10 @@ export class FPLService {
 
     let scored: ScoredPlayer[] = [];
     
-    const available = players.filter(p => p.status === 'a' || p.chance_of_playing_next_round === 100);
+    const available = players.filter(p => 
+      p.status !== 'i' && p.status !== 's' && p.status !== 'u' &&
+      (p.chance_of_playing_next_round === null || p.chance_of_playing_next_round === undefined || p.chance_of_playing_next_round >= 50)
+    );
     scored = available.map(p => {
       const baseXp = oracle.getXP(p.id, nextEventId);
       let horizonXP = 0;

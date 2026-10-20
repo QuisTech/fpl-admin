@@ -129,6 +129,8 @@ export function solveOptimalSquad(
     sortedByCost.slice(0, 8).forEach(c => selectedIds.add(c.id));
     // Any locked player
     posList.filter(c => c.isLocked).forEach(c => selectedIds.add(c.id));
+    // Any elite premium asset (>= 10.0m) to ensure minElitePlayers feasibility
+    posList.filter(c => c.cost >= 100).forEach(c => selectedIds.add(c.id));
 
     posList.forEach(c => {
       if (selectedIds.has(c.id)) {
@@ -220,8 +222,35 @@ export function solveOptimalSquad(
     }
   });
 
-  const solution = solver.Solve(model) as Record<string, any>;
+  let solution = solver.Solve(model) as Record<string, any>;
   
+  // Dynamic Constraint Relaxation Fallback (Per V3 Architecture)
+  // If strict constraints (eo_total, elite_total, or captaincy links) cause infeasibility,
+  // progressively relax constraints so the LP solver STILL outputs an optimal mathematical squad
+  // rather than crashing into the unconstrained raw heuristic sort.
+  if (!solution || !solution.feasible) {
+    // Stage 1: Relax EO total and elite player constraints
+    if (model.constraints['eo_total']) {
+      model.constraints['eo_total'] = { min: Math.floor((params.minEoTotal || 250) * 0.6) };
+    }
+    if (model.constraints['elite_total'] && params.minElitePlayers) {
+      delete model.constraints['elite_total'];
+    }
+    solution = solver.Solve(model) as Record<string, any>;
+  }
+
+  if (!solution || !solution.feasible) {
+    // Stage 2: Relax defensive diversification and pure EO
+    delete model.constraints['eo_total'];
+    delete model.constraints['total_cap'];
+    Object.keys(model.constraints).forEach(k => {
+      if (k.startsWith('def_team_') || k.startsWith('cap_link_') || k.startsWith('c_')) {
+        delete model.constraints[k];
+      }
+    });
+    solution = solver.Solve(model) as Record<string, any>;
+  }
+
   if (!solution || !solution.feasible) {
     return []; 
   }

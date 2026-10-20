@@ -245,7 +245,7 @@ export abstract class BaseOracle implements XPOracle {
       const starts = p.starts || 0;
       const avgMins = rawMinutes / completedGws;
       const startRate = starts / completedGws;
-      const isAvail = p.status === 'a' && probPlay > 0.5;
+      const isAvail = p.status !== 'i' && p.status !== 's' && p.status !== 'u' && probPlay >= 0.5;
 
       let dynamicPredictedMins = 0;
       if (!isAvail) {
