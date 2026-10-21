@@ -13443,3 +13443,29 @@ Analyzed the exact gameweek-by-gameweek results directly from the **Performance 
 
 4. **Scenarios to Completely Avoid**:
    - **AGGRESSIVE Mode across all fuels** (ranks #15 to #19, 313–350 pts). Punty differential captains caused severe double-digit point losses.
+
+---
+
+### User (Turn 134 - 2026-10-21T12:38:34+01:00)
+
+So how is the 2 results different?
+7-Gameweek Monte Carlo walk-forward audit across all 21 scenarios vs Performance tab?
+
+### Assistant (Turn 134)
+
+Detailed the architectural and methodological differences between the **Performance Tab** and the **Monte Carlo Walk-Forward Audit**:
+
+1. **Snapshot vs Autonomous Re-solving**:
+   - **Performance Tab**: Displays frozen pre-deadline snapshots saved in browser localStorage/Firestore at the time the user or scheduled sync captured the squad.
+   - **Walk-Forward Audit**: Autonomous point-in-time solver re-running the linear programming algorithm from scratch against archived snapshot CSVs for every gameweek.
+
+2. **Gameweek Coverage**:
+   - **Performance Tab**: Covers GW2 through GW7 (the 6 gameweeks captured in the active browser history).
+   - **Walk-Forward Audit**: Full 7-gameweek audit from GW1 to GW7.
+
+3. **Autosubs & Lineup Nuance**:
+   - Minor lineup differences between when a snapshot was captured mid-week vs final point-in-time archived CSV data (e.g. Palmer/João Pedro in the snapshot vs Konsa/Iwobi in the audit).
+
+4. **Strategic Synthesis**:
+   - **Performance Tab** answers: "Which saved setup had the highest floor and most reliable captain safety?" (Winner: `FPLForm Risky Template Shield SAFE` with 460 pts, never dropping below 54).
+   - **Walk-Forward Audit** answers: "Which mathematical formula generates the highest long-term market Alpha?" (Winner: `Quant Optimal VALUE` with 569–586 pts, maximizing points-per-million).
