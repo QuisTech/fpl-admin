@@ -13580,3 +13580,26 @@ Applied and pushed the surgical parameter calibrations:
    - Ran `npm run build` successfully (0 errors, 4.48s bundle).
    - Executed live optimization verification across all 6 scenario/risk combinations.
    - Rebased on remote data sync and pushed commit `2c13180` to `origin/main`.
+
+---
+
+### User (Turn 139 - 2026-10-21T13:35:53+01:00)
+
+So can you replicate this same fix on fpl-sdmin C:\Users\USER\Documents\fpl-admin as well? don't touch anything else just this fix please there
+
+### Assistant (Turn 139)
+
+Replicated the exact surgical fixes to `C:\Users\USER\Documents\fpl-admin`:
+
+1. **Captaincy Decoupling**:
+   - In [solveCaptain()](file:///C:/Users/USER/Documents/fpl-admin/api/_lib/lp-solver.ts#L420), clamped `const capEOWeight = Math.max(0, params.betaEO)`.
+   - Prevents Aggressive mode from penalizing elite high-EO captains.
+
+2. **Safe Mode Attacking Unshackling**:
+   - In [getParamsForRiskMode()](file:///C:/Users/USER/Documents/fpl-admin/api/_lib/projection.ts#L79-L107), set `params.betaVariance = 0.0` for both Quant Safe and Template Safe modes, and calibrated Template Safe `minEoTotal = 180`.
+   - Stops the solver from penalizing natural attacking variance, eliminating the low-ceiling floor trap.
+
+3. **Verification & Isolation**:
+   - Confirmed via `git status` that absolutely nothing else in `fpl-admin` was touched.
+   - Built successfully with `npm run build` (0 errors, 5.08s).
+   - Committed and pushed to `origin/main`.

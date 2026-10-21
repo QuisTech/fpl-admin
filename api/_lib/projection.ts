@@ -79,7 +79,7 @@ export function getParamsForRiskMode(
       params.betaEO = -2.0;      // Slight differential tilt
       params.betaDifferential = 4.0;
     } else if (riskMode === 'safe') {
-      params.betaVariance = -0.2; // Penalize volatility/unpredictability for high points floor
+      params.betaVariance = 0.0; // Neutral on volatility: never penalize natural attacking returns
       params.betaEO = 0.0;        // Zero crowd-following bias
       params.minEoTotal = 0;
       params.minElitePlayers = 1; // Guarantee at least one elite premium
@@ -100,9 +100,9 @@ export function getParamsForRiskMode(
       params.betaEO = 0.0; // Anchors protect the core; remaining slots seek differentials
       params.betaDifferential = 4.0;
     } else if (riskMode === 'safe') {
-      params.betaVariance = -0.1;
-      params.betaEO = 3.5;     // Strongly reward high Top 1k EO across the entire squad
-      params.minEoTotal = 250; // Enforce massive template protection
+      params.betaVariance = 0.0; // Neutral on volatility: protect floor via anchors, not by punishing goals
+      params.betaEO = 2.5;     // Solid Top 1k consensus protection without deadweight distortion
+      params.minEoTotal = 180; // Enforce strong core template protection without locking in overpriced deadwood
       params.minElitePlayers = 1;
     } else if (riskMode === 'value') {
       params.betaVariance = 0.0;

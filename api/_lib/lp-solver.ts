@@ -416,8 +416,9 @@ export function solveCaptain(
     const targetTail = params.betaVariance > 0 ? (dist.tails[15] || 0) : (dist.tails[8] || 0);
     const tailWeight = Math.abs(params.betaVariance) * 10; 
     const skewReward = params.betaVariance > 0 ? ((dist.skewness || 0) * 0.5) : 0;
+    const capEOWeight = Math.max(0, params.betaEO);
 
-    return (dist.mean + (tailWeight * targetTail) + skewReward + (params.betaEO * eo / 100)) * posMultiplier;
+    return (dist.mean + (tailWeight * targetTail) + skewReward + (capEOWeight * eo / 100)) * posMultiplier;
   };
 
   const playersWithScores = xiIds.map(id => ({
