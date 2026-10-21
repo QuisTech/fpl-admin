@@ -13525,3 +13525,31 @@ Delivered quantitative recommendation: **Tweak them now.**
    - **Fix 1 (Aggressive)**: Decouple differential squad selection from captaincy. Seek high-ceiling differential outfielders, but uncap/zero-out the negative EO penalty on captaincy (`betaEO >= 0`).
    - **Fix 2 (Safe)**: Reframe Safe mode around Rank Protection (securing the high-EO elite spine) without penalizing high-PPM explosive attacking assets.
    - **Control Group Architecture**: Keep the original untweaked configuration as a preserved benchmark in the Monte Carlo archive to track historical continuity across all 38 gameweeks, while upgrading the live engine for actual decision-making.
+
+---
+
+### User (Turn 137 - 2026-10-21T13:19:36+01:00)
+
+So how can you do it without touch all other things what are working good?
+Can you ?
+
+### Assistant (Turn 137)
+
+Explained how the modular parameter architecture guarantees zero side effects:
+
+1. **Strict Modular Isolation**:
+   - The code isolates every mode into separate `if/else` branches inside [getParamsForRiskMode()](file:///c:/Users/USER/Documents/fpl-planner/api/_lib/projection.ts#L68).
+   - **VALUE mode** (the #1 walk-forward performer with 569–586 pts) resides in its own isolated branch and is left 100% untouched.
+   - **BALANCED mode** resides in its own branch and is 100% untouched.
+   - All 3 underlying data models (**FPLForm**, **Native FPL**, **Eye-Test**) and core solvers (LP branch-and-bound knapsack, Poisson xG/xA models, minutes models) remain 100% untouched.
+
+2. **The 2 Exact Surgical Edits**:
+   - **Edit 1: Captaincy Decoupling in [solveCaptain()](file:///c:/Users/USER/Documents/fpl-planner/api/_lib/lp-solver.ts#L420)**:
+     - Replace `params.betaEO` with `const capEOWeight = Math.max(0, params.betaEO)`.
+     - For Value mode (`betaEO = 0`), `Math.max(0, 0) = 0` (Identical).
+     - For Balanced mode (`betaEO = 0`), `Math.max(0, 0) = 0` (Identical).
+     - For Template Safe (`betaEO = 3.5`), `Math.max(0, 3.5) = 3.5` (Identical).
+     - ONLY Aggressive mode (`betaEO = -2.0`) is healed, preventing it from penalizing Haaland.
+   - **Edit 2: Safe Mode Attacking Unshackling in [getParamsForRiskMode()](file:///c:/Users/USER/Documents/fpl-planner/api/_lib/projection.ts#L82)**:
+     - Only modifies the `riskMode === 'safe'` branch to stop penalizing variance (`betaVariance = 0.0`).
+     - Leaves all other risk modes and scenarios completely unaffected.
