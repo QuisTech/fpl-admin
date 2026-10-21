@@ -13375,3 +13375,5 @@ Confirmed and pushed the changes to GitHub remote (`origin/main`):
 - Committed: `fix(monte-carlo): resolve serverless ESM module import and add in-memory service injection` (commit `a47ff3f`).
 - Pushed to `https://github.com/QuisTech/fpl-planner.git` on `main`.
 - Clean working tree in `fpl-planner`.
+
+- Additional: Synced GW7 snapshot and regenerated Monte Carlo audit datasets (commit `f59b275`) and pushed to `origin main`. Both `fpl-planner` and `fpl-admin` working trees are 100% clean and pushed.
