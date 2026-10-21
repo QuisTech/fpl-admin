@@ -13496,3 +13496,32 @@ Queried live engine recommendations and analyzed the current captaincy decision 
 
 4. **Practical Action**:
    - If pre-match press conferences confirm Haaland is 100% fit and starting, the availability probability resets to 1.0 (pushing his projection back above 6.0 xP), and the model automatically re-promotes Haaland to Captain.
+
+---
+
+### User (Turn 136 - 2026-10-21T13:08:43+01:00)
+
+So do we need to tweak them?
+
+1. The "Safe Mode" Trap (-78 to -134 pts behind)
+What went wrong: SAFE mode over-penalizes fixture uncertainty and defensive rotation. To minimize downside risk, the linear solver gets forced into "low-ceiling, high-floor" assets (Tarkowski, Justin, defensive mids) or overpriced template staples who underperform their price tag.
+It leaves no budget for explosive assets and consistently averages only 58–66 pts per week.
+2. The "Aggressive Mode" Disaster (-117 to -170 pts behind)
+What went wrong: AGGRESSIVE mode over-optimizes for differential ceiling and captain punting. In multiple gameweeks (GW2, GW3, GW5, GW6), it gambled by captaining high-variance differentials (Semenyo, Cherki, Ndoye, Tavernier, Foden) instead of Haaland.
+When those differentials blanked with 1–2 points and Haaland scored 13–26 points, the team suffered irreversible 20-to-30 point losses in a single week.
+
+Or should we allow them to go the full course of the entire 38 GW first? What say you?
+
+### Assistant (Turn 136)
+
+Delivered quantitative recommendation: **Tweak them now.**
+
+1. **Structural Pathologies vs. Random Variance**:
+   - In quantitative modeling, you wait out statistical noise (e.g., penalty misses, red cards). You do NOT wait out structural bugs in the objective function.
+   - In Aggressive mode, `betaEO = -2.0` in captain selection penalized players purely for being high ownership, forcing contrarian captaincy even when Haaland had a 10-point baseline. Running this for 38 weeks will compound the loss from -170 to -400+ points.
+   - In Safe mode, `betaVariance = -0.2` penalizes explosive assets with lumpy returns, forcing the knapsack solver into low-ceiling 2-point defensive assets.
+
+2. **Surgical Fixes Proposed**:
+   - **Fix 1 (Aggressive)**: Decouple differential squad selection from captaincy. Seek high-ceiling differential outfielders, but uncap/zero-out the negative EO penalty on captaincy (`betaEO >= 0`).
+   - **Fix 2 (Safe)**: Reframe Safe mode around Rank Protection (securing the high-EO elite spine) without penalizing high-PPM explosive attacking assets.
+   - **Control Group Architecture**: Keep the original untweaked configuration as a preserved benchmark in the Monte Carlo archive to track historical continuity across all 38 gameweeks, while upgrading the live engine for actual decision-making.
