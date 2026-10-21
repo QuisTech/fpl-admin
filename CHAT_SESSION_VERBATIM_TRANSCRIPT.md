@@ -13377,3 +13377,69 @@ Confirmed and pushed the changes to GitHub remote (`origin/main`):
 - Clean working tree in `fpl-planner`.
 
 - Additional: Synced GW7 snapshot and regenerated Monte Carlo audit datasets (commit `f59b275`) and pushed to `origin main`. Both `fpl-planner` and `fpl-admin` working trees are 100% clean and pushed.
+---
+
+### User (Turn 133 - 2026-10-21T12:28:05+01:00)
+
+So which of these is really performing well if I'm to follow any moving forward from here:
+
+[User pasted full 21 scenario outputs for Gameweeks 7, 6, 5, 4, 3, and 2]
+
+### Assistant (Turn 133)
+
+Conducted an empirical multi-gameweek quantitative audit across all 21 scenarios spanning Gameweeks 2 through 7 (6 Gameweeks, 126 evaluated squad outcomes):
+
+1. **Overall Standout Performer**:
+   - **FPLForm - Risky Template Shield (SAFE)** is the clear #1 performing scenario across the 6-gameweek sample, generating **460 total points** (average **76.7 pts/GW**).
+   - Holds a **+23 point buffer** over 2nd place and **+63 points** over the Human Manager baseline (397 pts).
+   - Displayed elite consistency with an exceptionally high floor (lowest week was 54 pts) and massive ceilings (98 pts in GW2, 100 pts in GW4, 74 pts in GW7).
+
+2. **Top Tier Alternatives**:
+   - **#2 Eye Test - Quant Optimal (VALUE)**: 437 pts (72.8 pts/GW) - Highest ceiling model (105 pts in GW4, 83 pts in GW6).
+   - **#3 Native FPL - Risky Template Shield (SAFE)**: 425 pts (70.8 pts/GW) - Strong template tracker, but suffered volatility in GW7 (38 pts).
+   - **#4 FPLForm - Risky Template Shield (VALUE)**: 423 pts (70.5 pts/GW) - Highly reliable sibling to the #1 preset.
+   - **#5 Native FPL - Quant Optimal (VALUE)**: 423 pts (70.5 pts/GW) - Scored the single highest GW score in the dataset (116 pts in GW4).
+
+3. **Engine Breakdown**:
+   - **FPLForm** is the superior and most disciplined engine overall (mean total: 402.3 pts, 67.1 pts/GW). It features realistic, conservative xP modeling that avoids chasing trap differentials.
+   - **Native FPL** (mean total: 385.7 pts, 64.3 pts/GW) is prone to boom-and-bust cycles.
+   - **Eye Test** (mean total: 375.2 pts, 62.5 pts/GW) suffers from severe xP over-inflation (predicted 545 xP, delivered 364 actual, -181 deficit) and is the weakest engine on average.
+   - **Human Manager Baseline** (397 pts, 66.2 pts/GW) comfortably beat the average AI presets, highlighting that human judgment outperforms erratic algorithmic punts.
+
+4. **Strategy & Risk Profile Takeaways**:
+   - **Risky Template Shield (66.2/GW)** consistently beats **Quant Optimal (63.0/GW)** by anchoring essential template heavy-hitters (e.g. Haaland captaincy) while capturing differentials in midfield and defense.
+   - **SAFE (68.0/GW)** and **VALUE (67.8/GW)** massively outperform **AGGRESSIVE (58.1/GW)** by nearly 60 points over 6 weeks. Aggressive presets consistently bleed points by captaining speculative differentials (Cunha, Semenyo, Cherki, Lewis-Potter).
+
+5. **Forward-Looking Recommendation**:
+   - Primary Framework to follow: **FPLForm - Risky Template Shield (SAFE)**.
+   - Secondary scout / differential benchmark: **Eye Test - Quant Optimal (VALUE)**.
+   - Strict rule: Never follow AGGRESSIVE captaincy recommendations.
+
+---
+
+### User (Turn 133 - 2026-10-21T12:33:17+01:00)
+
+I wasn't asking for 7-Gameweek Monte Carlo walk-forward audit across all 21 scenarios, I was asking based on performance tab
+
+### Assistant (Turn 133)
+
+Analyzed the exact gameweek-by-gameweek results directly from the **Performance Tab** across all 21 scenarios (GW2 to GW7):
+
+1. **#1 Undisputed Performer in the Performance Tab**:
+   - **`FPLForm | Risky Template Shield | SAFE`**
+   - **Total Points**: **460 pts** (Average: **76.7 pts/GW**)
+   - **Scores**: 98 pts (#1 in GW2), 66 pts (GW3), 100 pts (#4 in GW4), 54 pts (GW5), 68 pts (GW6), 74 pts (#4 in GW7).
+   - **Why**: Highest floor in the entire app. Never dropped below 54 points in any gameweek. Combines template captain security (Haaland/Fernandes) with consistent rolling form.
+
+2. **#2 Best High-Ceiling Performer**:
+   - **`Eye Test | Quant Optimal | VALUE`**
+   - **Total Points**: **437 pts** (Average: **72.8 pts/GW**)
+   - **Scores**: 63 (GW2), 63 (GW3), 105 (#2 in GW4), 50 (GW5), 83 (#2 in GW6), 73 (GW7).
+   - **Why**: Captures underlying attacking telemetry (xG/xA/box touches) with high Points-Per-Million enablers.
+
+3. **Comparison to User's Official Squad**:
+   - **`My Team`**: **397 pts** (Average: **66.2 pts/GW**, Rank 10).
+   - Following `FPLForm Risky Template Shield SAFE` would have yielded **+63 net points** over your team across GW2–7.
+
+4. **Scenarios to Completely Avoid**:
+   - **AGGRESSIVE Mode across all fuels** (ranks #15 to #19, 313–350 pts). Punty differential captains caused severe double-digit point losses.
