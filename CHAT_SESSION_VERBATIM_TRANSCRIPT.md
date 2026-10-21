@@ -13553,3 +13553,30 @@ Explained how the modular parameter architecture guarantees zero side effects:
    - **Edit 2: Safe Mode Attacking Unshackling in [getParamsForRiskMode()](file:///c:/Users/USER/Documents/fpl-planner/api/_lib/projection.ts#L82)**:
      - Only modifies the `riskMode === 'safe'` branch to stop penalizing variance (`betaVariance = 0.0`).
      - Leaves all other risk modes and scenarios completely unaffected.
+
+---
+
+### User (Turn 138 - 2026-10-21T13:22:55+01:00)
+
+yes
+
+### Assistant (Turn 138)
+
+Applied and pushed the surgical parameter calibrations:
+
+1. **Captaincy Decoupling**:
+   - In [solveCaptain()](file:///c:/Users/USER/Documents/fpl-planner/api/_lib/lp-solver.ts#L420), clamped `capEOWeight = Math.max(0, params.betaEO)`.
+   - Prevents Aggressive mode from penalizing elite high-EO captains like Haaland and Palmer, while preserving differential outfield transfer hunting.
+
+2. **Safe Mode Attacking Unshackling**:
+   - In [getParamsForRiskMode()](file:///c:/Users/USER/Documents/fpl-planner/api/_lib/projection.ts#L79-L107), set `params.betaVariance = 0.0` for both Quant Safe and Template Safe modes, and calibrated Template Safe `minEoTotal = 180`.
+   - Stops the solver from penalizing natural attacking variance, allowing it to recruit explosive assets (Saka, Fernandes, Palmer) instead of low-ceiling defenders.
+
+3. **Protection of Core Systems**:
+   - **VALUE mode** (the #1 walk-forward engine) was left completely untouched.
+   - All 3 data providers, minutes heuristics, and the knapsack solver remain 100% untouched.
+
+4. **Validation & Deployment**:
+   - Ran `npm run build` successfully (0 errors, 4.48s bundle).
+   - Executed live optimization verification across all 6 scenario/risk combinations.
+   - Rebased on remote data sync and pushed commit `2c13180` to `origin/main`.
