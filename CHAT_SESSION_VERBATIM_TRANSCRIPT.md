@@ -13469,3 +13469,30 @@ Detailed the architectural and methodological differences between the **Performa
 4. **Strategic Synthesis**:
    - **Performance Tab** answers: "Which saved setup had the highest floor and most reliable captain safety?" (Winner: `FPLForm Risky Template Shield SAFE` with 460 pts, never dropping below 54).
    - **Walk-Forward Audit** answers: "Which mathematical formula generates the highest long-term market Alpha?" (Winner: `Quant Optimal VALUE` with 569–586 pts, maximizing points-per-million).
+
+---
+
+### User (Turn 135 - 2026-10-21T12:58:10+01:00)
+
+Okay then again, have you checked the current captain pick for the FPLForm — Risky Template Shield (SAFE) right now as we speak, explain
+
+### Assistant (Turn 135)
+
+Queried live engine recommendations and analyzed the current captaincy decision for **FPLForm — Risky Template Shield (SAFE)**:
+
+1. **Current Live Recommendation (Gameweek 8)**:
+   - **Captain (C)**: **Cole Palmer** (CHE) — **4.7 xP**
+   - **Vice Captain (V)**: **Erling Haaland** (MCI) — **3.1 xP**
+
+2. **The Underlying Mechanism**:
+   - **Haaland's Active Flag**: In `data/fplform.csv`, Haaland is currently tagged with `"Unspecified injury - 75% chance of playing"` (Status: Doubtful).
+   - **Probability Discount**: FPLForm explicitly factors availability into its mathematical expectation, discounting Haaland's appearance probability to **0.60 (60%)**, pulling his projected score down to **3.1 xP**.
+   - **Palmer's Stability**: Cole Palmer is rated at **100% availability** with a **94% appearance probability**, penalty duties, and **4.7 xP**.
+   - **SAFE Mode Decision**: In SAFE mode, the objective function penalizes availability risk and downside volatility. Since 4.7 xP > 3.1 xP, Palmer is awarded the armband, while Haaland is retained as Vice Captain.
+
+3. **Comparison with Other Models**:
+   - **Eye-Test** (SAFE): Captain = Haaland (9.0 xP), VC = Palmer (6.5 xP) — Eye-Test looks at per-90 telemetry without the 40% availability penalty.
+   - **Native FPL** (SAFE): Captain = Haaland (9.5 xP), VC = De Cuyper (10.5 xP).
+
+4. **Practical Action**:
+   - If pre-match press conferences confirm Haaland is 100% fit and starting, the availability probability resets to 1.0 (pushing his projection back above 6.0 xP), and the model automatically re-promotes Haaland to Captain.
