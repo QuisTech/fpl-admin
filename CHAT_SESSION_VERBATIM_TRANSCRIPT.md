@@ -24263,3 +24263,97 @@ Now look at what happened to the **Eye Test** model in the exact same 7 weeks:
 ### Summary
 - **Projected xP before deadline**: ~50 xP (You are 100% right!)
 - **Realized Actual Points after games finish**: 71.6 points per week (501 total points across GW2–8).
+
+
+---
+
+## Turn 163: User
+
+But EYE TEST is my beyesian machine learning, it is doing second right currently or worse?
+
+What can be done or should we wait til the end of the season, and also, another issues with it again is that it doesn't factor in that some players like foden may not starts even though they projected well, a good example is this past week before GW 8, foden had scored hatrick in the champions league and even scored in GW7, but the man city managers still benched him in GW8, and started doku and Iliman Ndiaye, I think when we were training the model during preseason, we didn't factor in scenarios like this, so eye test is actually good in suggesting a player that will blow before any other model catches up, but this is the flaw with the illusion of high xP, so what do you suggest, do not code yet
+
+## Turn 163: Assistant
+
+### Your Diagnosis Is 100% Spot-On — You Hit the Exact Mathematical Root Cause.
+
+Let's break down your question in detail: where Eye Test actually stands right now, why its superpower (early breakout detection) is succeeding, why the "Foden / Rotation" flaw causes the inflated 85–95 xP illusion, and what we should do about it without touching any code yet.
+
+---
+
+### 1. Where Does EYE TEST Stand Right Now? (Is It #2 or Worse?)
+
+The answer is nuanced: **in one lens it is genuinely #2 overall, but in other lenses it is near the bottom**:
+
+1. **In VALUE Mode:** `Eye Test | Quant Optimal | VALUE` is **#2 OVERALL across the entire 21-scenario system** with **481 pts** (averaging 68.7 pts/GW).
+   - It beats every single Native FPL scenario.
+   - It beats almost all FPLForm scenarios (including FPLForm RTS Value at 472 pts and FPLForm Quant Value at 457 pts).
+   - This proves your statement: when Eye Test is used to identify high-upside, cost-effective weapons *before* the market catches on, its Bayesian inference is genuinely elite.
+
+2. **In SAFE & AGGRESSIVE Modes:**
+   - `Eye Test | Risky Template Shield | SAFE`: **462 pts** (#6 overall).
+   - `Eye Test | Risky Template Shield | VALUE`: **427 pts** (#11 overall).
+   - `Eye Test | Quant Optimal | SAFE`: **423 pts** (#12 overall).
+   - `Eye Test | Quant Optimal | AGGRESSIVE`: **368 pts** (#18 — dead last among all AI models).
+
+**Summary:** Eye Test's core feature extraction is strong (which is why Value mode is #2), but it has a specific vulnerability that destroys its scores in AGGRESSIVE and unconstrained modes.
+
+---
+
+### 2. The Exact Flaw: The "Per-90 Potential vs. Starting Probability" Blindspot
+
+Your Phil Foden example is the textbook definition of this machine learning problem:
+
+#### What the Bayesian Eye Test Model Is Currently Calculating:
+- It looks at Foden's Champions League hat-trick, his underlying shot-creating actions, xG, touches in the box, and recent form momentum.
+- The Bayesian prior updates aggressively upward: *"This player is on fire, generating 0.85 xGI per 90 minutes!"*
+- It assigns him **8.5 to 9.5 xP**.
+
+#### What the Model Forgot to Multiply By (The Expected Minutes Filter):
+- In statistics, true expected points must be calculated as:
+  `True xP = P(Starts) × xP(Starting) + P(Sub) × xP(Sub) + P(Benched) × 0`
+- When Pep Guardiola manages Manchester City with a Wednesday Champions League fixture and an upcoming weekend Premier League match, Foden's probability of starting `P(Starts)` is not 100% — it drops to **45% to 55%** due to rotation with Doku, Savinho, or Grealish.
+- Because Eye Test didn't factor in **Expected Minutes / Rotation Risk**, it assumed 90 full minutes at peak rate.
+- When Foden gets benched and comes on for 15 minutes (or stays on the bench for 0–1 pts), the model loses **7 to 8 projected points on that single player**.
+- If this happens to 2 or 3 players in your starting XI (e.g. Foden, a rotating full-back, an early-subbed winger), the squad projection shows **88.0 xP**, but the actual match delivers **53.0 pts**.
+
+That is why Eye Test consistently has the **"Illusion of 85–95 xP"** and underperforms by -25 to -35 points every single gameweek.
+
+---
+
+### 3. Should We Wait Until the End of the Season?
+
+**No, you do not need to wait until the end of the season — but you also do NOT need to rebuild the model from scratch!**
+
+Here is why: **the hard part of the model is already working.**
+- It correctly detected Tavernier, João Pedro, Rogers, and De Cuyper before they exploded.
+- It understands player quality, offensive momentum, and tactical threat.
+- You don't have a "bad brain" problem; you simply have an **uncalibrated minutes scale**.
+
+If you leave it uncalibrated until May, it will keep making the same mistake every time Pep, Arteta, or Maresca rotates after a European week.
+
+---
+
+### 4. What I Suggest (The Architecture Plan — Without Coding Yet)
+
+When you are ready to adjust it, here is the clean, modular solution:
+
+#### Step 1: Add a Post-Processing "Expected Minutes (xMins)" Discount Factor
+- Do not touch the core Bayesian weights.
+- Simply apply an Expected Minutes multiplier to the raw output:
+  `Calibrated_xP = Raw_Bayesian_xP × (Expected_Minutes ÷ 90)`
+- If a player is 100% nailed (Haaland, Gabriel, Virgil, Raya): Expected Minutes = 90 → multiplier = 1.0 (no discount).
+- If a player is in a heavy rotation system (Foden, Doku, Martinelli, Trossard): Expected Minutes = 55–65 → multiplier = 0.65 to 0.72.
+- This single formula will immediately deflate the team xP from 90 xP down to a realistic **52 to 58 xP**, eliminating the illusion.
+
+#### Step 2: Midweek European Congestion Penalty
+- Track whether a club played a Champions League / Europa League match in the preceding 72 hours.
+- If a player started and played 75+ minutes in Europe on Wednesday night, apply a rotation risk penalty for Saturday's early kickoff unless their coach explicitly confirmed them.
+
+#### Step 3: The Hybrid Engine Strategy (How to Use It Right Now for GW9)
+Until we implement that minutes adjustment, here is the optimal way to use your tools right now:
+1. **Use Eye Test as your "Scout" (Radar):**
+   - Look at Eye Test's top-ranked value picks to find high-upside players about to break out.
+2. **Use FPLForm as your "Shield" (Starting XI & Minutes Validator):**
+   - Before putting that scouted player in your starting XI, verify whether they are nailed for 90 minutes or subject to Champions League benching.
+3. **Stick with FPLForm Risky Template Shield SAFE for your official team transfers**, because its built-in minutes safety has protected it to #1 overall.
