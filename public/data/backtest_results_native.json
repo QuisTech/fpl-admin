@@ -1,24 +1,24 @@
 {
-  "generatedAt": "2026-10-26T16:21:10.233Z",
+  "generatedAt": "2026-10-26T19:55:20.843Z",
   "fuel": "native",
   "startGw": 1,
-  "endGw": 8,
+  "endGw": 9,
   "hasLivePoints": true,
   "totals": {
     "safe": {
-      "totalPoints": 463,
-      "alphaVsTemplate": -120.9
+      "totalPoints": 554.3,
+      "alphaVsTemplate": -116.3
     },
     "risky": {
-      "totalPoints": 417,
-      "alphaVsTemplate": -166.9
+      "totalPoints": 501,
+      "alphaVsTemplate": -169.6
     },
     "value": {
-      "totalPoints": 639,
-      "alphaVsTemplate": 55.1
+      "totalPoints": 714.9,
+      "alphaVsTemplate": 44.3
     },
     "template": {
-      "totalPoints": 583.9
+      "totalPoints": 670.6
     }
   },
   "gameweeks": [
@@ -605,6 +605,79 @@
       "riskySwapCount": 4,
       "riskyAvgSwapCost": 0.12,
       "riskyQuality": "PASS"
+    },
+    {
+      "gameweek": 9,
+      "templateScore": 86.7,
+      "safe": {
+        "mode": "SAFE",
+        "startingXI": [
+          "Raya (ARS)",
+          "Gabriel (ARS)",
+          "Rice (ARS)",
+          "N.Jackson (AVL)",
+          "Hill (BOU)",
+          "Evanilson (BOU)",
+          "De Cuyper (BHA)",
+          "Henderson (CHE)",
+          "Neto (CHE)",
+          "Haaland (MCI)",
+          "Mbeumo (MUN)"
+        ],
+        "captain": "Haaland (C)",
+        "projectedGwXp": 91.3,
+        "projected8GwXp": 746.5,
+        "actualPoints": 91.3,
+        "averageXiEo": 25.7,
+        "alphaVsTemplate": 4.6
+      },
+      "risky": {
+        "mode": "RISKY",
+        "startingXI": [
+          "Raya (ARS)",
+          "Gabriel (ARS)",
+          "Rice (ARS)",
+          "N.Jackson (AVL)",
+          "Tavernier (BOU)",
+          "Evanilson (BOU)",
+          "Gomez (BHA)",
+          "Henderson (CHE)",
+          "Hato (CHE)",
+          "Neto (CHE)",
+          "Jacquet (LIV)"
+        ],
+        "captain": "Evanilson (C)",
+        "projectedGwXp": 84,
+        "projected8GwXp": 708.1,
+        "actualPoints": 84,
+        "averageXiEo": 5.1,
+        "alphaVsTemplate": -2.7
+      },
+      "value": {
+        "mode": "VALUE",
+        "startingXI": [
+          "Raya (ARS)",
+          "Calafiori (ARS)",
+          "Konsa (ARS)",
+          "Tavernier (BOU)",
+          "Evanilson (BOU)",
+          "De Cuyper (BHA)",
+          "Groß (BHA)",
+          "Rogers (CHE)",
+          "Palmer (CHE)",
+          "Muharemović (LEE)",
+          "Haaland (MCI)"
+        ],
+        "captain": "Haaland (C)",
+        "projectedGwXp": 75.9,
+        "projected8GwXp": 626.7,
+        "actualPoints": 75.9,
+        "averageXiEo": 62.5,
+        "alphaVsTemplate": -10.8
+      },
+      "riskySwapCount": 4,
+      "riskyAvgSwapCost": 1.2,
+      "riskyQuality": "WARNING"
     }
   ]
 }
