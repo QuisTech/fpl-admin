@@ -149,7 +149,7 @@ export const BacktestDashboard = ({ initialFuel }: BacktestDashboardProps) => {
     if (activeTab === 'native') fileName = 'backtest_results_native.json';
     if (activeTab === 'eye-test') fileName = 'backtest_results_eyetest.json';
     
-    fetch(`/data/${fileName}`)
+    fetch(`/data/${fileName}?t=${Date.now()}`)
       .then(res => {
         if (!res.ok) throw new Error(`No ${activeTab.toUpperCase()} backtest results found. Run the backtest CLI first.`);
         return res.json();
@@ -317,7 +317,10 @@ export const BacktestDashboard = ({ initialFuel }: BacktestDashboardProps) => {
 
       {/* Gameweek Breakdown */}
       <div>
-        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Gameweek Breakdown</h3>
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Gameweek Breakdown</h3>
+          <span className="text-[8px] text-slate-500 font-mono hidden sm:inline">Scores: SAFE / RISKY / VALUE · Badge audits Risky Mode</span>
+        </div>
         <div className="space-y-2">
           {data.gameweeks.map(gw => {
             const isExpanded = expandedGw === gw.gameweek;
@@ -332,22 +335,51 @@ export const BacktestDashboard = ({ initialFuel }: BacktestDashboardProps) => {
                   onClick={() => setExpandedGw(isExpanded ? null : gw.gameweek)}
                   className="w-full p-3 flex items-center justify-between hover:bg-slate-800/30 transition-colors"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-[10px] font-black text-white uppercase">GW{gw.gameweek}</span>
-                    <div className="flex items-center gap-2 text-[9px] font-mono">
-                      <span className="text-emerald-400">{gw.safe.actualPoints}</span>
-                      <span className="text-slate-600">/</span>
-                      <span className="text-amber-400">{gw.risky.actualPoints}</span>
-                      <span className="text-slate-600">/</span>
-                      <span className="text-cyan-400">{gw.value.actualPoints}</span>
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                    <span className="text-[11px] font-black text-white uppercase px-2 py-0.5 bg-slate-800/80 rounded border border-slate-700 font-mono">GW{gw.gameweek}</span>
+                    
+                    {/* Explicit Mode Badges */}
+                    <div className="flex items-center gap-1.5 text-[9px] font-mono">
+                      <span className={`px-1.5 py-0.5 rounded border flex items-center gap-1 ${
+                        bestMode.mode === 'SAFE' 
+                          ? 'bg-emerald-500/25 border-emerald-500/50 text-emerald-300 font-black shadow-[0_0_8px_rgba(16,185,129,0.2)]' 
+                          : 'bg-slate-950/60 border-slate-800 text-slate-400'
+                      }`}>
+                        <span className="text-[7.5px] font-bold uppercase text-emerald-400">SAFE:</span>
+                        <span className="text-white font-black">{gw.safe.actualPoints}</span>
+                      </span>
+
+                      <span className={`px-1.5 py-0.5 rounded border flex items-center gap-1 ${
+                        bestMode.mode === 'RISKY' 
+                          ? 'bg-amber-500/25 border-amber-500/50 text-amber-300 font-black shadow-[0_0_8px_rgba(245,158,11,0.2)]' 
+                          : 'bg-slate-950/60 border-slate-800 text-slate-400'
+                      }`}>
+                        <span className="text-[7.5px] font-bold uppercase text-amber-400">RISKY:</span>
+                        <span className="text-white font-black">{gw.risky.actualPoints}</span>
+                      </span>
+
+                      <span className={`px-1.5 py-0.5 rounded border flex items-center gap-1 ${
+                        bestMode.mode === 'VALUE' 
+                          ? 'bg-cyan-500/25 border-cyan-500/50 text-cyan-300 font-black shadow-[0_0_8px_rgba(6,182,212,0.2)]' 
+                          : 'bg-slate-950/60 border-slate-800 text-slate-400'
+                      }`}>
+                        <span className="text-[7.5px] font-bold uppercase text-cyan-400">VALUE:</span>
+                        <span className="text-white font-black">{gw.value.actualPoints}</span>
+                      </span>
                     </div>
-                    <span className={`px-1.5 py-0.5 rounded text-[7px] font-black uppercase ${
-                      gw.riskyQuality === 'PASS'
-                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                        : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                    }`}>
-                      {gw.riskyQuality === 'PASS' ? <CheckCircle className="w-2.5 h-2.5 inline mr-0.5" /> : <AlertTriangle className="w-2.5 h-2.5 inline mr-0.5" />}
-                      {gw.riskyQuality}
+
+                    {/* Unambiguous Risky Quality Badge */}
+                    <span 
+                      className={`px-2 py-0.5 rounded text-[7.5px] font-black uppercase tracking-wider flex items-center gap-1 ${
+                        gw.riskyQuality === 'PASS'
+                          ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
+                          : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+                      }`}
+                      title="Differential Quality of Risky mode vs Safe baseline"
+                    >
+                      <span className="text-[7px] text-slate-400 font-bold normal-case">Risky Diff:</span>
+                      {gw.riskyQuality === 'PASS' ? <CheckCircle className="w-2.5 h-2.5 inline text-emerald-400" /> : <AlertTriangle className="w-2.5 h-2.5 inline text-amber-400" />}
+                      <span>{gw.riskyQuality}</span>
                     </span>
                   </div>
                   {isExpanded ? <ChevronUp className="w-4 h-4 text-slate-500" /> : <ChevronDown className="w-4 h-4 text-slate-500" />}
