@@ -193,7 +193,7 @@ export const PitchView = ({
 
     const starterIdSet = new Set(bestStarters.map(p => p.id));
 
-    // Bench: remaining outfielders sorted (non-excluded by score desc, then excluded by score desc)
+    // Bench: remaining outfielders sorted (non-excluded by reliability then score desc, then excluded)
     const outfieldBench = squadList
       .filter(p => !starterIdSet.has(p.id) && p.position !== 'GKP' && p.element_type !== 1)
       .sort((a, b) => {
@@ -201,7 +201,19 @@ export const PitchView = ({
         const bExcluded = excludedSet.has(b.id);
         if (!aExcluded && bExcluded) return -1;
         if (aExcluded && !bExcluded) return 1;
-        return (b.score ?? b.xP ?? 0) - (a.score ?? a.xP ?? 0);
+
+        // Auto-Sub Bench Armor: available starter priority for Sub 1
+        const aAvail = (a.chance_of_playing_next_round ?? 100) >= 75;
+        const bAvail = (b.chance_of_playing_next_round ?? 100) >= 75;
+        const aScore = a.score ?? a.xP ?? 0;
+        const bScore = b.score ?? b.xP ?? 0;
+
+        const aNailed = aAvail && aScore >= 1.5;
+        const bNailed = bAvail && bScore >= 1.5;
+        if (aNailed && !bNailed) return -1;
+        if (!aNailed && bNailed) return 1;
+
+        return bScore - aScore;
       });
 
     const bench = [...benchGkp, ...outfieldBench];

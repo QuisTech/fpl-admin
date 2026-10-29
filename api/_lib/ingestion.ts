@@ -244,8 +244,20 @@ export abstract class BaseOracle implements XPOracle {
       const rawMinutes = p.minutes || 0;
       const starts = p.starts || 0;
       const avgMins = rawMinutes / completedGws;
-      const startRate = starts / completedGws;
+      const startRate = Math.min(1.0, starts / completedGws);
       const isAvail = p.status !== 'i' && p.status !== 's' && p.status !== 'u' && probPlay >= 0.5;
+
+      // Empirical average minutes when starting (hook index / duration)
+      // Clamped between 45 and 90 to reflect actual match substitution patterns
+      const minsPerStart = starts > 0 ? Math.min(90, Math.max(45, rawMinutes / starts)) : 0;
+
+      // Top-1k Elite Consensus starting conviction: what fraction of elite owners start this player?
+      const top1k = this.top1kData[fplId];
+      let eliteStartConviction = 1.0;
+      if (top1k && top1k.ownership >= 5.0) {
+        // e.g. 45% started / 50% owned = 0.90 conviction
+        eliteStartConviction = Math.min(1.0, Math.max(0.1, top1k.started / top1k.ownership));
+      }
 
       let dynamicPredictedMins = 0;
       if (!isAvail) {
@@ -253,12 +265,23 @@ export abstract class BaseOracle implements XPOracle {
       } else if (nextEventId === 1) {
         // Pre-season before GW1: use price baseline & availability
         dynamicPredictedMins = (cost >= 45 ? 85 : 0) * probPlay;
-      } else if (startRate >= 0.5 || (completedGws <= 1 && starts >= 1)) {
-        // Regular confirmed starter (started >=50% of matches)
-        dynamicPredictedMins = Math.max(65, Math.min(90, avgMins)) * probPlay;
+      } else if (startRate >= 0.8) {
+        // Core Nailed Starter (started >= 80% of matches in 2026/27)
+        // Scaled by their empirical minsPerStart and elite start conviction
+        dynamicPredictedMins = minsPerStart * eliteStartConviction * probPlay;
+      } else if (startRate >= 0.25 || (completedGws <= 1 && starts >= 1)) {
+        // Rotated / Squad Asset (started 25% to 80% of matches in 2026/27)
+        // Probability of starting reflects empirical startRate and elite conviction
+        const effectiveStartProb = Math.min(1.0, startRate * (top1k && top1k.ownership >= 5.0 ? eliteStartConviction : 1.0));
+        // If not starting, calculate empirical impact substitute minutes
+        const nonStartGws = Math.max(1, completedGws - starts);
+        const nonStartMins = Math.max(0, rawMinutes - (starts * (minsPerStart > 0 ? minsPerStart : 60)));
+        const avgSubMins = Math.min(25, nonStartMins / nonStartGws);
+        const subMins = rawMinutes > (starts * 45) ? Math.max(10, avgSubMins) : 0;
+        dynamicPredictedMins = ((effectiveStartProb * minsPerStart) + ((1 - effectiveStartProb) * subMins)) * probPlay;
       } else if (rawMinutes > 0) {
-        // Impact substitute (played minutes but not a starter)
-        dynamicPredictedMins = Math.max(15, Math.min(35, avgMins)) * probPlay;
+        // Impact substitute / Bench player (started < 25% of matches)
+        dynamicPredictedMins = Math.min(25, avgMins) * probPlay;
       } else {
         // Unused bench / reserve (0 minutes played)
         dynamicPredictedMins = 0;
@@ -298,7 +321,7 @@ export abstract class BaseOracle implements XPOracle {
         minutesLast3: dynamicPredictedMins * 3,
         minutesLast5: dynamicPredictedMins * 5,
         minutesEWMA: dynamicPredictedMins,
-        startsLast5: (dynamicPredictedMins >= 60 ? 1 : 0) * 5,
+        startsLast5: Math.round(startRate * 5),
         seasonMinutesPercent: dynamicPredictedMins / 90,
         restHours: 168,
         fixturesLast7Days: 1,
