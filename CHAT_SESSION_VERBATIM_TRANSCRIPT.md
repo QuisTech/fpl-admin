@@ -26083,3 +26083,31 @@ pushed?
 2. **`fpl-admin`**:
    - Rebased with remote automated data commits and pushed commit `e861e5c` to `https://github.com/QuisTech/fpl-admin.git` (branch `main`).
    - Working tree clean.
+
+---
+
+### User (Turn 185)
+
+what is pushed to fpl-admin? is it the same imlementation we just did on fpl planner?
+
+---
+
+### Assistant (Turn 185)
+
+**Yes, exactly the same.**
+
+Every single code change we just made in `fpl-planner` was synchronized to `fpl-admin`. All three core files are **100% byte-for-byte identical** between both repositories:
+
+1. **`api/_lib/ingestion.ts`**:
+   - The empirical 2026/27 minutes model replacing arbitrary 65-min minimum inflation.
+   - The duration / hook index (`minsPerStart = starts > 0 ? Math.min(90, Math.max(45, rawMinutes / starts)) : 0`).
+   - Elite consensus start conviction integration (`top1k.started / top1k.ownership`).
+   - Scaled sub minutes for non-starters.
+
+2. **`api/index.ts`**:
+   - The **Auto-Sub Bench Armor (Smart Sub 1 Priority)** ensuring that position 13 (Substitute 1) is locked to a high-availability, consistent starter with positive expected points, protecting against unexpected starter rotation.
+
+3. **`src/components/PitchView.tsx`**:
+   - The outfield bench ordering updated to prioritize available starters for Sub 1 in lineup generation.
+
+The only other difference in `fpl-admin` was that it seamlessly rebased with the routine automated FPL fixture/XP updates from its GitHub Actions before pushing.
