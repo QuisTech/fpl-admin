@@ -147,3 +147,24 @@ In [CareerModeView.tsx](file:///c:/Users/USER/Documents/fpl-admin/src/components
 - **Badge Styling**: Updated from `bg-fpl-purple/20 text-fpl-purple border border-fpl-purple/30` to `bg-purple-500/15 text-purple-300 border border-purple-500/30`.
 - **Text Label**: Updated to explicitly state `OFFICIAL 1 FT / GW RULES`.
 - **Visual Contrast**: Now glows with crisp readability in luminous `purple-300`, harmonizing cleanly with the adjacent `emerald-300`, `cyan-300`, and `amber-300` pills.
+
+
+---
+
+### User (Turn 195 - 2026-11-01T23:16:45+01:00)
+
+push
+
+---
+
+### Assistant (Turn 195)
+
+Both repositories are fully committed, synced, and pushed to `origin/main`:
+
+1. **`fpl-admin` (`https://github.com/QuisTech/fpl-admin`)**:
+   - Latest commit: `4d65557 fix(ui): boost contrast and visibility for official rules badge in CareerModeView`
+   - Remote status: Up to date (`Everything up-to-date`).
+
+2. **`fpl-planner` (`https://github.com/QuisTech/fpl-planner`)**:
+   - Latest commit: `a7f6c60 fix(ui): boost contrast and visibility for official rules badge in CareerModeView`
+   - Remote status: Up to date (`Everything up-to-date`).
