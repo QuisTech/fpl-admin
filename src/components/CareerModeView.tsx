@@ -634,18 +634,29 @@ export const CareerModeView = ({
                       <div 
                         key={b.id} 
                         className={cn(
-                          "bg-slate-900/60 p-2 rounded-xl border text-[11px] flex flex-col justify-between",
-                          b.isAutoSubIn ? "border-amber-500/40 bg-amber-500/5" : "border-slate-800"
+                          "p-2 rounded-xl border text-[11px] flex flex-col justify-between transition-all",
+                          b.isAutoSubOut 
+                            ? "bg-rose-500/10 border-rose-500/40" 
+                            : b.isAutoSubIn 
+                            ? "bg-amber-500/10 border-amber-500/40" 
+                            : "bg-slate-900/60 border-slate-800"
                         )}
                       >
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-[8.5px] font-mono text-slate-500">Sub {bIdx + 1}</span>
-                          <span className="text-[9px] font-mono uppercase text-slate-400">{b.position}</span>
+                          <div className="flex items-center gap-1">
+                            <span className="text-[9px] font-mono uppercase text-slate-400">{b.position}</span>
+                            {b.isAutoSubOut && (
+                              <span className="text-[8px] font-mono text-rose-300 bg-rose-500/25 px-1 py-0.2 rounded font-bold">0 mins</span>
+                            )}
+                          </div>
                         </div>
-                        <div className="font-bold text-slate-200 truncate">{b.web_name}</div>
+                        <div className={cn("font-bold truncate", b.isAutoSubOut ? "text-slate-400 line-through" : "text-slate-200")}>
+                          {b.web_name}
+                        </div>
                         <div className="flex items-center justify-between mt-1 text-[10px] font-mono">
                           <span className="text-slate-500">{b.costDisplay}</span>
-                          <span className="font-bold text-slate-300">{b.points} pts</span>
+                          <span className={cn("font-bold", b.isAutoSubOut ? "text-rose-400" : "text-slate-300")}>{b.points} pts</span>
                         </div>
                       </div>
                     ))}

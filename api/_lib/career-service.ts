@@ -319,6 +319,7 @@ export class CareerService {
       // Auto-substitutions calculation: Under official FPL rules, auto-sub ONLY triggers if starter played 0 minutes
       const autoSubs: { outPlayer: string; inPlayer: string; points: number }[] = [];
       const finalStarters = [...xiIds];
+      const finalBench = [...benchIds];
       const usedBench = new Set<number>();
 
       finalStarters.forEach((sid, idx) => {
@@ -326,25 +327,29 @@ export class CareerService {
         // Auto-sub only triggers if starter played 0 minutes (did not feature)
         if (sStats.minutes === 0) {
           const sPos = oracle.getPosition(sid);
-          const sub = benchIds.find(bid => {
+          const subIdx = finalBench.findIndex(bid => {
             if (usedBench.has(bid)) return false;
             const bPos = oracle.getPosition(bid);
             if (sPos === 'GKP') return bPos === 'GKP';
             return bPos !== 'GKP';
           });
 
-          const subStats = sub ? playerStats[sub] : undefined;
-          // Bench sub must have featured (minutes > 0)
-          if (sub && subStats && subStats.minutes > 0) {
-            usedBench.add(sub);
-            finalStarters[idx] = sub;
-            const pOut = baseData.players.find((p: any) => p.id === sid);
-            const pIn = baseData.players.find((p: any) => p.id === sub);
-            autoSubs.push({
-              outPlayer: pOut ? pOut.web_name : `Player ${sid}`,
-              inPlayer: pIn ? pIn.web_name : `Player ${sub}`,
-              points: subStats.points
-            });
+          if (subIdx !== -1) {
+            const sub = finalBench[subIdx];
+            const subStats = playerStats[sub] ?? { points: 0, minutes: 0 };
+            // Bench sub must have featured (minutes > 0)
+            if (subStats.minutes > 0) {
+              usedBench.add(sub);
+              finalStarters[idx] = sub;
+              finalBench[subIdx] = sid; // Starter who sat out moves to bench!
+              const pOut = baseData.players.find((p: any) => p.id === sid);
+              const pIn = baseData.players.find((p: any) => p.id === sub);
+              autoSubs.push({
+                outPlayer: pOut ? pOut.web_name : `Player ${sid}`,
+                inPlayer: pIn ? pIn.web_name : `Player ${sub}`,
+                points: subStats.points
+              });
+            }
           }
         }
       });
@@ -389,10 +394,10 @@ export class CareerService {
         return pModel;
       });
 
-      const benchModels: CareerPlayer[] = benchIds.map(id => {
+      const benchModels: CareerPlayer[] = finalBench.map(id => {
         const pModel = this.mapPlayer(id, baseData, oracle, playerStats, false, false, 0);
-        if (usedBench.has(id)) {
-          pModel.isAutoSubIn = true;
+        if (autoSubs.some(as => as.outPlayer === pModel.web_name)) {
+          pModel.isAutoSubOut = true;
         }
         return pModel;
       });
@@ -611,30 +616,35 @@ export class CareerService {
       // Auto-subs: Under official FPL rules, auto-sub ONLY triggers if starter played 0 minutes
       const autoSubs: { outPlayer: string; inPlayer: string; points: number }[] = [];
       const finalStarters = [...xiIds];
+      const finalBench = [...benchIds];
       const usedBench = new Set<number>();
 
       finalStarters.forEach((sid, idx) => {
         const sStats = playerStats[sid] ?? { points: 0, minutes: 0 };
         if (sStats.minutes === 0) {
           const sPos = oracle.getPosition(sid);
-          const sub = benchIds.find(bid => {
+          const subIdx = finalBench.findIndex(bid => {
             if (usedBench.has(bid)) return false;
             const bPos = oracle.getPosition(bid);
             if (sPos === 'GKP') return bPos === 'GKP';
             return bPos !== 'GKP';
           });
 
-          const subStats = sub ? playerStats[sub] : undefined;
-          if (sub && subStats && subStats.minutes > 0) {
-            usedBench.add(sub);
-            finalStarters[idx] = sub;
-            const pOut = baseData.players.find((p: any) => p.id === sid);
-            const pIn = baseData.players.find((p: any) => p.id === sub);
-            autoSubs.push({
-              outPlayer: pOut ? pOut.web_name : `Player ${sid}`,
-              inPlayer: pIn ? pIn.web_name : `Player ${sub}`,
-              points: subStats.points
-            });
+          if (subIdx !== -1) {
+            const sub = finalBench[subIdx];
+            const subStats = playerStats[sub] ?? { points: 0, minutes: 0 };
+            if (subStats.minutes > 0) {
+              usedBench.add(sub);
+              finalStarters[idx] = sub;
+              finalBench[subIdx] = sid; // Starter who sat out moves to bench!
+              const pOut = baseData.players.find((p: any) => p.id === sid);
+              const pIn = baseData.players.find((p: any) => p.id === sub);
+              autoSubs.push({
+                outPlayer: pOut ? pOut.web_name : `Player ${sid}`,
+                inPlayer: pIn ? pIn.web_name : `Player ${sub}`,
+                points: subStats.points
+              });
+            }
           }
         }
       });
@@ -684,10 +694,10 @@ export class CareerService {
         return pModel;
       });
 
-      const benchModels = benchIds.map(id => {
+      const benchModels = finalBench.map(id => {
         const pModel = this.mapPlayer(id, baseData, oracle, playerStats, false, false, 0);
-        if (usedBench.has(id)) {
-          pModel.isAutoSubIn = true;
+        if (autoSubs.some(as => as.outPlayer === pModel.web_name)) {
+          pModel.isAutoSubOut = true;
         }
         return pModel;
       });
