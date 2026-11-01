@@ -277,6 +277,7 @@ async function startServer() {
       const fuel = ((req.query.fuel || req.body?.fuel) as string) || 'fplform';
       const riskMode = ((req.query.riskMode || req.body?.riskMode) as string) || 'safe';
       const scenario = (((req.query.scenario || req.body?.scenario) as string) || 'quant') as 'quant' | 'template';
+      const forwardSource = (((req.query.forwardSource || req.body?.forwardSource) as string) || (teamId ? 'synced' : 'autonomous')) as 'autonomous' | 'synced';
       const endGw = (req.query.endGw || req.body?.endGw) ? parseInt((req.query.endGw || req.body?.endGw) as string, 10) : 9;
 
       const { CareerService } = await import("./api/_lib/career-service");
@@ -284,7 +285,7 @@ async function startServer() {
         const payload = await CareerService.getSyncedCareerReplay(teamId, fuel, riskMode, endGw, scenario);
         return res.json(payload);
       } else if (mode === 'forward') {
-        const payload = await CareerService.getForwardCareerProjection(teamId, fuel, riskMode, 6, scenario);
+        const payload = await CareerService.getForwardCareerProjection(teamId, fuel, riskMode, 6, scenario, forwardSource);
         return res.json(payload);
       } else {
         const payload = await CareerService.getAutonomousCareer(fuel, riskMode, endGw, scenario);

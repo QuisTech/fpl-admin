@@ -101,6 +101,7 @@ export const CareerModeView = ({
   activeScenario = 'quant'
 }: CareerModeViewProps) => {
   const [mode, setMode] = useState<'autonomous' | 'synced' | 'forward'>(teamId ? 'synced' : 'autonomous');
+  const [forwardSource, setForwardSource] = useState<'autonomous' | 'synced'>('autonomous');
   const [data, setData] = useState<CareerSeasonPayload | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -113,6 +114,12 @@ export const CareerModeView = ({
     }
   }, [teamId]);
 
+  useEffect(() => {
+    if (mode === 'forward') {
+      fetchCareerData();
+    }
+  }, [forwardSource]);
+
   const fetchCareerData = async () => {
     setLoading(true);
     setError(null);
@@ -123,7 +130,8 @@ export const CareerModeView = ({
           teamId: teamId || undefined,
           fuel: activeFuel,
           riskMode: activeRisk,
-          scenario: activeScenario
+          scenario: activeScenario,
+          forwardSource: mode === 'forward' ? forwardSource : undefined
         }
       });
       if (!res.data || typeof res.data !== 'object' || !Array.isArray(res.data.gameweeks)) {
@@ -175,63 +183,96 @@ export const CareerModeView = ({
               {mode === 'synced' && teamId 
                 ? `Counterfactual Replay: Human vs AI starting from ${data?.managerName || 'Your'} GW1 Squad`
                 : mode === 'forward'
-                ? `Forward Roadmap: Projected 1-FT Weekly Moves for GW${data?.startGw || 10} → GW${data?.endGw || 15}`
+                ? `Forward Roadmap: Projected 1-FT Moves for ${forwardSource === 'autonomous' ? 'Autonomous AI Squad (GW9 Seed)' : data?.managerName || 'Your Synced Team'} (GW${data?.startGw || 10} → GW${data?.endGw || 15})`
                 : "Autonomous AI Manager navigating the season from £100.0m with squad continuity"}
             </p>
           </div>
         </div>
 
         {/* Mode Selector Tabs */}
-        <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-fpl-border self-start md:self-auto">
-          <button
-            onClick={() => setMode('autonomous')}
-            className={cn(
-              "px-3 py-1.5 rounded-lg text-xs font-bold transition-all",
-              mode === 'autonomous'
-                ? "bg-fpl-green text-slate-950 shadow-[0_0_12px_rgba(0,255,133,0.3)]"
-                : "text-slate-400 hover:text-slate-200"
-            )}
-          >
-            Autonomous AI
-          </button>
-          
-          <button
-            onClick={() => setMode('synced')}
-            disabled={!teamId}
-            title={!teamId ? "Enter a Team ID in the header to unlock Synced Replay" : "Replay with your actual GW1 squad"}
-            className={cn(
-              "px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5",
-              mode === 'synced'
-                ? "bg-fpl-green text-slate-950 shadow-[0_0_12px_rgba(0,255,133,0.3)]"
-                : teamId 
-                ? "text-slate-400 hover:text-slate-200"
-                : "text-slate-600 opacity-50 cursor-not-allowed"
-            )}
-          >
-            <span>You vs AI Duel</span>
-            {teamId && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>}
-          </button>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 self-start md:self-auto">
+          {mode === 'forward' && (
+            <div className="flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800 text-[11px]">
+              <button
+                onClick={() => setForwardSource('autonomous')}
+                className={cn(
+                  "px-2.5 py-1 rounded-lg font-bold transition-all flex items-center gap-1.5",
+                  forwardSource === 'autonomous'
+                    ? "bg-purple-500/20 text-purple-300 border border-purple-500/40"
+                    : "text-slate-400 hover:text-slate-200"
+                )}
+              >
+                <Bot className="w-3 h-3" />
+                <span>Autonomous Squad</span>
+              </button>
+              {teamId && (
+                <button
+                  onClick={() => setForwardSource('synced')}
+                  className={cn(
+                    "px-2.5 py-1 rounded-lg font-bold transition-all flex items-center gap-1.5",
+                    forwardSource === 'synced'
+                      ? "bg-fpl-green/20 text-fpl-green border border-fpl-green/40"
+                      : "text-slate-400 hover:text-slate-200"
+                  )}
+                >
+                  <UserCheck className="w-3 h-3" />
+                  <span>My Synced Team</span>
+                </button>
+              )}
+            </div>
+          )}
 
-          <button
-            onClick={() => setMode('forward')}
-            className={cn(
-              "px-3 py-1.5 rounded-lg text-xs font-bold transition-all",
-              mode === 'forward'
-                ? "bg-fpl-green text-slate-950 shadow-[0_0_12px_rgba(0,255,133,0.3)]"
-                : "text-slate-400 hover:text-slate-200"
-            )}
-          >
-            Forward Roadmap
-          </button>
+          <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-fpl-border">
+            <button
+              onClick={() => setMode('autonomous')}
+              className={cn(
+                "px-3 py-1.5 rounded-lg text-xs font-bold transition-all",
+                mode === 'autonomous'
+                  ? "bg-fpl-green text-slate-950 shadow-[0_0_12px_rgba(0,255,133,0.3)]"
+                  : "text-slate-400 hover:text-slate-200"
+              )}
+            >
+              Autonomous AI
+            </button>
+            
+            <button
+              onClick={() => setMode('synced')}
+              disabled={!teamId}
+              title={!teamId ? "Enter a Team ID in the header to unlock Synced Replay" : "Replay with your actual GW1 squad"}
+              className={cn(
+                "px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5",
+                mode === 'synced'
+                  ? "bg-fpl-green text-slate-950 shadow-[0_0_12px_rgba(0,255,133,0.3)]"
+                  : teamId 
+                  ? "text-slate-400 hover:text-slate-200"
+                  : "text-slate-600 opacity-50 cursor-not-allowed"
+              )}
+            >
+              <span>You vs AI Duel</span>
+              {teamId && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>}
+            </button>
 
-          <button 
-            onClick={fetchCareerData}
-            disabled={loading}
-            className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors ml-1"
-            title="Re-run Simulation"
-          >
-            <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin text-fpl-green")} />
-          </button>
+            <button
+              onClick={() => setMode('forward')}
+              className={cn(
+                "px-3 py-1.5 rounded-lg text-xs font-bold transition-all",
+                mode === 'forward'
+                  ? "bg-fpl-green text-slate-950 shadow-[0_0_12px_rgba(0,255,133,0.3)]"
+                  : "text-slate-400 hover:text-slate-200"
+              )}
+            >
+              Forward Roadmap
+            </button>
+
+            <button 
+              onClick={fetchCareerData}
+              disabled={loading}
+              className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors ml-1"
+              title="Re-run Simulation"
+            >
+              <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin text-fpl-green")} />
+            </button>
+          </div>
         </div>
       </div>
 

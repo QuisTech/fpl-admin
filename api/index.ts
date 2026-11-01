@@ -2055,6 +2055,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const fuel = ((query.fuel || req.body?.fuel) as string) || 'fplform';
       const riskMode = ((query.riskMode || req.body?.riskMode) as string) || 'safe';
       const scenario = (((query.scenario || req.body?.scenario) as string) || 'quant') as 'quant' | 'template';
+      const forwardSource = (((query.forwardSource || req.body?.forwardSource) as string) || (teamId ? 'synced' : 'autonomous')) as 'autonomous' | 'synced';
       const endGw = (query.endGw || req.body?.endGw) ? parseInt((query.endGw || req.body?.endGw) as string, 10) : 9;
 
       const { CareerService } = await import("./_lib/career-service.js");
@@ -2062,7 +2063,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const payload = await CareerService.getSyncedCareerReplay(teamId, fuel, riskMode, endGw, scenario);
         return res.status(200).json(payload);
       } else if (mode === 'forward') {
-        const payload = await CareerService.getForwardCareerProjection(teamId, fuel, riskMode, 6, scenario);
+        const payload = await CareerService.getForwardCareerProjection(teamId, fuel, riskMode, 6, scenario, forwardSource);
         return res.status(200).json(payload);
       } else {
         const payload = await CareerService.getAutonomousCareer(fuel, riskMode, endGw, scenario);

@@ -392,3 +392,42 @@ We have now archived the official minute-by-minute logs (`player_stats.json`) ac
    - Bench players must have featured (`minutes > 0`) to be eligible to sub in.
 3. **Accurate Captaincy Fallback**:
    - Vice-captaincy promotion now verifies `capMinutes === 0 && vcMinutes > 0`.
+
+
+---
+
+### User (Turn 199 - 2026-11-01T23:55:56+01:00)
+
+Also how do we see the forward roadmap of Autonomous AI, assuming someone is following and playing Autonomous AI game weekly
+
+---
+
+### Assistant (Turn 199)
+
+We have added a direct **Forward Squad Source Toggle** to the Career tab so anyone playing along with the Autonomous AI can seamlessly project its next moves:
+
+---
+
+### 1. How It Works
+
+When you click the **`Forward Roadmap`** button:
+1. **Source Selector Appears**: Right above the mode tabs, you will now see a dedicated toggle:
+   - **`[Autonomous Squad]`**: Projects forward from the **Autonomous AI's actual GW9 squad state**.
+   - **`[My Synced Team]`**: Projects forward from your **real-life FPL team** (available whenever a Team ID is entered).
+2. **True Continuity from GW9 into GW10 → GW15**:
+   - The engine retrieves the Autonomous AI's exact ending 15-man squad from GW9.
+   - It carries over its exact bank balance (e.g. £0.5m) and banked Free Transfers (e.g. 1 or 2 FTs).
+   - Under 1 FT/week human rules, it solves the optimal transfer in/out for each upcoming gameweek, evaluates whether to roll the transfer, selects the optimal starting XI, designates the captain (2×), and forecasts the expected points.
+
+---
+
+### 2. How to Use It to Play Along Weekly
+
+If you are following the Autonomous AI team:
+1. Open the **Career** tab.
+2. Click **`Forward Roadmap`**.
+3. Select **`Autonomous Squad`**.
+4. The timeline updates to display **GW10, GW11, GW12, GW13, GW14, and GW15**:
+   - **Matchday Sheet**: Shows the projected Starting XI, ordered bench, and Captain choice.
+   - **Manager Decision Log**: Tells you the exact move recommended for the upcoming gameweek (e.g. `GW10 Projected: Transfer Out → In (1 FT used)` or `GW10 Projected: Roll Free Transfer (Bank: 2 FTs)`).
+   - **Bank & Free Transfer Tracker**: Shows your remaining in-the-bank funds and available FTs heading into future deadlines.

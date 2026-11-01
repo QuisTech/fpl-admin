@@ -783,7 +783,8 @@ export class CareerService {
     fuel: string = 'fplform',
     riskMode: string = 'safe',
     horizonGws: number = 6,
-    scenario: 'quant' | 'template' = 'quant'
+    scenario: 'quant' | 'template' = 'quant',
+    forwardSource: 'autonomous' | 'synced' = 'autonomous'
   ): Promise<CareerSeasonPayload> {
     const params = getParamsForRiskMode(riskMode, DEFAULT_PARAMETERS, scenario);
     const baseData = await FPLService.getBaseData();
@@ -793,10 +794,11 @@ export class CareerService {
 
     let squad: number[] = [];
     let bank = 0;
+    let initialFt = 1;
     let managerName = 'Autonomous Squad';
     let teamName = 'AI Optimization Unit';
 
-    if (teamId) {
+    if (forwardSource === 'synced' && teamId) {
       const cleanId = String(teamId).trim();
       try {
         const [picksRes, entryRes] = await Promise.all([
@@ -813,6 +815,21 @@ export class CareerService {
         }
       } catch (e: any) {
         console.warn(`[CareerService] Forward roadmap picks fetch failed for ${teamId}:`, e.message);
+      }
+    } else {
+      // Seed forward projection directly from the Autonomous AI's cumulative GW1-GW9 playthrough
+      try {
+        const autoCareer = await this.getAutonomousCareer(fuel, riskMode, currentGw, scenario);
+        const lastGw = autoCareer.gameweeks[autoCareer.gameweeks.length - 1];
+        if (lastGw) {
+          squad = [...lastGw.startingXI.map(p => p.id), ...lastGw.bench.map(p => p.id)];
+          bank = lastGw.bank;
+          initialFt = lastGw.freeTransfersRemaining;
+          managerName = 'Autonomous AI Squad';
+          teamName = 'AI Optimization Unit (GW9 Seed)';
+        }
+      } catch (e: any) {
+        console.warn('[CareerService] Failed to seed from Autonomous Career:', e.message);
       }
     }
 
@@ -841,7 +858,7 @@ export class CareerService {
     let state: SquadState = {
       squad,
       bank,
-      freeTransfers: 1,
+      freeTransfers: initialFt,
       chipState: { 'WC': 1, 'FH': 1, 'BB': 1, 'TC': 1 },
       gameweek: startGw,
       accumulatedScore: 0,
