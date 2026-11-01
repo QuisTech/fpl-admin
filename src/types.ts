@@ -340,5 +340,6 @@ export interface TeamSyncResponse {
   managerInfo?: ManagerInfo | null;
   gameweek?: number;
   scenario?: 'quant' | 'template';
+  multiWeekPlan?: any;
 }
 

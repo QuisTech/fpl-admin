@@ -270,6 +270,31 @@ async function startServer() {
     }
   });
 
+  app.all("/api/career", async (req, res) => {
+    try {
+      const mode = ((req.query.mode || req.body?.mode) as string) || 'autonomous';
+      const teamId = (req.query.teamId || req.body?.teamId) as string;
+      const fuel = ((req.query.fuel || req.body?.fuel) as string) || 'fplform';
+      const riskMode = ((req.query.riskMode || req.body?.riskMode) as string) || 'safe';
+      const endGw = (req.query.endGw || req.body?.endGw) ? parseInt((req.query.endGw || req.body?.endGw) as string, 10) : 9;
+
+      const { CareerService } = await import("./api/_lib/career-service");
+      if (mode === 'synced' && teamId) {
+        const payload = await CareerService.getSyncedCareerReplay(teamId, fuel, riskMode, endGw);
+        return res.json(payload);
+      } else if (mode === 'forward') {
+        const payload = await CareerService.getForwardCareerProjection(teamId, fuel, riskMode, 6);
+        return res.json(payload);
+      } else {
+        const payload = await CareerService.getAutonomousCareer(fuel, riskMode, endGw);
+        return res.json(payload);
+      }
+    } catch (error: any) {
+      console.error("Local Dev Career Error:", error.message);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.get("/api/ping", (req, res) => {
     res.json({ status: "ok", message: "Grand Cru Engine Online" });
   });

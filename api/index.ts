@@ -673,8 +673,8 @@ export class FPLService {
 
       // Smart Sub 1 Priority: if a player has positive xP (>= 1.5) and is available with solid starting history,
       // prioritize them into Sub 1 to protect against an attacking starter being unexpectedly benched
-      const aNailed = aAvail && (a.startsLast5 ?? 3) >= 3 && aScore >= 1.5;
-      const bNailed = bAvail && (b.startsLast5 ?? 3) >= 3 && bScore >= 1.5;
+      const aNailed = aAvail && Number((a as any).startsLast5 ?? 3) >= 3 && aScore >= 1.5;
+      const bNailed = bAvail && Number((b as any).startsLast5 ?? 3) >= 3 && bScore >= 1.5;
       if (aNailed && !bNailed) return -1;
       if (!aNailed && bNailed) return 1;
 
@@ -2046,6 +2046,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(200).json(result);
       } catch (err: any) {
         return res.status(500).json({ error: err.message || "Failed to execute Monte Carlo archive" });
+      }
+    }
+
+    if (url.includes('/api/career')) {
+      const mode = ((query.mode || req.body?.mode) as string) || 'autonomous';
+      const teamId = (query.teamId || req.body?.teamId) as string;
+      const fuel = ((query.fuel || req.body?.fuel) as string) || 'fplform';
+      const riskMode = ((query.riskMode || req.body?.riskMode) as string) || 'safe';
+      const endGw = (query.endGw || req.body?.endGw) ? parseInt((query.endGw || req.body?.endGw) as string, 10) : 9;
+
+      const { CareerService } = await import("./_lib/career-service.js");
+      if (mode === 'synced' && teamId) {
+        const payload = await CareerService.getSyncedCareerReplay(teamId, fuel, riskMode, endGw);
+        return res.status(200).json(payload);
+      } else if (mode === 'forward') {
+        const payload = await CareerService.getForwardCareerProjection(teamId, fuel, riskMode, 6);
+        return res.status(200).json(payload);
+      } else {
+        const payload = await CareerService.getAutonomousCareer(fuel, riskMode, endGw);
+        return res.status(200).json(payload);
       }
     }
 
