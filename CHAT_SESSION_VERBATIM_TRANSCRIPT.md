@@ -251,3 +251,94 @@ The application does not rely on a single simulation algorithm. It is powered by
   - `FPLForm`: Rolling exponential decay models based on recent player form and Fixture Difficulty Ratings (FDR).
   - `Native`: Official FPL Influence, Creativity, Threat (ICT) indices and points-per-match metrics.
   - `Eye-Test`: Machine learning feature store evaluating underlying match metrics: Expected Goals (xG), Expected Assists (xA), key passes, big chances created, shot conversion rates, and opponent defense ratings.
+
+
+---
+
+### User (Turn 197 - 2026-11-01T23:24:49+01:00)
+
+Explain this:
+
+Gameweek Timeline
+Click a Gameweek to inspect matchday
+
+GW1
+69 pts
++6
+
+GW2
+72 pts
+-20
+
+GW3
+66 pts
++26
+
+GW4
+65 pts
+-17
+
+GW5
+64 pts
++6
+
+GW6
+43 pts
+-16
+
+GW7
+64 pts
+-15
+
+GW8
+55 pts
++19
+
+GW9
+41 pts
+
+---
+
+### Assistant (Turn 197)
+
+This is the **Gameweek Timeline Bar** from your **"You vs AI Duel" Mode**. 
+
+Each pill represents one Gameweek and contains three specific pieces of information:
+
+```text
+┌──────────────┐
+│     GW1      │ ← Gameweek number
+│    69 pts    │ ← AI Net Points scored that week
+│      +6      │ ← Alpha Delta vs YOUR real-life team
+└──────────────┘
+```
+
+---
+
+### 1. The Numbers Explained
+
+- **`69 pts`, `72 pts`, `66 pts`, etc.**:
+  - This is the **actual net points earned by the AI manager** in that Gameweek.
+  - It factors in the starting XI scores, 2× captain points (with vice-captain fallback), automatic bench substitutions, and any -4 transfer hit penalties.
+- **The Plus/Minus Numbers (`+6`, `-20`, `+26`, etc.) — The "Alpha Delta"**:
+  - Formula: `Alpha Delta = AI Net Score - Your Real Score`.
+  - It measures who won the duel in that specific Gameweek:
+    - **Green Positive (`+6`, `+26`, `+19`)**: The AI manager **outperformed** your real team.
+      - **GW1 (+6)**: AI scored 69 pts vs your real 63 pts (AI gained +6 pts).
+      - **GW3 (+26)**: AI scored 66 pts vs your real 40 pts (AI crushed it by +26 pts).
+      - **GW8 (+19)**: AI scored 55 pts vs your real 36 pts (AI gained +19 pts).
+    - **Red Negative (`-20`, `-17`, `-16`, `-15`)**: Your human managerial decisions **beat** the AI!
+      - **GW2 (-20)**: AI scored 72 pts, but you scored 92 pts (You beat the AI by 20 pts).
+      - **GW4 (-17)**: AI scored 65 pts, but you scored 82 pts (You beat the AI by 17 pts).
+      - **GW6 (-16)** & **GW7 (-15)**: Your real-life captaincy or transfer calls beat the AI model.
+    - **GW9 (`41 pts`)**: No delta shown (either points were tied, or GW9 live match data is still finalizing).
+
+---
+
+### 2. What Happens When You Click a Gameweek?
+
+The timeline doubles as an interactive matchday selector:
+1. **Interactive Inspection**: Clicking on any pill (e.g. click **`GW3`**) instantly reloads the lower screen for that Gameweek.
+2. **Matchday Lineup**: Shows the AI's Starting XI, who it captained, who was benched, and if any green `Auto-Sub In` events occurred.
+3. **Manager Decision Log**: Displays the exact logic of the week (e.g. `Transfer: Isak → Haaland (1 FT used, 0 hit)` or `Rolled Free Transfer`).
+4. **Side-by-Side Comparison Card**: Displays your real team score, real transfers, real hits, and overall rank alongside the AI's choices.
