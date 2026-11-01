@@ -168,3 +168,86 @@ Both repositories are fully committed, synced, and pushed to `origin/main`:
 2. **`fpl-planner` (`https://github.com/QuisTech/fpl-planner`)**:
    - Latest commit: `a7f6c60 fix(ui): boost contrast and visibility for official rules badge in CareerModeView`
    - Remote status: Up to date (`Everything up-to-date`).
+
+
+---
+
+### User (Turn 196 - 2026-11-01T23:20:46+01:00)
+
+What powers the simulations? Monte carlo or what? I want to know
+
+---
+
+### Assistant (Turn 196)
+
+The application does not rely on a single simulation algorithm. It is powered by a **hybrid mathematical pipeline** combining five specialized components:
+
+---
+
+### 1. Mixed-Integer Linear Programming (MILP / Knapsack Optimization)
+**Files**: `api/_lib/lp-solver.ts` (powered by `javascript-lp-solver` using the Revised Simplex Method and Branch-and-Bound).
+
+- **What it does**: Solves the combinatorial 15-player squad selection, transfer combinations (1 to 3 transfers), Starting XI, and Captaincy.
+- **Constraints enforced**:
+  - Exact budget cap (e.g. £100.0m minus current bank).
+  - Positional quotas: exactly 2 GKP, 5 DEF, 5 MID, 3 FWD.
+  - Club limits: max 3 players per Premier League club.
+  - Starting XI formation legality: 1 GKP, at least 3 DEF, at least 2 MID, at least 1 FWD.
+  - Defensive diversification: prevents over-concentration in defensive assets from the same team unless designated as an elite defensive club.
+  - Effective Ownership (EO) threshold: in Template Shield mode, enforces game-theoretic floor defense against Top 1k consensus.
+
+---
+
+### 2. Multi-Gameweek Horizon Beam Search
+**Files**: `api/_lib/simulator.ts` (`Simulator.simulateHorizon`).
+
+- **What it does**: Explores the tree of future decisions across an 8-gameweek horizon.
+- **How it works**:
+  - Rather than exhaustively checking millions of transfer branches, it maintains a **Beam Width** of the top 500 candidate squad states (50 on serverless).
+  - At each gameweek step, it explores rolling the FT, 1 to 3 transfer swaps, and chip deployments (Wildcard, Free Hit, Bench Boost, Triple Captain).
+  - Evaluates each branch using a holistic **Fitness Function**:
+    `Fitness = Accumulated xP + Learned Chip Residual Values + Bank Interest Valuation + Terminal Squad Horizon Score`.
+
+---
+
+### 3. Monte Carlo Stochastic Simulation (1,000+ Iterations)
+**Files**: `scripts/run_monte_carlo_archive.ts` (`runFPLMonteCarloSimulation`) & `src/types/monteCarloAudit.ts`.
+
+- **What it does**: Powers the **Backtest Tab** and **Risk Distribution Audits**, modeling volatility, upside, and downside tail risk for any squad setup.
+- **Mathematical details**:
+  - Runs **1,000 to 10,000 stochastic trials** per gameweek.
+  - Generates standard normal random variates using the **Box-Muller transform**:
+    `z = sqrt(-2.0 × ln(u1)) × cos(2.0 × π × u2)`
+  - Applies position-specific standard deviations:
+    - Goalkeepers: `stdDev = 0.45 × xP` (low volatility)
+    - Defenders: `stdDev = 0.55 × xP` (clean sheet binary swing)
+    - Midfielders & Forwards: `stdDev = 0.65 × xP` (high variance)
+  - **Heavy-Tail Return Spikes**: An 8% Poisson-like probability that an attacker has a "haul event" (+3.0 to +11.0 bonus points) and a 5% penalty probability for disciplinary cards or early tactical substitutions (-4.0 points).
+  - **Outputs**: Generates empirical probability curves: Median, Mean, P10 Floor, P90 Ceiling, 80% Confidence Interval, **Haul Probability** (% chances of scoring 75+ points), and **Blank Probability** (% chances of scoring 40 or fewer points).
+
+---
+
+### 4. Sequential FPL State Machine (Career Mode)
+**Files**: `api/_lib/career-service.ts` (`CareerService`).
+
+- **What it does**: Powers the **Career Tab** (Autonomous AI and You vs AI Duel).
+- **How it works**:
+  - Implements a deterministic, rule-based state machine that advances week-by-week from GW1 to GW9.
+  - Accurately tracks official FPL mechanics:
+    - Banked Free Transfers (adding 1 FT each week up to a max of 5).
+    - -4 point hit penalties for excess transfers.
+    - True price change economics: keeping half the profit above original purchase price when selling.
+    - Captaincy delegation: if the captain features for 0 minutes, the 2× multiplier delegates automatically to the vice-captain.
+    - Official auto-substitution rules: replacing 0-minute starters with eligible bench players in strict bench order while preserving legal formations.
+  - Matches the AI decisions against **actual historical official matchday results** (`data/snapshots/gw_*/player_points.json`) to calculate authentic earned points.
+
+---
+
+### 5. Machine Learning Feature Store & Predictive Oracles
+**Files**: `api/_lib/ingestion.ts` & `api/_lib/projection.ts`.
+
+- **What it does**: Generates the underlying Expected Points (xP) distributions that feed the solvers and simulations.
+- **The 3 Engines**:
+  - `FPLForm`: Rolling exponential decay models based on recent player form and Fixture Difficulty Ratings (FDR).
+  - `Native`: Official FPL Influence, Creativity, Threat (ICT) indices and points-per-match metrics.
+  - `Eye-Test`: Machine learning feature store evaluating underlying match metrics: Expected Goals (xG), Expected Assists (xA), key passes, big chances created, shot conversion rates, and opponent defense ratings.
