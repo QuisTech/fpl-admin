@@ -123,3 +123,27 @@ When you adjust the global controls in the app header, the Career tab immediatel
 
 > [!NOTE]
 > If you are testing on **localhost**, be sure to restart your local development terminal (`Ctrl + C` followed by `npm run dev`) so that your local Node Express server loads the new `/api/career` endpoint.
+
+
+---
+
+### User (Turn 194 - 2026-11-01T23:06:55+01:00)
+
+I can't see this written, adjust the css color:
+
+OFFICIAL 1 FT / GW RULES
+
+---
+
+### Assistant (Turn 194)
+
+The badge text color has been adjusted for optimal contrast and visibility.
+
+### Root Cause
+`--color-fpl-purple` is set to `#37003c` (the Premier League dark plum/purple). When applied as text (`text-fpl-purple`) over dark slate backgrounds (`bg-slate-950/80`), it became virtually indistinguishable from black.
+
+### What Was Changed
+In [CareerModeView.tsx](file:///c:/Users/USER/Documents/fpl-admin/src/components/CareerModeView.tsx#L161-L163):
+- **Badge Styling**: Updated from `bg-fpl-purple/20 text-fpl-purple border border-fpl-purple/30` to `bg-purple-500/15 text-purple-300 border border-purple-500/30`.
+- **Text Label**: Updated to explicitly state `OFFICIAL 1 FT / GW RULES`.
+- **Visual Contrast**: Now glows with crisp readability in luminous `purple-300`, harmonizing cleanly with the adjacent `emerald-300`, `cyan-300`, and `amber-300` pills.

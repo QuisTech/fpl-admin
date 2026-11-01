@@ -158,8 +158,8 @@ export const CareerModeView = ({
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-sm font-black uppercase tracking-wider text-white">AI Season Career</h2>
-              <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-fpl-purple/20 text-fpl-purple border border-fpl-purple/30">
-                OFFICIAL 1 FT / GW
+              <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30">
+                OFFICIAL 1 FT / GW RULES
               </span>
               <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 uppercase">
                 {activeFuel}
