@@ -47,10 +47,14 @@ export class ErrorBoundary extends (React.Component as any)<Props, State> {
 
             {this.state.error && (
               <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-3 text-left">
-                <p className="text-[10px] font-mono font-bold text-red-400 truncate">
+                <p className="text-[10px] font-mono font-bold text-red-400 break-words">
                   {this.state.error.name}: {this.state.error.message}
                 </p>
-              </div>
+                {this.state.error.stack && (
+                  <pre className="text-[9px] font-mono text-slate-500 mt-2 whitespace-pre-wrap break-all max-h-36 overflow-y-auto">
+                    {this.state.error.stack.split('\n').slice(0, 8).join('\n')}
+                  </pre>
+                )}</div>
             )}
 
             <button

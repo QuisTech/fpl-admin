@@ -119,9 +119,11 @@ export const CareerModeView = ({ teamId, activeFuel = 'fplform', activeRisk = 's
           riskMode: activeRisk
         }
       });
+      if (!res.data || typeof res.data !== 'object' || !Array.isArray(res.data.gameweeks)) {
+        throw new Error("Server returned an invalid response (HTML fallback received). Please restart your local dev server so the new API route is loaded.");
+      }
       setData(res.data);
-      // Select the latest gameweek by default
-      if (res.data?.gameweeks && res.data.gameweeks.length > 0) {
+      if (res.data.gameweeks.length > 0) {
         setSelectedGwIndex(res.data.gameweeks.length - 1);
       }
     } catch (err: any) {
@@ -231,7 +233,7 @@ export const CareerModeView = ({ teamId, activeFuel = 'fplform', activeRisk = 's
             Simulating Human Gameweek Sequences...
           </p>
         </div>
-      ) : data ? (
+      ) : data && Array.isArray(data.gameweeks) && data.gameweeks.length > 0 ? (
         <>
           {/* Season Metric KPI Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -244,7 +246,7 @@ export const CareerModeView = ({ teamId, activeFuel = 'fplform', activeRisk = 's
               <div>
                 <div className="text-2xl font-black text-white font-mono">{data.totalPoints}</div>
                 <div className="text-[10px] text-slate-400 mt-1 flex items-center gap-1">
-                  <span>Avg: {(data.totalPoints / (data.gameweeks.length || 1)).toFixed(1)} pts/GW</span>
+                  <span>Avg: {(data.totalPoints / (data.gameweeks?.length || 1)).toFixed(1)} pts/GW</span>
                 </div>
               </div>
             </div>
@@ -396,10 +398,10 @@ export const CareerModeView = ({ teamId, activeFuel = 'fplform', activeRisk = 's
                   {/* Transfer Action Details */}
                   <div className="space-y-2 pt-2 border-t border-fpl-border/40">
                     <div className="text-[10px] font-mono uppercase font-bold text-slate-400">Transfer Execution</div>
-                    {activeGwData.transfersIn.length > 0 ? (
+                    {(activeGwData.transfersIn?.length || 0) > 0 ? (
                       <div className="space-y-1.5">
-                        {activeGwData.transfersIn.map((tIn, i) => {
-                          const tOut = activeGwData.transfersOut[i];
+                        {(activeGwData.transfersIn || []).map((tIn, i) => {
+                          const tOut = activeGwData.transfersOut?.[i];
                           return (
                             <div key={i} className="flex items-center justify-between bg-slate-900 p-2.5 rounded-xl border border-slate-800 text-xs">
                               <div className="flex items-center gap-2">
@@ -421,13 +423,13 @@ export const CareerModeView = ({ teamId, activeFuel = 'fplform', activeRisk = 's
                   </div>
 
                   {/* Auto-Subs Callout (if any triggered) */}
-                  {activeGwData.autoSubs.length > 0 && (
+                  {(activeGwData.autoSubs?.length || 0) > 0 && (
                     <div className="space-y-1.5 pt-2 border-t border-fpl-border/40">
                       <div className="text-[10px] font-mono uppercase font-bold text-amber-400 flex items-center gap-1.5">
                         <Clock className="w-3 h-3" />
                         <span>Bench Auto-Substitution Triggered</span>
                       </div>
-                      {activeGwData.autoSubs.map((as, idx) => (
+                      {(activeGwData.autoSubs || []).map((as, idx) => (
                         <div key={idx} className="bg-amber-500/10 border border-amber-500/30 p-2 rounded-xl text-xs text-amber-300 flex items-center justify-between font-mono">
                           <span>{as.inPlayer} subbed in for {as.outPlayer}</span>
                           <span className="font-bold text-emerald-400">+{as.points} pts</span>
@@ -502,7 +504,7 @@ export const CareerModeView = ({ teamId, activeFuel = 'fplform', activeRisk = 's
 
                   {/* Starting XI List Cards */}
                   <div className="space-y-1.5">
-                    {activeGwData.startingXI.map((p) => {
+                    {(activeGwData.startingXI || []).map((p) => {
                       const isCap = p.id === activeGwData.activeCaptain.id;
                       const isVc = p.id === activeGwData.viceCaptain.id && !isCap;
                       const scoreDisplay = isCap ? p.points * 2 : p.points;
@@ -568,7 +570,7 @@ export const CareerModeView = ({ teamId, activeFuel = 'fplform', activeRisk = 's
                     Substitutes Bench (Ordered Priority)
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {activeGwData.bench.map((b, bIdx) => (
+                    {(activeGwData.bench || []).map((b, bIdx) => (
                       <div 
                         key={b.id} 
                         className={cn(
@@ -597,3 +599,4 @@ export const CareerModeView = ({ teamId, activeFuel = 'fplform', activeRisk = 's
     </div>
   );
 };
+
