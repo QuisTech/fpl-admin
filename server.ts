@@ -276,17 +276,18 @@ async function startServer() {
       const teamId = (req.query.teamId || req.body?.teamId) as string;
       const fuel = ((req.query.fuel || req.body?.fuel) as string) || 'fplform';
       const riskMode = ((req.query.riskMode || req.body?.riskMode) as string) || 'safe';
+      const scenario = (((req.query.scenario || req.body?.scenario) as string) || 'quant') as 'quant' | 'template';
       const endGw = (req.query.endGw || req.body?.endGw) ? parseInt((req.query.endGw || req.body?.endGw) as string, 10) : 9;
 
       const { CareerService } = await import("./api/_lib/career-service");
       if (mode === 'synced' && teamId) {
-        const payload = await CareerService.getSyncedCareerReplay(teamId, fuel, riskMode, endGw);
+        const payload = await CareerService.getSyncedCareerReplay(teamId, fuel, riskMode, endGw, scenario);
         return res.json(payload);
       } else if (mode === 'forward') {
-        const payload = await CareerService.getForwardCareerProjection(teamId, fuel, riskMode, 6);
+        const payload = await CareerService.getForwardCareerProjection(teamId, fuel, riskMode, 6, scenario);
         return res.json(payload);
       } else {
-        const payload = await CareerService.getAutonomousCareer(fuel, riskMode, endGw);
+        const payload = await CareerService.getAutonomousCareer(fuel, riskMode, endGw, scenario);
         return res.json(payload);
       }
     } catch (error: any) {

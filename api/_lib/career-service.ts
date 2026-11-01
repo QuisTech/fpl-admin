@@ -5,6 +5,10 @@ import { FPLService } from '../index.js';
 import { OracleFactory, XPOracle } from './ingestion.js';
 import { solveOptimalSquad, solveStartingXI, solveCaptain, solveOptimalTransfers } from './lp-solver.js';
 import { SquadState, getSellingPrice } from './simulator.js';
+import { getParamsForRiskMode } from './projection.js';
+import { loadWeights } from './weights-loader.js';
+
+const DEFAULT_PARAMETERS = loadWeights('baseline');
 
 export interface CareerPlayer {
   id: number;
@@ -68,6 +72,7 @@ export interface CareerSeasonPayload {
   teamName?: string;
   fuel: string;
   riskMode: string;
+  scenario?: 'quant' | 'template';
   startGw: number;
   endGw: number;
   totalPoints: number;
@@ -178,19 +183,21 @@ export class CareerService {
   public static async getAutonomousCareer(
     fuel: string = 'fplform',
     riskMode: string = 'safe',
-    endGw: number = 9
+    endGw: number = 9,
+    scenario: 'quant' | 'template' = 'quant'
   ): Promise<CareerSeasonPayload> {
-    const cacheKey = `auto_${fuel}_${riskMode}_${endGw}`;
+    const cacheKey = `auto_${fuel}_${riskMode}_${scenario}_${endGw}`;
     const cached = this.autonomousCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
       return cached.payload;
     }
 
+    const params = getParamsForRiskMode(riskMode, DEFAULT_PARAMETERS, scenario);
     const baseData = await FPLService.getBaseData();
     const oracleGw1 = this.getOracleForGw(1, baseData, fuel, riskMode);
 
     // Initial GW1 squad solve with £100m budget
-    const initialSquad = solveOptimalSquad(oracleGw1, 1, 1000, 8);
+    const initialSquad = solveOptimalSquad(oracleGw1, 1, 1000, 8, params);
     let totalSpent = 0;
     const purchasePrices: Record<number, number> = {};
     initialSquad.forEach(id => {
@@ -228,7 +235,7 @@ export class CareerService {
       // Handle Transfer decisions starting from GW2
       if (gw > 1) {
         // Evaluate single transfer first
-        const tResult = solveOptimalTransfers(oracle, gw, state, 1, 8);
+        const tResult = solveOptimalTransfers(oracle, gw, state, 1, 8, params);
         if (tResult && tResult.transfersIn.length > 0) {
           const inId = tResult.transfersIn[0];
           const outId = tResult.transfersOut[0];
@@ -271,11 +278,11 @@ export class CareerService {
       }
 
       // Starting XI and Captain selection
-      const xiIds = solveStartingXI(oracle, gw, state.squad);
+      const xiIds = solveStartingXI(oracle, gw, state.squad, params);
       const xiSet = new Set(xiIds);
       const benchIds = state.squad.filter(id => !xiSet.has(id));
 
-      const { captain, viceCaptain } = solveCaptain(oracle, gw, xiIds);
+      const { captain, viceCaptain } = solveCaptain(oracle, gw, xiIds, params);
 
       // Auto-substitutions calculation
       const autoSubs: { outPlayer: string; inPlayer: string; points: number }[] = [];
@@ -411,6 +418,7 @@ export class CareerService {
       mode: 'autonomous',
       fuel,
       riskMode,
+      scenario,
       startGw: 1,
       endGw,
       totalPoints: state.accumulatedScore,
@@ -433,8 +441,10 @@ export class CareerService {
     teamId: string,
     fuel: string = 'fplform',
     riskMode: string = 'safe',
-    endGw: number = 9
+    endGw: number = 9,
+    scenario: 'quant' | 'template' = 'quant'
   ): Promise<CareerSeasonPayload> {
+    const params = getParamsForRiskMode(riskMode, DEFAULT_PARAMETERS, scenario);
     const cleanId = String(teamId).trim();
     const baseData = await FPLService.getBaseData();
 
@@ -512,7 +522,7 @@ export class CareerService {
 
       // AI transfer decisions from GW2 onward using the user's squad
       if (gw > 1) {
-        const tResult = solveOptimalTransfers(oracle, gw, state, 1, 8);
+        const tResult = solveOptimalTransfers(oracle, gw, state, 1, 8, params);
         if (tResult && tResult.transfersIn.length > 0) {
           const inId = tResult.transfersIn[0];
           const outId = tResult.transfersOut[0];
@@ -553,10 +563,10 @@ export class CareerService {
       }
 
       // Starting XI and Captain selection
-      const xiIds = solveStartingXI(oracle, gw, state.squad);
+      const xiIds = solveStartingXI(oracle, gw, state.squad, params);
       const xiSet = new Set(xiIds);
       const benchIds = state.squad.filter(id => !xiSet.has(id));
-      const { captain, viceCaptain } = solveCaptain(oracle, gw, xiIds);
+      const { captain, viceCaptain } = solveCaptain(oracle, gw, xiIds, params);
 
       // Auto-subs
       const autoSubs: { outPlayer: string; inPlayer: string; points: number }[] = [];
@@ -702,6 +712,7 @@ export class CareerService {
       teamName,
       fuel,
       riskMode,
+      scenario,
       startGw: 1,
       endGw: maxGw,
       totalPoints: state.accumulatedScore,
@@ -728,8 +739,10 @@ export class CareerService {
     teamId?: string,
     fuel: string = 'fplform',
     riskMode: string = 'safe',
-    horizonGws: number = 6
+    horizonGws: number = 6,
+    scenario: 'quant' | 'template' = 'quant'
   ): Promise<CareerSeasonPayload> {
+    const params = getParamsForRiskMode(riskMode, DEFAULT_PARAMETERS, scenario);
     const baseData = await FPLService.getBaseData();
     const currentGw = baseData.currentEventId || 9;
     const startGw = currentGw + 1;
@@ -771,7 +784,7 @@ export class CareerService {
     );
 
     if (squad.length !== 15) {
-      squad = solveOptimalSquad(oracle, startGw, 1000, 6);
+      squad = solveOptimalSquad(oracle, startGw, 1000, 6, params);
       let cost = 0;
       squad.forEach(id => { cost += oracle.getCost(id); });
       bank = 1000 - cost;
@@ -802,7 +815,7 @@ export class CareerService {
       let isRolled = false;
       let freeTransfersAvailable = state.freeTransfers;
 
-      const tResult = solveOptimalTransfers(oracle, gw, state, 1, 6);
+      const tResult = solveOptimalTransfers(oracle, gw, state, 1, 6, params);
       if (tResult && tResult.transfersIn.length > 0) {
         const inId = tResult.transfersIn[0];
         const outId = tResult.transfersOut[0];
@@ -841,10 +854,10 @@ export class CareerService {
         state.freeTransfers = Math.min(5, state.freeTransfers + 1);
       }
 
-      const xiIds = solveStartingXI(oracle, gw, state.squad);
+      const xiIds = solveStartingXI(oracle, gw, state.squad, params);
       const xiSet = new Set(xiIds);
       const benchIds = state.squad.filter(id => !xiSet.has(id));
-      const { captain, viceCaptain } = solveCaptain(oracle, gw, xiIds);
+      const { captain, viceCaptain } = solveCaptain(oracle, gw, xiIds, params);
 
       // In forward projections, points are based on Expected Points (xP)
       let grossPoints = 0;
@@ -916,6 +929,7 @@ export class CareerService {
       teamName,
       fuel,
       riskMode,
+      scenario,
       startGw,
       endGw,
       totalPoints: state.accumulatedScore,

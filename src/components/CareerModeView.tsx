@@ -91,9 +91,15 @@ interface CareerModeViewProps {
   teamId?: string;
   activeFuel?: 'fplform' | 'native' | 'eye-test';
   activeRisk?: 'safe' | 'aggressive' | 'value';
+  activeScenario?: 'quant' | 'template';
 }
 
-export const CareerModeView = ({ teamId, activeFuel = 'fplform', activeRisk = 'safe' }: CareerModeViewProps) => {
+export const CareerModeView = ({ 
+  teamId, 
+  activeFuel = 'fplform', 
+  activeRisk = 'safe',
+  activeScenario = 'quant'
+}: CareerModeViewProps) => {
   const [mode, setMode] = useState<'autonomous' | 'synced' | 'forward'>(teamId ? 'synced' : 'autonomous');
   const [data, setData] = useState<CareerSeasonPayload | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -116,7 +122,8 @@ export const CareerModeView = ({ teamId, activeFuel = 'fplform', activeRisk = 's
           mode,
           teamId: teamId || undefined,
           fuel: activeFuel,
-          riskMode: activeRisk
+          riskMode: activeRisk,
+          scenario: activeScenario
         }
       });
       if (!res.data || typeof res.data !== 'object' || !Array.isArray(res.data.gameweeks)) {
@@ -136,7 +143,7 @@ export const CareerModeView = ({ teamId, activeFuel = 'fplform', activeRisk = 's
 
   useEffect(() => {
     fetchCareerData();
-  }, [mode, teamId, activeFuel, activeRisk]);
+  }, [mode, teamId, activeFuel, activeRisk, activeScenario]);
 
   const activeGwData = data?.gameweeks?.[selectedGwIndex] || null;
 
@@ -149,10 +156,19 @@ export const CareerModeView = ({ teamId, activeFuel = 'fplform', activeRisk = 's
             <Bot className="w-5 h-5" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-sm font-black uppercase tracking-wider text-white">AI Season Career</h2>
               <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-fpl-purple/20 text-fpl-purple border border-fpl-purple/30">
-                OFFICIAL 1 FT / GW RULES
+                OFFICIAL 1 FT / GW
+              </span>
+              <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 uppercase">
+                {activeFuel}
+              </span>
+              <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 uppercase">
+                {activeRisk}
+              </span>
+              <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-amber-500/10 text-amber-300 border border-amber-500/20 uppercase">
+                {activeScenario === 'template' ? 'Template Shield' : 'Quant Optimal'}
               </span>
             </div>
             <p className="text-[11px] text-slate-400">

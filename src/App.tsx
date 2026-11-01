@@ -257,7 +257,7 @@ function FPLApp() {
               ) : tab === 'backtest' ? (
                 <BacktestDashboard initialFuel={fuel} />
               ) : tab === 'career' ? (
-                <CareerModeView teamId={teamId} activeFuel={fuel} activeRisk={riskMode} />
+                <CareerModeView teamId={teamId} activeFuel={fuel} activeRisk={riskMode} activeScenario={activeScenario} />
               ) : tab === 'chips' ? (
                 <ChipAdvisor syncedData={syncedData} tier={tier} setTab={setTab} userId={activeUserId} />
               ) : (
