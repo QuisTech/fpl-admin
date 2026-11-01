@@ -113,6 +113,32 @@ export class CareerService {
     return {};
   }
 
+  private static getPlayerStats(gw: number): Record<number, { points: number; minutes: number }> {
+    const statsPath = path.join(process.cwd(), `data/snapshots/gw_${gw}/player_stats.json`);
+    if (fs.existsSync(statsPath)) {
+      try {
+        const raw = JSON.parse(fs.readFileSync(statsPath, 'utf8'));
+        const result: Record<number, { points: number; minutes: number }> = {};
+        for (const k in raw) {
+          result[parseInt(k, 10)] = {
+            points: Number(raw[k].points ?? 0),
+            minutes: Number(raw[k].minutes ?? 0)
+          };
+        }
+        return result;
+      } catch (e) {
+        console.warn(`[CareerService] Error reading player_stats for GW${gw}:`, e);
+      }
+    }
+    const pointsMap = this.getPlayerPoints(gw);
+    const fallback: Record<number, { points: number; minutes: number }> = {};
+    for (const k in pointsMap) {
+      const pts = pointsMap[k];
+      fallback[parseInt(k, 10)] = { points: pts, minutes: pts > 0 ? 90 : 0 };
+    }
+    return fallback;
+  }
+
   private static getOracleForGw(gw: number, baseData: any, fuel: string, riskMode: string): XPOracle {
     let csvPath = path.join(process.cwd(), `data/snapshots/gw_${gw}/fplform.csv`);
     if (fuel === 'native') {
@@ -150,7 +176,7 @@ export class CareerService {
     id: number,
     baseData: any,
     oracle: XPOracle,
-    actualPoints: Record<number, number>,
+    actualStats: Record<number, { points: number; minutes: number }>,
     isCaptain: boolean,
     isViceCaptain: boolean,
     multiplier: number
@@ -160,7 +186,9 @@ export class CareerService {
     const cost = oracle.getCost(id);
     const teamObj = baseData.teams.find((t: any) => t.id === p?.team);
     const teamShort = teamObj ? teamObj.short_name : oracle.getTeam(id) || 'FPL';
-    const points = actualPoints[id] ?? 0;
+    const stat = actualStats[id];
+    const points = stat ? stat.points : 0;
+    const minutes = stat ? stat.minutes : 0;
 
     return {
       id,
@@ -170,7 +198,7 @@ export class CareerService {
       costDisplay: `£${(cost / 10).toFixed(1)}m`,
       team_short_name: teamShort,
       points,
-      minutes: points > 0 ? 90 : 0, // approximation when only total points known
+      minutes,
       isCaptain,
       isViceCaptain,
       multiplier
@@ -223,7 +251,11 @@ export class CareerService {
 
     for (let gw = 1; gw <= endGw; gw++) {
       const oracle = this.getOracleForGw(gw, baseData, fuel, riskMode);
-      const actualPoints = this.getPlayerPoints(gw);
+      const playerStats = this.getPlayerStats(gw);
+      const actualPoints: Record<number, number> = {};
+      for (const id in playerStats) {
+        actualPoints[id] = playerStats[id].points;
+      }
 
       let transfersInList: any[] = [];
       let transfersOutList: any[] = [];
@@ -284,15 +316,15 @@ export class CareerService {
 
       const { captain, viceCaptain } = solveCaptain(oracle, gw, xiIds, params);
 
-      // Auto-substitutions calculation
+      // Auto-substitutions calculation: Under official FPL rules, auto-sub ONLY triggers if starter played 0 minutes
       const autoSubs: { outPlayer: string; inPlayer: string; points: number }[] = [];
       const finalStarters = [...xiIds];
       const usedBench = new Set<number>();
 
       finalStarters.forEach((sid, idx) => {
-        const pts = actualPoints[sid] ?? 0;
-        // If starter scored 0 points (did not play or blanked) and bench player scored > 0
-        if (pts === 0) {
+        const sStats = playerStats[sid] ?? { points: 0, minutes: 0 };
+        // Auto-sub only triggers if starter played 0 minutes (did not feature)
+        if (sStats.minutes === 0) {
           const sPos = oracle.getPosition(sid);
           const sub = benchIds.find(bid => {
             if (usedBench.has(bid)) return false;
@@ -301,7 +333,9 @@ export class CareerService {
             return bPos !== 'GKP';
           });
 
-          if (sub && (actualPoints[sub] ?? 0) > 0) {
+          const subStats = sub ? playerStats[sub] : undefined;
+          // Bench sub must have featured (minutes > 0)
+          if (sub && subStats && subStats.minutes > 0) {
             usedBench.add(sub);
             finalStarters[idx] = sub;
             const pOut = baseData.players.find((p: any) => p.id === sid);
@@ -309,15 +343,17 @@ export class CareerService {
             autoSubs.push({
               outPlayer: pOut ? pOut.web_name : `Player ${sid}`,
               inPlayer: pIn ? pIn.web_name : `Player ${sub}`,
-              points: actualPoints[sub] ?? 0
+              points: subStats.points
             });
           }
         }
       });
 
-      // Active captain check: if captain played 0, pass to vice-captain
+      // Active captain check: if captain played 0 minutes, pass to vice-captain if vice-captain played > 0 minutes
       let activeCapId = captain;
-      if ((actualPoints[captain] ?? 0) === 0 && (actualPoints[viceCaptain] ?? 0) > 0) {
+      const capStats = playerStats[captain] ?? { points: 0, minutes: 0 };
+      const vcStats = playerStats[viceCaptain] ?? { points: 0, minutes: 0 };
+      if (capStats.minutes === 0 && vcStats.minutes > 0) {
         activeCapId = viceCaptain;
       }
 
@@ -346,7 +382,7 @@ export class CareerService {
       const startingXIModels: CareerPlayer[] = finalStarters.map(id => {
         const isCap = id === activeCapId;
         const isVc = id === viceCaptain && activeCapId !== viceCaptain;
-        const pModel = this.mapPlayer(id, baseData, oracle, actualPoints, isCap, isVc, isCap ? 2 : 1);
+        const pModel = this.mapPlayer(id, baseData, oracle, playerStats, isCap, isVc, isCap ? 2 : 1);
         if (autoSubs.some(as => as.inPlayer === pModel.web_name)) {
           pModel.isAutoSubIn = true;
         }
@@ -354,15 +390,15 @@ export class CareerService {
       });
 
       const benchModels: CareerPlayer[] = benchIds.map(id => {
-        const pModel = this.mapPlayer(id, baseData, oracle, actualPoints, false, false, 0);
+        const pModel = this.mapPlayer(id, baseData, oracle, playerStats, false, false, 0);
         if (usedBench.has(id)) {
           pModel.isAutoSubIn = true;
         }
         return pModel;
       });
 
-      const capModel = startingXIModels.find(p => p.id === captain) || this.mapPlayer(captain, baseData, oracle, actualPoints, true, false, 2);
-      const vcModel = startingXIModels.find(p => p.id === viceCaptain) || this.mapPlayer(viceCaptain, baseData, oracle, actualPoints, false, true, 1);
+      const capModel = startingXIModels.find(p => p.id === captain) || this.mapPlayer(captain, baseData, oracle, playerStats, true, false, 2);
+      const vcModel = startingXIModels.find(p => p.id === viceCaptain) || this.mapPlayer(viceCaptain, baseData, oracle, playerStats, false, true, 1);
       const activeCapModel = startingXIModels.find(p => p.id === activeCapId) || capModel;
 
       // Decision log sentence
@@ -510,7 +546,11 @@ export class CareerService {
 
     for (let gw = 1; gw <= maxGw; gw++) {
       const oracle = this.getOracleForGw(gw, baseData, fuel, riskMode);
-      const actualPoints = this.getPlayerPoints(gw);
+      const playerStats = this.getPlayerStats(gw);
+      const actualPoints: Record<number, number> = {};
+      for (const id in playerStats) {
+        actualPoints[id] = playerStats[id].points;
+      }
       const userGwRecord = userHistoryEvents.find((e: any) => e.event === gw);
 
       let transfersInList: any[] = [];
@@ -568,14 +608,14 @@ export class CareerService {
       const benchIds = state.squad.filter(id => !xiSet.has(id));
       const { captain, viceCaptain } = solveCaptain(oracle, gw, xiIds, params);
 
-      // Auto-subs
+      // Auto-subs: Under official FPL rules, auto-sub ONLY triggers if starter played 0 minutes
       const autoSubs: { outPlayer: string; inPlayer: string; points: number }[] = [];
       const finalStarters = [...xiIds];
       const usedBench = new Set<number>();
 
       finalStarters.forEach((sid, idx) => {
-        const pts = actualPoints[sid] ?? 0;
-        if (pts === 0) {
+        const sStats = playerStats[sid] ?? { points: 0, minutes: 0 };
+        if (sStats.minutes === 0) {
           const sPos = oracle.getPosition(sid);
           const sub = benchIds.find(bid => {
             if (usedBench.has(bid)) return false;
@@ -584,7 +624,8 @@ export class CareerService {
             return bPos !== 'GKP';
           });
 
-          if (sub && (actualPoints[sub] ?? 0) > 0) {
+          const subStats = sub ? playerStats[sub] : undefined;
+          if (sub && subStats && subStats.minutes > 0) {
             usedBench.add(sub);
             finalStarters[idx] = sub;
             const pOut = baseData.players.find((p: any) => p.id === sid);
@@ -592,14 +633,16 @@ export class CareerService {
             autoSubs.push({
               outPlayer: pOut ? pOut.web_name : `Player ${sid}`,
               inPlayer: pIn ? pIn.web_name : `Player ${sub}`,
-              points: actualPoints[sub] ?? 0
+              points: subStats.points
             });
           }
         }
       });
 
       let activeCapId = captain;
-      if ((actualPoints[captain] ?? 0) === 0 && (actualPoints[viceCaptain] ?? 0) > 0) {
+      const capStats = playerStats[captain] ?? { points: 0, minutes: 0 };
+      const vcStats = playerStats[viceCaptain] ?? { points: 0, minutes: 0 };
+      if (capStats.minutes === 0 && vcStats.minutes > 0) {
         activeCapId = viceCaptain;
       }
 
@@ -634,7 +677,7 @@ export class CareerService {
       const startingXIModels = finalStarters.map(id => {
         const isCap = id === activeCapId;
         const isVc = id === viceCaptain && activeCapId !== viceCaptain;
-        const pModel = this.mapPlayer(id, baseData, oracle, actualPoints, isCap, isVc, isCap ? 2 : 1);
+        const pModel = this.mapPlayer(id, baseData, oracle, playerStats, isCap, isVc, isCap ? 2 : 1);
         if (autoSubs.some(as => as.inPlayer === pModel.web_name)) {
           pModel.isAutoSubIn = true;
         }
@@ -642,15 +685,15 @@ export class CareerService {
       });
 
       const benchModels = benchIds.map(id => {
-        const pModel = this.mapPlayer(id, baseData, oracle, actualPoints, false, false, 0);
+        const pModel = this.mapPlayer(id, baseData, oracle, playerStats, false, false, 0);
         if (usedBench.has(id)) {
           pModel.isAutoSubIn = true;
         }
         return pModel;
       });
 
-      const capModel = startingXIModels.find(p => p.id === captain) || this.mapPlayer(captain, baseData, oracle, actualPoints, true, false, 2);
-      const vcModel = startingXIModels.find(p => p.id === viceCaptain) || this.mapPlayer(viceCaptain, baseData, oracle, actualPoints, false, true, 1);
+      const capModel = startingXIModels.find(p => p.id === captain) || this.mapPlayer(captain, baseData, oracle, playerStats, true, false, 2);
+      const vcModel = startingXIModels.find(p => p.id === viceCaptain) || this.mapPlayer(viceCaptain, baseData, oracle, playerStats, false, true, 1);
       const activeCapModel = startingXIModels.find(p => p.id === activeCapId) || capModel;
 
       let log = '';
@@ -861,10 +904,10 @@ export class CareerService {
 
       // In forward projections, points are based on Expected Points (xP)
       let grossPoints = 0;
-      const dummyActualPoints: Record<number, number> = {};
+      const dummyActualStats: Record<number, { points: number; minutes: number }> = {};
       state.squad.forEach(id => {
         const xp = Math.round(oracle.getXP(id, gw));
-        dummyActualPoints[id] = xp;
+        dummyActualStats[id] = { points: xp, minutes: 90 };
         if (xiSet.has(id)) {
           grossPoints += id === captain ? xp * 2 : xp;
         }
@@ -881,19 +924,19 @@ export class CareerService {
       const startingXIModels = xiIds.map(id => {
         const isCap = id === captain;
         const isVc = id === viceCaptain;
-        return this.mapPlayer(id, baseData, oracle, dummyActualPoints, isCap, isVc, isCap ? 2 : 1);
+        return this.mapPlayer(id, baseData, oracle, dummyActualStats, isCap, isVc, isCap ? 2 : 1);
       });
 
       const benchModels = benchIds.map(id => {
-        return this.mapPlayer(id, baseData, oracle, dummyActualPoints, false, false, 0);
+        return this.mapPlayer(id, baseData, oracle, dummyActualStats, false, false, 0);
       });
 
-      const capModel = startingXIModels.find(p => p.id === captain) || this.mapPlayer(captain, baseData, oracle, dummyActualPoints, true, false, 2);
-      const vcModel = startingXIModels.find(p => p.id === viceCaptain) || this.mapPlayer(viceCaptain, baseData, oracle, dummyActualPoints, false, true, 1);
+      const capModel = startingXIModels.find(p => p.id === captain) || this.mapPlayer(captain, baseData, oracle, dummyActualStats, true, false, 2);
+      const vcModel = startingXIModels.find(p => p.id === viceCaptain) || this.mapPlayer(viceCaptain, baseData, oracle, dummyActualStats, false, true, 1);
 
       let log = isRolled
-        ? `GW${gw} Projected: Roll Free Transfer (Bank: ${state.freeTransfers} FTs). Captain: ${capModel.web_name} (${dummyActualPoints[captain] * 2} xP).`
-        : `GW${gw} Projected: Transfer ${transfersOutList[0]?.name} → ${transfersInList[0]?.name}. Captain: ${capModel.web_name} (${dummyActualPoints[captain] * 2} xP).`;
+        ? `GW${gw} Projected: Roll Free Transfer (Bank: ${state.freeTransfers} FTs). Captain: ${capModel.web_name} (${(dummyActualStats[captain]?.points ?? 0) * 2} xP).`
+        : `GW${gw} Projected: Transfer ${transfersOutList[0]?.name} → ${transfersInList[0]?.name}. Captain: ${capModel.web_name} (${(dummyActualStats[captain]?.points ?? 0) * 2} xP).`;
 
       gameweeks.push({
         gameweek: gw,

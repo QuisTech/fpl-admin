@@ -342,3 +342,53 @@ The timeline doubles as an interactive matchday selector:
 2. **Matchday Lineup**: Shows the AI's Starting XI, who it captained, who was benched, and if any green `Auto-Sub In` events occurred.
 3. **Manager Decision Log**: Displays the exact logic of the week (e.g. `Transfer: Isak → Haaland (1 FT used, 0 hit)` or `Rolled Free Transfer`).
 4. **Side-by-Side Comparison Card**: Displays your real team score, real transfers, real hits, and overall rank alongside the AI's choices.
+
+
+---
+
+### User (Turn 198 - 2026-11-01T23:50:46+01:00)
+
+Under the Autonomous AI, does that mean most of these players don't play at all for them to be sub in?
+
+
+
+Bench Auto-Substitution Triggered
+Thiaw subbed in for Groß
++1 pts
+Anderson subbed in for João Pedro
++1 pts
+Thomas subbed in for B.Fernandes
++1 pts
+
+---
+
+### Assistant (Turn 198)
+
+### 1. The Short Answer: Did They Play?
+
+- **João Pedro**: **Did not play at all (0 minutes)**. He suffered an ankle injury in late September and was absent from the squad in GW8.
+- **Bruno Fernandes**: **Did not play at all (0 minutes)**. He featured for 0 minutes in the official GW8 matchday.
+- **Groß**: **Actually played 90 minutes**, but finished with **0 points** (played and blanked with disciplinary/goal concession deductions).
+
+---
+
+### 2. Why Did Groß Get Subbed If He Played 90 Minutes?
+
+Under official Fantasy Premier League rules, **an auto-substitution ONLY triggers when a starting player features for 0 minutes**. If a player plays even 1 minute and finishes on 0 points, they cannot be substituted off.
+
+In the initial implementation of the career engine, `player_points.json` only recorded total points scored, so the substitution check evaluated `points === 0` as a proxy for "did not feature". While this correctly caught genuine absences like **João Pedro** (0 mins) and **Bruno Fernandes** (0 mins), it also treated Groß's rare 0-point 90-minute appearance as an absence.
+
+---
+
+### 3. What Was Enhanced
+
+We have now archived the official minute-by-minute logs (`player_stats.json`) across all gameweeks (GW1 to GW9) directly from the Premier League API:
+
+1. **Strict 0-Minute Enforcement**:
+   - Auto-substitutions now explicitly check `minutes === 0`.
+   - Starters who play minutes and score 0 points (like Groß) stay on the pitch.
+   - Genuine non-starters (like João Pedro and Bruno Fernandes with 0 minutes) legitimately trigger bench auto-substitutions.
+2. **Valid Bench Qualifier**:
+   - Bench players must have featured (`minutes > 0`) to be eligible to sub in.
+3. **Accurate Captaincy Fallback**:
+   - Vice-captaincy promotion now verifies `capMinutes === 0 && vcMinutes > 0`.
