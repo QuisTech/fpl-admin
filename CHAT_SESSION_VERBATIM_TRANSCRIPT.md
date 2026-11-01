@@ -431,3 +431,54 @@ If you are following the Autonomous AI team:
    - **Matchday Sheet**: Shows the projected Starting XI, ordered bench, and Captain choice.
    - **Manager Decision Log**: Tells you the exact move recommended for the upcoming gameweek (e.g. `GW10 Projected: Transfer Out → In (1 FT used)` or `GW10 Projected: Roll Free Transfer (Bank: 2 FTs)`).
    - **Bank & Free Transfer Tracker**: Shows your remaining in-the-bank funds and available FTs heading into future deadlines.
+
+
+---
+
+## User Request:
+Okay but now, I can't see my real life squad team sync again, or how do I see that?
+
+## Assistant Response:
+Here is exactly where and how your real-life synced squad is located across the application, why it may have appeared hidden, and the new quality-of-life enhancements we just deployed:
+
+---
+
+### 1. Where to See Your Real-Life Synced Squad
+
+Your synced squad lives in three primary areas:
+
+#### A. Pitch Tab (Live 15-Man Team on the Grass Pitch)
+- Click the **`Pitch`** tab in the main navigation.
+- If your squad is active, you will see the cyan banner at the top:
+  `Synced Squad: <Your Team Name> (#<Your Team ID>)`
+  displaying your starting XI, bench order, captain (C), vice-captain (VC), and live GW points.
+- **New Feature Added**: If the pitch was toggled to the AI Global Optimum (e.g. after a page reload or clicking "Global Optimum"), a top banner now appears:
+  `Active Pitch: AI Global Optimum • <Your Team Name> (#<Team ID>) is ready`
+  with a one-click button: **`[Switch to My Synced Squad]`**.
+
+#### B. Career Tab (You vs AI Duel)
+- In the **Career** tab, click the **`You vs AI Duel`** mode button in the top right.
+- This loads your **real-world team's actual performance from GW1 to GW9**:
+  - Shows your actual GW scores, transfer hits taken (-4, -8), and cumulative rank.
+  - Compares your score head-to-head against what the AI Co-Pilot would have done starting with your exact same GW1 squad.
+
+#### C. Career Tab (Forward Roadmap → My Synced Team)
+- In the **Career** tab, click **`Forward Roadmap`**.
+- In the source pill bar, select **`[My Synced Team]`**.
+- This projects your **real-world current squad** forward from GW10 to GW15 under official 1 FT/week rules.
+
+---
+
+### 2. Why Did It Seem Missing Before?
+
+1. **Autonomous AI Mode vs Synced Mode**: In the Career tab, if you are on `Autonomous AI`, the engine displays the computer's independent simulation from GW1 with £100.0m (which picked Groß, João Pedro, Bruno Fernandes, etc.). Clicking **`You vs AI Duel`** switches back to your real team.
+2. **Squad View Source on Reload**: Previously, refreshing the page defaulted the pitch view to the AI's Global Optimum squad and required manual re-syncing.
+
+---
+
+### 3. Enhancements Deployed
+
+- **Automatic Team Sync on Startup**: The app now automatically syncs your saved Team ID on initial page load, so `syncedData` is immediately available in memory.
+- **Persistent Pitch Preference**: Your choice to view your synced squad is now remembered across page refreshes.
+- **Direct Switcher Banner on Pitch**: When viewing the Global Optimum, a banner with a **`[Switch to My Synced Squad]`** button allows toggling between the AI Optimum and your real team with one click.
+- **Synced Squad Metric Badge**: The left column Squad Value card displays `MY SQUAD` whenever you are viewing your synced team on the pitch.
