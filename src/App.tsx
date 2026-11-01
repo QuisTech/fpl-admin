@@ -52,7 +52,17 @@ function FPLApp() {
   const [tab, setTab] = useState<'optimizer' | 'pitch' | 'picks' | 'transfers' | 'chips' | 'performance' | 'backtest' | 'career' | 'agent'>('optimizer');
   const [snapshotToast, setSnapshotToast] = useState<SnapshotToastData | null>(null);
   const [isSnapshotModalOpen, setIsSnapshotModalOpen] = useState(false);
-  const [squadViewSource, setSquadViewSource] = useState<'optimum' | 'synced'>('optimum');
+  const [squadViewSource, setSquadViewSource] = useState<'optimum' | 'synced'>(() => {
+    try {
+      return (localStorage.getItem('fpl_squad_view_source') as 'optimum' | 'synced') || 'synced';
+    } catch {
+      return 'synced';
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem('fpl_squad_view_source', squadViewSource);
+  }, [squadViewSource]);
 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [profileTab, setProfileTab] = useState<string | null>(null);
@@ -172,7 +182,7 @@ function FPLApp() {
 
         <Header data={data} riskMode={riskMode} setRiskMode={setRiskMode} fuel={fuel} setFuel={setFuel} authUser={authUser} tier={tier} onOpenAuth={() => setIsAuthModalOpen(true)} onSignOut={() => signOut(auth)} setTeamId={setTeamId} profileTab={profileTab} setProfileTab={setProfileTab} />
 
-        <MetricsColumn data={data} syncedData={syncedData} riskMode={riskMode} tab={tab} onSyncTeamId={(id, gw) => handleSync(id, gw)} />
+        <MetricsColumn data={data} syncedData={syncedData} riskMode={riskMode} tab={tab} squadViewSource={squadViewSource} onSyncTeamId={(id, gw) => handleSync(id, gw)} />
 
         {/* Primary Content Area */}
         <div className="col-span-12 lg:col-span-6 bg-card-bg border border-fpl-border rounded-3xl overflow-hidden relative shadow-xl min-h-[600px]">
@@ -240,6 +250,8 @@ function FPLApp() {
                   onClearConstraints={clearConstraints}
                   squadViewSource={squadViewSource}
                   onResetToOptimum={() => setSquadViewSource('optimum')}
+                  onSwitchToSynced={() => setSquadViewSource('synced')}
+                  onSyncTeam={(id) => handleSync(id)}
                   teamId={teamId}
                 />
               ) : tab === 'picks' ? (

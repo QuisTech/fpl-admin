@@ -8,10 +8,14 @@ interface MetricsColumnProps {
   syncedData?: TeamSyncResponse | null;
   riskMode: 'safe' | 'aggressive' | 'value';
   onSyncTeamId?: (teamId: string, gameweek?: number) => void;
+  squadViewSource?: 'optimum' | 'synced';
 }
 
-export const MetricsColumn = ({ data, syncedData, riskMode, tab, onSyncTeamId }: MetricsColumnProps & { tab: string }) => {
-  const isViewingMySquad = !!syncedData && ['transfers', 'performance', 'chips'].includes(tab);
+export const MetricsColumn = ({ data, syncedData, riskMode, tab, squadViewSource = 'synced', onSyncTeamId }: MetricsColumnProps & { tab: string }) => {
+  const isViewingMySquad = !!syncedData && (
+    ['transfers', 'performance', 'chips'].includes(tab) ||
+    (tab === 'pitch' && squadViewSource === 'synced')
+  );
   const squadValue = isViewingMySquad ? (syncedData.totalCost || 0) : (data?.totalCost || 0);
   const itb = isViewingMySquad
     ? (syncedData.bank || 0)

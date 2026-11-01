@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Trophy, TrendingUp, TrendingDown, Shield, Zap, ChevronLeft, ChevronRight, 
@@ -101,16 +101,19 @@ export const CareerModeView = ({
   activeScenario = 'quant'
 }: CareerModeViewProps) => {
   const [mode, setMode] = useState<'autonomous' | 'synced' | 'forward'>(teamId ? 'synced' : 'autonomous');
-  const [forwardSource, setForwardSource] = useState<'autonomous' | 'synced'>('autonomous');
+  const [forwardSource, setForwardSource] = useState<'autonomous' | 'synced'>(teamId ? 'synced' : 'autonomous');
   const [data, setData] = useState<CareerSeasonPayload | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedGwIndex, setSelectedGwIndex] = useState<number>(0);
 
-  // Sync mode automatically when teamId changes
+  // Sync mode automatically when teamId actually changes to a new value
+  const lastSyncedTeamId = useRef<string | undefined>(teamId);
   useEffect(() => {
-    if (teamId && mode === 'autonomous') {
+    if (teamId && lastSyncedTeamId.current !== teamId) {
+      lastSyncedTeamId.current = teamId;
       setMode('synced');
+      setForwardSource('synced');
     }
   }, [teamId]);
 

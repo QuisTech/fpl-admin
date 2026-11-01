@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { PlayerCard } from './PlayerCard';
 import { SyncedSquadBanner } from './SyncedSquadBanner';
 import { RecommendationResponse, ScoredPlayer, TeamSyncResponse } from '../types';
-import { Zap, Shield, Lock, Ban, X, ArrowRightLeft, Calendar, Eye, EyeOff, Activity, Trophy, Coins, Users, Layout, List } from 'lucide-react';
+import { Zap, Shield, Lock, Ban, X, ArrowRightLeft, Calendar, Eye, EyeOff, Activity, Trophy, Coins, Users, Layout, List, UserCheck } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface PitchViewProps {
@@ -24,6 +24,8 @@ interface PitchViewProps {
   onClearConstraints?: () => void;
   squadViewSource?: 'optimum' | 'synced';
   onResetToOptimum?: () => void;
+  onSwitchToSynced?: () => void;
+  onSyncTeam?: (teamId: string) => void;
   teamId?: string;
 }
 
@@ -71,6 +73,8 @@ export const PitchView = ({
   onClearConstraints,
   squadViewSource = 'optimum',
   onResetToOptimum,
+  onSwitchToSynced,
+  onSyncTeam,
   teamId
 }: PitchViewProps) => {
   const [showFixtures, setShowFixtures] = useState(true);
@@ -557,6 +561,51 @@ export const PitchView = ({
       exit={{ opacity: 0 }}
       className="flex-grow flex flex-col justify-start space-y-2 py-1 sm:py-2 w-full max-w-5xl mx-auto"
     >
+      {/* Switch to Synced Squad Banner (renders when viewing Optimum) */}
+      {!isSyncedView && (
+        <div className="w-full mb-2 p-2.5 sm:p-3 bg-gradient-to-r from-slate-950/95 via-slate-900/95 to-cyan-950/90 border border-slate-800 rounded-2xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 sm:gap-3 shadow-md backdrop-blur-md">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+            <div className="min-w-0">
+              <div className="text-xs font-bold text-white flex items-center gap-2 flex-wrap">
+                <span>Active Pitch: <strong className="text-fpl-green">AI Global Optimum</strong></span>
+                {syncedData?.managerInfo?.teamName && (
+                  <span className="text-[10px] font-mono bg-cyan-500/15 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30 font-semibold truncate">
+                    {syncedData.managerInfo.teamName} (#{teamId})
+                  </span>
+                )}
+              </div>
+              <p className="text-[10px] text-slate-400 mt-0.5">
+                {syncedData?.squad && syncedData.squad.length > 0 
+                  ? "Your real-life squad is synced and ready. Click anytime to view your actual 15 players and live gameweek points."
+                  : teamId 
+                  ? ("Team ID #" + teamId + " is configured. Click to sync your real squad and live points.")
+                  : "Enter your Team ID in the top header to sync your real-world team."}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            {syncedData?.squad && syncedData.squad.length > 0 && onSwitchToSynced ? (
+              <button
+                onClick={onSwitchToSynced}
+                className="w-full md:w-auto flex items-center justify-center gap-1.5 px-3 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/50 text-cyan-200 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-sm active:scale-95 cursor-pointer whitespace-nowrap"
+              >
+                <UserCheck className="w-3.5 h-3.5 text-cyan-300" />
+                <span>Switch to My Synced Squad</span>
+              </button>
+            ) : teamId && onSyncTeam ? (
+              <button
+                onClick={() => onSyncTeam(teamId)}
+                className="w-full md:w-auto flex items-center justify-center gap-1.5 px-3 py-1.5 bg-fpl-purple hover:bg-fpl-purple/80 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-sm active:scale-95 cursor-pointer whitespace-nowrap"
+              >
+                <Zap className="w-3.5 h-3.5" />
+                <span>Sync Team #{teamId}</span>
+              </button>
+            ) : null}
+          </div>
+        </div>
+      )}
+
       {/* Synced Squad Banner (renders when viewing a synced manager's squad) */}
       {isSyncedView && onResetToOptimum && (
         <SyncedSquadBanner

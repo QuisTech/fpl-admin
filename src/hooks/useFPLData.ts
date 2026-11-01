@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import axios from 'axios';
 import { RecommendationResponse, TeamSyncResponse, ScoredPlayer } from '../types';
 
@@ -82,6 +82,16 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [riskMode, fuel, activeScenario]);
+
+  // Automatically fetch and sync team when teamId is present on load or updated
+  const initialSyncAttempted = useRef<string | null>(null);
+  useEffect(() => {
+    const cleanId = typeof teamId === 'string' ? teamId.trim() : (teamId ? String(teamId).trim() : '');
+    if (cleanId && initialSyncAttempted.current !== cleanId) {
+      initialSyncAttempted.current = cleanId;
+      syncTeam(cleanId);
+    }
+  }, [teamId]);
 
   // Load user tier and profile ONCE on login/auth init
   useEffect(() => {
