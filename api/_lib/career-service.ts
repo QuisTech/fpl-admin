@@ -76,6 +76,8 @@ export interface CareerSeasonPayload {
   startGw: number;
   endGw: number;
   totalPoints: number;
+  basePoints?: number;
+  forwardPoints?: number;
   totalHitsCost: number;
   totalTransfersMade: number;
   totalTransfersRolled: number;
@@ -805,15 +807,17 @@ export class CareerService {
     let squad: number[] = [];
     let bank = 0;
     let initialFt = 1;
+    let initialAccumulatedScore = 0;
     let managerName = 'Autonomous Squad';
     let teamName = 'AI Optimization Unit';
 
     if (forwardSource === 'synced' && teamId) {
       const cleanId = String(teamId).trim();
       try {
-        const [picksRes, entryRes] = await Promise.all([
+        const [picksRes, entryRes, histRes] = await Promise.all([
           axios.get(`${this.FPL_BASE}/entry/${cleanId}/event/${currentGw}/picks/`, { headers: { 'User-Agent': 'Mozilla/5.0' }, timeout: 8000 }),
-          axios.get(`${this.FPL_BASE}/entry/${cleanId}/`, { headers: { 'User-Agent': 'Mozilla/5.0' }, timeout: 8000 })
+          axios.get(`${this.FPL_BASE}/entry/${cleanId}/`, { headers: { 'User-Agent': 'Mozilla/5.0' }, timeout: 8000 }),
+          axios.get(`${this.FPL_BASE}/entry/${cleanId}/history/`, { headers: { 'User-Agent': 'Mozilla/5.0' }, timeout: 8000 })
         ]);
         if (picksRes.data?.picks && Array.isArray(picksRes.data.picks)) {
           squad = picksRes.data.picks.map((p: any) => p.element);
@@ -822,6 +826,13 @@ export class CareerService {
         if (entryRes.data) {
           managerName = `${entryRes.data.player_first_name || ''} ${entryRes.data.player_last_name || ''}`.trim() || 'Manager';
           teamName = entryRes.data.name || teamName;
+          initialAccumulatedScore = Number(entryRes.data.summary_overall_points || 0);
+        }
+        if (histRes.data?.current && Array.isArray(histRes.data.current) && histRes.data.current.length > 0) {
+          const lastEvent = histRes.data.current[histRes.data.current.length - 1];
+          if (lastEvent?.total_points) {
+            initialAccumulatedScore = Number(lastEvent.total_points);
+          }
         }
       } catch (e: any) {
         console.warn(`[CareerService] Forward roadmap picks fetch failed for ${teamId}:`, e.message);
@@ -835,6 +846,7 @@ export class CareerService {
           squad = [...lastGw.startingXI.map(p => p.id), ...lastGw.bench.map(p => p.id)];
           bank = lastGw.bank;
           initialFt = lastGw.freeTransfersRemaining;
+          initialAccumulatedScore = autoCareer.totalPoints;
           managerName = 'Autonomous AI Squad';
           teamName = 'AI Optimization Unit (GW9 Seed)';
         }
@@ -871,7 +883,7 @@ export class CareerService {
       freeTransfers: initialFt,
       chipState: { 'WC': 1, 'FH': 1, 'BB': 1, 'TC': 1 },
       gameweek: startGw,
-      accumulatedScore: 0,
+      accumulatedScore: initialAccumulatedScore,
       purchasePrices
     };
 
@@ -992,6 +1004,8 @@ export class CareerService {
       });
     }
 
+    const forwardPoints = state.accumulatedScore - initialAccumulatedScore;
+
     return {
       mode: 'forward',
       teamId,
@@ -1003,6 +1017,8 @@ export class CareerService {
       startGw,
       endGw,
       totalPoints: state.accumulatedScore,
+      basePoints: initialAccumulatedScore,
+      forwardPoints,
       totalHitsCost: 0,
       totalTransfersMade,
       totalTransfersRolled,

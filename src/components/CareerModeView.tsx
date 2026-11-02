@@ -72,6 +72,8 @@ export interface CareerSeasonPayload {
   startGw: number;
   endGw: number;
   totalPoints: number;
+  basePoints?: number;
+  forwardPoints?: number;
   totalHitsCost: number;
   totalTransfersMade: number;
   totalTransfersRolled: number;
@@ -300,19 +302,42 @@ export const CareerModeView = ({
             {/* KPI 1: Total Points */}
             <div className="bg-slate-950 border border-fpl-border rounded-2xl p-4 flex flex-col justify-between shadow-sm relative overflow-hidden">
               <div className="flex items-center justify-between text-slate-400 mb-2">
-                <span className="text-[10px] font-mono uppercase tracking-wider font-bold">Total Season Points</span>
+                <span className="text-[10px] font-mono uppercase tracking-wider font-bold">
+                  {mode === 'forward' ? `Projected Season Total (GW${data.endGw})` : "Total Season Points"}
+                </span>
                 <Trophy className="w-4 h-4 text-amber-400" />
               </div>
               <div>
-                <div className="text-2xl font-black text-white font-mono">{data.totalPoints}</div>
+                <div className="text-2xl font-black text-white font-mono">{data.totalPoints} pts</div>
                 <div className="text-[10px] text-slate-400 mt-1 flex items-center gap-1">
-                  <span>Avg: {(data.totalPoints / (data.gameweeks?.length || 1)).toFixed(1)} pts/GW</span>
+                  {mode === 'forward' ? (
+                    <span>
+                      GW1-{(data.startGw || 10) - 1} Base: <strong className="text-white">{data.basePoints ?? 0} pts</strong> • Projected: <strong className="text-emerald-400">+{data.forwardPoints ?? (data.totalPoints - (data.basePoints ?? 0))} xP</strong>
+                    </span>
+                  ) : (
+                    <span>Avg: {(data.totalPoints / (data.gameweeks?.length || 1)).toFixed(1)} pts/GW</span>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* KPI 2: Human Comparison Delta or Transfers Made */}
-            {mode === 'synced' && data.humanSummary ? (
+            {/* KPI 2: Forward Horizon Yield, Human Comparison Delta, or Transfers Made */}
+            {mode === 'forward' ? (
+              <div className="bg-slate-950 border border-fpl-border rounded-2xl p-4 flex flex-col justify-between shadow-sm relative overflow-hidden">
+                <div className="flex items-center justify-between text-slate-400 mb-2">
+                  <span className="text-[10px] font-mono uppercase tracking-wider font-bold">Forward Horizon Yield</span>
+                  <TrendingUp className="w-4 h-4 text-emerald-400" />
+                </div>
+                <div>
+                  <div className="text-2xl font-black text-emerald-400 font-mono">
+                    +{data.forwardPoints ?? (data.totalPoints - (data.basePoints ?? 0))} <span className="text-xs font-normal text-slate-400">xP</span>
+                  </div>
+                  <div className="text-[10px] text-slate-400 mt-1">
+                    Avg: {((data.forwardPoints ?? (data.totalPoints - (data.basePoints ?? 0))) / (data.gameweeks?.length || 1)).toFixed(1)} xP/GW (GW{data.startGw} → GW{data.endGw})
+                  </div>
+                </div>
+              </div>
+            ) : mode === 'synced' && data.humanSummary ? (
               <div className="bg-slate-950 border border-fpl-border rounded-2xl p-4 flex flex-col justify-between shadow-sm relative overflow-hidden">
                 <div className="flex items-center justify-between text-slate-400 mb-2">
                   <span className="text-[10px] font-mono uppercase tracking-wider font-bold">Alpha vs Human Score</span>
