@@ -743,3 +743,46 @@ The clear #1 top-performing combination is:
    `Native` feeds the solver directly with raw FPL points per game and immediate Premier League momentum. During rapid early-season form shifts, it was quicker to capitalize on hot streaks than long-term regression models.
 3. **`Safe` / `Value` Avoids Destructive Rotation**:
    `Safe` prioritizes guaranteed 90-minute starters. In contrast, `Aggressive` tried to chase volatile low-ownership differentials which frequently rotated or blanked, costing upwards of 85+ total points over the 9 weeks.
+
+---
+
+## User Request:
+So does that mean someone can confidently following this winning mode/strategy/scenario moving forward?
+
+## Assistant Response:
+**Yes, with one important strategic nuance.**
+
+Following **Native + Safe + Template Shield** as your primary baseline strategy is the highest-floor, lowest-risk way to play Fantasy Premier League. If your goal is to consistently beat 90%+ of managers, win your mini-leagues, and achieve a steady high overall rank, it provides an exceptional roadmap.
+
+However, treating it like a "smart autopilot" rather than a 100% blind autopilot will yield the best real-world results. Here is the full breakdown of why it excels and the practical caveats to keep in mind:
+
+### 1. Why You Can Confidently Follow It
+- **Immunity to Effective Ownership (EO) Rank Drops**:
+  In FPL, 80% of top managers own and captain the template core (Haaland, Palmer, Saka, Gabriel). When those players score a hat-trick or brace, non-owners plummet down the ranks. `Template Shield` guarantees you are never victimized by the template.
+- **Discipline Against Emotional Transfers**:
+  Human managers frequently take unnecessary -4 or -8 transfer hits when they panic after a bad gameweek. The AI plays with strict 1 FT discipline and 0 hits, saving you 20–40 points over a season in avoided hit penalties alone.
+- **High Minute Security in Congested Fixtures (`Safe`)**:
+  As the season heads into the congested winter calendar (European fixtures, December midweek games), rotation is rampant. The `Safe` setting filters out rotation-risk players and selects locked 90-minute starters.
+
+---
+
+### 2. The Nuances and Limitations to Watch For
+- **Recency Bias in `Native` Fuel**:
+  `Native` fuel relies on recent Premier League performance (points-per-game over the last 30 days). While this catches real-world form surges quickly, it can occasionally suffer from recency bias:
+  - If a player had an unsustainable lucky streak (e.g. 3 goals from 0.4 xG) but now faces Manchester City (A), Arsenal (A), and Liverpool (A), `Native` might still rank them high.
+  - In comparison, `FPLForm` evaluates forward-looking expected data (xG, xA, fixture difficulty ratings) to spot who is due to haul next.
+- **Rank Protection vs Rank Chasing**:
+  - `Template Shield` is designed to **protect your rank** and build steady green arrows.
+  - If you are in Gameweek 32 and trailing your mini-league leader by 80 points, following `Template Shield` will not help you catch them because you will be matching their team player-for-player. In that scenario, pivoting to `Aggressive` or `Quant Optimal` differentials is required.
+- **Late Press Conference News & Injury Embargos**:
+  The AI solver optimizes based on available API data. If a key player suffers a hamstring strain in Friday afternoon training, human verification of press conference reports before deadline is still essential.
+
+---
+
+### 3. The Recommended Weekly Workflow
+1. **Use `Native + Safe + Template Shield` as your default transfer guide**:
+   Check the Career Forward Roadmap on Tuesday/Wednesday to see the AI's proposed transfer and captaincy.
+2. **Sanity Check Fixtures & xG**:
+   Cross-reference with `FPLForm` to ensure the incoming player isn't entering a brutal fixture run.
+3. **Verify Friday Press Conferences**:
+   Confirm all starting XI players are fit to start before locking in your team.
