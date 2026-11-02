@@ -843,3 +843,57 @@ In the **Career tab**, the AI plays by the exact rules you face every week:
   Look at the **Performance tab** and `Quant Optimal` solver to maximize points for that isolated week or reset.
 - **For your normal weekly 1 FT**:
   Always follow the **Career Forward Roadmap** with **`Native + Safe + Template Shield`**. It optimizes your transfer path so your team remains strong across future gameweeks without forcing you into costly point hits.
+
+---
+
+## User Request:
+So can the AI Season Career, can the Autonomous Squad in the Forward Roadmap have the bench arranged as it should, I can see Substitutes Bench (Ordered Priority)
+Sub 1
+DEF
+Lindelöf
+£4.5m
+4 pts
+Sub 2
+GKP
+Leno
+£4.5m
+5 pts
+Sub 3
+MID
+Rudoni
+£4.9m
+6 pts
+Sub 4
+DEF
+Ouattara
+£4.0m
+5 pts
+
+Is that how sub is in real life? that arrangement
+
+## Assistant Response:
+**No, that was NOT how a real-life FPL bench works, and you caught an important presentation flaw.**
+
+In official Fantasy Premier League (FPL):
+1. **The Reserve Goalkeeper (GKP) is ALWAYS in a dedicated GKP bench slot**:
+   - A goalkeeper can **only** substitute for the starting goalkeeper if the starting goalkeeper plays 0 minutes.
+   - A goalkeeper **can never** replace an outfield player, and an outfield player **can never** replace a goalkeeper.
+   - Therefore, putting Leno (GKP) as `Sub 2` between Lindelöf (`Sub 1`) and Rudoni (`Sub 3`) made no sense under official FPL rules.
+2. **The 3 Outfield Substitutes are Ordered by Priority**:
+   - Outfield substitutes must be ordered 1 to 3 by **Expected Points (xP)** or predicted yield, so that if an outfield starter misses out, your highest-upside player is automatically subbed in first (`Sub 1`), followed by `Sub 2`, then `Sub 3`.
+
+---
+
+### What We Fixed
+
+We updated both [`career-service.ts`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts) and [`CareerModeView.tsx`](file:///c:/Users/USER/Documents/fpl-admin/src/components/CareerModeView.tsx) across both repositories:
+
+1. **Automatic Bench Sorting by Position & xP**:
+   - The engine now segregates bench players:
+     - **Slot 1**: The Reserve Goalkeeper (`GKP`) is placed first.
+     - **Slots 2–4**: The three outfield substitutes are sorted in descending order of **Expected Points (xP)**.
+2. **Dedicated UI Badges Matching Official FPL**:
+   - **Reserve GK**: Explicitly labeled with an amber **`GK SUB`** badge.
+   - **Outfield Substitutes**: Explicitly labeled **`SUB 1`**, **`SUB 2`**, and **`SUB 3`** representing their exact auto-sub order.
+
+Both repositories (`fpl-admin` and `fpl-planner`) have been updated and pushed to GitHub `main`, and the dev server has been restarted with the authentic bench structure.
