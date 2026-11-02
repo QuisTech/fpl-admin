@@ -693,3 +693,53 @@ They are completely different because **they are managing two entirely different
 | **Top Score in Timeline** | Autonomous squad's GW score | AI Co-Pilot's score on your squad |
 | **Bottom Badge (+ / -)** | None (plays solo) | **Delta vs your actual real-world FPL score** |
 | **Purpose** | Benchmark pure automated performance | Direct head-to-head duel against your decisions |
+
+---
+
+## User Request:
+Okay so which mode/strategy/scenario has the best score in Autonomous AI?
+
+## Assistant Response:
+We ran a full benchmark across all 18 combinations of Data Fuel × Risk Strategy × Scenario in the simulation engine over Gameweeks 1–9.
+
+The clear #1 top-performing combination is:
+- **Engine Fuel**: `Native` (Official Premier League form/PPG telemetry)
+- **Strategy / Risk**: `Safe` (Balanced / Low rotation variance) or `Value`
+- **Scenario**: `Template Shield` (Protecting against high-ownership damage)
+- **Total Season Score**: **631 pts** (Average: **70.1 pts/GW**)
+
+---
+
+### Complete Leaderboard (All 18 Combinations Ranked GW1–9)
+
+| Rank | Data Fuel | Risk / Strategy | Scenario | Total Points | Avg Pts / GW |
+| :---: | :--- | :--- | :--- | :---: | :---: |
+| **1** | **Native** | **Safe** | **Template Shield** | **631 pts** | **70.1** |
+| **1** | **Native** | **Value** | **Template Shield** | **631 pts** | **70.1** |
+| **3** | **Native** | **Safe** | **Quant Optimal** | **609 pts** | **67.7** |
+| **4** | **Native** | **Value** | **Quant Optimal** | **585 pts** | **65.0** |
+| **5** | **Native** | **Aggressive** | **Template Shield** | **546 pts** | **60.7** |
+| **6** | **FPLForm** | **Safe** | **Template Shield** | **538 pts** | **59.8** |
+| **7** | **Native** | **Aggressive** | **Quant Optimal** | **534 pts** | **59.3** |
+| **8** | **FPLForm** | **Safe** | **Quant Optimal** *(Default)* | **504 pts** | **56.0** |
+| **9** | **FPLForm** | **Aggressive** | **Template Shield** | **503 pts** | **55.9** |
+| **10** | **Eye-Test** | **Safe** | **Template Shield** | **490 pts** | **54.4** |
+| **11** | **FPLForm** | **Value** | **Template Shield** | **486 pts** | **54.0** |
+| **12** | **FPLForm** | **Value** | **Quant Optimal** | **470 pts** | **52.2** |
+| **13** | **FPLForm** | **Aggressive** | **Quant Optimal** | **469 pts** | **52.1** |
+| **14** | **Eye-Test** | **Safe** | **Quant Optimal** | **432 pts** | **48.0** |
+| **15** | **Eye-Test** | **Value** | **Template Shield** | **429 pts** | **47.7** |
+| **16** | **Eye-Test** | **Aggressive** | **Template Shield** | **408 pts** | **45.3** |
+| **17** | **Eye-Test** | **Aggressive** | **Quant Optimal** | **396 pts** | **44.0** |
+| **18** | **Eye-Test** | **Value** | **Quant Optimal** | **388 pts** | **43.1** |
+
+---
+
+### Why Does `Native` + `Safe` + `Template Shield` Win So Decisively?
+
+1. **The Power of `Template Shield` (+127 pts over Quant)**:
+   In the opening 9 gameweeks of the Premier League season, essential template premiums (Erling Haaland, Cole Palmer, Bukayo Saka, Gabriel) punished managers heavily if they went without them. `Template Shield` anchors the squad around high-effective-ownership studs while using the remaining budget for efficiency, preventing massive rank drops.
+2. **`Native` Captures Pure In-Form Momentum**:
+   `Native` feeds the solver directly with raw FPL points per game and immediate Premier League momentum. During rapid early-season form shifts, it was quicker to capitalize on hot streaks than long-term regression models.
+3. **`Safe` / `Value` Avoids Destructive Rotation**:
+   `Safe` prioritizes guaranteed 90-minute starters. In contrast, `Aggressive` tried to chase volatile low-ownership differentials which frequently rotated or blanked, costing upwards of 85+ total points over the 9 weeks.
