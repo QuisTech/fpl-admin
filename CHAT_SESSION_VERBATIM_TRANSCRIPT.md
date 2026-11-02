@@ -786,3 +786,60 @@ However, treating it like a "smart autopilot" rather than a 100% blind autopilot
    Cross-reference with `FPLForm` to ensure the incoming player isn't entering a brutal fixture run.
 3. **Verify Friday Press Conferences**:
    Confirm all starting XI players are fit to start before locking in your team.
+
+---
+
+## User Request:
+So it means the performance is different between the mode/strategy/scenario as it is with the performance tab that is more of a WC and FH play every week to that of what AI is playing like normal human would play weekly.
+
+I say this because different mode/strategy/scenario is topping those other mode/strategy/scenario,
+
+## Assistant Response:
+**You have hit upon the single most important mathematical distinction in FPL optimization:**
+
+The discrepancy between which strategy tops the **Performance tab** versus which strategy tops the **Career tab** comes down to **Zero-Constraint (Free Hit every week)** versus **Real-World Constraints (1 Free Transfer per week)**.
+
+---
+
+### 1. The Performance Tab: The "Unlimited Free Hit / Wildcard" World
+
+In the **Performance tab** (and Pitch Snapshot view), the solver optimizes each gameweek completely in isolation:
+- **No memory**: It takes £100.0m and picks the theoretical absolute best 15 players for that specific 3-day weekend.
+- **Why `Quant Optimal` & `Aggressive` look so good here**:
+  - If a mid-table team has a prime home match in GW3, the unconstrained solver will happily load up on 3 of their attackers.
+  - When that team has an impossible fixture in GW4 (e.g. Manchester City away), the solver simply erases them and drafts 3 completely different players for £0 penalty!
+  - It never suffers the consequences of player rotation, bench lock-in, price drops, or limited transfer tokens. It is literally playing a **Free Hit chip every single week**.
+
+---
+
+### 2. The Career Tab: The Authentic Human Constraint World
+
+In the **Career tab**, the AI plays by the exact rules you face every week:
+- **Strict squad continuity**: You draft one 15-man squad in GW1 and must carry it forward.
+- **Limited resources**: You only get **1 Free Transfer per week** (capped at 5 rolled transfers), and any extra transfer costs a painful **-4 point penalty**.
+- **Selling tax**: You lose 50% of player price appreciation when selling.
+- **Why `Template Shield` + `Native` + `Safe` Dominates Here (631 pts)**:
+  - **You cannot easily undo a bad punt**: If you bought an aggressive, high-variance differential in GW2 and they blank or get rotated in GW3, you can only transfer out *one* player. You are stuck holding the rest of your squad.
+  - **The Power of Consistency**: Core template assets (Erling Haaland, Cole Palmer, Bukayo Saka, Gabriel) maintain elite returns across 8–10 week blocks. They don't need to be transferred in and out every week.
+  - **High Minute Security (`Safe`)**: Having 11 guaranteed 90-minute starters protects you against the bench trap where unexpected benchings force 0-pointers onto the pitch.
+
+---
+
+### 3. Comparison Breakdown
+
+| Dimension | Performance Tab / Snapshots | Career Mode / Autonomous AI |
+| :--- | :--- | :--- |
+| **Operational Reality** | Weekly Free Hit / Wildcard | **Real Season (1 FT / week)** |
+| **Squad Memory** | Zero (Wipes slate clean every week) | Full (Locked squad across all 38 GWs) |
+| **Transfer Penalty** | Infinite free transfers (0 hits) | 1 FT/week (-4 for extra moves) |
+| **Top Performing Strategy** | `Quant Optimal` / `Aggressive` (Chases 1-week spikes) | **`Template Shield` + `Safe`** (Steady compound growth) |
+| **Best Used For** | Planning an actual Wildcard or Free Hit chip | **Planning regular weekly transfers and captaincy** |
+
+---
+
+### 4. What This Means For Your Weekly Decisions
+
+- **If you are playing your Wildcard or Free Hit chip**:
+  Look at the **Performance tab** and `Quant Optimal` solver to maximize points for that isolated week or reset.
+- **For your normal weekly 1 FT**:
+  Always follow the **Career Forward Roadmap** with **`Native + Safe + Template Shield`**. It optimizes your transfer path so your team remains strong across future gameweeks without forcing you into costly point hits.
