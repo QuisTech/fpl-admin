@@ -623,3 +623,73 @@ Yes, everything is committed and pushed to GitHub `main` across both repositorie
 
 3. **Local Dev Server**:
    - Active and running the updated code on port 3000.
+
+---
+
+## User Request:
+So why is the You vs AI Duel points 
+different from Autonomous AI points ?
+
+You vs AI Duel points 
+Gameweek Timeline
+Click a Gameweek to inspect matchday
+
+GW1: 63 pts (0)
+GW2: 91 pts (-1)
+GW3: 62 pts (+22)
+GW4: 68 pts (-14)
+GW5: 53 pts (-5)
+GW6: 43 pts (-16)
+GW7: 80 pts (+1)
+GW8: 55 pts (+19)
+GW9: 50 pts (+17)
+
+Autonomous AI points
+Total Season Points: 504 pts
+Avg: 56.0 pts/GW
+GW1: 43 pts
+GW2: 84 pts
+GW3: 51 pts
+GW4: 65 pts
+GW5: 31 pts
+GW6: 37 pts
+GW7: 58 pts
+GW8: 73 pts
+GW9: 62 pts
+
+## Assistant Response:
+They are completely different because **they are managing two entirely different 15-man squads with two entirely different starting points**:
+
+### 1. Autonomous AI Mode: The Independent Computer Squad
+- **The Starting Point (GW1)**:
+  The algorithm had a blank canvas and £100.0m to pick whatever 15 players it wanted at the beginning of the season (players like Verbruggen, Haaland, McBurnie, Enciso, Palmer, etc.). It has **no connection to your real-world team**.
+- **The Timeline Scores (43, 84, 51, 65, 31, 37, 58, 73, 62 = 504 pts)**:
+  These are the raw gameweek scores achieved by the AI's own hand-picked squad. Because there is no human manager to compare against in this mode, it displays pure scores with no comparison badges.
+
+---
+
+### 2. You vs AI Duel: A Counterfactual "What-If" on YOUR Team
+- **The Starting Point (GW1)**:
+  This mode fetched **YOUR real-life Gameweek 1 squad** from the official FPL API.
+- **The Core Mission**:
+  It runs a head-to-head simulation: *"If an AI Co-Pilot took over YOUR exact GW1 squad and managed it under official 1 FT/week rules, how would it perform compared to how you managed it?"*
+- **What the Two Numbers in Each Button Mean**:
+  - **The Top Number (63 pts, 91 pts, 62 pts...)**: The score of the **AI Co-Pilot managing your squad tree**.
+  - **The Bottom Badge (0, -1, +22, -14... +17)**: The **Alpha Delta** = `(AI Co-Pilot Score) - (Your Real-World Score)` in that specific gameweek:
+    - **GW1**: AI Co-Pilot scored 63 pts, You scored 63 pts → `0` (Identical squads on day 1)
+    - **GW2**: AI Co-Pilot scored 91 pts, You scored 92 pts → `-1` (You beat the AI by 1 pt)
+    - **GW3**: AI Co-Pilot scored 62 pts, You scored 40 pts → `+22` (AI Co-Pilot outscored you by 22 pts)
+    - **GW4**: AI Co-Pilot scored 68 pts, You scored 82 pts → `-14` (You beat the AI Co-Pilot by 14 pts!)
+    - **GW9**: AI Co-Pilot scored 50 pts, You scored 33 pts → `+17` (AI Co-Pilot outscored you by 17 pts)
+
+---
+
+### Summary Comparison Table
+
+| Attribute | Autonomous AI Mode | You vs AI Duel Mode |
+| :--- | :--- | :--- |
+| **Starting Squad (GW1)** | Computer's own draft (£100.0m optimal) | **Your exact real-life GW1 team** |
+| **Team Managed** | AI's independent 15 players | AI Co-Pilot branch of your team |
+| **Top Score in Timeline** | Autonomous squad's GW score | AI Co-Pilot's score on your squad |
+| **Bottom Badge (+ / -)** | None (plays solo) | **Delta vs your actual real-world FPL score** |
+| **Purpose** | Benchmark pure automated performance | Direct head-to-head duel against your decisions |
