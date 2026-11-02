@@ -556,3 +556,50 @@ You also spotted the presentation bug on the matchday sheet:
 - **True Bench Swap**: When an auto-substitution occurs, the starter who sat out (0 mins) is **swapped onto the bench**, and the substitute moves onto the pitch.
 - **No Duplicate Players**: Bogle, Palmer, and Ndiaye now only appear on the pitch where they play.
 - **Clear Bench Indication**: On the bench, the player who missed out is marked with a red `0 mins` badge and a strikethrough name so you can clearly see who sat out and who replaced them.
+
+---
+
+## User Request:
+The Total Season Points Is always different from Forward Roadmap The Total Season Points
+
+## Assistant Response:
+Here is the exact explanation for why the numbers differed, and how we resolved it so the Forward Roadmap now provides seamless continuity with your season points:
+
+### 1. Why Was It Showing a Different Number?
+
+- **Autonomous AI / Synced History (GW1 → GW9)**:
+  This mode shows the **actual points banked** over the completed 9 gameweeks (for example, **504 pts**).
+- **Forward Roadmap (GW10 → GW15)**:
+  Previously, the forward simulation started its point counter at 0 and only counted the projected points over the 6 upcoming gameweeks (for example, **306 xP**).
+
+Because both screens used the header label **"Total Season Points"**, it appeared as though switching to Forward Roadmap drastically dropped your points from 504 to 306, when in reality 306 was merely the forward 6-week increment.
+
+---
+
+### 2. How We Fixed It (Continuous Season Progression)
+
+We updated both the backend calculation engine ([career-service.ts](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts)) and the dashboard UI ([CareerModeView.tsx](file:///c:/Users/USER/Documents/fpl-admin/src/components/CareerModeView.tsx)) across both repositories:
+
+1. **Seeding the Completed Season Base**:
+   - **Autonomous Forward Roadmap**: Automatically seeds the simulation with the completed GW1–9 score (**504 pts**).
+   - **Synced Real Squad Forward Roadmap**: Automatically queries the official FPL history API for your team's exact cumulative overall points (**506 pts**).
+
+2. **Continuous Gameweek Timeline**:
+   The Forward Timeline now accumulates forward from that base rather than starting at zero:
+   - Base (GW1–9): **504 pts**
+   - GW10: 504 + 52 = **556 pts**
+   - GW11: 556 + 51 = **607 pts**
+   - GW12: 607 + 51 = **658 pts**
+   - GW13: 658 + 52 = **710 pts**
+   - GW14: 710 + 51 = **761 pts**
+   - GW15: 761 + 49 = **810 pts**
+
+3. **Dedicated, Transparent KPI Cards**:
+   When viewing the Forward Roadmap:
+   - **KPI Card 1: Projected Season Total (GW15)**:
+     Displays **810 pts**, with a subtitle:
+     `GW1-9 Base: 504 pts • Projected: +306 xP`
+   - **KPI Card 2: Forward Horizon Yield**:
+     Displays **+306 xP** (Average: 51.0 xP/GW over GW10 → GW15), showing the added value of the forward strategy.
+
+Both repositories (`fpl-admin` and `fpl-planner`) have been updated and pushed to GitHub main, and the local server on port 3000 has been refreshed.
