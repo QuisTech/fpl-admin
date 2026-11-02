@@ -603,3 +603,23 @@ We updated both the backend calculation engine ([career-service.ts](file:///c:/U
      Displays **+306 xP** (Average: 51.0 xP/GW over GW10 → GW15), showing the added value of the forward strategy.
 
 Both repositories (`fpl-admin` and `fpl-planner`) have been updated and pushed to GitHub main, and the local server on port 3000 has been refreshed.
+
+---
+
+## User Request:
+pushed?
+
+## Assistant Response:
+Yes, everything is committed and pushed to GitHub `main` across both repositories:
+
+1. **`fpl-admin`**:
+   - Pushed commit `8a079a3` (`fix(career): connect forward roadmap cumulative season points and improve KPI cards`)
+   - Pushed commit `421354b` (`docs: update verbatim transcript with forward roadmap cumulative points explanation`)
+   - Branch: `origin/main` (up to date)
+
+2. **`fpl-planner`**:
+   - Pushed commit `3290b17` (`fix(career): connect forward roadmap cumulative season points and improve KPI cards`)
+   - Branch: `origin/main` (up to date)
+
+3. **Local Dev Server**:
+   - Active and running the updated code on port 3000.
