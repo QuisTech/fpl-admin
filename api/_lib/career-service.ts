@@ -210,6 +210,17 @@ export class CareerService {
   /**
    * Run the Autonomous Season Career from GW1 to endGw under official FPL human constraints.
    */
+    private static orderBenchIds(benchIds: number[], oracle: XPOracle, gw: number): number[] {
+    const gkpIds = benchIds.filter(id => oracle.getPosition(id) === 'GKP');
+    const outfieldIds = benchIds.filter(id => oracle.getPosition(id) !== 'GKP');
+    outfieldIds.sort((a, b) => {
+      const xpA = typeof oracle.getXP === 'function' ? oracle.getXP(a, gw) : 0;
+      const xpB = typeof oracle.getXP === 'function' ? oracle.getXP(b, gw) : 0;
+      return xpB - xpA;
+    });
+    return [...gkpIds, ...outfieldIds];
+  }
+
   public static async getAutonomousCareer(
     fuel: string = 'fplform',
     riskMode: string = 'safe',
@@ -314,7 +325,8 @@ export class CareerService {
       // Starting XI and Captain selection
       const xiIds = solveStartingXI(oracle, gw, state.squad, params);
       const xiSet = new Set(xiIds);
-      const benchIds = state.squad.filter(id => !xiSet.has(id));
+      const rawBenchIds = state.squad.filter(id => !xiSet.has(id));
+      const benchIds = this.orderBenchIds(rawBenchIds, oracle, gw);
 
       const { captain, viceCaptain } = solveCaptain(oracle, gw, xiIds, params);
 
@@ -612,7 +624,8 @@ export class CareerService {
       // Starting XI and Captain selection
       const xiIds = solveStartingXI(oracle, gw, state.squad, params);
       const xiSet = new Set(xiIds);
-      const benchIds = state.squad.filter(id => !xiSet.has(id));
+      const rawBenchIds = state.squad.filter(id => !xiSet.has(id));
+      const benchIds = this.orderBenchIds(rawBenchIds, oracle, gw);
       const { captain, viceCaptain } = solveCaptain(oracle, gw, xiIds, params);
 
       // Auto-subs: Under official FPL rules, auto-sub ONLY triggers if starter played 0 minutes
@@ -938,7 +951,8 @@ export class CareerService {
 
       const xiIds = solveStartingXI(oracle, gw, state.squad, params);
       const xiSet = new Set(xiIds);
-      const benchIds = state.squad.filter(id => !xiSet.has(id));
+      const rawBenchIds = state.squad.filter(id => !xiSet.has(id));
+      const benchIds = this.orderBenchIds(rawBenchIds, oracle, gw);
       const { captain, viceCaptain } = solveCaptain(oracle, gw, xiIds, params);
 
       // In forward projections, points are based on Expected Points (xP)

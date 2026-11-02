@@ -652,10 +652,16 @@ export const CareerModeView = ({
                 {/* Bench Section */}
                 <div className="mt-4 pt-3 border-t border-fpl-border/60">
                   <div className="text-[10px] font-mono uppercase font-bold text-slate-400 mb-2">
-                    Substitutes Bench (Ordered Priority)
+                    Substitutes Bench (Reserve GK + Ordered Priority)
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {(activeGwData.bench || []).map((b, bIdx) => (
+                    {(() => {
+                    let outfieldCounter = 0;
+                    return (activeGwData.bench || []).map((b) => {
+                      const isGkp = b.position === 'GKP';
+                      if (!isGkp) outfieldCounter += 1;
+                      const slotLabel = isGkp ? 'GK Sub' : `Sub ${outfieldCounter}`;
+                      return (
                       <div 
                         key={b.id} 
                         className={cn(
@@ -668,7 +674,7 @@ export const CareerModeView = ({
                         )}
                       >
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-[8.5px] font-mono text-slate-500">Sub {bIdx + 1}</span>
+                          <span className={cn("text-[8.5px] font-mono font-bold tracking-wider uppercase", isGkp ? "text-amber-400" : "text-slate-400")}>{slotLabel}</span>
                           <div className="flex items-center gap-1">
                             <span className="text-[9px] font-mono uppercase text-slate-400">{b.position}</span>
                             {b.isAutoSubOut && (
@@ -684,7 +690,9 @@ export const CareerModeView = ({
                           <span className={cn("font-bold", b.isAutoSubOut ? "text-rose-400" : "text-slate-300")}>{b.points} pts</span>
                         </div>
                       </div>
-                    ))}
+                    );
+                    });
+                    })()}
                   </div>
                 </div>
               </div>
