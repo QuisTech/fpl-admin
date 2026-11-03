@@ -48,6 +48,7 @@ export interface CareerGameweek {
   teamValue: number;
   teamValueDisplay: string;
   decisionLog: string;
+  chipActive?: string;
   averageScore?: number;
   humanComparison?: {
     gameweek: number;
@@ -85,6 +86,11 @@ export interface CareerSeasonPayload {
     totalTransfersMade: number;
     currentOverallRank: number;
     netAlphaVsHuman: number;
+  };
+  chipInventory?: {
+    currentSet: string;
+    deadlineGw: number;
+    chips: { name: string; label: string; status: 'AVAILABLE' | 'USED' | 'EXPIRED'; usedInGw?: number }[];
   };
   gameweeks: CareerGameweek[];
 }
@@ -409,6 +415,41 @@ export const CareerModeView = ({
             </div>
           </div>
 
+          {/* 2026/27 Two-Set Chip System HUD */}
+          <div className="bg-gradient-to-r from-purple-950/40 via-indigo-950/30 to-slate-950/60 p-3.5 rounded-2xl border border-purple-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-sm">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="inline-block w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
+                <span className="text-xs font-black text-purple-300 uppercase tracking-widest">
+                  2026/27 Chip System: Set 1 Active (GW1–GW19)
+                </span>
+                <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase tracking-wider">
+                  GW19 Expiration Cutoff
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-300">
+                Set 1 chips must be deployed before Gameweek 19 or they expire. All 4 chips held in reserve for high-xP/Double Gameweek execution. Fresh Set 2 unlocks in GW20.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {[
+                { id: 'WC', label: 'Wildcard' },
+                { id: 'TC', label: 'Triple Cap' },
+                { id: 'BB', label: 'Bench Boost' },
+                { id: 'FH', label: 'Free Hit' }
+              ].map(chip => (
+                <span 
+                  key={chip.id}
+                  className="px-2 py-0.5 rounded text-[9.5px] font-mono font-bold bg-slate-900 border border-emerald-500/40 text-emerald-300 flex items-center gap-1"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  {chip.label}
+                </span>
+              ))}
+            </div>
+          </div>
+
           {/* Gameweek Step Timeline */}
           <div className="bg-slate-950 border border-fpl-border rounded-2xl p-3">
             <div className="flex items-center justify-between mb-2 px-1">
@@ -440,6 +481,11 @@ export const CareerModeView = ({
                     <span className="text-xs font-black font-mono text-white mt-0.5">
                       {gw.netPoints} pts
                     </span>
+                    {gw.chipActive && (
+                      <span className="text-[8px] font-mono font-black px-1.5 py-0.2 rounded bg-purple-500/30 text-purple-300 border border-purple-500/50 uppercase mt-0.5">
+                        {gw.chipActive}
+                      </span>
+                    )}
                     {mode === 'synced' && alpha !== undefined && (
                       <span className={cn(
                         "text-[9px] font-mono font-bold mt-1",

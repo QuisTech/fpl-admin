@@ -90,6 +90,11 @@ export interface CareerSeasonPayload {
     currentOverallRank: number;
     netAlphaVsHuman: number;
   };
+  chipInventory?: {
+    currentSet: string;
+    deadlineGw: number;
+    chips: { name: string; label: string; status: 'AVAILABLE' | 'USED' | 'EXPIRED'; usedInGw?: number }[];
+  };
   gameweeks: CareerGameweek[];
 }
 
@@ -482,6 +487,16 @@ export class CareerService {
       totalTransfersRolled,
       finalBank: `£${(state.bank / 10).toFixed(1)}m`,
       finalTeamValue: `£${((gameweeks[gameweeks.length - 1]?.teamValue || 1000) / 10).toFixed(1)}m`,
+      chipInventory: {
+        currentSet: 'Set 1 (GW1–19)',
+        deadlineGw: 19,
+        chips: [
+          { name: 'WC', label: 'Wildcard', status: state.chipState['WC'] > 0 ? 'AVAILABLE' : 'USED' },
+          { name: 'TC', label: 'Triple Captain', status: state.chipState['TC'] > 0 ? 'AVAILABLE' : 'USED' },
+          { name: 'BB', label: 'Bench Boost', status: state.chipState['BB'] > 0 ? 'AVAILABLE' : 'USED' },
+          { name: 'FH', label: 'Free Hit', status: state.chipState['FH'] > 0 ? 'AVAILABLE' : 'USED' }
+        ]
+      },
       gameweeks
     };
 
@@ -957,14 +972,38 @@ export class CareerService {
 
       // In forward projections, points are based on Expected Points (xP)
       let grossPoints = 0;
+      let activeChip: string | undefined = undefined;
+
+      // Smart Chip Evaluation (2026/27 Set 1 rules: GW1–19)
+      const capXp = oracle.getXP(captain, gw);
+      const benchXp = benchIds.reduce((sum, id) => sum + oracle.getXP(id, gw), 0);
+
+      if (state.chipState['TC'] > 0 && (capXp >= 10.0 || gw === 19)) {
+        activeChip = 'TC';
+        state.chipState['TC'] -= 1;
+      } else if (state.chipState['BB'] > 0 && (benchXp >= 15.0 || gw === 19)) {
+        activeChip = 'BB';
+        state.chipState['BB'] -= 1;
+      }
+
       const dummyActualStats: Record<number, { points: number; minutes: number }> = {};
       state.squad.forEach(id => {
         const xp = Math.round(oracle.getXP(id, gw));
         dummyActualStats[id] = { points: xp, minutes: 90 };
         if (xiSet.has(id)) {
-          grossPoints += id === captain ? xp * 2 : xp;
+          if (id === captain) {
+            grossPoints += activeChip === 'TC' ? xp * 3 : xp * 2;
+          } else {
+            grossPoints += xp;
+          }
         }
       });
+
+      if (activeChip === 'BB') {
+        benchIds.forEach(id => {
+          grossPoints += Math.round(oracle.getXP(id, gw));
+        });
+      }
 
       state.accumulatedScore += grossPoints;
 
@@ -977,7 +1016,8 @@ export class CareerService {
       const startingXIModels = xiIds.map(id => {
         const isCap = id === captain;
         const isVc = id === viceCaptain;
-        return this.mapPlayer(id, baseData, oracle, dummyActualStats, isCap, isVc, isCap ? 2 : 1);
+        const mult = isCap ? (activeChip === 'TC' ? 3 : 2) : 1;
+        return this.mapPlayer(id, baseData, oracle, dummyActualStats, isCap, isVc, mult);
       });
 
       const benchModels = benchIds.map(id => {
