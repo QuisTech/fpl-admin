@@ -897,3 +897,43 @@ We updated both [`career-service.ts`](file:///c:/Users/USER/Documents/fpl-admin/
    - **Outfield Substitutes**: Explicitly labeled **`SUB 1`**, **`SUB 2`**, and **`SUB 3`** representing their exact auto-sub order.
 
 Both repositories (`fpl-admin` and `fpl-planner`) have been updated and pushed to GitHub `main`, and the dev server has been restarted with the authentic bench structure.
+
+---
+
+## User Request:
+So I realise all the iterations we've done, it seems the planner tab in fpl-planner has dissappeared, why is that, look into it please. Then once you restore the planner tab, implement it in fpl-admin as well, so both project have equal of everything
+
+## Assistant Response:
+Here is the exact root cause of why the `Planner` tab disappeared and the complete restoration and parity sync performed across both repositories:
+
+### 1. Why Did the Planner Tab Disappear?
+In commit `27aa9bb` (`feat: add AI Season Career Mode with human discipline rules and synced replay`), when the new **Career** tab was introduced into `src/App.tsx`, the tab string `'planner'` was unintentionally replaced with `'career'` in the tab state and navigation array:
+```diff
+- const [tab, setTab] = useState<'optimizer' | 'pitch' | 'planner' | 'picks' | ...>('optimizer');
++ const [tab, setTab] = useState<'optimizer' | 'pitch' | 'picks' | ... | 'career' | 'agent'>('optimizer');
+```
+As a result, `<MultiWeekPlanner />` was replaced by `<CareerModeView />` in the component switcher rather than coexisting alongside each other.
+
+---
+
+### 2. What We Restored & Synced Across Both Repositories
+
+1. **Restored the `Planner` Tab in Both Projects**:
+   - Re-added `'planner'` to the active tabs list in `src/App.tsx` across both `fpl-planner` and `fpl-admin`:
+     `['optimizer', 'pitch', 'planner', 'picks', 'transfers', 'chips', 'performance', 'backtest', 'career', 'agent']`
+   - Re-imported and rendered `<MultiWeekPlanner />` whenever `tab === 'planner'`.
+
+2. **Full File Parity in `fpl-admin`**:
+   The Multi-Week Beam Planner and Monte Carlo audit engine files previously lived only in `fpl-planner`. We ported all missing components and datasets into `fpl-admin`:
+   - `src/components/MultiWeekPlanner.tsx`
+   - `src/components/MonteCarloAuditView.tsx`
+   - `src/utils/fplQuantEngine.ts`
+   - `src/types.ts` (`PlannerStepDetail` and full typing suite)
+   - `src/components/BacktestDashboard.tsx` (integrated Monte Carlo audit tab)
+   - Monte Carlo historical audit files: `data/monte_carlo_audit_*.json`, `public/data/monte_carlo_audit_*.json`
+
+3. **Build & Quality Verification**:
+   - `npm run lint` (`tsc --noEmit`): 0 errors across both repos.
+   - `npm run build` (`vite build`): Succeeded in both repos.
+   - Both repositories committed and pushed to GitHub `origin/main`.
+   - Local dev server on port 3000 running live with all 10 tabs active.
