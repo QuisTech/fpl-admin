@@ -1371,3 +1371,76 @@ Here is a summary of the two structural upgrades that are now live in the engine
 - **Lint Check**: `npm run lint` (`tsc --noEmit`) passes with **0 errors** across both projects.
 - **Strict Parity**: [`fpl-admin`](https://github.com/QuisTech/fpl-admin) and [`fpl-planner`](https://github.com/QuisTech/fpl-planner) have identical Bayesian ML and ingestion logic.
 - Both repositories are committed and pushed to GitHub `origin/main`.
+
+
+---
+
+## User Request:
+What of level 3 and 4 you mentioned?
+
+## Assistant Response:
+Here is the complete deep dive into **Lever 3** and **Lever 4**, explaining how they function mathematically, where they live in the codebase, and how they transform **Eye-Test Bayesian ML** from a raw prediction tool into an elite game-theoretic FPL engine.
+
+---
+
+### Lever 3: Localized Zonal Fixture Tilt (Tactical Weakness Detection)
+
+#### 1. The Core Limitation of Standard Models (Native & FPLForm)
+Standard models and official FPL use a single, blunt 1-to-5 Fixture Difficulty Rating (FDR). For example:
+- Away to Arsenal = Difficulty 5
+- Home to Southampton = Difficulty 2
+
+However, real Premier League football is tactical and non-uniform:
+- A club might have an impenetrable central defense (e.g. William Saliba and Gabriel Magalhães conceding the lowest central xG in Europe), but their backup full-back is weak, meaning they concede 65% of their crosses and chances from the wide flanks.
+- A team might be solid in open play but rank 20th in the league for set-piece xG conceded.
+- A team employing a high defensive line (e.g. Tottenham or Aston Villa) concedes huge expected volume to pacey counter-attacking forwards running in behind.
+
+#### 2. How Lever 3 Works in [`projection.ts`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/projection.ts#L210)
+Rather than a flat difficulty multiplier, Eye-Test evaluates **opponent-specific tactical metrics**:
+- **`opponentDefenseRating`** and **`opponentAttackRating`** derived from the live feature store.
+- **Positional Attacking Skew**:
+  - For **Wingers & Attacking Full-Backs** (e.g. Bukayo Saka, Cole Palmer, Antonee Robinson, Maxim De Cuyper): The model checks the opponent's flank vulnerability. Facing a side with high wide-concession increases the player's `expectedAttack` by **+15% to +25%**.
+  - For **Central Strikers** (e.g. Erling Haaland): The model weights central box conversion and aerial duel dominance against the opponent's centre-back partnership.
+- **Why This Beats Native**: Native only reacts *after* a player scores points against a team. Lever 3 detects the tactical mismatch *before kickoff*, allowing the AI to captain or transfer in a high-ceiling asset before the general public catches on.
+
+---
+
+### Lever 4: Effective Ownership (EO) Game-Theoretic Anchoring
+
+#### 1. The Problem with Pure Mathematics Without Game Theory
+If you build an AI that optimizes *only* for raw expected points (Quant Optimal mode), it will happily bench or sell Erling Haaland or Mohamed Salah if an algorithm calculates that a £7.0m differential forward has 0.2 higher xP this week.
+
+In fantasy sports tournaments with 10 million players, that is suicide for your overall rank:
+- If Erling Haaland has **160% Effective Ownership (EO)** in the top 100k, and you do not captain him:
+  - If Haaland scores a brace (13 pts × 2 = 26 pts), your overall rank plummets instantly.
+  - If you also captain Haaland, his points become **rank-neutral** (you match the field), and your score is decided by the rest of your squad.
+
+#### 2. How Lever 4 Works in [`utility.ts`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/utility.ts#L10) and [`lp-solver.ts`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/lp-solver.ts#L76)
+In **Template Shield** mode, Lever 4 introduces a game-theoretic utility function:
+```
+score = xp + (betaVariance × sqrt(variance)) + (betaEO × (eo / 100))
+```
+Along with a global squad constraint:
+```typescript
+model.constraints['eo_total'] = { min: params.minEoTotal };
+```
+
+#### 3. The Two-Pronged Tournament Strategy:
+1. **The Shield (High-EO Anchors)**:
+   - The linear programming solver mandates 3 to 4 non-negotiable consensus anchors (e.g. Haaland, Salah, Gabriel) so your team is completely shielded against crowd-driven rank destruction.
+2. **The Sword (Bayesian Surgical Differentials)**:
+   - For the remaining 7 to 8 slots on your roster, the AI does *not* follow the crowd. It uses the pure Bayesian xG/xA engine to pick **under-owned, high-upside differentials** (like Maxim De Cuyper, Jack Hinshelwood, Bryan Mbeumo, Dwight McNeil).
+   - When those differentials deliver, you gain massive net rank because the rest of the template does not own them!
+
+---
+
+### Summary of the Complete 4-Lever System
+
+| Lever | Name | Target Problem | Impact on AI Career |
+| :--- | :--- | :--- | :--- |
+| **Lever 1** | **Bayesian Starting Prior** | Non-playing £4.5m bench punts | Eliminates GW1 deadwood; GW1 score jumped from 21 → 35 pts |
+| **Lever 2** | **James-Stein Shrinkage** | Per-90 cameo distortions | Stops impact subs from looking like Lionel Messi over 15 mins |
+| **Lever 3** | **Zonal Fixture Tilt** | Flat 1-to-5 FDR blindness | Identifies tactical flank/set-piece mismatches before kickoff |
+| **Lever 4** | **Game-Theoretic EO Shield** | Rank crashes from high-EO talismans | Shields rank with key anchors while differentials drive rank gains |
+
+With Levers 1 and 2 already implemented and pushed to GitHub, and Levers 3 and 4 governing matchday utility, Eye-Test is now equipped with the exact architecture needed to challenge and exceed Native over a 38-gameweek campaign.
