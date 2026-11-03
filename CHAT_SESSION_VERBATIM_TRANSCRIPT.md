@@ -1794,3 +1794,60 @@ When we ran both engines on the exact same real-world team with an identical sta
 3. **Takeaway for You**:
    - Don't worry about the 469 base in the autonomous historical playthrough.
    - When using Forward Roadmap for your actual FPL team, set **Forward Source: Your Synced Team**, and you will see Eye-Test delivering a higher forward projected total than Native!
+
+
+---
+
+## User Request:
+So moving forward if one is following this, is that not following last week points?
+BASE: Native Safe Template (Your Anchor)
+
+## Assistant Response:
+**That is one of the sharpest questions in FPL.** "Chasing last week's points" is the single most common trap that casual managers fall into (e.g. buying a player after they score a lucky hat-trick, only for them to blank in the next 3 games while facing difficult fixtures).
+
+Here is the honest truth about whether **BASE: Native Safe Template** is "chasing last week's points," and how the algorithm protects you:
+
+---
+
+### 1. Why Native is NOT Just "Chasing Last Week's Points"
+
+If a model only looked at recent match scores, it would be a blind trend-follower. However, in [`ingestion.ts`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/ingestion.ts#L642) and [`projection.ts`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/projection.ts#L210), **Native incorporates three forward-looking safeguards**:
+
+1. **14-Week Forward Fixture Horizon**:
+   - The engine does *not* evaluate a player in a vacuum. It evaluates their upcoming schedule for up to **14 gameweeks ahead** (home vs away, opponent defense rating, and fixture difficulty).
+   - If a mid-priced midfielder scores 15 points in GW9 but faces Arsenal (A), Man City (A), and Liverpool (H) in GW10–12, **the engine will NOT recommend transferring them in**. The forward linear program sees the red fixture wall ahead and skips them.
+2. **The "Anti-Fluke" Minutes Filter**:
+   - Casual managers chase one-week fluke scorers (e.g. a £4.5m defender who scored a lucky 90th-minute header off a corner).
+   - Native Safe enforces strict minutes thresholds and season-long baseline ICT metrics. It will not buy a player who only had 1 lucky touch; it requires proven, repeatable Premier League minutes.
+3. **Template Shield is Insurance, Not Chasing**:
+   - Keeping Erling Haaland or Mohamed Salah as your captain is not "chasing last week's points" — it is **game-theoretic rank insurance**. When 75%+ of active managers captain Haaland, you captain him to match the field, ensuring a Haaland hat-trick never destroys your rank.
+
+---
+
+### 2. The Inherent Limitation of Native (Where the Risk Lies)
+
+While Native is not blindly chasing flukes, it is undeniably **reactive**:
+- It evaluates players whose form and official ICT have *already risen*.
+- It typically buys an in-form asset **after** they have produced 1 or 2 good games, meaning you miss the initial price rise and the first big haul.
+- It typically sells an out-of-form asset **after** they have already blanked for 2 consecutive weeks.
+
+This makes Native a **high-floor, low-volatility anchor**. It will keep you competitive, protect your rank, and prevent stupid mistakes. But on its own, it will rarely spot the hidden gem *before* the crowd discovers them.
+
+---
+
+### 3. How to Break Free of "Chasing Points" (The Pro Hybrid Strategy)
+
+This is why the **Anchor & Strike** hybrid strategy is so effective:
+
+| Squad Role | Percentage of Squad | Engine to Use | Why |
+| :--- | :--- | :--- | :--- |
+| **The Core Foundation** | **80% (9–10 players)** | **NATIVE SAFE TEMPLATE** | Keeps your captaincy, goalkeeper, and primary defense rock-solid. You never gamble on your core anchors. |
+| **Weekly Free Transfer** | **20% (1–2 players)** | **EYE-TEST AGGRESSIVE / SAFE QUANT** | **You stop chasing past points!** You buy players based on underlying expected goals (xG), expected assists (xA), and tactical flank weaknesses *before* their points explode on the scoreboard. |
+
+---
+
+### Summary Takeaway
+
+- Following **NATIVE SAFE TEMPLATE** does **not** mean you are blindly chasing last week's points — the forward fixture matrix protects you from buying bad fixtures.
+- However, Native is reactive by design.
+- To stay one step ahead of the crowd, use **Native Safe Template** as your defensive shield, and consult **Eye-Test Quant** to make your weekly transfers proactive rather than reactive!
