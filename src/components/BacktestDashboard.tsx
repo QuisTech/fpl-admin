@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { BarChart3, TrendingUp, TrendingDown, ShieldCheck, Zap, DollarSign, ChevronDown, ChevronUp, AlertTriangle, CheckCircle, Play, X } from 'lucide-react';
+import { BarChart3, TrendingUp, TrendingDown, ShieldCheck, Zap, DollarSign, ChevronDown, ChevronUp, AlertTriangle, CheckCircle, Play, X, Dice5 } from 'lucide-react';
 import { auth } from '../lib/firebase';
+import { MonteCarloAuditView } from './MonteCarloAuditView';
 
 interface SwapDetail {
   outPlayer: string;
@@ -60,6 +61,7 @@ export const BacktestDashboard = ({ initialFuel }: BacktestDashboardProps) => {
     return 'eye-test'; // Default to EYE-TEST
   };
 
+  const [subTab, setSubTab] = useState<'lineup' | 'monte-carlo'>('monte-carlo');
   const [activeTab, setActiveTab] = useState<'fplform' | 'native' | 'eye-test'>(normalizeFuel(initialFuel));
   const [data, setData] = useState<BacktestData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -164,12 +166,51 @@ export const BacktestDashboard = ({ initialFuel }: BacktestDashboardProps) => {
       });
   }, [activeTab]);
 
+  const subNav = (
+    <div className="flex bg-slate-900/90 p-1 rounded-xl border border-slate-800 w-fit mb-4 shadow-sm">
+      <button
+        onClick={() => setSubTab('monte-carlo')}
+        className={`px-3.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all flex items-center gap-1.5 ${
+          subTab === 'monte-carlo'
+            ? 'bg-purple-600 text-white shadow-md font-extrabold'
+            : 'text-slate-400 hover:text-white'
+        }`}
+      >
+        <Dice5 className="w-3.5 h-3.5" />
+        Monte Carlo Multi-Week Planner Audit
+      </button>
+      <button
+        onClick={() => setSubTab('lineup')}
+        className={`px-3.5 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all flex items-center gap-1.5 ${
+          subTab === 'lineup'
+            ? 'bg-slate-800 text-white shadow-md font-extrabold'
+            : 'text-slate-400 hover:text-white'
+        }`}
+      >
+        <BarChart3 className="w-3.5 h-3.5" />
+        Single-GW Lineups
+      </button>
+    </div>
+  );
+
+  if (subTab === 'monte-carlo') {
+    return (
+      <div className="space-y-4">
+        {subNav}
+        <MonteCarloAuditView initialFuel={activeTab} />
+      </div>
+    );
+  }
+
   if (loading && !data) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <BarChart3 className="w-8 h-8 text-fpl-green animate-pulse mx-auto mb-3" />
-          <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Loading {activeTab.toUpperCase()} Data...</p>
+      <div className="space-y-4">
+        {subNav}
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <BarChart3 className="w-8 h-8 text-fpl-green animate-pulse mx-auto mb-3" />
+            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Loading {activeTab.toUpperCase()} Data...</p>
+          </div>
         </div>
       </div>
     );
@@ -178,6 +219,7 @@ export const BacktestDashboard = ({ initialFuel }: BacktestDashboardProps) => {
   if (error || !data) {
     return (
       <div className="space-y-4">
+        {subNav}
         {/* Toggle (even on error so they can switch back) */}
         <div className="flex bg-slate-900 rounded-lg p-1 w-fit">
           <button
@@ -229,6 +271,7 @@ export const BacktestDashboard = ({ initialFuel }: BacktestDashboardProps) => {
       animate={{ opacity: 1 }}
       className="space-y-4"
     >
+      {subNav}
       {/* Header and Toggle */}
       <div className="flex items-start justify-between">
         <div>

@@ -330,6 +330,29 @@ export interface ManagerInfo {
   last_deadline_total_transfers?: number;
 }
 
+
+export interface PlannerStepDetail {
+  stepIndex: number;
+  gameweek: number;
+  actionType: 'ROLL' | 'TRANSFER' | 'CHIP';
+  actionDesc: string;
+  chipName?: string;
+  transfersIn?: number[];
+  transfersOut?: number[];
+  transfersInDetails?: Array<{ id: number; name: string; cost: number; position: string; team: string }>;
+  transfersOutDetails?: Array<{ id: number; name: string; cost: number; position: string; team: string }>;
+  hitCost: number;
+  weeklyScore: number;
+  weeklyVariance: number;
+  starters: number[];
+  bench: number[];
+  captainId: number;
+  viceCaptainId: number;
+  bank: number;
+  freeTransfers: number;
+  confidenceInterval: [number, number];
+}
+
 export interface TeamSyncResponse {
   squad: ScoredPlayer[];
   transfers: TransferRecommendation[];
@@ -340,6 +363,5 @@ export interface TeamSyncResponse {
   managerInfo?: ManagerInfo | null;
   gameweek?: number;
   scenario?: 'quant' | 'template';
-  multiWeekPlan?: any;
 }
 

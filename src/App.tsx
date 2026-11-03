@@ -8,6 +8,7 @@ import { MetricsColumn } from './components/MetricsColumn';
 import { PitchView } from './components/PitchView';
 import { DataGrid } from './components/DataGrid';
 import { TransferView } from './components/TransferView';
+import { MultiWeekPlanner } from './components/MultiWeekPlanner';
 import { ChipAdvisor } from './components/ChipAdvisor';
 import { PerformanceView } from './components/PerformanceView';
 import { BacktestDashboard } from './components/BacktestDashboard';
@@ -49,7 +50,7 @@ import { SnapshotModal } from './components/SnapshotModal';
 function FPLApp() {
   const [riskMode, setRiskMode] = useState<'safe' | 'aggressive' | 'value'>('safe');
   const [fuel, setFuel] = useState<'fplform' | 'native' | 'eye-test'>('fplform');
-  const [tab, setTab] = useState<'optimizer' | 'pitch' | 'picks' | 'transfers' | 'chips' | 'performance' | 'backtest' | 'career' | 'agent'>('optimizer');
+  const [tab, setTab] = useState<'optimizer' | 'pitch' | 'planner' | 'picks' | 'transfers' | 'chips' | 'performance' | 'backtest' | 'career' | 'agent'>('optimizer');
   const [snapshotToast, setSnapshotToast] = useState<SnapshotToastData | null>(null);
   const [isSnapshotModalOpen, setIsSnapshotModalOpen] = useState(false);
   const [squadViewSource, setSquadViewSource] = useState<'optimum' | 'synced'>(() => {
@@ -191,7 +192,7 @@ function FPLApp() {
           <div className="relative z-10 p-4 sm:p-6 h-full flex flex-col">
             <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between mb-8">
               <div className="flex flex-wrap gap-1 bg-slate-950 p-1 rounded-xl border border-fpl-border w-full md:w-auto justify-center">
-                {(['optimizer', 'pitch', 'picks', 'transfers', 'chips', 'performance', 'backtest', 'career', 'agent'] as const).map((t) => (
+                {(['optimizer', 'pitch', 'planner', 'picks', 'transfers', 'chips', 'performance', 'backtest', 'career', 'agent'] as const).map((t) => (
                   <button 
                     key={t}
                     onClick={() => setTab(t)}
@@ -253,6 +254,18 @@ function FPLApp() {
                   onSwitchToSynced={() => setSquadViewSource('synced')}
                   onSyncTeam={(id) => handleSync(id)}
                   teamId={teamId}
+                />
+              ) : tab === 'planner' ? (
+                <MultiWeekPlanner 
+                  data={data}
+                  syncedData={syncedData}
+                  riskMode={riskMode}
+                  onSyncTeamId={(id, gw) => handleSync(id, gw)}
+                  onApplySquad={(playerIds) => {
+                    setSquadViewSource('synced');
+                    setTab('pitch');
+                  }}
+                  onViewAudit={() => setTab('backtest')}
                 />
               ) : tab === 'picks' ? (
                 <DataGrid 
