@@ -920,6 +920,10 @@ export class CareerService {
     let totalTransfersRolled = 0;
 
     for (let gw = startGw; gw <= endGw; gw++) {
+      // Set 2 Chip Renewal: At GW20, any remaining Set 1 chips expire and Set 2 chips become available
+      if (gw === 20) {
+        state.chipState = { 'WC': 1, 'FH': 1, 'BB': 1, 'TC': 1 };
+      }
       let transfersInList: any[] = [];
       let transfersOutList: any[] = [];
       let isRolled = false;
@@ -974,14 +978,27 @@ export class CareerService {
       let grossPoints = 0;
       let activeChip: string | undefined = undefined;
 
-      // Smart Chip Evaluation (2026/27 Set 1 rules: GW1–19)
+      // Smart Chip Evaluation (Set 1: GW1–19 SGW Optimization vs Set 2: GW20–38 DGW/BGW Optimization)
+      // Key Real-World Rule: Double Gameweeks (DGWs) virtually NEVER occur in GW1–19 because domestic cup clashes
+      // (FA Cup QF/SF, EFL Cup Final) only create postponements in the spring (GW20–38).
+      // Therefore, Set 1 chips MUST be triggered on elite Single Gameweek peaks before expiring after GW19:
+      // - TC1: Elite Single Gameweek fixture (e.g. Haaland/Salah home to promoted side, capXp >= 8.5) or deadline (GW19)
+      // - BB1: High-ceiling bench with favorable single fixtures (benchXp >= 11.0) or deadline (GW19)
+      // In Set 2 (GW20–38), true DGWs occur, so thresholds target double-fixture upside:
+      // - TC2: Double Gameweek captaincy (capXp >= 12.0) or GW38
+      // - BB2: Double Gameweek bench depth (benchXp >= 16.0) or GW38
+      const isSet1 = gw <= 19;
+      const tcThreshold = isSet1 ? 8.5 : 12.0;
+      const bbThreshold = isSet1 ? 11.0 : 16.0;
+      const chipDeadline = isSet1 ? 19 : 38;
+
       const capXp = oracle.getXP(captain, gw);
       const benchXp = benchIds.reduce((sum, id) => sum + oracle.getXP(id, gw), 0);
 
-      if (state.chipState['TC'] > 0 && (capXp >= 10.0 || gw === 19)) {
+      if (state.chipState['TC'] > 0 && (capXp >= tcThreshold || gw === chipDeadline)) {
         activeChip = 'TC';
         state.chipState['TC'] -= 1;
-      } else if (state.chipState['BB'] > 0 && (benchXp >= 15.0 || gw === 19)) {
+      } else if (state.chipState['BB'] > 0 && (benchXp >= bbThreshold || gw === chipDeadline)) {
         activeChip = 'BB';
         state.chipState['BB'] -= 1;
       }
@@ -1027,9 +1044,15 @@ export class CareerService {
       const capModel = startingXIModels.find(p => p.id === captain) || this.mapPlayer(captain, baseData, oracle, dummyActualStats, true, false, 2);
       const vcModel = startingXIModels.find(p => p.id === viceCaptain) || this.mapPlayer(viceCaptain, baseData, oracle, dummyActualStats, false, true, 1);
 
+      let logPrefix = activeChip ? `[CHIP: ${activeChip === 'TC' ? 'Triple Captain' : activeChip === 'BB' ? 'Bench Boost' : activeChip}] ` : '';
+      let capPts = (dummyActualStats[captain]?.points ?? 0) * (activeChip === 'TC' ? 3 : 2);
       let log = isRolled
-        ? `GW${gw} Projected: Roll Free Transfer (Bank: ${state.freeTransfers} FTs). Captain: ${capModel.web_name} (${(dummyActualStats[captain]?.points ?? 0) * 2} xP).`
-        : `GW${gw} Projected: Transfer ${transfersOutList[0]?.name} → ${transfersInList[0]?.name}. Captain: ${capModel.web_name} (${(dummyActualStats[captain]?.points ?? 0) * 2} xP).`;
+        ? `${logPrefix}GW${gw} Projected: Roll Free Transfer (Bank: ${state.freeTransfers} FTs). Captain: ${capModel.web_name} (${capPts} xP).`
+        : `${logPrefix}GW${gw} Projected: Transfer ${transfersOutList[0]?.name} → ${transfersInList[0]?.name}. Captain: ${capModel.web_name} (${capPts} xP).`;
+      if (activeChip === 'BB') {
+        const benchPtsSum = benchIds.reduce((sum, id) => sum + (dummyActualStats[id]?.points ?? 0), 0);
+        log += ` Bench Boost added +${benchPtsSum} xP from bench.`;
+      }
 
       gameweeks.push({
         gameweek: gw,
@@ -1054,6 +1077,7 @@ export class CareerService {
         squadValue,
         teamValue,
         teamValueDisplay: `£${(teamValue / 10).toFixed(1)}m`,
+        chipActive: activeChip,
         decisionLog: log
       });
     }
@@ -1079,8 +1103,8 @@ export class CareerService {
       finalBank: `£${(state.bank / 10).toFixed(1)}m`,
       finalTeamValue: `£${((gameweeks[gameweeks.length - 1]?.teamValue || 1000) / 10).toFixed(1)}m`,
       chipInventory: {
-        currentSet: startGw <= 19 ? 'Set 1 (GW1–19)' : 'Set 2 (GW20–38)',
-        deadlineGw: startGw <= 19 ? 19 : 38,
+        currentSet: (gameweeks[gameweeks.length - 1]?.gameweek || startGw) <= 19 ? 'Set 1 (GW1–19)' : 'Set 2 (GW20–38)',
+        deadlineGw: (gameweeks[gameweeks.length - 1]?.gameweek || startGw) <= 19 ? 19 : 38,
         chips: [
           { name: 'WC', label: 'Wildcard', status: state.chipState['WC'] > 0 ? 'AVAILABLE' : 'USED' },
           { name: 'TC', label: 'Triple Captain', status: state.chipState['TC'] > 0 ? 'AVAILABLE' : 'USED' },

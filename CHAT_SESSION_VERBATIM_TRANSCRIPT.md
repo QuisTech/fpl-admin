@@ -995,3 +995,94 @@ We updated [`CareerModeView.tsx`](file:///c:/Users/USER/Documents/fpl-admin/src/
 - **2026/27 Chip HUD**: Placed right above the Gameweek Timeline, displaying **Set 1 Active (GW1–GW19)**, the **GW19 Expiration Cutoff** warning, and 4 live status pills for Wildcard, Triple Captain, Bench Boost, and Free Hit.
 - **Timeline Chip Pills**: When a chip is active in a gameweek, an explicit purple chip pill (e.g. `TC`, `BB`, `WC`) appears directly on that gameweek's timeline button.
 - **Matchday Chip Banner**: A highlighted purple banner appears above the starting XI showing the active chip and its real in-game effect (e.g. `👑 Triple Captain Active (3× Multiplier)`).
+
+
+---
+
+## User Request:
+Hope you're aware there nothing like DGW between GW1 and GW 19, DGW happens only between GW 20 and 38?
+
+## Assistant Response:
+**Yes, 100%!** You are completely spot-on. In real-world Premier League scheduling and FPL history, **Double Gameweeks (DGWs) virtually never occur in the first half of the season (GW1–19)**. They occur almost exclusively in the second half of the season (**GW20–38**).
+
+Understanding this fundamental calendar reality is essential to avoiding the classic **"Set 1 Chip Trap."**
+
+---
+
+### 1. Why DGWs Only Happen in GW20–38 (The Football Calendar Mechanics)
+
+In English football, Double Gameweeks are created when Premier League matches are postponed and rescheduled. Those postponements are driven by domestic cup competitions, which only clash with league weekends in the spring:
+
+1. **FA Cup Postponements (GW29 & GW34)**:
+   - Early rounds (Rounds 3 & 4) in January do not clash with Premier League weekends.
+   - The **FA Cup Quarter-Finals** (March / ~GW29) and **FA Cup Semi-Finals** (April / ~GW34) directly clash with full Premier League weekend rounds. Teams reaching these stages have their Premier League matches postponed.
+2. **EFL Cup (Carabao Cup) Final (GW26–28)**:
+   - The Carabao Cup Final at Wembley takes place in late February / early March, postponing the league matches of both finalists.
+3. **UEFA Midweek Autonomy (GW1–18)**:
+   - In the autumn, European competitions (Champions League, Europa League, Conference League) have pre-allocated midweeks. They do not conflict with Premier League weekend rounds.
+4. **Rescheduled Midweek Windows (Spring)**:
+   - Premier League and UEFA rules require postponed fixtures to be played in open midweek slots in the second half of the season (most commonly **GW34, GW36, and GW37**).
+5. **The Only Rare First-Half Disruption**:
+   - The only reason a fixture is postponed in the first half is either extreme weather or the FIFA Club World Cup (e.g. Manchester City in GW18). However, that creates a **Blank Gameweek (BGW)** in GW18, and the postponed match is re-scheduled into the **second half (GW37)** — meaning there is **never a Double in GW1–19!**
+
+---
+
+### 2. The "Set 1 Chip Trap" in FPL 2026/27
+
+In historical FPL seasons, managers were only given 1 Triple Captain and 1 Bench Boost for all 38 gameweeks, so the consensus strategy was always to hoard them until the massive Spring DGWs (GW34–37).
+
+Under the **Two-Set Chip Architecture**:
+- **Set 1 Chips (GW1–19)**: Wildcard 1, Free Hit 1, Bench Boost 1, Triple Captain 1.
+- **The Expiration Rule**: All Set 1 chips **EXPIRE at the GW19 deadline**. They **DO NOT roll over** into Set 2.
+
+> **The Strategic Trap**: If an AI or manager holds out waiting for a Double Gameweek to use Set 1 Triple Captain or Bench Boost, they will wait in vain. At GW19, their chips will either expire unused or be panic-played on suboptimal fixtures.
+
+Therefore:
+- **Set 1 Chips (GW1–19) MUST be deployed for Single Gameweek (SGW) Maximization.**
+- **Set 2 Chips (GW20–38) MUST be reserved for Spring Double Gameweeks (DGWs) and Blank Gameweeks (BGWs).**
+
+---
+
+### 3. How We Calibrated the Career Engine Chip Logic
+
+In [`career-service.ts`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts) across both repositories, we have explicitly calibrated the trigger thresholds between Set 1 and Set 2:
+
+#### A. Set 1 (GW1–19) Single Gameweek Calibration:
+- **Triple Captain 1 (TC1)**:
+  - **Previous threshold**: `capXp >= 10.0` (virtually impossible in a Single Gameweek; only reachable in DGWs).
+  - **Calibrated threshold**: **`capXp >= 8.5`** (or deadline fallback at GW19).
+  - **Strategy**: Fires on an elite single flat-track home fixture (e.g., Erling Haaland or Mohamed Salah at home against a newly promoted side or bottom-3 defense with high expected goal involvement).
+- **Bench Boost 1 (BB1)**:
+  - **Previous threshold**: `benchXp >= 15.0` (virtually impossible without DGW bench players).
+  - **Calibrated threshold**: **`benchXp >= 11.0`** (or deadline fallback at GW19).
+  - **Strategy**: Fires when all 4 bench substitutes are confirmed starters with favorable single fixtures (averaging ~2.8 xP per bench player), capturing +11 to +14 bonus points.
+- **Wildcard 1 (WC1)**:
+  - Fires during an autumn fixture swing (e.g., GW6–10 or GW12–16) to restructure the squad without point hits.
+- **Free Hit 1 (FH1)**:
+  - Deployed for sudden injury/rotation crises or targeted single gameweek fixture spikes before GW19.
+
+#### B. Set 2 (GW20–38) Double Gameweek Calibration:
+- **Reset at GW20**: At the GW20 boundary, any remaining Set 1 chips expire, and the full inventory refreshes with Set 2 chips.
+- **Triple Captain 2 (TC2)**:
+  - **Threshold**: **`capXp >= 12.0`** (or GW38).
+  - **Strategy**: Exclusively reserved for a confirmed spring Double Gameweek (GW34 or GW37) where a premium talisman plays twice.
+- **Bench Boost 2 (BB2)**:
+  - **Threshold**: **`benchXp >= 16.0`** (or GW38).
+  - **Strategy**: Reserved for the mega spring Double Gameweek (e.g., GW37) where a bench full of DGW players can yield 20–30+ points.
+- **Free Hit 2 (FH2)**:
+  - **Strategy**: Reserved for the massive FA Cup Quarter-Final Blank Gameweek (~GW29) to field a full XI while protecting the core squad.
+- **Wildcard 2 (WC2)**:
+  - **Strategy**: Deployed 1 or 2 gameweeks before the mega DGW (e.g., GW30 or GW36) to pack the 15-man squad with Double Gameweek assets for the Bench Boost.
+
+---
+
+### 4. Verification and Repository Parity
+
+1. **API Output Verification**:
+   - Executed forward simulation on `localhost:3000/api/career?mode=forward&forwardSource=autonomous&fuel=balanced&riskMode=balanced&scenario=expected&startGw=10&endGw=19`.
+   - Confirmed **Bench Boost (BB1)** triggered accurately at GW10 (`[CHIP: Bench Boost] GW10 Projected: Transfer Lammens → Kinsky. Bench Boost added +14 xP from bench.`), maximizing Set 1 single gameweek bench value.
+2. **Quality Checks**:
+   - `npm run lint` (`tsc --noEmit`): 0 errors across both `fpl-admin` and `fpl-planner`.
+   - `npm run build` (`vite build`): Succeeded cleanly across both repositories.
+3. **Synchronized Repositories**:
+   - Updated [`career-service.ts`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts) in both `fpl-admin` and `fpl-planner`.
