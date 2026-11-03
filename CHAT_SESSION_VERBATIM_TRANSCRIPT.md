@@ -1503,3 +1503,49 @@ In **Career Mode**, real-world constraints are sequential:
    - **Native** gives you a **stable, low-volatility foundation** because it sticks to proven starters.
    - **Eye-Test Bayesian ML** gives you the **predictive edge** to identify breakout stars and tactical mismatches *before* they appear in Native's trailing points.
    - Following **NATIVE SAFE TEMPLATE SHIELD** gives you the ultimate balance: rock-solid rank protection on your core picks with zero guesswork, while using underlying expected metrics to make your weekly transfers count.
+
+
+---
+
+## User Request:
+So if someone is to follow NATIVE SAFE TEMPLATE SHIELD, which of the eye test mode, scenario/strategiss  is for one to check out the about to breakout stars?
+
+## Assistant Response:
+To scout and identify the **"about-to-breakout stars"** while keeping **NATIVE SAFE TEMPLATE SHIELD** as your core foundation, the optimal scouting configuration is:
+
+👉 **Fuel: `Eye-Test` | Risk Mode: `Aggressive` | Scenario: `Quant Optimal`** (The "Scout Radar" Profile)
+
+Here is why this specific combination is designed to uncover breakout differentials, and the exact step-by-step workflow for how to use it:
+
+---
+
+### 1. Why This Specific Combination Finds the Breakouts
+
+Each of the three toggles plays a distinct role in discovering high-ceiling differential assets:
+
+1. **Fuel: `Eye-Test (Bayesian ML)`**
+   - **Why**: Native only knows what *already* happened on the scoreboard. Eye-Test looks under the hood at **underlying chance creation** (`xG90`, `xA90`, big chances created, shots in the box, and expected goal involvement). It detects players who are getting into dangerous positions repeatedly but whose official points haven't exploded yet.
+2. **Risk Mode: `Aggressive`**
+   - **Why**: `Safe` mode penalizes variance and suppresses volatility. In contrast, `Aggressive` mode actively rewards **variance ceiling (`betaVariance > 0`)**. It specifically hunts for explosive tail distributions — players who might score 2 points on a bad day, but have a 20% probability of dropping a 15–20 point mega-haul against weak defenses.
+3. **Scenario: `Quant Optimal`**
+   - **Why**: `Template Shield` enforces crowd-ownership quotas (`minEoTotal`) that force the algorithm to pick popular players. `Quant Optimal` strips away crowd bias entirely (`betaEO = 0.0`). It lets the linear programming solver search the entire 700+ player database for pure statistical upside, regardless of whether a player is owned by only 2% or 5% of managers.
+
+---
+
+### 2. The 3-Step "Anchor & Strike" Playbook
+
+As an FPL manager, you do **not** want to build your entire 15-man squad out of high-variance punts (which would introduce too much downside). Instead, use the **Anchor & Strike** strategy:
+
+#### Step 1: Keep Your Main Squad in "NATIVE SAFE TEMPLATE SHIELD"
+- This is your **Home Base**.
+- It ensures your captaincy (e.g. Erling Haaland or Mohamed Salah) and core defense (e.g. Gabriel) match the top 100k consensus, guaranteeing you never suffer a catastrophic rank drop when the template hauls.
+
+#### Step 2: Switch to "EYE-TEST AGGRESSIVE QUANT" in the Transfers/Picks Tab
+- Open the **Transfers** or **Picks** tab and flip the header controls to **Eye-Test + Aggressive + Quant Optimal**.
+- Look specifically at the **mid-priced midfielders (£5.5m–£7.5m)** and **attacking full-backs (£4.5m–£5.5m)** that the model surfaces:
+  - Players with high expected points but low crowd ownership (under 15% EO).
+  - For example, assets like **Bryan Mbeumo**, **Marcus Tavernier**, **Morgan Gibbs-White**, **Evanilson**, and **Maxim De Cuyper**.
+
+#### Step 3: The Surgical Transfer Strike
+- When you have a free transfer in your main team, instead of buying a player whose price has already risen after 3 consecutive hauls, you bring in the **Eye-Test breakout candidate** 1 or 2 gameweeks *before* the general public notices them.
+- **The Result**: You get the rank safety of the **Template Shield** on your premiums, combined with the explosive upward rank mobility of **Eye-Test's forward-looking differentials**.
