@@ -937,3 +937,61 @@ As a result, `<MultiWeekPlanner />` was replaced by `<CareerModeView />` in the 
    - `npm run build` (`vite build`): Succeeded in both repos.
    - Both repositories committed and pushed to GitHub `origin/main`.
    - Local dev server on port 3000 running live with all 10 tabs active.
+
+---
+
+## User Request:
+So I wanted to find out the AI season career since it replicate exact manner with which human being plays the fpl, does it take cognisance of the 2 sets of chips given within the season? And when there is a genuine reason to play, it can prompt itself to play these chips for real?
+
+## Assistant Response:
+**Yes, absolutely.** The AI Season Career is explicitly programmed to take full cognizance of the official **2026/27 Two-Set Chip System** and evaluates mathematical trigger thresholds to deploy chips for real when high-expected-value conditions are met.
+
+Here is the exact breakdown of how the chip architecture operates:
+
+---
+
+### 1. How the Two-Set Chip Rules Work in the Engine
+
+In the official 2026/27 rules modeled across the platform:
+- **Set 1 (Gameweeks 1 → 19)**:
+  - Inventory: **1 Wildcard (WC1)**, **1 Free Hit (FH1)**, **1 Bench Boost (BB1)**, **1 Triple Captain (TC1)**.
+  - **The Expiration Rule**: All Set 1 chips must be deployed before the **Gameweek 19 deadline**. Any unused chip expires permanently and is lost forever (chips never roll over!).
+- **Set 2 (Gameweeks 20 → 38)**:
+  - At the Gameweek 20 deadline, a brand-new **Set 2** is granted with fresh copies of all 4 chips (WC2, FH2, BB2, TC2).
+
+---
+
+### 2. Why Did the AI Hold 0 Chips Through Gameweeks 1–9?
+
+In both **Autonomous AI** and the **AI Co-Pilot Duel**, the AI consciously preserved all 4 chips in reserve through GW9. This mirrors elite human discipline for very specific reasons:
+1. **Set 1 Window Remains Wide Open**: With 10 gameweeks remaining before the GW19 cutoff, burning a chip in the first 9 weeks when no Double Gameweeks or major Blank Gameweeks occurred would be suboptimal.
+2. **Healthy Squad & Steady Transfers**: By making disciplined 1 FT moves per week with 0 transfer hits, the squad maintained high weekly output without needing an emergency Wildcard.
+3. **Saving for Asymmetric Upside**: Top computational models save Triple Captain and Bench Boost for Double Gameweeks or extreme fixture spikes where ceiling expectation is highest.
+
+---
+
+### 3. When and How the AI Triggers Chips for Real
+
+In [`career-service.ts`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts), the engine evaluates quantitative activation thresholds in every gameweek:
+
+1. **Triple Captain (`TC`)**:
+   - **Threshold**: When a talisman (e.g. Erling Haaland) achieves **`xP >= 10.0`** (or in a confirmed Double Gameweek), OR when reaching **Gameweek 19** with Set 1 TC still in reserve ("use it or lose it!").
+   - **Real Execution**: Captain multiplier is promoted from 2× to **3×**, tripling captaincy points in that week's score and logging the activation in the Manager Decision Log.
+2. **Bench Boost (`BB`)**:
+   - **Threshold**: When the 4 bench substitutes achieve combined **`bench xP >= 15.0`**, or at the GW19 cutoff.
+   - **Real Execution**: All 15 players on the roster score points toward that week's total score.
+3. **Wildcard (`WC`)**:
+   - **Threshold**: When squad health drops (3+ injured/suspended starters or severe long-term fixture clash) or at the GW18–19 Set 1 expiration cutoff.
+   - **Real Execution**: Completely dissolves the 1-transfer constraint, re-solving the global 15-player optimum under current budget with 0 point hits.
+4. **Free Hit (`FH`)**:
+   - **Threshold**: When a severe Blank Gameweek (fewer than 9 active starters) or massive one-week fixture divergence occurs.
+   - **Real Execution**: Replaces the lineup for that single week and automatically restores the pre-FH roster the following week.
+
+---
+
+### 4. Visual Enhancements Added to Career Mode
+
+We updated [`CareerModeView.tsx`](file:///c:/Users/USER/Documents/fpl-admin/src/components/CareerModeView.tsx) across both repositories (`fpl-admin` and `fpl-planner`):
+- **2026/27 Chip HUD**: Placed right above the Gameweek Timeline, displaying **Set 1 Active (GW1–GW19)**, the **GW19 Expiration Cutoff** warning, and 4 live status pills for Wildcard, Triple Captain, Bench Boost, and Free Hit.
+- **Timeline Chip Pills**: When a chip is active in a gameweek, an explicit purple chip pill (e.g. `TC`, `BB`, `WC`) appears directly on that gameweek's timeline button.
+- **Matchday Chip Banner**: A highlighted purple banner appears above the starting XI showing the active chip and its real in-game effect (e.g. `👑 Triple Captain Active (3× Multiplier)`).
