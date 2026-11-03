@@ -1618,3 +1618,19 @@ Notice the stark contrast when you flip between the two modes in the **Career Ta
 3. **Execute the Move 1 Week Early**:
    - Buy that breakout star with your 1 Free Transfer.
    - You get the best of both worlds: your captain is bulletproof with the template, while your single transfer is a mathematically backed breakout star that propels you ahead of your mini-league rivals.
+
+
+---
+
+## User Request:
+You mean Eye-Test Risky Quant?
+
+## Assistant Response:
+**YES, EXACTLY!** You nailed it.
+
+In the user interface:
+- **`EYE-TEST`** is the amber Fuel button.
+- **`RISKY`** is the orange Strategy button (which executes the `aggressive` high-ceiling variance model).
+- **`QUANT`** (or **`Quant Optimal`**) is the scenario toggle that removes all crowd-ownership constraints.
+
+So button-for-button on your screen, **`EYE-TEST` + `RISKY` + `QUANT`** is the exact combination to view the AI scouting and hunting for breakout stars in the Career Tab!
