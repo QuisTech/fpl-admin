@@ -1671,3 +1671,62 @@ Both **`EYE-TEST RISKY QUANT`** and **`EYE-TEST SAFE QUANT`** serve as powerful 
   👉 **`EYE-TEST` + `RISKY` + `Quant Optimal`**
 - If you want to see **who the AI recommends buying as a steady transfer upgrade while keeping Haaland captained**, click:
   👉 **`EYE-TEST` + `SAFE` + `Quant Optimal`**
+
+
+---
+
+## User Request:
+EYE-TEST + RISKY + Quant Optimal is showing this:
+
+Transfer Execution
+McGinn
+E.Le Fée
+£5.7m
+
+
+
+
+EYE-TEST + SAFE + Quant Optimal is the one showing what you said instead:
+Transfer Execution
+Maatsen
+De Cuyper
+£5.4m
+
+## Assistant Response:
+**Aha! You are looking at two different Gameweek buttons in the timeline!**
+
+Here is what is happening:
+
+- In **EYE-TEST + SAFE + Quant Optimal**, `Transfer: Maatsen → De Cuyper (£5.4m)` is the move for **Gameweek 10** (the very first button on the timeline).
+- In **EYE-TEST + RISKY + Quant Optimal**, `Transfer: McGinn → E.Le Fée (£5.7m)` is the move for **Gameweek 15** (the last button on the timeline). Your interface had Gameweek 15 selected!
+
+If you click through each Gameweek button (GW10 to GW15) in the timeline bar, here is the full week-by-week roadmap for both modes:
+
+---
+
+### Comparison: Week-by-Week Timeline
+
+#### A. EYE-TEST + SAFE + Quant Optimal (Best for Immediate GW10 Action)
+- **Click GW10**: `Transfer: Maatsen → De Cuyper (£5.4m)` | Captain: Haaland (27 xP) ← *(This is the immediate GW10 move!)*
+- **Click GW11**: `Transfer: Hall → Lindelöf (£4.5m)` | Captain: Haaland (20 xP)
+- **Click GW12**: `Transfer: Robertson → N.Williams (£4.9m)` | Captain: Haaland (16 xP)
+- **Click GW13**: `Transfer: Gakpo → Ødegaard (£6.7m)` | Captain: Gibbs-White (18 xP)
+- **Click GW14**: `Transfer: Dasilva → Boscagli (£4.5m)` | Captain: Tavernier (16 xP)
+- **Click GW15**: `Transfer: Horníček → Sels (£5.0m)` | Captain: Mbeumo (18 xP)
+
+#### B. EYE-TEST + RISKY + Quant Optimal (Hyper-Aggressive Midfield Churn)
+- **Click GW10**: `Transfer: Foden → McGinn (£5.4m)` | Captain: Isak (16 xP)
+- **Click GW11**: `Transfer: Horníček → A.Becker (£5.5m)` | Captain: Haaland (30 xP)
+- **Click GW12**: `Transfer: Maatsen → N.Williams (£4.9m)` | Captain: Isak (12 xP)
+- **Click GW13**: `Transfer: Gakpo → Mbeumo (£7.9m)` | Captain: Gibbs-White (18 xP)
+- **Click GW14**: `Transfer: Dasilva → Bogle (£4.8m)` | Captain: Tavernier (16 xP)
+- **Click GW15**: `Transfer: McGinn → E.Le Fée (£5.7m)` | Captain: Mbeumo (18 xP) ← *(The one currently active on your screen)*
+
+---
+
+### Which One Should You Follow for GW10?
+
+Because you are anchoring your real team to **NATIVE SAFE TEMPLATE SHIELD**, **`EYE-TEST + SAFE + Quant Optimal`** is the ideal scouting lens:
+1. It looks at **Gameweek 10 right now** and recommends an immediate, high-upside upgrade: **Maxim De Cuyper (£5.4m)** in defense.
+2. It keeps your captaincy safely on **Erling Haaland**.
+3. It avoids the chaotic, short-term punts (like buying John McGinn in GW10 only to sell him for Enzo Le Fée in GW15).
