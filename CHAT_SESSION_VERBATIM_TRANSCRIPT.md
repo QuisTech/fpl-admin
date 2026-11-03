@@ -1623,14 +1623,51 @@ Notice the stark contrast when you flip between the two modes in the **Career Ta
 ---
 
 ## User Request:
-You mean Eye-Test Risky Quant?
+You mean Eye-Test Risky Quant? or Eye-Test SAFE Quant Optimal?
 
 ## Assistant Response:
-**YES, EXACTLY!** You nailed it.
+**Yes, exactly! In the UI button bar, it is labeled `RISKY` (the orange button).**
 
-In the user interface:
-- **`EYE-TEST`** is the amber Fuel button.
-- **`RISKY`** is the orange Strategy button (which executes the `aggressive` high-ceiling variance model).
-- **`QUANT`** (or **`Quant Optimal`**) is the scenario toggle that removes all crowd-ownership constraints.
+Both **`EYE-TEST RISKY QUANT`** and **`EYE-TEST SAFE QUANT`** serve as powerful scouting lenses, but they look for breakouts in two distinct ways:
 
-So button-for-button on your screen, **`EYE-TEST` + `RISKY` + `QUANT`** is the exact combination to view the AI scouting and hunting for breakout stars in the Career Tab!
+---
+
+### 1. EYE-TEST + RISKY + Quant Optimal (The Maximum Breakout & Wild Differential Hunter)
+- **Buttons in UI**:
+  - Fuel Source: **`EYE-TEST`** (Amber button)
+  - Strategy Mode: **`RISKY`** (Orange button)
+  - Scenario: **`Quant Optimal`**
+- **What It Does**:
+  - This is the most uninhibited ceiling mode in the entire engine. It actively rewards variance (`betaVariance > 0`) and completely ignores what percentage of managers own the player.
+- **What You See in the Career Tab Autonomous Moves**:
+  - **Bold, Explosive Differential Captaincies**:
+    - GW13 Captain: **Morgan Gibbs-White** (18 xP ceiling)
+    - GW14 Captain: **Marcus Tavernier** (16 xP ceiling)
+    - GW15 Captain: **Bryan Mbeumo** (18 xP ceiling)
+  - **Attacking Transfers**: It immediately buys **Maxim De Cuyper** and **Bryan Mbeumo** ahead of their green fixture runs.
+- **When to Use This**:
+  - When you want to see the **absolute highest-upside differential punts and differential captaincies** that the machine learning model believes could drop a 15–20 point mega-haul.
+
+---
+
+### 2. EYE-TEST + SAFE + Quant Optimal (The Balanced Breakout Hunter)
+- **Buttons in UI**:
+  - Fuel Source: **`EYE-TEST`** (Amber button)
+  - Strategy Mode: **`SAFE`** (Green button)
+  - Scenario: **`Quant Optimal`**
+- **What It Does**:
+  - It uses Eye-Test's forward-looking underlying xG/xA to find breakout transfers, BUT it keeps `SAFE` discipline on captaincy and minutes security (penalizing rotation risks).
+- **What You See in the Career Tab Autonomous Moves**:
+  - **Rock-Solid Captaincy**: Keeps the armband securely on **Erling Haaland** (GW10: 27 xP, GW11: 20 xP, GW12: 16 xP).
+  - **Smart Breakout Transfers**: Uses its weekly free transfer to bring in breakout assets like **De Cuyper** and **Mbeumo** without gambling on risky differential captaincies.
+- **When to Use This**:
+  - When you want to find **sensible breakout transfers for your outfield positions**, but you prefer keeping the captain's armband safely anchored on Haaland.
+
+---
+
+### Summary Recommendation: Which Should You Click?
+
+- If you want to see **who the AI thinks is about to explode as a differential captain or high-ceiling talisman**, click:
+  👉 **`EYE-TEST` + `RISKY` + `Quant Optimal`**
+- If you want to see **who the AI recommends buying as a steady transfer upgrade while keeping Haaland captained**, click:
+  👉 **`EYE-TEST` + `SAFE` + `Quant Optimal`**
