@@ -263,8 +263,17 @@ export abstract class BaseOracle implements XPOracle {
       if (!isAvail) {
         dynamicPredictedMins = 0;
       } else if (nextEventId === 1) {
-        // Pre-season before GW1: use price baseline & availability
-        dynamicPredictedMins = (cost >= 45 ? 85 : 0) * probPlay;
+        // Pre-season before GW1: Gate predicted minutes by official ep_next and starting likelihood
+        const safeEp = safeParseFloat(p.ep_next || "0");
+        const isNailedStart = safeEp >= 2.0 || (cost >= 55 && safeEp >= 1.5);
+        if (!isAvail || safeEp <= 0.5) {
+          dynamicPredictedMins = 0;
+        } else if (isNailedStart) {
+          dynamicPredictedMins = 85 * probPlay;
+        } else {
+          // Rotational / impact sub
+          dynamicPredictedMins = Math.min(30, safeEp * 15) * probPlay;
+        }
       } else if (startRate >= 0.8) {
         // Core Nailed Starter (started >= 80% of matches in 2026/27)
         // Scaled by their empirical minsPerStart and elite start conviction

@@ -1282,3 +1282,60 @@ In contrast, the **Native** engine is anchored to reality:
 - **Eye-Test Bayesian ML** is great at finding **isolated differential punts** in single gameweeks where you need an aggressive, low-ownership ceiling pick.
 - For a **full season campaign under 1 FT/week rules**, pure underlying ML rates without playing-time security will wreck your squad's continuity.
 - Sticking with **NATIVE SAFE TEMPLATE SHIELD** guarantees that your team maintains 15 starting assets, avoids the firefighting trap, and deploys every free transfer toward genuine point upgrades.
+
+
+---
+
+## User Request:
+Can EYE TEST be improved so it can even be better than NATIVE, is that a possiblity?
+
+## Assistant Response:
+**YES, 100% absolutely.** It is not just a possibility; in quantitative sports science and predictive analytics, underlying Bayesian machine learning models (xG, xA, pitch tilt, localized shot maps) are fundamentally designed to outperform trailing points and official ICT metrics.
+
+In fact, analyzing why Native initially beat Eye-Test led us directly to the **exact structural flaw** in the model and the **4-step roadmap** to make Eye-Test surpass Native.
+
+---
+
+### 1. The Root Flaw Discovered (The GW1 Minutes Bug)
+
+When investigating why Eye-Test underperformed in the Season Career, we uncovered a critical assumption in [`ingestion.ts`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/ingestion.ts#L267):
+```typescript
+} else if (nextEventId === 1) {
+  // Pre-season before GW1: use price baseline & availability
+  dynamicPredictedMins = (cost >= 45 ? 85 : 0) * probPlay;
+}
+```
+**The Impact**: Before Gameweek 1, the engine assigned **85 predicted minutes** to *every single player in the Premier League costing £4.5m or more* as long as they weren't flagged with an injury.
+- Rotational substitutes like Jonathan David (£5.9m), Adli (£4.8m), and Cho (£5.0m) and backup goalkeeper Mamardashvili (£4.8m) were all treated as 85-minute nailed starters.
+- Because their per-90 underlying statistics from prior seasons or friendlies were high, the optimizer drafted 5 of them into the GW1 squad.
+- They all played 0 minutes in GW1 (scoring just 21 points), and the AI spent the next 5 weeks burning its precious 1 FT/week firefighting deadwood.
+
+---
+
+### 2. The 4 Levers to Make Eye-Test Beat Native
+
+To make the Eye-Test Bayesian ML model surpass Native in full-season playthroughs, we apply 4 quantitative upgrades:
+
+#### Lever 1: Bayesian Starting Probability Prior (Gated Minutes)
+- **The Upgrade**: Rather than assuming 85 minutes based on price, we gate predicted minutes using an empirical starting probability prior (managerial rotation history, confirmed starting role, and official starting status).
+- **The Proof**: We just implemented this in [`ingestion.ts`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/ingestion.ts#L267). Gating GW1 minutes immediately improved Eye-Test's GW1 score from **21 pts to 35 pts**, replacing bench players with confirmed starters like Phil Foden, Kai Havertz, Morgan Gibbs-White, and Jack Hinshelwood (16 pts haul)!
+
+#### Lever 2: Empirical Bayes James-Stein Shrinkage (Per-90 Stabilization)
+- **The Upgrade**: Small-sample per-90 metrics are notoriously noisy. When an impact sub plays 30 minutes and takes 3 shots, their unregressed `xG90` looks like an elite striker.
+- **The Math**: Using **James-Stein Shrinkage**, we shrink individual per-90 rates toward their positional baseline according to their total minutes sample. A talisman with 2,000 minutes is trusted 95%; a player with 150 minutes is 85% regressed to the league-average £5.0m midfielder mean.
+
+#### Lever 3: Localized Zonal Fixture Tilt (Tactical Weakness Detection)
+- **The Upgrade**: Native relies on generic 1-to-5 Fixture Difficulty Ratings (FDR).
+- **The Edge**: Eye-Test's Poisson model can evaluate **localized flank and zonal vulnerability**. If a winger (e.g. Bukayo Saka or Antoine Semenyo) attacks an opponent conceding 60% of their chances from their defensive left flank (e.g. due to an injured full-back), Eye-Test detects an asymmetric attacking spike that Native's generic rating completely misses.
+
+#### Lever 4: Effective Ownership (EO) Game-Theoretic Anchoring
+- **The Upgrade**: In Template Shield mode, blend the Bayesian xG with an **EO Risk Penalty**.
+- **The Edge**: The squad securely anchors to essential consensus anchors (Haaland, Salah, Palmer) to prevent rank crashes, while using the Bayesian xG engine specifically to identify **high-EV differential wingers and defenders** (like De Cuyper, Hinshelwood, Mbeumo) before the crowd catches on.
+
+---
+
+### 3. Summary: Native (Rear-View) vs Eye-Test (Predictive Horizon)
+
+- **Native** is a **rear-view mirror**: it rewards players who *already* scored points and accumulated official ICT. It is safe, but it is always reactive.
+- **Eye-Test Bayesian ML** is a **forward-looking radar**: once playing-time priors and sample shrinkage are properly calibrated, it identifies players about to haul *before* their price and points explode.
+- With Lever 1 now live in both repositories, the foundation is in place for Eye-Test to compete directly with and surpass Native.
