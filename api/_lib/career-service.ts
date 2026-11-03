@@ -1078,6 +1078,16 @@ export class CareerService {
       totalTransfersRolled,
       finalBank: `£${(state.bank / 10).toFixed(1)}m`,
       finalTeamValue: `£${((gameweeks[gameweeks.length - 1]?.teamValue || 1000) / 10).toFixed(1)}m`,
+      chipInventory: {
+        currentSet: startGw <= 19 ? 'Set 1 (GW1–19)' : 'Set 2 (GW20–38)',
+        deadlineGw: startGw <= 19 ? 19 : 38,
+        chips: [
+          { name: 'WC', label: 'Wildcard', status: state.chipState['WC'] > 0 ? 'AVAILABLE' : 'USED' },
+          { name: 'TC', label: 'Triple Captain', status: state.chipState['TC'] > 0 ? 'AVAILABLE' : 'USED' },
+          { name: 'BB', label: 'Bench Boost', status: state.chipState['BB'] > 0 ? 'AVAILABLE' : 'USED' },
+          { name: 'FH', label: 'Free Hit', status: state.chipState['FH'] > 0 ? 'AVAILABLE' : 'USED' }
+        ]
+      },
       gameweeks
     };
   }
