@@ -1086,3 +1086,52 @@ In [`career-service.ts`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/care
    - `npm run build` (`vite build`): Succeeded cleanly across both repositories.
 3. **Synchronized Repositories**:
    - Updated [`career-service.ts`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts) in both `fpl-admin` and `fpl-planner`.
+
+
+---
+
+## User Request:
+Oh wow, seems the AI have in mind to play BB and TC in GW 10 and GW 11, from what I see in your updated UI
+
+## Assistant Response:
+**Yes, exactly!** What you are seeing in the Forward Roadmap (especially under the **Native** fuel model) is the AI executing a rapid-fire **GW10 Bench Boost → GW11 Triple Captain** one-two punch.
+
+Here is the exact mathematical and tactical reasoning behind why the AI chose this specific sequence:
+
+---
+
+### 1. The Real-Time Decision Logs
+
+Under the **Native** engine, the simulation generated the following moves:
+
+- **Gameweek 10: Bench Boost (BB1)**
+  - **Decision Log**: `[CHIP: Bench Boost] GW10 Projected: Transfer Silva → Lindelöf. Captain: Haaland (14 xP). Bench Boost added +20 xP from bench.`
+  - **Why GW10**: After executing a defensive transfer to secure playing minutes, all 4 substitutes (Sub 1 through Sub 4) are projected starters with favorable fixtures. The bench alone contributes an exceptional **+20 expected points (xP)**. In a Single Gameweek context (where no autumn DGWs exist), securing +15 to +20 points from your bench is as close to an optimal SGW Bench Boost as you will ever get.
+
+- **Gameweek 11: Triple Captain (TC1)**
+  - **Decision Log**: `[CHIP: Triple Captain] GW11 Projected: Transfer Rice → Wharton. Captain: Haaland (27 xP).`
+  - **Why GW11**: The official FPL rules mandate that only **one chip can be played per gameweek**. Having extracted max bench output in GW10, the engine immediately shifts focus to Erling Haaland in GW11, whose base expected output of ~9.0 xP is multiplied to **27 xP** with the 3× Triple Captain arm band against a vulnerable opponent.
+
+---
+
+### 2. Tactical Advantages of This Sequencing
+
+1. **Defeating the GW19 Expiration Clock**:
+   - Because Set 1 chips expire permanently after GW19, holding both TC and BB late into November/December carries massive rotation risks (Champions League midweeks, festive fixture congestion, random restings).
+   - Executing them in GW10 and GW11 banks the high-ceiling points early, eliminating the anxiety of a forced panic play on GW19.
+2. **Squad Freshness**:
+   - In GW10–11, squads are generally healthy and fully fit before the grueling December schedule begins. Bench players are far more likely to play full 90 minutes.
+3. **Clean Runway for Wildcard 1 & Free Transfers**:
+   - With BB1 and TC1 successfully cashed in, the manager has the entire period from **GW12 to GW19** completely clear to roll free transfers (stacking up to 3–5 FTs) or deploy Wildcard 1 if key premiums suffer injuries.
+
+---
+
+### 3. How a Human Manager Should Evaluate This Move
+
+If you are looking at following this roadmap in your actual FPL team:
+
+- **For Bench Boost (GW10)**:
+  - **Green Light**: If all 4 of your bench players (backup goalkeeper and 3 outfielders) are nailed-on starters with solid fixtures (e.g., home games or non-top-6 opponents).
+  - **Caution**: If one of your bench spots is occupied by a £4.0m non-playing enabler or someone returning from injury, consider using 1 transfer to shore up the bench first, or delay the Bench Boost until your entire 15-man squad is active.
+- **For Triple Captain (GW11)**:
+  - **Green Light**: If Erling Haaland or Mohamed Salah has a fixture where Manchester City or Liverpool are heavily favored (implied team goals > 2.5). A single-fixture haul of a brace plus bonus easily matches or exceeds a mediocre DGW!
