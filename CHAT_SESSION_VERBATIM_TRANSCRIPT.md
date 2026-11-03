@@ -1205,3 +1205,80 @@ When managing your team with this setup, follow this practical playbook:
    - If a Friday evening press conference breaks news of a sudden illness or training injury that has not yet updated in the database, use your human judgment to make a sensible substitute.
 4. **Set 1 vs Set 2 Chip Execution**:
    - Since Set 1 chips expire permanently at GW19, deploying Bench Boost or Triple Captain in GW10–11 when your 15 players have favorable single fixtures is a sound mathematical move. Even if a bench player scores 2 points instead of 6, you safely banked the chip's value rather than letting it expire or panic-playing it under heavy December rotation.
+
+
+---
+
+## User Request:
+So I want to ask why EYE TEST bayesian ML doesn't perform well with AI career
+
+## Assistant Response:
+Here is the exact mathematical and tactical breakdown of why the **Eye-Test Bayesian ML** engine scored **427–485 points**, while **Native** scored **606–614 points** and **FPLForm** scored **512–537 points** across the 9-gameweek Career simulation.
+
+---
+
+### 1. The Per-90 Rate Distortion (The Small-Sample Trap)
+
+In [`projection.ts`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/projection.ts#L220), the Eye-Test engine evaluates players bottom-up from granular underlying rates:
+- `xG90` (Expected Goals per 90)
+- `xA90` (Expected Assists per 90)
+- `shots90` (Shots per 90)
+- `keyPasses90` (Key Passes per 90)
+
+**The Flaw**: Fringe squad players, rotational impact substitutes, and new summer signings who only featured in short cameos often show **artificially inflated per-90 metrics** because they played 15–20 minutes against tired legs. 
+
+Because the pure machine learning weights heavily reward high per-90 attacking rates, the Eye-Test engine in Gameweek 1 fell in love with players who had flashy underlying numbers but lacked guaranteed manager trust. In GW1, the Eye-Test engine selected:
+- **Muñoz** (0 pts)
+- **O'Riley** (0 pts)
+- **Jonathan David** (0 pts)
+- **Adli** (0 pts)
+- **Cho** (0 pts)
+- **Mamardashvili** (0 pts)
+- **Gelhardt** (0 pts)
+
+As a result, Eye-Test scored an abysmal **21 points in Gameweek 1** (compared to 44–48 points for Native).
+
+---
+
+### 2. The 1 Free Transfer Human Trap (Firefighting vs Capital Allocation)
+
+In isolated single-week optimizers (like the **Pitch** tab or **Free Hit** backtests), an algorithm is allowed to wipe its squad clean every single week. If it makes 5 bad picks in GW1, it suffers zero long-term consequences because it gets a brand-new 15-man squad in GW2 for free.
+
+In **AI Career Mode**, real-world human rules are strictly enforced:
+- **Only 1 Free Transfer per Gameweek**
+- **-4 point penalty hits for any extra moves**
+
+Because Eye-Test loaded up on 4 to 5 non-playing or bench players in GW1, the AI was forced to spend the next 5 weeks playing **firefighter** just to field 11 active starters:
+- **GW2 Transfer**: `Mamardashvili → Rushworth` (fixing non-playing backup keeper)
+- **GW3 Transfer**: `O'Riley → McAtee`
+- **GW4 Transfer**: `Adli → Rudoni`
+- **GW5 Transfer**: `David → Awoniyi`
+- **GW6 Transfer**: `Gvardiol → Van Hecke`
+
+Because its single free transfer each week was trapped putting out fires in the squad, the AI **could never make proactive attacking transfers** to jump on exploding form assets (like Cole Palmer, Bukayo Saka, or Bryan Mbeumo).
+
+---
+
+### 3. Why NATIVE Dominates Career Mode (606–614 Points)
+
+In contrast, the **Native** engine is anchored to reality:
+1. **Official Premier League ICT & Price Baselines**:
+   - Native uses official Premier League Influence, Creativity, Threat, and Points-Per-Match (PPM) indexes. A player priced at £10.0m–£15.0m with high baseline minutes is recognized as an indispensable starter.
+2. **Starting XI Stability**:
+   - In GW1, Native selected rock-solid Premier League starters who played 90 minutes every single week.
+3. **Proactive Transfer Compounding**:
+   - Because Native had a healthy, playing squad from Day 1, it never had to waste transfers replacing non-playing deadwood.
+   - In GW2–9, Native used its 1 FT/week to make aggressive, high-upside upgrades:
+     - `Transfer: Dedić → N.Williams`
+     - `Transfer: N.Williams → Gabriel`
+     - `Transfer: E.Le Fée → Tonali`
+     - `Transfer: Tonali → Declan Rice`
+   - Every single transfer systematically upgraded the squad's ceiling rather than fixing basic lineup emergencies.
+
+---
+
+### 4. Summary Takeaway for Managers
+
+- **Eye-Test Bayesian ML** is great at finding **isolated differential punts** in single gameweeks where you need an aggressive, low-ownership ceiling pick.
+- For a **full season campaign under 1 FT/week rules**, pure underlying ML rates without playing-time security will wreck your squad's continuity.
+- Sticking with **NATIVE SAFE TEMPLATE SHIELD** guarantees that your team maintains 15 starting assets, avoids the firefighting trap, and deploys every free transfer toward genuine point upgrades.
