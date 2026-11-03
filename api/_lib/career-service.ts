@@ -229,17 +229,18 @@ export class CareerService {
   public static async getAutonomousCareer(
     fuel: string = 'fplform',
     riskMode: string = 'safe',
-    endGw: number = 9,
+    endGw?: number,
     scenario: 'quant' | 'template' = 'quant'
   ): Promise<CareerSeasonPayload> {
-    const cacheKey = `auto_${fuel}_${riskMode}_${scenario}_${endGw}`;
+    const baseData = await FPLService.getBaseData();
+    const effectiveEndGw = (endGw !== undefined && !isNaN(endGw)) ? endGw : (baseData.currentEventId || 9);
+    const cacheKey = `auto_${fuel}_${riskMode}_${scenario}_${effectiveEndGw}`;
     const cached = this.autonomousCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
       return cached.payload;
     }
 
     const params = getParamsForRiskMode(riskMode, DEFAULT_PARAMETERS, scenario);
-    const baseData = await FPLService.getBaseData();
     const oracleGw1 = this.getOracleForGw(1, baseData, fuel, riskMode);
 
     // Initial GW1 squad solve with £100m budget
@@ -267,7 +268,7 @@ export class CareerService {
     let totalTransfersRolled = 0;
     let totalHitsCost = 0;
 
-    for (let gw = 1; gw <= endGw; gw++) {
+    for (let gw = 1; gw <= effectiveEndGw; gw++) {
       const oracle = this.getOracleForGw(gw, baseData, fuel, riskMode);
       const playerStats = this.getPlayerStats(gw);
       const actualPoints: Record<number, number> = {};
@@ -511,12 +512,13 @@ export class CareerService {
     teamId: string,
     fuel: string = 'fplform',
     riskMode: string = 'safe',
-    endGw: number = 9,
+    endGw?: number,
     scenario: 'quant' | 'template' = 'quant'
   ): Promise<CareerSeasonPayload> {
     const params = getParamsForRiskMode(riskMode, DEFAULT_PARAMETERS, scenario);
     const cleanId = String(teamId).trim();
     const baseData = await FPLService.getBaseData();
+    const effectiveEndGw = (endGw !== undefined && !isNaN(endGw)) ? endGw : (baseData.currentEventId || 9);
 
     // 1. Fetch user's real history & entry details
     let userHistoryEvents: any[] = [];
@@ -576,7 +578,7 @@ export class CareerService {
     let totalHitsCost = 0;
     let cumulativeAlpha = 0;
 
-    const maxGw = Math.min(endGw, userHistoryEvents.length || endGw);
+    const maxGw = Math.min(effectiveEndGw, userHistoryEvents.length || effectiveEndGw);
 
     for (let gw = 1; gw <= maxGw; gw++) {
       const oracle = this.getOracleForGw(gw, baseData, fuel, riskMode);

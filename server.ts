@@ -278,7 +278,7 @@ async function startServer() {
       const riskMode = ((req.query.riskMode || req.body?.riskMode) as string) || 'safe';
       const scenario = (((req.query.scenario || req.body?.scenario) as string) || 'quant') as 'quant' | 'template';
       const forwardSource = (((req.query.forwardSource || req.body?.forwardSource) as string) || (teamId ? 'synced' : 'autonomous')) as 'autonomous' | 'synced';
-      const endGw = (req.query.endGw || req.body?.endGw) ? parseInt((req.query.endGw || req.body?.endGw) as string, 10) : 9;
+      const endGw = (req.query.endGw || req.body?.endGw) ? parseInt((req.query.endGw || req.body?.endGw) as string, 10) : undefined;
 
       const { CareerService } = await import("./api/_lib/career-service");
       if (mode === 'synced' && teamId) {

@@ -2056,7 +2056,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const riskMode = ((query.riskMode || req.body?.riskMode) as string) || 'safe';
       const scenario = (((query.scenario || req.body?.scenario) as string) || 'quant') as 'quant' | 'template';
       const forwardSource = (((query.forwardSource || req.body?.forwardSource) as string) || (teamId ? 'synced' : 'autonomous')) as 'autonomous' | 'synced';
-      const endGw = (query.endGw || req.body?.endGw) ? parseInt((query.endGw || req.body?.endGw) as string, 10) : 9;
+      const endGw = (query.endGw || req.body?.endGw) ? parseInt((query.endGw || req.body?.endGw) as string, 10) : undefined;
 
       const { CareerService } = await import("./_lib/career-service.js");
       if (mode === 'synced' && teamId) {

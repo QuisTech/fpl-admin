@@ -1135,3 +1135,73 @@ If you are looking at following this roadmap in your actual FPL team:
   - **Caution**: If one of your bench spots is occupied by a £4.0m non-playing enabler or someone returning from injury, consider using 1 transfer to shore up the bench first, or delay the Bench Boost until your entire 15-man squad is active.
 - **For Triple Captain (GW11)**:
   - **Green Light**: If Erling Haaland or Mohamed Salah has a fixture where Manchester City or Liverpool are heavily favored (implied team goals > 2.5). A single-fixture haul of a brace plus bonus easily matches or exceeds a mediocre DGW!
+
+
+---
+
+## User Request:
+Okay so as GW finishes, the exact just concluded GW will be added to the Autonomous AI details right?
+
+Also, is it a guarantee what the AI plays will become reality or how should I take the AI prediction at the end of the GW? SInce I am going to be following the NATIVE SAFE TEMPLATE SHIELD
+
+## Assistant Response:
+Here are the exact answers to both questions regarding how gameweek transitions work and how to interpret and execute AI predictions when following **NATIVE SAFE TEMPLATE SHIELD**:
+
+---
+
+### 1. Does the Concluded Gameweek Automatically Get Added to Autonomous AI?
+
+**Yes, absolutely.**
+
+Here is the exact automated data pipeline that runs as each Gameweek finishes:
+
+1. **Official FPL Settlement**:
+   - Once the final fixture of a gameweek ends, the official Premier League game engine finalizes bonus points, records official player minutes, goals, assists, and clean sheets, marks that event as `finished: true`, and updates the current gameweek counter.
+2. **Dynamic Transition into Historical Timeline**:
+   - The Autonomous AI engine (`CareerService.getAutonomousCareer`) dynamically detects the newly completed gameweek.
+   - It simulates the exact transfer made going into that matchday, sets the starting XI and captain, and records the **real, verified official FPL matchday points** scored by those 15 players (including official auto-substitutions if a starter played 0 minutes).
+   - That gameweek is permanently locked into the **Autonomous AI Historical Timeline** (e.g. GW10 joins GW1–9).
+3. **The Forward Roadmap Rolls Forward**:
+   - The **Forward Roadmap** immediately advances: instead of showing GW10 to GW15, it automatically begins at **GW11** (projecting GW11 to GW16), seamlessly seeded with your team's updated bank balance, squad value, and banked free transfers (up to 5 FTs).
+
+---
+
+### 2. Is It a Guarantee That What the AI Predicts Becomes Reality?
+
+**No prediction model can ever guarantee a specific real-world outcome in a single 90-minute football match.**
+
+Anyone who claims an FPL algorithm can guarantee reality in a single matchday is misleading you. Understanding the difference between **single-match variance** and **long-term mathematical expected value (EV)** is what separates elite FPL managers from casual players:
+
+#### A. Expected Value (EV) vs Single-Match Variance
+- Football is a sport with significant single-match variance: a referee awards a soft penalty in the 10th minute, an elite striker hits the post twice, a goalkeeper makes 11 miraculous saves, or a 94th-minute deflected goal wipes out a clean sheet.
+- When the AI projects Erling Haaland for 9.0 xP (or 27 xP on Triple Captain), it does **not** mean Haaland is contractually guaranteed to score 27 points. It means that given his underlying Expected Goal Involvement (xGI), volume of shots inside the box, historical conversion rate, and opposition defensive metrics, captaining Haaland offers the **highest statistical probability of scoring points** compared to every other player in the league.
+
+#### B. Why "NATIVE SAFE TEMPLATE SHIELD" is the Most Reliable Setup
+By selecting **Native + Safe + Template Shield**, you have configured the most mathematically resilient, rank-defending strategy possible:
+
+1. **Native (ICT & PPM Baseline)**:
+   - Avoids short-term knee-jerk bias. It anchors player valuation to official Premier League Influence, Creativity, and Threat metrics combined with points-per-million capital efficiency.
+2. **Safe (High-Floor Discipline)**:
+   - Prioritizes proven 90-minute starters with high appearance reliability.
+   - Penalizes rotation risks and volatile punts.
+   - Mandates elite premium anchors (Haaland, Salah, Palmer, Gabriel) and protects clean-sheet floors.
+3. **Template Shield (Game-Theoretic EO Defense)**:
+   - In FPL, your overall rank is heavily determined by **Effective Ownership (EO)**. If the top 100k managers are 150% invested in a talisman (ownership + captaincy) and you do not own him, a single brace will severely damage your rank.
+   - Template Shield mathematically protects you against rank crashes by matching high-ownership consensus picks while identifying surgical, high-probability micro-differentials to gain rank steadily.
+
+---
+
+### 3. How You Should Approach AI Predictions Each Week
+
+When managing your team with this setup, follow this practical playbook:
+
+1. **Think in 4–8 Week Horizons (The Law of Large Numbers)**:
+   - In any single gameweek, luck and variance can swing scores by ±15 to 20 points.
+   - Over a 5 to 10 gameweek block, random variance cancels out, and disciplined mathematical decision-making consistently beats human emotion and knee-jerking.
+2. **Trust the Power of Rolling Transfers**:
+   - When the AI advises **rolling a Free Transfer** (doing nothing), trust it! Banking a transfer gives you 2 FTs for the following gameweek, providing immense flexibility to navigate sudden injuries or capitalize on fixture swings.
+3. **Combine AI Logic with Pre-Deadline Team News**:
+   - The AI uses the latest official injury and availability flags (`chance_of_playing_next_round`).
+   - If a Friday evening press conference breaks news of a sudden illness or training injury that has not yet updated in the database, use your human judgment to make a sensible substitute.
+4. **Set 1 vs Set 2 Chip Execution**:
+   - Since Set 1 chips expire permanently at GW19, deploying Bench Boost or Triple Captain in GW10–11 when your 15 players have favorable single fixtures is a sound mathematical move. Even if a bench player scores 2 points instead of 6, you safely banked the chip's value rather than letting it expire or panic-playing it under heavy December rotation.
