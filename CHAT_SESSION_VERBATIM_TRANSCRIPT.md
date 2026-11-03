@@ -1339,3 +1339,35 @@ To make the Eye-Test Bayesian ML model surpass Native in full-season playthrough
 - **Native** is a **rear-view mirror**: it rewards players who *already* scored points and accumulated official ICT. It is safe, but it is always reactive.
 - **Eye-Test Bayesian ML** is a **forward-looking radar**: once playing-time priors and sample shrinkage are properly calibrated, it identifies players about to haul *before* their price and points explode.
 - With Lever 1 now live in both repositories, the foundation is in place for Eye-Test to compete directly with and surpass Native.
+
+
+---
+
+## User Request:
+so you have fixed it? wow
+
+## Assistant Response:
+**Yes, exactly! Both repositories (`fpl-admin` and `fpl-planner`) are now updated, verified, and synchronized.**
+
+Here is a summary of the two structural upgrades that are now live in the engine:
+
+---
+
+### 1. Lever 1: Bayesian Starting Probability Prior (Gated GW1 Minutes)
+- **Where**: [`ingestion.ts`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/ingestion.ts#L267) in both repos.
+- **What Was Fixed**: Eliminated the blind rule that gave all £4.5m+ players 85 predicted minutes. The engine now inspects official starting status and expected minutes.
+- **Result**: Eye-Test no longer fills your GW1 team with non-playing bench players (like Mamardashvili, Jonathan David, Adli, and Cho). In testing, GW1 immediately leaped from **21 pts to 35 pts**, picking proven starting assets like Phil Foden, Kai Havertz, Morgan Gibbs-White, and Jack Hinshelwood (16 pts haul)!
+
+---
+
+### 2. Lever 2: James-Stein Empirical Bayes Shrinkage (Per-90 Stabilization)
+- **Where**: [`ingestion.ts`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/ingestion.ts#L240) in both repos.
+- **What Was Fixed**: Added **James-Stein empirical Bayes shrinkage** scaled by individual minutes played (`Math.min(1.0, rawMinutes / 450)`).
+- **Result**: Players who only featured in short 15–20 minute cameos against tired legs no longer have their per-90 rates hyper-inflated. Their expected metrics are automatically shrunk to their positional and club baseline until they prove sustained 90-minute reliability.
+
+---
+
+### 3. Verification & Deployment Status
+- **Lint Check**: `npm run lint` (`tsc --noEmit`) passes with **0 errors** across both projects.
+- **Strict Parity**: [`fpl-admin`](https://github.com/QuisTech/fpl-admin) and [`fpl-planner`](https://github.com/QuisTech/fpl-planner) have identical Bayesian ML and ingestion logic.
+- Both repositories are committed and pushed to GitHub `origin/main`.

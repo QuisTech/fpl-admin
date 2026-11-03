@@ -230,22 +230,23 @@ export abstract class BaseOracle implements XPOracle {
       const priorXA = (pos === 'MID' ? 0.18 : pos === 'FWD' ? 0.12 : pos === 'DEF' ? 0.06 : 0.0) * priceScale;
 
       const completedGws = Math.max(1, nextEventId - 1);
-
-      // Dynamic Bayesian weight scaling with sample size (completedGws)
-      // GW1-3: ~25-35% live stats, firmly anchored to multi-season prior
-      // GW5-8: ~55-70% live stats, rolling sample surge (Phase 2 2K resolution)
-      // GW10+: ~85-90% live stats, peak predictive empirical power
-      const liveWeight = Math.min(0.90, Math.max(0.25, 0.15 + completedGws * 0.08));
-      const priorWeight = 1 - liveWeight;
-
-      let xG90 = Math.min(1.0, (expectedGoalsPer90 * liveWeight) + (priorXG * priorWeight));
-      let xA90 = Math.min(0.7, (expectedAssistsPer90 * liveWeight) + (priorXA * priorWeight));
-
       const rawMinutes = p.minutes || 0;
       const starts = p.starts || 0;
       const avgMins = rawMinutes / completedGws;
       const startRate = Math.min(1.0, starts / completedGws);
       const isAvail = p.status !== 'i' && p.status !== 's' && p.status !== 'u' && probPlay >= 0.5;
+
+      // Dynamic Bayesian weight scaling with sample size (completedGws) and empirical minutes shrinkage (James-Stein)
+      // GW1-3: ~25-35% live stats, firmly anchored to multi-season prior
+      // GW5-8: ~55-70% live stats, rolling sample surge (Phase 2 2K resolution)
+      // GW10+: ~85-90% live stats, peak predictive empirical power
+      // Scaled by individual minutes played to prevent hyper-inflated cameo distortions
+      const minutesConfidence = Math.min(1.0, rawMinutes / 450); // 450 mins = 5 full 90-min matches
+      const liveWeight = Math.min(0.90, Math.max(0.10, (0.15 + completedGws * 0.08) * (0.3 + 0.7 * minutesConfidence)));
+      const priorWeight = 1 - liveWeight;
+
+      let xG90 = Math.min(1.0, (expectedGoalsPer90 * liveWeight) + (priorXG * priorWeight));
+      let xA90 = Math.min(0.7, (expectedAssistsPer90 * liveWeight) + (priorXA * priorWeight));
 
       // Empirical average minutes when starting (hook index / duration)
       // Clamped between 45 and 90 to reflect actual match substitution patterns
