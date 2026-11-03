@@ -1549,3 +1549,72 @@ As an FPL manager, you do **not** want to build your entire 15-man squad out of 
 #### Step 3: The Surgical Transfer Strike
 - When you have a free transfer in your main team, instead of buying a player whose price has already risen after 3 consecutive hauls, you bring in the **Eye-Test breakout candidate** 1 or 2 gameweeks *before* the general public notices them.
 - **The Result**: You get the rank safety of the **Template Shield** on your premiums, combined with the explosive upward rank mobility of **Eye-Test's forward-looking differentials**.
+
+
+---
+
+## User Request:
+You're explaining other parts of the app, Im talking about the career tab please AI Autonomous moves
+
+## Assistant Response:
+Understood! Here is the exact walkthrough for how to use the **Career Tab** (specifically the **Autonomous AI** and **Forward Roadmap** modes) to scout about-to-breakout stars, along with the exact configuration to set in the header:
+
+---
+
+### 1. The Exact Configuration to Set in the Header
+
+To make the Career Tab's Autonomous engine hunt for breakout stars, set the global pills in the app header to:
+
+👉 **Fuel: `Eye-Test` | Risk Mode: `Aggressive` | Scenario: `Quant Optimal`**
+
+Then inside the **Career Tab**, click on **Forward Roadmap** (or **Autonomous AI**).
+
+---
+
+### 2. What the AI Autonomous Engine Does Under This Configuration (Real Simulation Data)
+
+When you run the Career Tab's Autonomous Forward Roadmap under **Eye-Test Aggressive Quant**, here is the exact sequence of moves the AI projects for Gameweeks 10 through 15:
+
+- **Gameweek 10**:
+  - **Autonomous Transfer**: `Transfer: Maatsen → De Cuyper`
+  - **Breakout Discovery**: The model identifies **Maxim De Cuyper** (£4.5m–£5.4m) as a high-xGI attacking full-back before his price surges.
+- **Gameweek 11**:
+  - **Autonomous Chip**: `[CHIP: Triple Captain] Captain: Haaland (30 xP target)`.
+  - **Autonomous Move**: Leverages the high single-gameweek ceiling before the GW19 Set 1 deadline.
+- **Gameweek 13**:
+  - **Autonomous Transfer**: `Transfer: Gakpo → Mbeumo`
+  - **Breakout Captaincy**: `Captain: Morgan Gibbs-White (18 xP)`
+  - **Breakout Discovery**: The engine brings in **Bryan Mbeumo** (£7.0m–£7.5m) right as Brentford's green attacking fixture swing begins, and hands the captaincy to **Gibbs-White** against a porous defense.
+- **Gameweek 14**:
+  - **Breakout Captaincy**: `Captain: Marcus Tavernier (16 xP)`
+  - **Breakout Discovery**: Singles out **Tavernier** as an explosive differential talisman against a weak defense.
+- **Gameweek 15**:
+  - **Breakout Captaincy**: `Captain: Bryan Mbeumo (18 xP)`
+  - **Breakout Discovery**: Entrusts Mbeumo with the captaincy as his underlying xG volume peaks.
+
+---
+
+### 3. How to Compare This to Your "Native Safe Template" Team in the Career Tab
+
+Notice the stark contrast when you flip between the two modes in the **Career Tab's Forward Roadmap**:
+
+| Gameweek | **BASE: Native Safe Template** (Your Anchor) | **SCOUT: Eye-Test Aggressive Quant** (Breakout Hunter) |
+| :--- | :--- | :--- |
+| **GW10** | Safe defensive move: `Doku → Wharton` | Attacking full-back hunt: `Maatsen → De Cuyper` |
+| **GW11** | Conservative captaincy: `Haaland` | Premium Triple Captain: `Haaland (30 xP)` |
+| **GW13** | Conservative transfer: `Ouattara → Gabriel` | High-xGI striker strike: `Gakpo → Mbeumo` |
+| **GW14** | Template captaincy: `Haaland / N.Jackson` | Differential captaincy: `Marcus Tavernier` |
+| **GW15** | Safe defensive shuffle: `Richards → N.Williams` | Explosive form captaincy: `Bryan Mbeumo` |
+
+---
+
+### 4. The Actionable Workflow for You Each Gameweek
+
+1. **Keep Your Real Team on Native Safe Template**:
+   - In the Career Tab's **You vs AI Duel** or **Forward Roadmap (Synced)**, follow the Native Safe recommendations for your captaincy (Haaland/Salah) and core defense. This guarantees rank safety.
+2. **Consult the Eye-Test Aggressive Quant Roadmap for Transfers**:
+   - Before confirming your weekly transfer, flip the pills to **Eye-Test + Aggressive + Quant Optimal** in the Career Tab.
+   - Look at the **Decision Log** in the next 1–2 gameweeks to see which differential winger or forward the AI is buying (e.g. Mbeumo, De Cuyper, Tavernier).
+3. **Execute the Move 1 Week Early**:
+   - Buy that breakout star with your 1 Free Transfer.
+   - You get the best of both worlds: your captain is bulletproof with the template, while your single transfer is a mathematically backed breakout star that propels you ahead of your mini-league rivals.
