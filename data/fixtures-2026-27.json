@@ -34325,25 +34325,6 @@
     "pulse_id": 0
   },
   {
-    "code": 2645353,
-    "event": 16,
-    "finished": false,
-    "finished_provisional": false,
-    "id": 159,
-    "kickoff_time": "2026-12-19T15:00:00Z",
-    "minutes": 0,
-    "provisional_start_time": false,
-    "started": false,
-    "team_a": 9,
-    "team_a_score": null,
-    "team_h": 18,
-    "team_h_score": null,
-    "stats": [],
-    "team_h_difficulty": 3,
-    "team_a_difficulty": 2,
-    "pulse_id": 0
-  },
-  {
     "code": 2645351,
     "event": 16,
     "finished": false,
@@ -34379,6 +34360,25 @@
     "stats": [],
     "team_h_difficulty": 2,
     "team_a_difficulty": 4,
+    "pulse_id": 0
+  },
+  {
+    "code": 2645353,
+    "event": 16,
+    "finished": false,
+    "finished_provisional": false,
+    "id": 159,
+    "kickoff_time": "2026-12-20T14:00:00Z",
+    "minutes": 0,
+    "provisional_start_time": false,
+    "started": false,
+    "team_a": 9,
+    "team_a_score": null,
+    "team_h": 18,
+    "team_h_score": null,
+    "stats": [],
+    "team_h_difficulty": 3,
+    "team_a_difficulty": 2,
     "pulse_id": 0
   },
   {
