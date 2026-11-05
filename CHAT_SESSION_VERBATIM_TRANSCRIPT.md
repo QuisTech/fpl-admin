@@ -1955,3 +1955,28 @@ With Barry's authentic 79 minutes and 9 points restored:
 
 **GW9 Total:** **69 Net Pts**
 
+## User (2026-11-05)
+
+fixed in both repo?
+
+## Assistant (2026-11-05)
+
+**Yes, absolutely.** It has been completely fixed, verified, and pushed to `origin/main` across **both** repositories:
+
+1. **`fpl-admin`** ([fpl-admin](file:///c:/Users/USER/Documents/fpl-admin)):
+   - **Commit:** `d1be728` — `fix(career): correct GW9 live matchday snapshot and defensive auto-sub reconciliation for Barry`
+   - Modified files:
+     - [career-service.ts](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts#L123) (defensive reconciliation added)
+     - [player_stats.json](file:///c:/Users/USER/Documents/fpl-admin/data/snapshots/gw_9/player_stats.json) (Barry 79m 9pts, Tarkowski 90m 6pts, Pickford 76m 2pts)
+     - [player_points.json](file:///c:/Users/USER/Documents/fpl-admin/data/snapshots/gw_9/player_points.json)
+   - Status: `On branch main, up to date with origin/main, working tree clean`.
+
+2. **`fpl-planner`** ([fpl-planner](file:///c:/Users/USER/Documents/fpl-planner)):
+   - **Commit:** `4f020b7` — `fix(career): correct GW9 live matchday snapshot and defensive auto-sub reconciliation for Barry`
+   - Modified files:
+     - [career-service.ts](file:///c:/Users/USER/Documents/fpl-planner/api/_lib/career-service.ts#L123) (defensive reconciliation added)
+     - [player_stats.json](file:///c:/Users/USER/Documents/fpl-planner/data/snapshots/gw_9/player_stats.json) (re-synced match stats)
+     - [player_points.json](file:///c:/Users/USER/Documents/fpl-planner/data/snapshots/gw_9/player_points.json)
+   - Status: `On branch main, up to date with origin/main, working tree clean`.
+
+Both codebases now share identical data integrity safeguards and authentic matchday stats.
