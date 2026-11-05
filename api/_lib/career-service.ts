@@ -122,28 +122,43 @@ export class CareerService {
 
   private static getPlayerStats(gw: number): Record<number, { points: number; minutes: number }> {
     const statsPath = path.join(process.cwd(), `data/snapshots/gw_${gw}/player_stats.json`);
+    const pointsMap = this.getPlayerPoints(gw);
+    const result: Record<number, { points: number; minutes: number }> = {};
+
     if (fs.existsSync(statsPath)) {
       try {
         const raw = JSON.parse(fs.readFileSync(statsPath, 'utf8'));
-        const result: Record<number, { points: number; minutes: number }> = {};
         for (const k in raw) {
           result[parseInt(k, 10)] = {
             points: Number(raw[k].points ?? 0),
             minutes: Number(raw[k].minutes ?? 0)
           };
         }
-        return result;
       } catch (e) {
         console.warn(`[CareerService] Error reading player_stats for GW${gw}:`, e);
       }
     }
-    const pointsMap = this.getPlayerPoints(gw);
-    const fallback: Record<number, { points: number; minutes: number }> = {};
+
+    // Defensive Reconciliation:
+    // If player_points has positive points for a player (> 0), they unquestionably featured in real life.
+    // If player_stats recorded 0 minutes and 0 points (e.g. from an incomplete/stale matchday snapshot),
+    // self-heal from player_points so genuine point scorers are never falsely marked as 0-minute non-players.
     for (const k in pointsMap) {
-      const pts = pointsMap[k];
-      fallback[parseInt(k, 10)] = { points: pts, minutes: pts > 0 ? 90 : 0 };
+      const id = parseInt(k, 10);
+      const pts = pointsMap[id] ?? 0;
+      if (pts > 0 && (!result[id] || (result[id].minutes === 0 && result[id].points === 0))) {
+        result[id] = { points: pts, minutes: 90 };
+      }
     }
-    return fallback;
+
+    if (Object.keys(result).length === 0) {
+      for (const k in pointsMap) {
+        const pts = pointsMap[k];
+        result[parseInt(k, 10)] = { points: pts, minutes: pts > 0 ? 90 : 0 };
+      }
+    }
+
+    return result;
   }
 
   private static getOracleForGw(gw: number, baseData: any, fuel: string, riskMode: string): XPOracle {
