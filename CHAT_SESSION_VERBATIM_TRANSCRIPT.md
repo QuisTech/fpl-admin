@@ -26234,3 +26234,75 @@ In [CareerModeView.tsx](file:///c:/Users/USER/Documents/fpl-admin/src/components
 - **Forward Roadmap (Autonomous Squad):** Now immediately displays **GW10** Manager Decision, 1-FT transfer execution, and starting lineup.
 - **Forward Roadmap (My Synced Team):** Now immediately displays **GW10** Manager Decision and proposed move for your actual squad.
 - Both repositories have been compiled with zero TypeScript errors and pushed to `origin/main`.
+
+## User (2026-11-06)
+
+Answer this person for me:
+
+HiMichael Marquis,
+
+I saw your GitHub project fpl-admin and spent some time looking through it.
+I like what you’re doing with it, and I think the project has potential to reach a much wider audience than it currently does.
+
+I work with open source projects to help get them in front of relevant developers, users, and communities through targeted organic promotion.
+The idea isn't to simply push a GitHub link around, but to find the places where people are already interested in what the project solves and introduce it in a way that makes sense for that audience.
+
+Looking at fpl-admin, I can already see a few communities where it could be relevant and generate genuine interest, feedback, and potentially new contributors or users.
+
+If you're open to it, I can send you a short breakdown of where I see the best opportunities for the project and how I would approach them.
+
+Best,
+
+Jordan@Cioly
+
+## Assistant (2026-11-06)
+
+### Context on this Message
+
+This is a standard cold outreach email from **Cioly** (a developer marketing & open-source growth agency). They scrape active GitHub repositories and send semi-automated outreach to repo owners. Their goal is usually to offer an initial "free breakdown" or audit, and then pitch a paid organic promotion or community marketing package.
+
+Depending on what you want to do, here are 3 ready-to-send options you can copy and paste:
+
+---
+
+### Option 1: Curious for Free Ideas (Guarded on Budget)
+*Use this if you\'d like to see their suggestions and community recommendations, but want to make it immediately clear that you have no budget for paid marketing.*
+
+> Hi Jordan,
+> 
+> Thanks for reaching out and taking a look at `fpl-admin`.
+> 
+> I\'m always open to feedback and learning about relevant communities where FPL and fantasy analytics enthusiasts hang out. Feel free to send over your breakdown.
+> 
+> Just to be upfront and respect your time: this is an independent open-source project with no dedicated marketing budget, so I am not in the market for paid agency or promotional services. If you\'re still happy to share your high-level ideas, I\'d gladly read them.
+> 
+> Best regards,  
+> Michael
+
+---
+
+### Option 2: Polite Decline (Not Interested)
+*Use this if you don\'t want marketing pitches or follow-up sales emails.*
+
+> Hi Jordan,
+> 
+> Thanks for reaching out and for your interest in `fpl-admin`.
+> 
+> Right now, my focus is purely on core product development and analytical modeling, so I\'m not looking for any promotional or marketing initiatives at this stage.
+> 
+> Appreciate your time and best of luck with Cioly.
+> 
+> Best regards,  
+> Michael
+
+---
+
+### Option 3: Short & Direct
+*Use this if you want the breakdown right away without back-and-forth.*
+
+> Hi Jordan,
+> 
+> Thanks for checking out the project. Sure, feel free to send over the breakdown here via email.
+> 
+> Best,  
+> Michael
