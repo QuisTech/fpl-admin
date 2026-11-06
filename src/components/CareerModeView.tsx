@@ -150,7 +150,8 @@ export const CareerModeView = ({
       }
       setData(res.data);
       if (res.data.gameweeks.length > 0) {
-        setSelectedGwIndex(res.data.gameweeks.length - 1);
+        const isForward = res.data.mode === 'forward' || mode === 'forward';
+        setSelectedGwIndex(isForward ? 0 : res.data.gameweeks.length - 1);
       }
     } catch (err: any) {
       console.error("Career Mode Fetch Error:", err);
@@ -164,7 +165,7 @@ export const CareerModeView = ({
     fetchCareerData();
   }, [mode, teamId, activeFuel, activeRisk, activeScenario]);
 
-  const activeGwData = data?.gameweeks?.[selectedGwIndex] || null;
+  const activeGwData = data?.gameweeks?.[selectedGwIndex] || data?.gameweeks?.[0] || null;
 
   return (
     <div className="space-y-6">
@@ -205,7 +206,10 @@ export const CareerModeView = ({
           {mode === 'forward' && (
             <div className="flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800 text-[11px]">
               <button
-                onClick={() => setForwardSource('autonomous')}
+                onClick={() => {
+                  setForwardSource('autonomous');
+                  setSelectedGwIndex(0);
+                }}
                 className={cn(
                   "px-2.5 py-1 rounded-lg font-bold transition-all flex items-center gap-1.5",
                   forwardSource === 'autonomous'
@@ -218,7 +222,10 @@ export const CareerModeView = ({
               </button>
               {teamId && (
                 <button
-                  onClick={() => setForwardSource('synced')}
+                  onClick={() => {
+                  setForwardSource('synced');
+                  setSelectedGwIndex(0);
+                }}
                   className={cn(
                     "px-2.5 py-1 rounded-lg font-bold transition-all flex items-center gap-1.5",
                     forwardSource === 'synced'
@@ -264,7 +271,10 @@ export const CareerModeView = ({
             </button>
 
             <button
-              onClick={() => setMode('forward')}
+              onClick={() => {
+                setMode('forward');
+                setSelectedGwIndex(0);
+              }}
               className={cn(
                 "px-3 py-1.5 rounded-lg text-xs font-bold transition-all",
                 mode === 'forward'
