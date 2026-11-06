@@ -26183,3 +26183,54 @@ pushed?
 2. **`fpl-admin`**:
    - Rebased with remote automated data syncs and pushed commit `b516786` to `https://github.com/QuisTech/fpl-admin.git` on branch `main`.
    - Working tree clean.
+
+## User (2026-11-06)
+
+So when I click on Forward Roadmap on career tab, whether (Autonomous Squad
+
+My Synced Team) why does it always starts showing from the last like the current GW 15, but I think it suppose to start showing GW10  or earliest GW
+
+## Assistant (2026-11-06)
+
+### Root Cause: Hardcoded Last-Index Selection
+
+You were completely right — that was an unintuitive default!
+
+Here is why it was happening:
+
+1. In [CareerModeView.tsx](file:///c:/Users/USER/Documents/fpl-admin/src/components/CareerModeView.tsx#L150), whenever career data was fetched or reloaded, the code unconditionally selected the last index of the array:
+   ```tsx
+   setSelectedGwIndex(res.data.gameweeks.length - 1);
+   ```
+2. For historical replay modes (`autonomous` and `synced`, covering GW1 to GW9), selecting `length - 1` lands on **GW9** (the most recent completed gameweek), which makes sense when reviewing past performance.
+3. However, for **Forward Roadmap**, the array consists of future gameweeks: `[GW10, GW11, GW12, GW13, GW14, GW15]`.
+   - Calling `length - 1` forced the UI to land on index 5 (**GW15** — 6 weeks into the future!) instead of the upcoming deadline (**GW10**).
+   - This happened every time you clicked **Forward Roadmap**, and every time you toggled between **Autonomous Squad** and **My Synced Team**.
+
+---
+
+### The Fix Implemented
+
+In [CareerModeView.tsx](file:///c:/Users/USER/Documents/fpl-admin/src/components/CareerModeView.tsx#L150) (across both [fpl-admin](file:///c:/Users/USER/Documents/fpl-admin) and [fpl-planner](file:///c:/Users/USER/Documents/fpl-planner)):
+
+1. **Intelligent Mode-Aware Gameweek Selection:**
+   ```tsx
+   const isForward = res.data.mode === 'forward' || mode === 'forward';
+   setSelectedGwIndex(isForward ? 0 : res.data.gameweeks.length - 1);
+   ```
+   - When in **Forward Roadmap**, the view now defaults to index `0` (**GW10**, the earliest upcoming deadline).
+   - When in historical replays, it continues defaulting to the latest completed gameweek (**GW9**).
+
+2. **Instant Reset on Squad Source Toggle:**
+   - When switching between **Autonomous Squad** and **My Synced Team**, the handler now immediately resets the view to index `0` (**GW10**), so you always see that squad's immediate next move first.
+
+3. **Defensive Fallback:**
+   - Added a safe fallback `data?.gameweeks?.[selectedGwIndex] || data?.gameweeks?.[0] || null` to eliminate any potential out-of-bounds rendering glitches.
+
+---
+
+### Verification
+
+- **Forward Roadmap (Autonomous Squad):** Now immediately displays **GW10** Manager Decision, 1-FT transfer execution, and starting lineup.
+- **Forward Roadmap (My Synced Team):** Now immediately displays **GW10** Manager Decision and proposed move for your actual squad.
+- Both repositories have been compiled with zero TypeScript errors and pushed to `origin/main`.
