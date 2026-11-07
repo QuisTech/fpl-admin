@@ -26974,3 +26974,31 @@ We have completely aligned and harmonized the entire season trajectory from **GW
 - **Seamless Forward Handoff:** Forward Roadmap (GW11–16) inherits this exact squad and plans single weekly 1-FT transfers forward into the upcoming horizon.
 
 Both repositories (`fpl-admin` and `fpl-planner`) have been updated, verified, and synced to `origin/main`.
+
+
+## User (2026-11-07)
+
+Historical Decision Freezed right?
+
+## Assistant (2026-11-07)
+
+### Yes, 100% Frozen and Locked in Stone!
+
+Yes, **Historical Decision Freezing** is completely active and locked in place across both `fpl-admin` and `fpl-planner`.
+
+Here is exactly how it is secured:
+
+1. **Permanently Locked File:**
+   - All gameweeks from **GW1 through GW10** are archived in [`data/snapshots/autonomous_career_history.json`](file:///c:/Users/USER/Documents/fpl-admin/data/snapshots/autonomous_career_history.json).
+   - This file is committed directly to the Git repository.
+
+2. **Solver Bypass for Historical Gameweeks:**
+   - In [`api/_lib/career-service.ts`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts), whenever a request comes in for completed gameweeks (GW1 to GW10), the engine intercepts it immediately and serves the frozen history directly.
+   - The dynamic solver is **completely bypassed** for past gameweeks. It cannot re-solve, re-optimize, or alter past decisions.
+
+3. **Immune to GitHub Actions Scrapers:**
+   - Even when GitHub Actions bots scrape new xP predictions or live data, completed gameweeks **never change**.
+   - Your squad (Verbruggen, De Cuyper, Van Hecke, Vuskovic, Silva, Tavernier, Iwobi, Rudoni, Haaland, Evanilson, Jackson, Leno, Manzambi, Ouattara, Wharton) is permanently set for GW10.
+
+4. **Forward Handoff Only:**
+   - When Gameweek 11 arrives, the algorithm will strictly take this locked 15-man squad and make its 1 Free Transfer forward from it.
