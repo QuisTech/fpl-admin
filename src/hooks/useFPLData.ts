@@ -41,7 +41,7 @@ export const useFPLData = (riskMode: 'safe' | 'aggressive' | 'value', fuel: 'fpl
   const [syncing, setSyncing] = useState(false);
   const [tier, setTier] = useState<string>('free');
   const [isTeamIdLocked, setIsTeamIdLocked] = useState(false);
-  const [activeScenario, setActiveScenario] = useState<'quant' | 'template'>('quant');
+  const [activeScenario, setActiveScenario] = useState<'quant' | 'template'>('template');
   const [lockedPlayerIds, setLockedPlayerIds] = useState<number[]>([]);
   const [excludedPlayerIds, setExcludedPlayerIds] = useState<number[]>([]);
 

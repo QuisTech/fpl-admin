@@ -104,26 +104,16 @@ interface CareerModeViewProps {
 
 export const CareerModeView = ({ 
   teamId, 
-  activeFuel = 'fplform', 
+  activeFuel = 'native', 
   activeRisk = 'safe',
-  activeScenario = 'quant'
+  activeScenario = 'template'
 }: CareerModeViewProps) => {
-  const [mode, setMode] = useState<'autonomous' | 'synced' | 'forward'>(teamId ? 'synced' : 'autonomous');
-  const [forwardSource, setForwardSource] = useState<'autonomous' | 'synced'>(teamId ? 'synced' : 'autonomous');
+  const [mode, setMode] = useState<'autonomous' | 'synced' | 'forward'>('autonomous');
+  const [forwardSource, setForwardSource] = useState<'autonomous' | 'synced'>('autonomous');
   const [data, setData] = useState<CareerSeasonPayload | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedGwIndex, setSelectedGwIndex] = useState<number>(0);
-
-  // Sync mode automatically when teamId actually changes to a new value
-  const lastSyncedTeamId = useRef<string | undefined>(teamId);
-  useEffect(() => {
-    if (teamId && lastSyncedTeamId.current !== teamId) {
-      lastSyncedTeamId.current = teamId;
-      setMode('synced');
-      setForwardSource('synced');
-    }
-  }, [teamId]);
 
   useEffect(() => {
     if (mode === 'forward') {
@@ -181,6 +171,21 @@ export const CareerModeView = ({
               <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30">
                 OFFICIAL 1 FT / GW RULES
               </span>
+              {mode === 'autonomous' && (
+                <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-fpl-green/15 text-fpl-green border border-fpl-green/30">
+                  AUTONOMOUS AI SQUAD
+                </span>
+              )}
+              {mode === 'synced' && (
+                <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                  YOU VS AI DUEL
+                </span>
+              )}
+              {mode === 'forward' && (
+                <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-sky-500/15 text-sky-300 border border-sky-500/30">
+                  SEASON FORECAST ({forwardSource.toUpperCase()})
+                </span>
+              )}
               <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 uppercase">
                 {activeFuel}
               </span>

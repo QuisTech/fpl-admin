@@ -2052,10 +2052,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (url.includes('/api/career')) {
       const mode = ((query.mode || req.body?.mode) as string) || 'autonomous';
       const teamId = (query.teamId || req.body?.teamId) as string;
-      const fuel = ((query.fuel || req.body?.fuel) as string) || 'fplform';
+      const fuel = ((query.fuel || req.body?.fuel) as string) || 'native';
       const riskMode = ((query.riskMode || req.body?.riskMode) as string) || 'safe';
-      const scenario = (((query.scenario || req.body?.scenario) as string) || 'quant') as 'quant' | 'template';
-      const forwardSource = (((query.forwardSource || req.body?.forwardSource) as string) || (teamId ? 'synced' : 'autonomous')) as 'autonomous' | 'synced';
+      const scenario = (((query.scenario || req.body?.scenario) as string) || 'template') as 'quant' | 'template';
+      const forwardSource = (((query.forwardSource || req.body?.forwardSource) as string) || 'autonomous') as 'autonomous' | 'synced';
       const endGw = (query.endGw || req.body?.endGw) ? parseInt((query.endGw || req.body?.endGw) as string, 10) : undefined;
 
       const { CareerService } = await import("./_lib/career-service.js");

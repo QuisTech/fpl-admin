@@ -49,7 +49,7 @@ import { SnapshotModal } from './components/SnapshotModal';
 
 function FPLApp() {
   const [riskMode, setRiskMode] = useState<'safe' | 'aggressive' | 'value'>('safe');
-  const [fuel, setFuel] = useState<'fplform' | 'native' | 'eye-test'>('fplform');
+  const [fuel, setFuel] = useState<'fplform' | 'native' | 'eye-test'>('native');
   const [tab, setTab] = useState<'optimizer' | 'pitch' | 'planner' | 'picks' | 'transfers' | 'chips' | 'performance' | 'backtest' | 'career' | 'agent'>('optimizer');
   const [snapshotToast, setSnapshotToast] = useState<SnapshotToastData | null>(null);
   const [isSnapshotModalOpen, setIsSnapshotModalOpen] = useState(false);
