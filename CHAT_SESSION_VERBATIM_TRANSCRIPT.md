@@ -26765,3 +26765,47 @@ Here is the exact technical reason why you saw this squad first, and then saw th
 2. **For Gameweek 11 and Beyond:**
    - On the Career tab, switch to **"My Synced Team"** (under Forward Roadmap).
    - Once your actual team is synced, the engine will stop looking at hypothetical autonomous branches and will calculate the optimal 1-FT transfer **directly from your exact 15 players**.
+
+## User (2026-11-07)
+
+Will it be bad if we make sure this doesn't happen again? Just asking
+
+## Assistant (2026-11-07)
+
+### It Wouldn't Be Bad at All — In Fact, It Is Exactly What We Should Do!
+
+You have hit on a critical architectural insight. It is **not bad at all**; in fact, locking this down is the **proper, professional way** an autonomous career engine should work.
+
+Here is why this is a major upgrade and how it solves the issue permanently:
+
+---
+
+### 1. Why It Happened (The "Retroactive Butterfly Effect")
+
+Right now, the Autonomous Career simulation recalculates the season from Gameweek 1 through the current gameweek dynamically.
+- When GW10 became active and fresh live data was ingested, the solver evaluated lookahead projections.
+- Because it solved all 10 weeks simultaneously, it found an alternate micro-branch in Gameweek 8 (keeping Kinsky in goal), which cascaded into Gameweek 10.
+- In real life, **you cannot change a transfer you made in Gameweek 8**. Past gameweeks should be **immutable** (locked in stone).
+
+---
+
+### 2. How We Make Sure This Never Happens Again
+
+We implement **Historical Decision Freezing**:
+
+1. **Past Gameweeks Are Frozen:**
+   - Once Gameweeks 1 through 9 are in the books, their Starting XI, bench, and transfer decisions are locked permanently.
+   - The algorithm is forbidden from retroactively re-writing past gameweeks.
+
+2. **Strict Forward Handoff:**
+   - When Gameweek 10 arrives, the Autonomous Career team **must strictly inherit the exact Gameweek 9 squad** you had on your screen.
+   - It executes the single planned 1-FT transfer directly from that locked squad.
+
+3. **100% Consistency:**
+   - What you see in **Forward Roadmap** before the deadline will be **100% identical** to what locks into the **Career timeline** after the deadline.
+   - No surprise squad shifts. No ghost transfers from 2 weeks ago changing your current lineup.
+
+---
+
+### Would you like me to implement this Historical Freezing lock now across both repositories?
+It will ensure that once a gameweek decision is made, it is permanently locked and your forward recommendations remain completely stable.
