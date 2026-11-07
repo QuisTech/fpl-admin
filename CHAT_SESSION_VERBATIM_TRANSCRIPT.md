@@ -27047,3 +27047,141 @@ Done! We have implemented the complete, realistic tactical season progression wh
   - **Bench:** Leno, Manzambi, Ouattara, Wharton.
 
 Both `fpl-admin` and `fpl-planner` are updated, type-checked with 0 errors, and pushed to `origin/main`.
+
+
+## User (2026-11-07)
+
+It just seems you cannot get it right dumb
+
+GW10 Starting Lineup
+Captain: Haaland (2×)
+GKP
+Petrović
+BOU
+£4.5m
+0 pts
+DEF
+Van Hecke
+TOT
+£5.0m
+0 pts
+DEF
+Silva
+BOU
+£5.1m
+0 pts
+DEF
+Boscagli
+BHA
+£4.5m
+0 pts
+MID
+Palmer
+CHE
+£9.8m
+0 pts
+MID
+Rudoni
+COV
+£4.9m
+0 pts
+FWD
+Haaland
+MCI
+(C) 2×
+£15.8m
+0 pts
+FWD
+N.Jackson
+AVL
+(VC)
+£7.0m
+0 pts
+FWD
+Barry
+EVE
+£5.7m
+0 pts
+DEF
+Ajer
+BRE
+£4.5m
+0 pts
+MID
+E.Le Fée
+SUN
+£5.7m
+0 pts
+Substitutes Bench (Reserve GK + Ordered Priority)
+GK Sub
+GKP
+Leno
+£4.5m
+0 pts
+Sub 1
+DEF
+Ouattara
+£4.0m
+0 pts
+Sub 2
+MID
+Ndiaye
+£5.8m
+0 pts
+Sub 3
+MID
+B.Fernandes
+£11.7m
+0 pts
+
+## Assistant (2026-11-07)
+
+### Why Petrović, Palmer & Barry Appeared & Root Cause Fixed
+
+The root cause was identified:
+
+In [`CareerModeView.tsx`](file:///c:/Users/USER/Documents/fpl-admin/src/components/CareerModeView.tsx#L105-L125), the component contained an automatic tab-hijacking line:
+```typescript
+const [mode, setMode] = useState<'autonomous' | 'synced' | 'forward'>(teamId ? 'synced' : 'autonomous');
+```
+and an accompanying `useEffect`:
+```typescript
+if (teamId && lastSyncedTeamId.current !== teamId) {
+  setMode('synced');
+}
+```
+
+Because your Team ID (`532002`) was cached in `localStorage`, the Career tab **silently auto-switched away from Autonomous AI to "You vs AI Duel"** upon loading.
+
+In "You vs AI Duel" (`mode = 'synced'`), the engine ran `CareerService.getSyncedCareerReplay('532002')` which replayed team 532002 from GW1 and arrived at the exact squad you saw:
+- **Starting XI:** Petrović, Van Hecke, Silva, Boscagli, Palmer, Rudoni, Haaland (C), N.Jackson (VC), Barry, Ajer, E.Le Fée.
+- **Bench:** Leno, Ouattara, Ndiaye, B.Fernandes.
+
+You were viewing the **You vs AI Duel** tab rather than **Autonomous AI**.
+
+---
+
+### Changes Implemented
+
+1. **Eliminated UI Auto-Hijack in [`CareerModeView.tsx`](file:///c:/Users/USER/Documents/fpl-admin/src/components/CareerModeView.tsx#L105-L125):**
+   - `mode` is now permanently defaulted to `'autonomous'`.
+   - `forwardSource` is permanently defaulted to `'autonomous'`.
+   - Removed the `useEffect` that auto-forced `mode = 'synced'` when `teamId` is present.
+   - Default props set to `activeFuel = 'native'`, `activeRisk = 'safe'`, `activeScenario = 'template'`.
+   - Added an explicit active badge in the header displaying `AUTONOMOUS AI SQUAD` (green), `YOU VS AI DUEL` (amber), or `SEASON FORECAST` (sky blue).
+
+2. **Defaulted Global Settings in [`App.tsx`](file:///c:/Users/USER/Documents/fpl-admin/src/App.tsx#L52) & [`useFPLData.ts`](file:///c:/Users/USER/Documents/fpl-admin/src/hooks/useFPLData.ts#L44):**
+   - `fuel` set to `'native'` (Native Fuel).
+   - `activeScenario` set to `'template'` (Template Shield).
+
+3. **Updated API Defaults in [`api/index.ts`](file:///c:/Users/USER/Documents/fpl-admin/api/index.ts#L2052-L2060):**
+   - Query fallbacks for `/api/career` set to `fuel = 'native'`, `riskMode = 'safe'`, `scenario = 'template'`, `mode = 'autonomous'`.
+
+4. **Cross-Repository Sync & Verification:**
+   - Changes applied to both `fpl-admin` and `fpl-planner`.
+   - Type-check verified with `npx tsc --noEmit` on both codebases (0 errors).
+   - Committed and pushed to `origin/main` on both repositories.
+
+The Career tab now strictly opens to **Autonomous AI** with **Native Fuel + Safe Mode + Template Shield**, displaying your locked pre-deadline squad:
+- **Starting XI:** Verbruggen, De Cuyper, Van Hecke, Vuskovic, Silva, Tavernier, Iwobi, Rudoni, Haaland (C), Evanilson (VC), N.Jackson.
+- **Bench:** Leno, Manzambi, Ouattara, Wharton.
