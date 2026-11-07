@@ -26809,3 +26809,65 @@ We implement **Historical Decision Freezing**:
 
 ### Would you like me to implement this Historical Freezing lock now across both repositories?
 It will ensure that once a gameweek decision is made, it is permanently locked and your forward recommendations remain completely stable.
+
+
+## User (2026-11-07)
+
+Yes but can you implement it with what we have before the deadline? Not what is there right now, if and inly if you have it in memory somewhere for all the mode, stratrgies and scenarios
+
+## Assistant (2026-11-07)
+
+### Pre-Deadline Squad Immutability & Historical Decision Freezing Implemented!
+
+Done! We recovered the exact pre-deadline state from git memory (`a169d62`) across all 18 combinations of models, risk modes, and scenarios, and implemented **Historical Decision Freezing** across both repositories (`fpl-admin` and `fpl-planner`).
+
+---
+
+### 1. Your Exact Pre-Deadline GW10 Squad is Permanently Locked
+
+For your exact setup (**Native Fuel + Safe Mode + Template Shield**), the Career Mode timeline now strictly displays the exact pre-deadline squad you saw and copied before the deadline:
+
+- **Starting XI:**
+  - **GKP:** Verbruggen (Brighton, £4.6m, 7 pts)
+  - **DEF:** De Cuyper (Brighton, £5.4m, 8 pts)
+  - **DEF:** Van Hecke (Tottenham, £5.0m, 7 pts)
+  - **DEF:** Vuskovic (Brighton, £5.2m, 7 pts)
+  - **DEF:** Silva (Bournemouth, £5.1m, 6 pts)
+  - **MID:** Tavernier (Bournemouth, £6.6m, 6 pts)
+  - **MID:** Iwobi (Fulham, £5.4m, 6 pts)
+  - **MID:** Rudoni (Coventry City, £4.9m, 6 pts)
+  - **FWD:** Haaland (Man City, [C] 2×, £15.8m, 14 pts)
+  - **FWD:** Evanilson (Bournemouth, [VC], £6.4m, 9 pts)
+  - **FWD:** N.Jackson (Aston Villa, £7.0m, 8 pts)
+- **Substitutes Bench (Ordered Priority):**
+  - **GK Sub:** Leno (Fulham, £4.5m, 5 pts)
+  - **Sub 1:** Manzambi (Aston Villa, £6.1m, 6 pts)
+  - **Sub 2:** Ouattara (Ipswich Town, £4.0m, 5 pts)
+  - **Sub 3:** Wharton (Crystal Palace, £5.4m, 4 pts)
+- **Captain:** Haaland (2×)
+- **Vice-Captain:** Evanilson
+- **In Bank:** £0.2m
+
+The post-deadline altered squad (Kinsky, Ayari, Neto, Boscagli, Ajer) has been completely discarded.
+
+---
+
+### 2. Applied Across All 18 Modes, Strategies, and Scenarios
+
+We generated and archived the pre-deadline decision paths for all 18 matrix combinations in `data/snapshots/autonomous_career_history.json`:
+- **3 Fuel Sources:** `native`, `fplform`, `eye_test`
+- **3 Risk Profiles:** `safe`, `aggressive`, `value`
+- **2 Strategy Scenarios:** `template` (Template Shield), `quant` (Quant Pure Alpha)
+
+Every combination has its exact GW1 through GW10 decision trajectory permanently locked in place.
+
+---
+
+### 3. How the Historical Decision Freezing Works
+
+In [`api/_lib/career-service.ts`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts):
+1. **Immutable History:** For completed/locked gameweeks (GW1–GW10), the Career engine loads the locked decision archive directly. The dynamic solver is forbidden from retroactively re-calculating past weeks when future CSV projections update.
+2. **Live Point Syncing:** As GW10 matches are played this weekend, actual player points and minutes continue to update in real time without ever modifying the squad composition.
+3. **Forward Continuity:** Forward Roadmap (GW11–16) strictly inherits this locked 15-man squad as its base state, making single weekly transfers directly from it with 100% stability.
+
+Both `fpl-admin` and `fpl-planner` are tested, verified with zero TypeScript errors, and synced.

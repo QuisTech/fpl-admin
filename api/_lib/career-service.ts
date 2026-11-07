@@ -255,35 +255,144 @@ export class CareerService {
       return cached.payload;
     }
 
+    // 1. Check for locked historical decisions to ensure permanent historical immutability
+    const historyFile = path.join(process.cwd(), 'data/snapshots/autonomous_career_history.json');
+    let lockedGameweeks: CareerGameweek[] = [];
+    if (fs.existsSync(historyFile)) {
+      try {
+        const histData = JSON.parse(fs.readFileSync(historyFile, 'utf8'));
+        const key = `${fuel}_${riskMode}_${scenario}`;
+        if (Array.isArray(histData[key])) {
+          lockedGameweeks = JSON.parse(JSON.stringify(histData[key]));
+        }
+      } catch (e) {
+        console.warn('[CareerService] Failed to read autonomous_career_history.json:', e);
+      }
+    }
+
+    // If requested gameweek range is fully within locked historical decisions, return locked records directly
+    if (lockedGameweeks.length > 0 && effectiveEndGw <= lockedGameweeks.length) {
+      const gws = lockedGameweeks.slice(0, effectiveEndGw);
+
+      // Update actual match points if player_stats.json has fresh match points for live gameweeks
+      gws.forEach(g => {
+        const stats = this.getPlayerStats(g.gameweek);
+        if (Object.keys(stats).length > 0) {
+          let gross = 0;
+          let hasStats = false;
+          g.startingXI.forEach(p => {
+            if (stats[p.id]) {
+              p.points = stats[p.id].points;
+              p.minutes = stats[p.id].minutes;
+              hasStats = true;
+            }
+            gross += p.points * p.multiplier;
+          });
+          g.bench.forEach(p => {
+            if (stats[p.id]) {
+              p.points = stats[p.id].points;
+              p.minutes = stats[p.id].minutes;
+            }
+          });
+          if (hasStats) {
+            g.grossPoints = gross;
+            g.netPoints = gross - (g.hitCostPoints || 0);
+          }
+        }
+      });
+
+      let runningTotal = 0;
+      gws.forEach(g => {
+        runningTotal += g.netPoints;
+        g.cumulativePoints = runningTotal;
+      });
+
+      const lastGw = gws[gws.length - 1];
+      const payload: CareerSeasonPayload = {
+        mode: 'autonomous',
+        fuel,
+        riskMode,
+        scenario,
+        startGw: 1,
+        endGw: effectiveEndGw,
+        totalPoints: runningTotal,
+        totalHitsCost: gws.reduce((acc, g) => acc + (g.hitCostPoints || 0), 0),
+        totalTransfersMade: gws.reduce((acc, g) => acc + (g.transfersIn?.length || 0), 0),
+        totalTransfersRolled: gws.filter(g => g.isRolledTransfer).length,
+        finalBank: lastGw ? lastGw.bankDisplay : '£0.0m',
+        finalTeamValue: lastGw ? lastGw.teamValueDisplay : '£100.0m',
+        chipInventory: {
+          currentSet: (lastGw?.gameweek || 1) <= 19 ? 'Set 1 (GW1–19)' : 'Set 2 (GW20–38)',
+          deadlineGw: (lastGw?.gameweek || 1) <= 19 ? 19 : 38,
+          chips: [
+            { name: 'WC', label: 'Wildcard', status: 'AVAILABLE' },
+            { name: 'TC', label: 'Triple Captain', status: 'AVAILABLE' },
+            { name: 'BB', label: 'Bench Boost', status: 'AVAILABLE' },
+            { name: 'FH', label: 'Free Hit', status: 'AVAILABLE' }
+          ]
+        },
+        gameweeks: gws
+      };
+
+      this.autonomousCache.set(cacheKey, { payload, timestamp: Date.now() });
+      return payload;
+    }
+
     const params = getParamsForRiskMode(riskMode, DEFAULT_PARAMETERS, scenario);
-    const oracleGw1 = this.getOracleForGw(1, baseData, fuel, riskMode);
-
-    // Initial GW1 squad solve with £100m budget
-    const initialSquad = solveOptimalSquad(oracleGw1, 1, 1000, 8, params);
-    let totalSpent = 0;
-    const purchasePrices: Record<number, number> = {};
-    initialSquad.forEach(id => {
-      const cost = oracleGw1.getCost(id);
-      totalSpent += cost;
-      purchasePrices[id] = cost;
-    });
-
-    let state: SquadState = {
-      squad: initialSquad,
-      bank: 1000 - totalSpent,
-      freeTransfers: 1, // Will earn 1 FT going into GW2
-      chipState: { 'WC': 1, 'FH': 1, 'BB': 1, 'TC': 1 },
-      gameweek: 1,
-      accumulatedScore: 0,
-      purchasePrices
-    };
-
+    let state: SquadState;
     const gameweeks: CareerGameweek[] = [];
     let totalTransfersMade = 0;
     let totalTransfersRolled = 0;
     let totalHitsCost = 0;
+    let startGw = 1;
 
-    for (let gw = 1; gw <= effectiveEndGw; gw++) {
+    if (lockedGameweeks.length > 0) {
+      gameweeks.push(...lockedGameweeks);
+      startGw = lockedGameweeks.length + 1;
+      const lastLocked = lockedGameweeks[lockedGameweeks.length - 1];
+      const lastLockedSquad = [...lastLocked.startingXI.map(p => p.id), ...lastLocked.bench.map(p => p.id)];
+      const purchasePrices: Record<number, number> = {};
+      const lastOracle = this.getOracleForGw(lockedGameweeks.length, baseData, fuel, riskMode);
+      lastLockedSquad.forEach(id => {
+        purchasePrices[id] = lastOracle.getCost(id);
+      });
+
+      state = {
+        squad: lastLockedSquad,
+        bank: lastLocked.bank,
+        freeTransfers: lastLocked.freeTransfersRemaining,
+        chipState: { 'WC': 1, 'FH': 1, 'BB': 1, 'TC': 1 },
+        gameweek: lockedGameweeks.length,
+        accumulatedScore: lastLocked.cumulativePoints,
+        purchasePrices
+      };
+
+      totalTransfersMade = lockedGameweeks.reduce((acc, g) => acc + (g.transfersIn?.length || 0), 0);
+      totalTransfersRolled = lockedGameweeks.filter(g => g.isRolledTransfer).length;
+      totalHitsCost = lockedGameweeks.reduce((acc, g) => acc + (g.hitCostPoints || 0), 0);
+    } else {
+      const oracleGw1 = this.getOracleForGw(1, baseData, fuel, riskMode);
+      const initialSquad = solveOptimalSquad(oracleGw1, 1, 1000, 8, params);
+      let totalSpent = 0;
+      const purchasePrices: Record<number, number> = {};
+      initialSquad.forEach(id => {
+        const cost = oracleGw1.getCost(id);
+        totalSpent += cost;
+        purchasePrices[id] = cost;
+      });
+
+      state = {
+        squad: initialSquad,
+        bank: 1000 - totalSpent,
+        freeTransfers: 1, // Will earn 1 FT going into GW2
+        chipState: { 'WC': 1, 'FH': 1, 'BB': 1, 'TC': 1 },
+        gameweek: 1,
+        accumulatedScore: 0,
+        purchasePrices
+      };
+    }
+
+    for (let gw = startGw; gw <= effectiveEndGw; gw++) {
       const oracle = this.getOracleForGw(gw, baseData, fuel, riskMode);
       const playerStats = this.getPlayerStats(gw);
       const actualPoints: Record<number, number> = {};
