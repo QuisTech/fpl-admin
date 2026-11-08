@@ -1,24 +1,24 @@
 {
-  "generatedAt": "2026-11-04T18:24:49.601Z",
+  "generatedAt": "2026-11-08T21:31:13.503Z",
   "fuel": "eyetest",
   "startGw": 1,
-  "endGw": 9,
+  "endGw": 10,
   "hasLivePoints": true,
   "totals": {
     "safe": {
-      "totalPoints": 464,
-      "alphaVsTemplate": -174.8
+      "totalPoints": 578.1,
+      "alphaVsTemplate": -177.6
     },
     "risky": {
-      "totalPoints": 431,
-      "alphaVsTemplate": -207.8
+      "totalPoints": 460.6,
+      "alphaVsTemplate": -295.1
     },
     "value": {
-      "totalPoints": 694,
-      "alphaVsTemplate": 55.2
+      "totalPoints": 722,
+      "alphaVsTemplate": -33.7
     },
     "template": {
-      "totalPoints": 638.8
+      "totalPoints": 755.6999999999999
     }
   },
   "gameweeks": [
@@ -29,23 +29,23 @@
         "mode": "SAFE",
         "startingXI": [
           "Havertz (ARS)",
+          "McBurnie (HUL)",
           "Gelhardt (HUL)",
-          "Isak (LIV)",
           "O'Reilly (MCI)",
           "Foden (MCI)",
           "Haaland (MCI)",
-          "Mbeumo (MUN)",
-          "Muñoz (NFO)",
+          "B.Fernandes (MUN)",
+          "N.Williams (NFO)",
           "Gibbs-White (NFO)",
           "Kinsky (TOT)",
           "Robertson (TOT)"
         ],
         "captain": "Haaland (C)",
-        "projectedGwXp": 80.1,
-        "projected8GwXp": 568,
-        "actualPoints": 24,
-        "averageXiEo": 16.7,
-        "alphaVsTemplate": -51.4
+        "projectedGwXp": 80.6,
+        "projected8GwXp": 567.9,
+        "actualPoints": 29,
+        "averageXiEo": 22.1,
+        "alphaVsTemplate": -46.4
       },
       "risky": {
         "mode": "RISKY",
@@ -53,21 +53,21 @@
           "Havertz (ARS)",
           "Leno (FUL)",
           "Castagne (FUL)",
+          "McBurnie (HUL)",
           "Gelhardt (HUL)",
-          "Isak (LIV)",
           "O'Reilly (MCI)",
           "Foden (MCI)",
           "Haaland (MCI)",
+          "B.Fernandes (MUN)",
           "Muñoz (NFO)",
-          "Gibbs-White (NFO)",
           "Ndoye (NFO)"
         ],
         "captain": "Haaland (C)",
-        "projectedGwXp": 78.8,
-        "projected8GwXp": 566.8,
-        "actualPoints": 28,
-        "averageXiEo": 14.3,
-        "alphaVsTemplate": -47.4
+        "projectedGwXp": 80.1,
+        "projected8GwXp": 563,
+        "actualPoints": 31,
+        "averageXiEo": 18,
+        "alphaVsTemplate": -44.4
       },
       "value": {
         "mode": "VALUE",
@@ -76,24 +76,24 @@
           "Calafiori (ARS)",
           "White (ARS)",
           "Palmer (CHE)",
-          "McBurnie (HUL)",
           "Szoboszlai (LIV)",
           "Isak (LIV)",
-          "Rúben (MCI)",
+          "O'Reilly (MCI)",
           "Foden (MCI)",
           "B.Fernandes (MUN)",
-          "Mbeumo (MUN)"
+          "Mbeumo (MUN)",
+          "Jair Cunha (NFO)"
         ],
-        "captain": "Mbeumo (C)",
-        "projectedGwXp": 65.7,
-        "projected8GwXp": 413.9,
-        "actualPoints": 63,
-        "averageXiEo": 26.3,
-        "alphaVsTemplate": -12.4
+        "captain": "B.Fernandes (C)",
+        "projectedGwXp": 79.1,
+        "projected8GwXp": 500.5,
+        "actualPoints": 59,
+        "averageXiEo": 20.7,
+        "alphaVsTemplate": -16.4
       },
-      "riskySwapCount": 3,
-      "riskyAvgSwapCost": 0.05,
-      "riskyQuality": "PASS"
+      "riskySwapCount": 4,
+      "riskyAvgSwapCost": 0.15,
+      "riskyQuality": "WARNING"
     },
     {
       "gameweek": 2,
@@ -102,23 +102,23 @@
         "mode": "SAFE",
         "startingXI": [
           "Dasilva (COV)",
-          "Awoniyi (COV)",
-          "Leno (FUL)",
           "Sessegnon (FUL)",
           "McBurnie (HUL)",
           "Gelhardt (HUL)",
+          "Cho (HUL)",
+          "O'Reilly (MCI)",
           "Foden (MCI)",
-          "Doku (MCI)",
           "Haaland (MCI)",
           "B.Fernandes (MUN)",
+          "Horníček (NEW)",
           "Van Hecke (TOT)"
         ],
         "captain": "Haaland (C)",
-        "projectedGwXp": 94.8,
-        "projected8GwXp": 572,
-        "actualPoints": 68,
-        "averageXiEo": 13.4,
-        "alphaVsTemplate": -54.8
+        "projectedGwXp": 94.7,
+        "projected8GwXp": 576.5,
+        "actualPoints": 73,
+        "averageXiEo": 22.8,
+        "alphaVsTemplate": -49.8
       },
       "risky": {
         "mode": "RISKY",
@@ -127,20 +127,20 @@
           "Sessegnon (FUL)",
           "McBurnie (HUL)",
           "Gelhardt (HUL)",
-          "Thomas (HUL)",
-          "Isak (LIV)",
+          "Cho (HUL)",
           "Foden (MCI)",
           "Doku (MCI)",
           "Haaland (MCI)",
+          "B.Fernandes (MUN)",
           "Horníček (NEW)",
-          "Van Hecke (TOT)"
+          "Robertson (TOT)"
         ],
         "captain": "Haaland (C)",
-        "projectedGwXp": 91.9,
-        "projected8GwXp": 569.8,
-        "actualPoints": 55,
-        "averageXiEo": 11.9,
-        "alphaVsTemplate": -67.8
+        "projectedGwXp": 94,
+        "projected8GwXp": 576.4,
+        "actualPoints": 72,
+        "averageXiEo": 18,
+        "alphaVsTemplate": -50.8
       },
       "value": {
         "mode": "VALUE",
@@ -149,23 +149,23 @@
           "Calafiori (ARS)",
           "White (ARS)",
           "Palmer (CHE)",
-          "Awoniyi (COV)",
+          "Dasilva (COV)",
           "Szoboszlai (LIV)",
           "Isak (LIV)",
+          "O'Reilly (MCI)",
           "Foden (MCI)",
           "B.Fernandes (MUN)",
-          "Mbeumo (MUN)",
-          "Van Hecke (TOT)"
+          "Mbeumo (MUN)"
         ],
         "captain": "Foden (C)",
-        "projectedGwXp": 69.5,
-        "projected8GwXp": 448.7,
-        "actualPoints": 98,
-        "averageXiEo": 26.3,
-        "alphaVsTemplate": -24.8
+        "projectedGwXp": 74.3,
+        "projected8GwXp": 463.3,
+        "actualPoints": 99,
+        "averageXiEo": 20.7,
+        "alphaVsTemplate": -23.8
       },
-      "riskySwapCount": 3,
-      "riskyAvgSwapCost": 0.1,
+      "riskySwapCount": 2,
+      "riskyAvgSwapCost": 0.01,
       "riskyQuality": "WARNING"
     },
     {
@@ -174,46 +174,46 @@
       "safe": {
         "mode": "SAFE",
         "startingXI": [
-          "Leno (FUL)",
           "Castagne (FUL)",
-          "Isak (LIV)",
           "Foden (MCI)",
           "Doku (MCI)",
           "Haaland (MCI)",
-          "Hall (NEW)",
+          "B.Fernandes (MUN)",
+          "Wissa (NEW)",
+          "Dedić (NEW)",
           "Muñoz (NFO)",
           "Gibbs-White (NFO)",
           "Van Hecke (TOT)",
-          "Kudus (TOT)"
+          "Kinsky (TOT)"
         ],
         "captain": "Haaland (C)",
-        "projectedGwXp": 90.6,
-        "projected8GwXp": 579.7,
-        "actualPoints": 51,
-        "averageXiEo": 18.8,
-        "alphaVsTemplate": -9.4
+        "projectedGwXp": 90.4,
+        "projected8GwXp": 580.4,
+        "actualPoints": 42,
+        "averageXiEo": 27,
+        "alphaVsTemplate": -18.4
       },
       "risky": {
         "mode": "RISKY",
         "startingXI": [
           "Leno (FUL)",
           "Castagne (FUL)",
-          "Isak (LIV)",
           "Foden (MCI)",
           "Doku (MCI)",
           "Haaland (MCI)",
-          "J.Murphy (NEW)",
-          "Dedić (NEW)",
+          "B.Fernandes (MUN)",
+          "Burn (NEW)",
+          "Wissa (NEW)",
           "Muñoz (NFO)",
-          "Van Hecke (TOT)",
-          "Kudus (TOT)"
+          "Igor Jesus (NFO)",
+          "Robertson (TOT)"
         ],
         "captain": "Haaland (C)",
         "projectedGwXp": 89.2,
-        "projected8GwXp": 569.8,
-        "actualPoints": 46,
-        "averageXiEo": 12.1,
-        "alphaVsTemplate": -14.4
+        "projected8GwXp": 570.5,
+        "actualPoints": 27,
+        "averageXiEo": 18.1,
+        "alphaVsTemplate": -33.4
       },
       "value": {
         "mode": "VALUE",
@@ -221,25 +221,25 @@
           "Calafiori (ARS)",
           "De Cuyper (BHA)",
           "Yalcouyé (BHA)",
-          "Rudoni (COV)",
           "Leno (FUL)",
           "Gakpo (LIV)",
           "Isak (LIV)",
           "Gvardiol (MCI)",
           "Haaland (MCI)",
           "B.Fernandes (MUN)",
-          "Mbeumo (MUN)"
+          "Mbeumo (MUN)",
+          "Robertson (TOT)"
         ],
         "captain": "Haaland (C)",
-        "projectedGwXp": 74.3,
-        "projected8GwXp": 495.5,
-        "actualPoints": 71,
-        "averageXiEo": 32.4,
-        "alphaVsTemplate": 10.6
+        "projectedGwXp": 74,
+        "projected8GwXp": 460.5,
+        "actualPoints": 70,
+        "averageXiEo": 26.3,
+        "alphaVsTemplate": 9.6
       },
-      "riskySwapCount": 2,
-      "riskyAvgSwapCost": 0.62,
-      "riskyQuality": "WARNING"
+      "riskySwapCount": 4,
+      "riskyAvgSwapCost": 0.31,
+      "riskyQuality": "PASS"
     },
     {
       "gameweek": 4,
@@ -247,46 +247,46 @@
       "safe": {
         "mode": "SAFE",
         "startingXI": [
-          "Gusto (CHE)",
-          "Palmer (CHE)",
-          "Scherpen (IPS)",
-          "Ouattara (IPS)",
-          "Isak (LIV)",
+          "Rogers (CHE)",
+          "Nketiah (CRY)",
+          "Davis (IPS)",
+          "O'Reilly (MCI)",
           "Foden (MCI)",
-          "Doku (MCI)",
           "Haaland (MCI)",
+          "B.Fernandes (MUN)",
           "Hall (NEW)",
           "Gibbs-White (NFO)",
-          "Van Hecke (TOT)"
+          "Van Hecke (TOT)",
+          "Kinsky (TOT)"
         ],
         "captain": "Haaland (C)",
-        "projectedGwXp": 90.2,
-        "projected8GwXp": 579.4,
-        "actualPoints": 42,
-        "averageXiEo": 28.6,
-        "alphaVsTemplate": -57.2
+        "projectedGwXp": 87.9,
+        "projected8GwXp": 581.1,
+        "actualPoints": 64,
+        "averageXiEo": 37.8,
+        "alphaVsTemplate": -35.2
       },
       "risky": {
         "mode": "RISKY",
         "startingXI": [
+          "Madueke (ARS)",
+          "Penders (CHE)",
           "Awoniyi (COV)",
-          "Ouattara (IPS)",
-          "Isak (LIV)",
+          "Nketiah (CRY)",
+          "Davis (IPS)",
+          "O'Reilly (MCI)",
           "Foden (MCI)",
-          "Doku (MCI)",
           "Haaland (MCI)",
-          "Horníček (NEW)",
+          "B.Fernandes (MUN)",
           "Dedić (NEW)",
-          "Muñoz (NFO)",
-          "Van Hecke (TOT)",
-          "Kudus (TOT)"
+          "Robertson (TOT)"
         ],
         "captain": "Haaland (C)",
-        "projectedGwXp": 85,
-        "projected8GwXp": 570.2,
-        "actualPoints": 29,
-        "averageXiEo": 12,
-        "alphaVsTemplate": -70.2
+        "projectedGwXp": 83.4,
+        "projected8GwXp": 571.8,
+        "actualPoints": 38,
+        "averageXiEo": 18.1,
+        "alphaVsTemplate": -61.2
       },
       "value": {
         "mode": "VALUE",
@@ -304,87 +304,87 @@
           "Robertson (TOT)"
         ],
         "captain": "Haaland (C)",
-        "projectedGwXp": 76.9,
-        "projected8GwXp": 464.3,
+        "projectedGwXp": 73.2,
+        "projected8GwXp": 446.5,
         "actualPoints": 97,
-        "averageXiEo": 59.3,
+        "averageXiEo": 52.3,
         "alphaVsTemplate": -2.2
       },
       "riskySwapCount": 5,
       "riskyAvgSwapCost": 0.23,
-      "riskyQuality": "WARNING"
+      "riskyQuality": "PASS"
     },
     {
       "gameweek": 5,
-      "templateScore": 53.8,
+      "templateScore": 54.1,
       "safe": {
         "mode": "SAFE",
         "startingXI": [
           "Suzuki (AVL)",
           "Dasilva (COV)",
           "Rudoni (COV)",
-          "Castagne (FUL)",
-          "Isak (LIV)",
+          "Awoniyi (COV)",
+          "Davis (IPS)",
           "O'Reilly (MCI)",
           "Foden (MCI)",
           "Haaland (MCI)",
           "B.Fernandes (MUN)",
           "Gibbs-White (NFO)",
-          "Robertson (TOT)"
+          "Van Hecke (TOT)"
         ],
         "captain": "Haaland (C)",
-        "projectedGwXp": 90.3,
-        "projected8GwXp": 585.9,
-        "actualPoints": 52,
-        "averageXiEo": 15.5,
-        "alphaVsTemplate": -1.8
+        "projectedGwXp": 91.2,
+        "projected8GwXp": 588.3,
+        "actualPoints": 47,
+        "averageXiEo": 25.4,
+        "alphaVsTemplate": -7.1
       },
       "risky": {
         "mode": "RISKY",
         "startingXI": [
           "Suzuki (AVL)",
           "Dasilva (COV)",
-          "Rudoni (COV)",
+          "Awoniyi (COV)",
           "Castagne (FUL)",
-          "Gakpo (LIV)",
-          "Isak (LIV)",
-          "O'Reilly (MCI)",
+          "Davis (IPS)",
           "Foden (MCI)",
+          "Doku (MCI)",
           "Haaland (MCI)",
+          "B.Fernandes (MUN)",
           "Gibbs-White (NFO)",
-          "Van Hecke (TOT)"
+          "Robertson (TOT)"
         ],
         "captain": "Haaland (C)",
-        "projectedGwXp": 88.4,
-        "projected8GwXp": 581.8,
-        "actualPoints": 55,
-        "averageXiEo": 14.2,
-        "alphaVsTemplate": 1.2
+        "projectedGwXp": 90.5,
+        "projected8GwXp": 584.6,
+        "actualPoints": 41,
+        "averageXiEo": 20.3,
+        "alphaVsTemplate": -13.1
       },
       "value": {
         "mode": "VALUE",
         "startingXI": [
           "Calafiori (ARS)",
+          "Suzuki (AVL)",
           "De Cuyper (BHA)",
           "Groß (BHA)",
           "Rogers (CHE)",
           "Palmer (CHE)",
           "Dasilva (COV)",
-          "Scherpen (IPS)",
           "Gvardiol (MCI)",
           "Foden (MCI)",
           "Haaland (MCI)",
-          "Gibbs-White (NFO)"
+          "Wissa (NEW)"
         ],
         "captain": "Haaland (C)",
-        "projectedGwXp": 75.9,
-        "projected8GwXp": 527.9,
+        "projectedGwXp": 71,
+        "projected8GwXp": 463.8,
         "actualPoints": 58,
-        "averageXiEo": 57.8,
-        "alphaVsTemplate": 4.2
+        "averageXiEo": 43.7,
+        "alphaVsTemplate": 3.9
       },
-      "riskySwapCount": 2,
-      "riskyAvgSwapCost": 0.26,
+      "riskySwapCount": 3,
+      "riskyAvgSwapCost": 0.15,
       "riskyQuality": "WARNING"
     },
     {
@@ -395,44 +395,44 @@
         "startingXI": [
           "Maatsen (AVL)",
           "Suzuki (AVL)",
-          "Thiago (BRE)",
           "Rogers (CHE)",
-          "Colwill (CHE)",
           "Dasilva (COV)",
           "Rudoni (COV)",
+          "Davis (IPS)",
           "Foden (MCI)",
           "Haaland (MCI)",
+          "B.Fernandes (MUN)",
           "Gibbs-White (NFO)",
           "Van Hecke (TOT)"
         ],
         "captain": "Gibbs-White (C)",
-        "projectedGwXp": 80.1,
-        "projected8GwXp": 591.5,
-        "actualPoints": 42,
-        "averageXiEo": 21.9,
-        "alphaVsTemplate": -40.2
+        "projectedGwXp": 83.1,
+        "projected8GwXp": 594,
+        "actualPoints": 38,
+        "averageXiEo": 33.9,
+        "alphaVsTemplate": -44.2
       },
       "risky": {
         "mode": "RISKY",
         "startingXI": [
+          "Madueke (ARS)",
           "Maatsen (AVL)",
           "Suzuki (AVL)",
-          "Colwill (CHE)",
           "Dasilva (COV)",
           "Rudoni (COV)",
-          "Gakpo (LIV)",
-          "Isak (LIV)",
+          "Davis (IPS)",
           "Foden (MCI)",
+          "B.Fernandes (MUN)",
           "Delap (NFO)",
           "Gibbs-White (NFO)",
-          "Van Hecke (TOT)"
+          "Robertson (TOT)"
         ],
         "captain": "Gibbs-White (C)",
-        "projectedGwXp": 78,
-        "projected8GwXp": 564.5,
-        "actualPoints": 25,
-        "averageXiEo": 2.3,
-        "alphaVsTemplate": -57.2
+        "projectedGwXp": 82.8,
+        "projected8GwXp": 562.2,
+        "actualPoints": 24,
+        "averageXiEo": 2.8,
+        "alphaVsTemplate": -58.2
       },
       "value": {
         "mode": "VALUE",
@@ -444,25 +444,25 @@
           "Groß (BHA)",
           "Rogers (CHE)",
           "Palmer (CHE)",
-          "Rudoni (COV)",
+          "Foden (MCI)",
           "Haaland (MCI)",
           "Delap (NFO)",
-          "Van Hecke (TOT)"
+          "Robertson (TOT)"
         ],
         "captain": "Haaland (C)",
-        "projectedGwXp": 74.6,
-        "projected8GwXp": 525.3,
-        "actualPoints": 74,
-        "averageXiEo": 58.9,
-        "alphaVsTemplate": -8.2
+        "projectedGwXp": 63.7,
+        "projected8GwXp": 461.8,
+        "actualPoints": 64,
+        "averageXiEo": 49.3,
+        "alphaVsTemplate": -18.2
       },
       "riskySwapCount": 3,
-      "riskyAvgSwapCost": 1.13,
+      "riskyAvgSwapCost": 1.33,
       "riskyQuality": "WARNING"
     },
     {
       "gameweek": 7,
-      "templateScore": 58.5,
+      "templateScore": 76.1,
       "safe": {
         "mode": "SAFE",
         "startingXI": [
@@ -471,41 +471,41 @@
           "Tavernier (BOU)",
           "Evanilson (BOU)",
           "Dasilva (COV)",
-          "Rudoni (COV)",
           "Castagne (FUL)",
-          "Cherki (MCI)",
+          "Foden (MCI)",
           "Haaland (MCI)",
+          "B.Fernandes (MUN)",
           "Gibbs-White (NFO)",
           "Van Hecke (TOT)"
         ],
         "captain": "Haaland (C)",
-        "projectedGwXp": 87.4,
-        "projected8GwXp": 582.3,
-        "actualPoints": 74,
-        "averageXiEo": 15.3,
-        "alphaVsTemplate": 15.5
+        "projectedGwXp": 87.6,
+        "projected8GwXp": 577.8,
+        "actualPoints": 78,
+        "averageXiEo": 32.2,
+        "alphaVsTemplate": 1.9
       },
       "risky": {
         "mode": "RISKY",
         "startingXI": [
+          "Maatsen (AVL)",
+          "McGinn (AVL)",
           "Suzuki (AVL)",
-          "Tavernier (BOU)",
-          "Evanilson (BOU)",
-          "Silva (BOU)",
           "Dasilva (COV)",
-          "Rudoni (COV)",
+          "Awoniyi (COV)",
           "Castagne (FUL)",
-          "Isak (LIV)",
+          "Enzo (MCI)",
           "Foden (MCI)",
-          "Cherki (MCI)",
-          "Van Hecke (TOT)"
+          "Haaland (MCI)",
+          "B.Fernandes (MUN)",
+          "Robertson (TOT)"
         ],
-        "captain": "Cherki (C)",
-        "projectedGwXp": 82.1,
-        "projected8GwXp": 550.4,
-        "actualPoints": 74,
-        "averageXiEo": 1.2,
-        "alphaVsTemplate": 15.5
+        "captain": "Haaland (C)",
+        "projectedGwXp": 84.3,
+        "projected8GwXp": 571.3,
+        "actualPoints": 60,
+        "averageXiEo": 18,
+        "alphaVsTemplate": -16.1
       },
       "value": {
         "mode": "VALUE",
@@ -514,24 +514,24 @@
           "Calafiori (ARS)",
           "Konsa (ARS)",
           "Tavernier (BOU)",
-          "Evanilson (BOU)",
           "De Cuyper (BHA)",
           "Groß (BHA)",
           "Rogers (CHE)",
           "Palmer (CHE)",
-          "Haaland (MCI)",
-          "Van Hecke (TOT)"
+          "Dasilva (COV)",
+          "Rudoni (COV)",
+          "Haaland (MCI)"
         ],
         "captain": "Haaland (C)",
-        "projectedGwXp": 85.3,
-        "projected8GwXp": 495.7,
-        "actualPoints": 91,
-        "averageXiEo": 62.4,
-        "alphaVsTemplate": 32.5
+        "projectedGwXp": 69.3,
+        "projected8GwXp": 440.4,
+        "actualPoints": 81,
+        "averageXiEo": 61.1,
+        "alphaVsTemplate": 4.9
       },
-      "riskySwapCount": 3,
-      "riskyAvgSwapCost": 1.33,
-      "riskyQuality": "WARNING"
+      "riskySwapCount": 4,
+      "riskyAvgSwapCost": 0.2,
+      "riskyQuality": "PASS"
     },
     {
       "gameweek": 8,
@@ -539,46 +539,46 @@
       "safe": {
         "mode": "SAFE",
         "startingXI": [
+          "N.Jackson (AVL)",
           "Tavernier (BOU)",
-          "Thiago (BRE)",
+          "Evanilson (BOU)",
           "Rushworth (COV)",
           "Dasilva (COV)",
           "Rudoni (COV)",
-          "Castagne (FUL)",
-          "Isak (LIV)",
+          "Davis (IPS)",
           "Haaland (MCI)",
-          "Mbeumo (MUN)",
+          "B.Fernandes (MUN)",
           "Hall (NEW)",
           "Gibbs-White (NFO)"
         ],
         "captain": "Haaland (C)",
-        "projectedGwXp": 88.4,
-        "projected8GwXp": 578.1,
-        "actualPoints": 62,
-        "averageXiEo": 20.4,
-        "alphaVsTemplate": 30.4
+        "projectedGwXp": 83.1,
+        "projected8GwXp": 580.9,
+        "actualPoints": 60,
+        "averageXiEo": 37.6,
+        "alphaVsTemplate": 28.4
       },
       "risky": {
         "mode": "RISKY",
         "startingXI": [
-          "Tavernier (BOU)",
-          "Thiago (BRE)",
+          "Ødegaard (ARS)",
+          "McGinn (AVL)",
+          "Evanilson (BOU)",
           "Rushworth (COV)",
           "Dasilva (COV)",
           "Rudoni (COV)",
           "Castagne (FUL)",
+          "Davis (IPS)",
           "Gakpo (LIV)",
           "Isak (LIV)",
-          "Cherki (MCI)",
-          "Dedić (NEW)",
-          "Gibbs-White (NFO)"
+          "B.Fernandes (MUN)"
         ],
-        "captain": "Thiago (C)",
-        "projectedGwXp": 83.6,
-        "projected8GwXp": 557.5,
-        "actualPoints": 58,
-        "averageXiEo": 3.5,
-        "alphaVsTemplate": 26.4
+        "captain": "B.Fernandes (C)",
+        "projectedGwXp": 75.2,
+        "projected8GwXp": 556.4,
+        "actualPoints": 42,
+        "averageXiEo": 2.9,
+        "alphaVsTemplate": 10.4
       },
       "value": {
         "mode": "VALUE",
@@ -596,62 +596,62 @@
           "Haaland (MCI)"
         ],
         "captain": "Haaland (C)",
-        "projectedGwXp": 62.4,
-        "projected8GwXp": 442.2,
+        "projectedGwXp": 62,
+        "projected8GwXp": 401.2,
         "actualPoints": 60,
-        "averageXiEo": 62.5,
+        "averageXiEo": 64.3,
         "alphaVsTemplate": 28.4
       },
-      "riskySwapCount": 3,
-      "riskyAvgSwapCost": 0.86,
+      "riskySwapCount": 5,
+      "riskyAvgSwapCost": 0.61,
       "riskyQuality": "WARNING"
     },
     {
       "gameweek": 9,
-      "templateScore": 54.9,
+      "templateScore": 68.3,
       "safe": {
         "mode": "SAFE",
         "startingXI": [
-          "Lindelöf (AVL)",
-          "McGinn (AVL)",
-          "Suzuki (AVL)",
-          "Tavernier (BOU)",
-          "Dasilva (COV)",
-          "Rudoni (COV)",
-          "Barry (EVE)",
-          "Isak (LIV)",
-          "Haaland (MCI)",
-          "Gibbs-White (NFO)",
-          "Van Hecke (TOT)"
-        ],
-        "captain": "Haaland (C)",
-        "projectedGwXp": 85.1,
-        "projected8GwXp": 581,
-        "actualPoints": 49,
-        "averageXiEo": 17.1,
-        "alphaVsTemplate": -5.9
-      },
-      "risky": {
-        "mode": "RISKY",
-        "startingXI": [
-          "Lindelöf (AVL)",
-          "McGinn (AVL)",
+          "Maatsen (AVL)",
           "Suzuki (AVL)",
           "Tavernier (BOU)",
           "Evanilson (BOU)",
           "Dasilva (COV)",
           "Rudoni (COV)",
-          "Castagne (FUL)",
-          "Enciso (IPS)",
-          "Isak (LIV)",
+          "Barry (EVE)",
+          "Davis (IPS)",
+          "Haaland (MCI)",
+          "Gibbs-White (NFO)",
           "Van Hecke (TOT)"
         ],
-        "captain": "Enciso (C)",
-        "projectedGwXp": 83.4,
-        "projected8GwXp": 548.4,
-        "actualPoints": 61,
-        "averageXiEo": 0.3,
-        "alphaVsTemplate": 6.1
+        "captain": "Haaland (C)",
+        "projectedGwXp": 85.8,
+        "projected8GwXp": 578.8,
+        "actualPoints": 57,
+        "averageXiEo": 35.1,
+        "alphaVsTemplate": -11.3
+      },
+      "risky": {
+        "mode": "RISKY",
+        "startingXI": [
+          "Maatsen (AVL)",
+          "McGinn (AVL)",
+          "Suzuki (AVL)",
+          "Dasilva (COV)",
+          "Rudoni (COV)",
+          "Davis (IPS)",
+          "Gakpo (LIV)",
+          "Isak (LIV)",
+          "Enzo (MCI)",
+          "B.Fernandes (MUN)",
+          "Robertson (TOT)"
+        ],
+        "captain": "Rudoni (C)",
+        "projectedGwXp": 81.3,
+        "projected8GwXp": 560.1,
+        "actualPoints": 40,
+        "averageXiEo": 1.2,
+        "alphaVsTemplate": -28.3
       },
       "value": {
         "mode": "VALUE",
@@ -660,23 +660,96 @@
           "Konsa (ARS)",
           "N.Jackson (AVL)",
           "Tavernier (BOU)",
+          "Groß (BHA)",
           "Rogers (CHE)",
           "Palmer (CHE)",
           "Dasilva (COV)",
-          "Rudoni (COV)",
-          "Enciso (IPS)",
+          "Davis (IPS)",
           "Haaland (MCI)",
           "Van Hecke (TOT)"
         ],
         "captain": "Haaland (C)",
-        "projectedGwXp": 77.4,
-        "projected8GwXp": 506.8,
-        "actualPoints": 82,
-        "averageXiEo": 37.5,
-        "alphaVsTemplate": 27.1
+        "projectedGwXp": 73.4,
+        "projected8GwXp": 492.4,
+        "actualPoints": 68,
+        "averageXiEo": 68.5,
+        "alphaVsTemplate": -0.3
+      },
+      "riskySwapCount": 6,
+      "riskyAvgSwapCost": 0.39,
+      "riskyQuality": "PASS"
+    },
+    {
+      "gameweek": 10,
+      "templateScore": 85.6,
+      "safe": {
+        "mode": "SAFE",
+        "startingXI": [
+          "Ødegaard (ARS)",
+          "Suzuki (AVL)",
+          "Tavernier (BOU)",
+          "Dasilva (COV)",
+          "Rudoni (COV)",
+          "Barry (EVE)",
+          "Davis (IPS)",
+          "Jacquet (LIV)",
+          "Araujo (LIV)",
+          "Haaland (MCI)",
+          "B.Fernandes (MUN)"
+        ],
+        "captain": "Haaland (C)",
+        "projectedGwXp": 90.1,
+        "projected8GwXp": 582.4,
+        "actualPoints": 90.1,
+        "averageXiEo": 26.8,
+        "alphaVsTemplate": 4.5
+      },
+      "risky": {
+        "mode": "RISKY",
+        "startingXI": [
+          "Ødegaard (ARS)",
+          "McGinn (AVL)",
+          "Evanilson (BOU)",
+          "Dasilva (COV)",
+          "Rudoni (COV)",
+          "Barry (EVE)",
+          "Davis (IPS)",
+          "A.Becker (LIV)",
+          "Jacquet (LIV)",
+          "Araujo (LIV)",
+          "B.Fernandes (MUN)"
+        ],
+        "captain": "Ødegaard (C)",
+        "projectedGwXp": 85.6,
+        "projected8GwXp": 561.4,
+        "actualPoints": 85.6,
+        "averageXiEo": 4.9,
+        "alphaVsTemplate": 0
+      },
+      "value": {
+        "mode": "VALUE",
+        "startingXI": [
+          "Raya (ARS)",
+          "Calafiori (ARS)",
+          "Konsa (ARS)",
+          "N.Jackson (AVL)",
+          "Tavernier (BOU)",
+          "De Cuyper (BHA)",
+          "Groß (BHA)",
+          "Rogers (CHE)",
+          "Palmer (CHE)",
+          "Dasilva (COV)",
+          "Haaland (MCI)"
+        ],
+        "captain": "Haaland (C)",
+        "projectedGwXp": 66,
+        "projected8GwXp": 429.2,
+        "actualPoints": 66,
+        "averageXiEo": 68.3,
+        "alphaVsTemplate": -19.6
       },
       "riskySwapCount": 3,
-      "riskyAvgSwapCost": 1.36,
+      "riskyAvgSwapCost": 0.87,
       "riskyQuality": "WARNING"
     }
   ]
