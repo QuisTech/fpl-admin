@@ -27678,3 +27678,382 @@ Yes — fixed, committed, and pushed to origin/main on **both** repositories:
 - **fpl-planner:** commit eee1404 (ix(career): compute exact bank balance and squad value from 100.0m budget)
 
 Both repositories have the identical updated files (data/snapshots/autonomous_career_history.json, data/snapshots/synced_career_history.json, and src/components/CareerModeView.tsx).
+
+
+## User (2026-11-09)
+
+This is a classic dilemma that many people face: balancing respect for your partner’s genuine desire to see you succeed with staying true to your personal principles, dignity, and professional standards.
+
+Your wife is acting out of love and ambition for your family — in Nigeria, relationship-driven networking ("connection") is seen as the primary vehicle for breakthroughs. However, your hesitation is completely valid: cold-messaging powerful figures asking for favors or contracts feels uncomfortable, and in reality, high-ranking officials get dozens of unsolicited, needy messages every week that they simply ignore.
+
+Here is a strategic, dignified way to handle this so you honor your wife's efforts without compromising your self-respect or professional boundaries.
+
+---
+
+### Step 1: Discreetly Verify Who He Actually Is
+Before sending anything, do your homework:
+- Save the number and check the **WhatsApp profile name, photo, and bio**.
+- Search the number or name on **Truecaller** or LinkedIn/Google.
+- Confirm whether he is a current NFF Executive Committee member, state FA chairman, committee head, or intermediary.
+- Knowing his actual portfolio prevents awkward mistakes and allows you to address him with proper Nigerian protocol (e.g., "Alhaji", "Chief", "Barrister", "Coach", or "Honorable").
+
+---
+
+### Step 2: The Golden Rule — Never Ask for a "Favor" or "Contract"
+The reason you feel uncomfortable is likely because approaching someone with an open hand (*"Please connect me or give me contracts"*) feels undignified.
+
+Shift the posture entirely:
+- **Do not ask for a job, contract, or money.**
+- **Do not sound desperate.**
+- **Position yourself as a person of specific competence and value** (e.g., in sports data/analytics, technical scouting, administration, digital media, or technology).
+- If you reach out as a **peer professional offering value or paying respects**, you keep 100% of your dignity.
+
+---
+
+### Step 3: Honor Your Wife’s Effort
+Let your wife know you appreciate her looking out for you:
+> *"I really appreciate you going out of your way to find this contact. I will reach out, but I have to do it in a way that represents us with high class and dignity so he takes us seriously."*
+
+This shows her you value her support while keeping you in full control of how the communication is handled.
+
+---
+
+### Step 4: The WhatsApp Outreach Template
+
+Keep it brief (under 80 words), courteous, respectful of protocol, and completely pressure-free.
+
+#### Option A: Value & Capability Introduction (Recommended)
+> *"Good day [Sir / Alhaji / Chief / Honorable Name],*
+> 
+> *My name is [Your Name]. I am reaching out on a respectful recommendation. I work in [Your Professional Field, e.g., Sports Technology / Performance Analytics / Project Management], focusing on modernizing football operations and talent optimization.*
+> 
+> *I follow your leadership and service within Nigerian football. I simply wanted to introduce myself and express my respect for the work you do. If you or your office ever require technical perspectives or insights in modern football solutions, I would be honored to share value.*
+> 
+> *Wishing you continued success. Respectfully, [Your Name]."*
+
+#### Option B: Courteous Executive Introduction
+> *"Good day [Sir / Title Name],*
+> 
+> *My name is [Your Name]. Your contact was shared with me through a close family connection with the highest regards for your impact in Nigerian football administration.*
+> 
+> *I lead work in [your specific expertise / tech / business], and I wanted to respectfully introduce myself and register my highest regards. I know how demanding your schedule is, so no immediate reply is required — just wanted to connect and wish you continued strides in your mandate.*
+> 
+> *Warm regards, [Your Name]."*
+
+---
+
+### Step 5: What Happens Next & Maintaining Boundaries
+
+1. **If he replies warmly:** Thank him politely. If he asks what you do, send a crisp 2-sentence summary or a 1-page executive profile. Never rush to ask for favors.
+2. **If he reads and does not reply (or doesn't read it):** **Leave it completely.** Do not double-text or chase. You fulfilled your wife’s wish with elegance and poise, while protecting your reputation.
+3. **If he asks for money upfront to "facilitate contracts":** Treat it as an immediate red flag and politely disengage.
+
+By taking this approach, you maintain your principles, demonstrate leadership, and show your wife that you value her ambition for you while executing it with dignity.
+
+
+
+
+
+
+
+
+
+
+
+
+here is my true life profile:
+I am the owner and CEO of inspirenova enterprises https://inspirenova.io/
+Principal Software Engineer and Systems Architect
+
+You can know more so you figure out a way for the first message
+
+## Assistant (2026-11-09)
+
+Knowing your actual profile at **InspireNova Enterprises** (https://inspirenova.io/) changes the entire posture of this outreach.
+
+You are **not** approaching him as someone looking for a favor. You are an **Abuja-based CEO and Principal Systems Architect** whose firm already has:
+1. **Live Football Operations Research & AI Decision Engines** (*FPL Horizon V3* — Linear Programming & multi-gameweek Beam Search simulation featured right on your site).
+2. **Award-Winning Cryptographic Document & Audit Ledger Systems** (*Foxit Sentinel Pro* — 2nd Place globally at DeveloperWeek 2026 out of 1,803 developers), which maps directly to tamper-proof player registration, licensing, and contract verification.
+3. **Enterprise Learning & Telecom/Security Intelligence Platforms** (*EIB Group LMS* and *LNK CDR Telecom Analytics*), which map directly to coach/referee accreditation portals and high-level executive networks in Abuja beyond football.
+
+Because you already have live, world-class proof of work on **inspirenova.io**, you can write a first message from **one executive to another** — calm, peer-level, zero begging, and backed by a link that immediately proves your caliber the moment he taps it.
+
+---
+
+### 3 Tailored First-Message Options for WhatsApp
+
+Choose the one that best fits what you discover about his specific seat (NFF Board/ExCo member, Committee Chairman, or broader Abuja business/political figure):
+
+#### Option 1: The Football Intelligence & Digital Systems Angle (Best if he is active in NFF Administration / Technical / Strategy)
+> *Good day [Sir / Alhaji / Chief / Honorable Name],*
+>
+> *My name is [Your Full Name], CEO and Principal Systems Architect at InspireNova Enterprises (https://inspirenova.io) here in Abuja.*
+>
+> *Your contact was shared with me with very high regards for your leadership in Nigerian football. At InspireNova, we architect enterprise AI systems, tamper-proof digital verification ledgers, and quantitative football intelligence engines.*
+>
+> *I am reaching out simply to pay my respects and introduce my firm. Whenever your schedule permits in Abuja, I would be honored to briefly share how modern AI and digital infrastructure can support football operations and executive initiatives.*
+>
+> *Wishing you continued success in your mandate.*
+> *Respectfully,*
+> *[Your Full Name]*
+> *CEO, InspireNova Enterprises*
+
+---
+
+#### Option 2: The High-Level Abuja CEO-to-Executive Introduction (Best if he is a "Big Man" with broad business/government influence beyond just football)
+> *Good day [Sir / Alhaji / Chief / Honorable Name],*
+>
+> *My name is [Your Full Name], Founder & CEO of InspireNova Enterprises (https://inspirenova.io), a software engineering and AI systems architecture firm based in Abuja.*
+>
+> *A close family contact spoke very highly of your leadership within the NFF and across the wider business community, and encouraged me to connect with you.*
+>
+> *We build high-performance enterprise platforms — from telecom/security intelligence and cryptographic audit systems to quantitative football analytics. I wanted to respectfully introduce myself and register my regards. If our technical capabilities can ever be of value to your office or wider network, I would be glad to connect at your convenience.*
+>
+> *Warm regards,*
+> *[Your Full Name]*
+> *CEO, InspireNova Enterprises*
+
+---
+
+#### Option 3: Short, Ultra-Dignified Executive Note (Under 65 words — Zero Pressure)
+> *Good day [Sir / Title + Name],*
+>
+> *I trust you are well. I am [Your Full Name], CEO & Principal Systems Architect at InspireNova Enterprises (https://inspirenova.io) in Abuja.*
+>
+> *Your contact was shared with me with high regards for your work in Nigerian football. My firm builds enterprise AI platforms, secure digital verification systems, and football analytics engines. I simply wanted to respectfully introduce myself and connect.*
+>
+> *Warm regards,*
+> *[Your Full Name]*
+
+---
+
+### Why Including `https://inspirenova.io` in Message #1 Works in Your Favor
+
+1. **WhatsApp Link Preview Does the Talking:** When you include `https://inspirenova.io`, WhatsApp generates a clean corporate preview card. Even if he only glances at your message for 5 seconds, he immediately sees an established software architecture company — not a random person asking for money.
+2. **Your Portfolio Already Has Football + Enterprise Credibility:** If he (or his Technical Assistant / PA) clicks your link, they see **DeveloperWeek 2026 Global 2nd Place**, **Telecom Security Graph Analytics**, **Enterprise LMS**, and **Football Operations Research Quant Engine**. That instantly puts you in the top 0.1% of people who ever message him.
+3. **Abuja Proximity Advantage:** Because InspireNova is headquartered in Abuja (where the NFF headquarters and key ministries sit), mentioning *"here in Abuja"* signals that if he ever says *"Come by my office on Tuesday,"* you can walk in as a Peer CEO with a live demo on your laptop or tablet.
+
+
+## User (2026-11-09)
+
+Why does localhost of fpl planner is different from it vercel app?
+GW10 Manager Decision
+63 Net Pts
+AI Transferred Bogle → Ajer. You scored 48 pts, AI scored 63 pts (+15 pts).
+
+Transfer Execution
+Bogle
+Ajer
+£4.5m
+Bank Balance: £4.0m
+Squad Value: £95.4m (£99.4m)
+You vs AI Co-Pilot
+AI +15 pts ahead
+Your Real Team
+48 pts
+Hits: -16 pts
+AI Co-Pilot Team
+63 pts
+Hits: 0 pts
+Cumulative Score after GW10: You 588 pts vs AI 656 pts.
+GW10 Starting Lineup
+Captain: Haaland (2×)
+GKP
+Roefs
+SUN
+£4.9m
+9 pts
+DEF
+Van Hecke
+TOT
+£5.1m
+4 pts
+DEF
+Silva
+BOU
+£5.1m
+3 pts
+DEF
+Boscagli
+BHA
+£4.5m
+5 pts
+MID
+Tavernier
+BOU
+£6.7m
+3 pts
+MID
+E.Le Fée
+SUN
+£5.7m
+11 pts
+FWD
+Haaland
+MCI
+(C) 2×
+£15.8m
+4 pts
+FWD
+N.Jackson
+AVL
+(VC)
+£7.1m
+11 pts
+FWD
+Evanilson
+BOU
+£6.5m
+9 pts
+MID
+Rudoni
+COV
+£4.9m
+2 pts
+MID
+Palmer
+CHE
+£9.8m
+2 pts
+Substitutes Bench (Reserve GK + Ordered Priority)
+GK Sub
+GKP
+Leno
+£4.5m
+3 pts
+Sub 1
+DEF
+Bassey
+£4.5m
+2 pts
+Sub 2
+DEF
+Ajer
+£4.5m
+2 pts
+Sub 3
+MID
+Ndiaye
+£5.8m
+2 pts
+
+Vercel app:
+GW10 Manager Decision
+77 Net Pts
+AI Transferred Dubravka → Verbruggen. You scored 48 pts, AI scored 77 pts (+29 pts).
+
+Transfer Execution
+Dubravka
+Verbruggen
+£4.6m
+Bank Balance: £0.0m
+Squad Value: £100.5m
+You vs AI Co-Pilot
+AI +29 pts ahead
+Your Real Team
+48 pts
+Hits: -16 pts
+AI Co-Pilot Team
+77 pts
+Hits: 0 pts
+Cumulative Score after GW10: You 588 pts vs AI 678 pts.
+GW10 Starting Lineup
+Captain: Haaland (2×)
+GKP
+Verbruggen
+BHA
+£4.6m
+6 pts
+DEF
+De Cuyper
+BHA
+£5.4m
+6 pts
+DEF
+Vuskovic
+BHA
+£5.2m
+12 pts
+DEF
+Van Hecke
+TOT
+£5.0m
+4 pts
+MID
+B.Fernandes
+MUN
+£11.7m
+10 pts
+MID
+Palmer
+CHE
+£9.8m
+2 pts
+MID
+E.Le Fée
+SUN
+£5.7m
+11 pts
+MID
+Ndiaye
+MCI
+£5.8m
+2 pts
+FWD
+Haaland
+MCI
+(C) 2×
+£15.8m
+4 pts
+FWD
+Evanilson
+BOU
+(VC)
+£6.4m
+9 pts
+FWD
+N.Jackson
+AVL
+£7.0m
+11 pts
+Substitutes Bench (Reserve GK + Ordered Priority)
+GK Sub
+GKP
+Leno
+£4.5m
+3 pts
+Sub 1
+DEF
+Bogle
+£4.8m
+7 pts
+Sub 2
+DEF
+Bassey
+£4.5m
+2 pts
+Sub 3
+MID
+Hughes
+£4.3m
+0 pts
+
+Whereas the fpl-admin localhost and its vercel app are these same as it should be.
+
+## Assistant (2026-11-09)
+
+### Why `fpl-planner` Localhost Differed from Its Vercel App
+
+1. **Stale Backend Process in Memory Since Nov 7 (`localhost:3000`):**
+   - When we inspected your running Node processes:
+     - **`fpl-admin` (`localhost:3001`, PID `14976`)** was started today (`11/9/2026`), so it loaded the updated `api/_lib/career-service.ts` that reads from `data/snapshots/synced_career_history.json` (`77 Net Pts`, `Dubravka → Verbruggen`, cumulative `678 pts`).
+     - **`fpl-planner` (`localhost:3000`, PID `40116`)** had been running continuously since **November 7 at 3:14 AM** (`tsx server.ts` without `--watch`).
+   - Because `tsx server.ts` caches backend ES modules (`./api/_lib/career-service`) in memory the first time `/api/career` is called, `localhost:3000` was still executing the **2-day-old backend code** in memory (before `synced_career_history.json` was wired into `getSyncedCareerReplay`), even though Vite hot-reloaded the frontend UI (`CareerModeView.tsx`).
+   - Meanwhile, the **`fpl-planner` Vercel app** built fresh from GitHub commit `eee1404`, so it ran the new backend code.
+
+2. **What I Just Did to Fix It:**
+   - Stopped the stale 2-day-old `localhost:3000` process (`PID 40116`) and started a fresh `fpl-planner` dev server on `http://localhost:3000`.
+   - Verified `/api/career?mode=synced&teamId=532002&fuel=native&riskMode=safe&scenario=template` on `localhost:3000` now returns the exact same frozen history as Vercel and `fpl-admin`:
+     - **`77 Net Pts`** (`AI Transferred Dubravka → Verbruggen. You scored 48 pts, AI scored 77 pts (+29 pts).`)
+     - **`Cumulative Score after GW10: You 588 pts vs AI 678 pts.`**
+   - Aligned the default fallback parameters in `server.ts` (`native`, `safe`, `template`, `autonomous`) and populated `squadValueDisplay` in `data/snapshots/synced_career_history.json` across both repositories.
