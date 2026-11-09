@@ -482,9 +482,12 @@ export class CareerService {
 
       // Handle Transfer decisions starting from GW2
       if (gw > 1) {
-        // Evaluate single transfer first
+        // Evaluate single transfer first — only execute if the incoming player starts in the Starting XI this GW
         const tResult = solveOptimalTransfers(oracle, gw, state, 1, 8, params);
-        if (tResult && tResult.transfersIn.length > 0) {
+        const candidateXi = tResult && tResult.transfersIn.length > 0
+          ? solveStartingXI(oracle, gw, tResult.squad, params)
+          : [];
+        if (tResult && tResult.transfersIn.length > 0 && candidateXi.includes(tResult.transfersIn[0])) {
           const inId = tResult.transfersIn[0];
           const outId = tResult.transfersOut[0];
           const inCost = oracle.getCost(inId);
@@ -751,6 +754,141 @@ export class CareerService {
       return this.getAutonomousCareer(fuel, riskMode, endGw);
     }
 
+    // Check for locked historical decisions in synced_career_history.json for permanent historical immutability
+    const syncedHistoryFile = path.join(process.cwd(), 'data/snapshots/synced_career_history.json');
+    let lockedSyncedGameweeks: CareerGameweek[] = [];
+    if (fs.existsSync(syncedHistoryFile)) {
+      try {
+        const histData = JSON.parse(fs.readFileSync(syncedHistoryFile, 'utf8'));
+        const normFuel = fuel === 'eye-test' ? 'eye_test' : fuel;
+        const teamKey = `${cleanId}_${normFuel}_${riskMode}_${scenario}`;
+        const fallbackKey = `${normFuel}_${riskMode}_${scenario}`;
+        if (Array.isArray(histData[teamKey])) {
+          lockedSyncedGameweeks = JSON.parse(JSON.stringify(histData[teamKey]));
+        } else if (cleanId === '532002' && Array.isArray(histData[fallbackKey])) {
+          lockedSyncedGameweeks = JSON.parse(JSON.stringify(histData[fallbackKey]));
+        }
+      } catch (e) {
+        console.warn('[CareerService] Failed to read synced_career_history.json:', e);
+      }
+    }
+
+    if (lockedSyncedGameweeks.length > 0 && effectiveEndGw <= lockedSyncedGameweeks.length) {
+      const gws = lockedSyncedGameweeks.slice(0, effectiveEndGw);
+      let runningTotal = 0;
+      let runningAlpha = 0;
+
+      for (const g of gws) {
+        const stats = await this.getLiveOrStoredPlayerStats(g.gameweek, baseData.currentEventId);
+        if (Object.keys(stats).length > 0) {
+          let gross = 0;
+          let hasStats = false;
+          g.startingXI.forEach(p => {
+            if (stats[p.id]) {
+              p.points = stats[p.id].points;
+              p.minutes = stats[p.id].minutes;
+              hasStats = true;
+            }
+            gross += p.points * p.multiplier;
+          });
+          g.bench.forEach(p => {
+            if (stats[p.id]) {
+              p.points = stats[p.id].points;
+              p.minutes = stats[p.id].minutes;
+            }
+          });
+          if (g.captain && stats[g.captain.id]) {
+            g.captain.points = stats[g.captain.id].points;
+            g.captain.minutes = stats[g.captain.id].minutes;
+          }
+          if (g.viceCaptain && stats[g.viceCaptain.id]) {
+            g.viceCaptain.points = stats[g.viceCaptain.id].points;
+            g.viceCaptain.minutes = stats[g.viceCaptain.id].minutes;
+          }
+          if (g.activeCaptain && stats[g.activeCaptain.id]) {
+            g.activeCaptain.points = stats[g.activeCaptain.id].points;
+            g.activeCaptain.minutes = stats[g.activeCaptain.id].minutes;
+          }
+          if (hasStats) {
+            g.grossPoints = gross;
+            g.netPoints = gross - (g.hitCostPoints || 0);
+          }
+        }
+
+        runningTotal += g.netPoints;
+        g.cumulativePoints = runningTotal;
+
+        const userGwRecord = userHistoryEvents.find((e: any) => e.event === g.gameweek);
+        if (userGwRecord) {
+          const humanGross = userGwRecord.points;
+          const humanHit = userGwRecord.event_transfers_cost || 0;
+          const humanNet = humanGross - humanHit;
+          const humanCum = userGwRecord.total_points;
+          const alphaDelta = g.netPoints - humanNet;
+          runningAlpha += alphaDelta;
+
+          g.humanComparison = {
+            gameweek: g.gameweek,
+            transfers: userGwRecord.event_transfers || 0,
+            transfersCost: humanHit,
+            grossPoints: humanGross,
+            netPoints: humanNet,
+            cumulativePoints: humanCum,
+            overallRank: userGwRecord.overall_rank,
+            alphaDelta,
+            cumulativeAlphaDelta: runningAlpha
+          };
+
+          if (g.gameweek === 1 && g.activeCaptain) {
+            g.decisionLog = `Identical GW1 base squad. AI Captain: ${g.activeCaptain.web_name} (${g.activeCaptain.points * (g.activeCaptain.multiplier || 2)} pts).`;
+          } else if (g.isRolledTransfer) {
+            g.decisionLog = `AI Rolled FT (Saved for future). You scored ${humanNet} pts, AI scored ${g.netPoints} pts (${alphaDelta >= 0 ? `+${alphaDelta}` : alphaDelta} pts).`;
+          } else if (g.transfersIn?.length > 0 && g.transfersOut?.length > 0) {
+            g.decisionLog = `AI Transferred ${g.transfersOut[0].name} → ${g.transfersIn[0].name}. You scored ${humanNet} pts, AI scored ${g.netPoints} pts (${alphaDelta >= 0 ? `+${alphaDelta}` : alphaDelta} pts).`;
+          }
+        }
+      }
+
+      const lastGw = gws[gws.length - 1];
+      const lastGwRecord = userHistoryEvents[userHistoryEvents.length - 1];
+
+      return {
+        mode: 'synced',
+        teamId: cleanId,
+        managerName,
+        teamName,
+        fuel,
+        riskMode,
+        scenario,
+        startGw: 1,
+        endGw: effectiveEndGw,
+        totalPoints: runningTotal,
+        totalHitsCost: gws.reduce((acc, g) => acc + (g.hitCostPoints || 0), 0),
+        totalTransfersMade: gws.reduce((acc, g) => acc + (g.transfersIn?.length || 0), 0),
+        totalTransfersRolled: gws.filter(g => g.isRolledTransfer).length,
+        finalBank: lastGw ? lastGw.bankDisplay : '£0.0m',
+        finalTeamValue: lastGw ? lastGw.teamValueDisplay : '£100.0m',
+        humanSummary: {
+          totalPoints: lastGwRecord?.total_points || lastGw?.humanComparison?.cumulativePoints || 0,
+          totalHitsCost: userHistoryEvents.reduce((acc: number, e: any) => acc + (e.event_transfers_cost || 0), 0),
+          totalTransfersMade: userHistoryEvents.reduce((acc: number, e: any) => acc + (e.event_transfers || 0), 0),
+          currentOverallRank: lastGwRecord?.overall_rank || 0,
+          netAlphaVsHuman: runningAlpha
+        },
+        chipInventory: {
+          currentSet: (lastGw?.gameweek || 1) <= 19 ? 'Set 1 (GW1–19)' : 'Set 2 (GW20–38)',
+          deadlineGw: (lastGw?.gameweek || 1) <= 19 ? 19 : 38,
+          chips: [
+            { name: 'WC', label: 'Wildcard', status: 'AVAILABLE' },
+            { name: 'TC', label: 'Triple Captain', status: 'AVAILABLE' },
+            { name: 'BB', label: 'Bench Boost', status: 'AVAILABLE' },
+            { name: 'FH', label: 'Free Hit', status: 'AVAILABLE' }
+          ]
+        },
+        gameweeks: gws
+      };
+    }
+
     const initialSquad = userPicksGw1.map((p: any) => p.element);
     const oracleGw1 = this.getOracleForGw(1, baseData, fuel, riskMode);
 
@@ -793,10 +931,13 @@ export class CareerService {
       let hitCostPoints = 0;
       let freeTransfersAvailable = state.freeTransfers;
 
-      // AI transfer decisions from GW2 onward using the user's squad
+      // AI transfer decisions from GW2 onward using the user's squad — only execute if incoming player makes the Starting XI
       if (gw > 1) {
         const tResult = solveOptimalTransfers(oracle, gw, state, 1, 8, params);
-        if (tResult && tResult.transfersIn.length > 0) {
+        const candidateXi = tResult && tResult.transfersIn.length > 0
+          ? solveStartingXI(oracle, gw, tResult.squad, params)
+          : [];
+        if (tResult && tResult.transfersIn.length > 0 && candidateXi.includes(tResult.transfersIn[0])) {
           const inId = tResult.transfersIn[0];
           const outId = tResult.transfersOut[0];
           const inCost = oracle.getCost(inId);
