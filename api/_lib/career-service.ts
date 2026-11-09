@@ -101,7 +101,61 @@ export interface CareerSeasonPayload {
 export class CareerService {
   private static FPL_BASE = 'https://fantasy.premierleague.com/api';
   private static autonomousCache: Map<string, { payload: CareerSeasonPayload; timestamp: number }> = new Map();
-  private static CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+  private static CACHE_TTL = 60 * 1000; // 1 minute
+  private static liveStatsCache: Map<number, { stats: Record<number, { points: number; minutes: number }>; timestamp: number }> = new Map();
+  private static LIVE_CACHE_TTL = 45 * 1000; // 45 seconds for live matchday updates
+
+  private static async getLiveOrStoredPlayerStats(
+    gw: number,
+    currentEventId?: number
+  ): Promise<Record<number, { points: number; minutes: number }>> {
+    const diskStats = this.getPlayerStats(gw);
+    const hasNonZeroDiskStats = Object.values(diskStats).some(s => s.points !== 0 || s.minutes > 0);
+
+    // Fetch live from official FPL API if this is the active gameweek or local snapshot has only 0s
+    if (gw === currentEventId || !hasNonZeroDiskStats) {
+      const cachedLive = this.liveStatsCache.get(gw);
+      if (cachedLive && Date.now() - cachedLive.timestamp < this.LIVE_CACHE_TTL) {
+        return cachedLive.stats;
+      }
+
+      try {
+        const res = await axios.get(`${this.FPL_BASE}/event/${gw}/live/`, {
+          headers: { 'User-Agent': 'Mozilla/5.0' },
+          timeout: 6000
+        });
+        const elements = res.data?.elements || [];
+        if (Array.isArray(elements) && elements.length > 0) {
+          const liveStats: Record<number, { points: number; minutes: number }> = {};
+          const pointsMap: Record<number, number> = {};
+          for (const el of elements) {
+            const pts = Number(el.stats?.total_points ?? 0);
+            const mins = Number(el.stats?.minutes ?? 0);
+            liveStats[el.id] = { points: pts, minutes: mins };
+            pointsMap[el.id] = pts;
+          }
+
+          if (Object.values(liveStats).some(s => s.points !== 0 || s.minutes > 0)) {
+            this.liveStatsCache.set(gw, { stats: liveStats, timestamp: Date.now() });
+            try {
+              const dir = path.join(process.cwd(), `data/snapshots/gw_${gw}`);
+              if (fs.existsSync(dir)) {
+                fs.writeFileSync(path.join(dir, 'player_points.json'), JSON.stringify(pointsMap, null, 2));
+                fs.writeFileSync(path.join(dir, 'player_stats.json'), JSON.stringify(liveStats, null, 2));
+              }
+            } catch {
+              // Ignore write errors in read-only serverless environments
+            }
+            return liveStats;
+          }
+        }
+      } catch (e: any) {
+        console.warn(`[CareerService] Live points fetch fallback for GW${gw}:`, e.message);
+      }
+    }
+
+    return diskStats;
+  }
 
   private static getPlayerPoints(gw: number): Record<number, number> {
     const pointsPath = path.join(process.cwd(), `data/snapshots/gw_${gw}/player_points.json`);
@@ -274,9 +328,9 @@ export class CareerService {
     if (lockedGameweeks.length > 0 && effectiveEndGw <= lockedGameweeks.length) {
       const gws = lockedGameweeks.slice(0, effectiveEndGw);
 
-      // Update actual match points if player_stats.json has fresh match points for live gameweeks
-      gws.forEach(g => {
-        const stats = this.getPlayerStats(g.gameweek);
+      // Update actual match points using live FPL API or stored player_stats.json for live/recent gameweeks
+      for (const g of gws) {
+        const stats = await this.getLiveOrStoredPlayerStats(g.gameweek, baseData.currentEventId);
         if (Object.keys(stats).length > 0) {
           let gross = 0;
           let hasStats = false;
@@ -294,12 +348,31 @@ export class CareerService {
               p.minutes = stats[p.id].minutes;
             }
           });
+          if (g.captain && stats[g.captain.id]) {
+            g.captain.points = stats[g.captain.id].points;
+            g.captain.minutes = stats[g.captain.id].minutes;
+          }
+          if (g.viceCaptain && stats[g.viceCaptain.id]) {
+            g.viceCaptain.points = stats[g.viceCaptain.id].points;
+            g.viceCaptain.minutes = stats[g.viceCaptain.id].minutes;
+          }
+          if (g.activeCaptain && stats[g.activeCaptain.id]) {
+            g.activeCaptain.points = stats[g.activeCaptain.id].points;
+            g.activeCaptain.minutes = stats[g.activeCaptain.id].minutes;
+          }
           if (hasStats) {
             g.grossPoints = gross;
             g.netPoints = gross - (g.hitCostPoints || 0);
+            if (g.decisionLog && g.activeCaptain) {
+              const capPts = g.activeCaptain.points * (g.activeCaptain.multiplier || 2);
+              g.decisionLog = g.decisionLog.replace(
+                /Captain:\s*([^(\n]+)\(\d+\s*pts\)/,
+                `Captain: ${g.activeCaptain.web_name} (${capPts} pts)`
+              );
+            }
           }
         }
-      });
+      }
 
       let runningTotal = 0;
       gws.forEach(g => {
@@ -394,7 +467,7 @@ export class CareerService {
 
     for (let gw = startGw; gw <= effectiveEndGw; gw++) {
       const oracle = this.getOracleForGw(gw, baseData, fuel, riskMode);
-      const playerStats = this.getPlayerStats(gw);
+      const playerStats = await this.getLiveOrStoredPlayerStats(gw, baseData.currentEventId);
       const actualPoints: Record<number, number> = {};
       for (const id in playerStats) {
         actualPoints[id] = playerStats[id].points;
@@ -702,11 +775,11 @@ export class CareerService {
     let totalHitsCost = 0;
     let cumulativeAlpha = 0;
 
-    const maxGw = Math.min(effectiveEndGw, userHistoryEvents.length || effectiveEndGw);
+    const maxGw = Math.max(effectiveEndGw, userHistoryEvents.length || effectiveEndGw);
 
-    for (let gw = 1; gw <= maxGw; gw++) {
+    for (let gw = 1; gw <= Math.min(effectiveEndGw, maxGw); gw++) {
       const oracle = this.getOracleForGw(gw, baseData, fuel, riskMode);
-      const playerStats = this.getPlayerStats(gw);
+      const playerStats = await this.getLiveOrStoredPlayerStats(gw, baseData.currentEventId);
       const actualPoints: Record<number, number> = {};
       for (const id in playerStats) {
         actualPoints[id] = playerStats[id].points;

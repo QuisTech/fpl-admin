@@ -115,6 +115,90 @@ export const CareerModeView = ({
   const [error, setError] = useState<string | null>(null);
   const [selectedGwIndex, setSelectedGwIndex] = useState<number>(0);
 
+  const hydrateLiveScores = async (payload: CareerSeasonPayload): Promise<CareerSeasonPayload> => {
+    if (!payload || payload.mode === 'forward' || !Array.isArray(payload.gameweeks) || payload.gameweeks.length === 0) {
+      return payload;
+    }
+    try {
+      const cloned: CareerSeasonPayload = JSON.parse(JSON.stringify(payload));
+      const latestGw = cloned.gameweeks[cloned.gameweeks.length - 1];
+      const liveRes = await axios.get(`/api/live/${latestGw.gameweek}`);
+      const elements = Array.isArray(liveRes.data) ? liveRes.data : (liveRes.data?.elements || []);
+      if (!Array.isArray(elements) || elements.length === 0) return payload;
+
+      const liveMap: Record<number, { points: number; minutes: number }> = {};
+      elements.forEach((el: any) => {
+        liveMap[el.id] = {
+          points: Number(el.stats?.total_points ?? 0),
+          minutes: Number(el.stats?.minutes ?? 0)
+        };
+      });
+
+      const hasLivePoints = Object.values(liveMap).some(s => s.points !== 0 || s.minutes > 0);
+      if (!hasLivePoints) return payload;
+
+      let gross = 0;
+      latestGw.startingXI.forEach(p => {
+        if (liveMap[p.id]) {
+          p.points = liveMap[p.id].points;
+          p.minutes = liveMap[p.id].minutes;
+        }
+        gross += p.points * p.multiplier;
+      });
+      latestGw.bench.forEach(p => {
+        if (liveMap[p.id]) {
+          p.points = liveMap[p.id].points;
+          p.minutes = liveMap[p.id].minutes;
+        }
+      });
+      if (latestGw.captain && liveMap[latestGw.captain.id]) {
+        latestGw.captain.points = liveMap[latestGw.captain.id].points;
+        latestGw.captain.minutes = liveMap[latestGw.captain.id].minutes;
+      }
+      if (latestGw.viceCaptain && liveMap[latestGw.viceCaptain.id]) {
+        latestGw.viceCaptain.points = liveMap[latestGw.viceCaptain.id].points;
+        latestGw.viceCaptain.minutes = liveMap[latestGw.viceCaptain.id].minutes;
+      }
+      if (latestGw.activeCaptain && liveMap[latestGw.activeCaptain.id]) {
+        latestGw.activeCaptain.points = liveMap[latestGw.activeCaptain.id].points;
+        latestGw.activeCaptain.minutes = liveMap[latestGw.activeCaptain.id].minutes;
+      }
+
+      latestGw.grossPoints = gross;
+      latestGw.netPoints = gross - (latestGw.hitCostPoints || 0);
+      if (latestGw.decisionLog && latestGw.activeCaptain) {
+        const capPts = latestGw.activeCaptain.points * (latestGw.activeCaptain.multiplier || 2);
+        latestGw.decisionLog = latestGw.decisionLog.replace(
+          /Captain:\s*([^(\n]+)\(\d+\s*pts\)/,
+          `Captain: ${latestGw.activeCaptain.web_name} (${capPts} pts)`
+        );
+      }
+
+      let runningTotal = 0;
+      cloned.gameweeks.forEach(g => {
+        runningTotal += g.netPoints;
+        g.cumulativePoints = runningTotal;
+      });
+      cloned.totalPoints = runningTotal;
+
+      if (latestGw.humanComparison && cloned.humanSummary) {
+        latestGw.humanComparison.alphaDelta = latestGw.netPoints - latestGw.humanComparison.netPoints;
+        let cumAlpha = 0;
+        cloned.gameweeks.forEach(g => {
+          if (g.humanComparison) {
+            cumAlpha += g.humanComparison.alphaDelta;
+            g.humanComparison.cumulativeAlphaDelta = cumAlpha;
+          }
+        });
+        cloned.humanSummary.netAlphaVsHuman = cumAlpha;
+      }
+
+      return cloned;
+    } catch {
+      return payload;
+    }
+  };
+
   useEffect(() => {
     if (mode === 'forward') {
       fetchCareerData();
@@ -138,10 +222,11 @@ export const CareerModeView = ({
       if (!res.data || typeof res.data !== 'object' || !Array.isArray(res.data.gameweeks)) {
         throw new Error("Server returned an invalid response (HTML fallback received). Please restart your local dev server so the new API route is loaded.");
       }
-      setData(res.data);
-      if (res.data.gameweeks.length > 0) {
-        const isForward = res.data.mode === 'forward' || mode === 'forward';
-        setSelectedGwIndex(isForward ? 0 : res.data.gameweeks.length - 1);
+      const hydrated = await hydrateLiveScores(res.data);
+      setData(hydrated);
+      if (hydrated.gameweeks.length > 0) {
+        const isForward = hydrated.mode === 'forward' || mode === 'forward';
+        setSelectedGwIndex(isForward ? 0 : hydrated.gameweeks.length - 1);
       }
     } catch (err: any) {
       console.error("Career Mode Fetch Error:", err);
@@ -154,6 +239,18 @@ export const CareerModeView = ({
   useEffect(() => {
     fetchCareerData();
   }, [mode, teamId, activeFuel, activeRisk, activeScenario]);
+
+  // Periodically poll live matchday scores every 60 seconds when viewing historical/active gameweeks
+  useEffect(() => {
+    if (mode === 'forward') return;
+    const interval = setInterval(async () => {
+      if (data) {
+        const updated = await hydrateLiveScores(data);
+        setData(updated);
+      }
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [mode, data]);
 
   const activeGwData = data?.gameweeks?.[selectedGwIndex] || data?.gameweeks?.[0] || null;
 

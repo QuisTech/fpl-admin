@@ -27185,3 +27185,130 @@ You were viewing the **You vs AI Duel** tab rather than **Autonomous AI**.
 The Career tab now strictly opens to **Autonomous AI** with **Native Fuel + Safe Mode + Template Shield**, displaying your locked pre-deadline squad:
 - **Starting XI:** Verbruggen, De Cuyper, Van Hecke, Vuskovic, Silva, Tavernier, Iwobi, Rudoni, Haaland (C), Evanilson (VC), N.Jackson.
 - **Bench:** Leno, Manzambi, Ouattara, Wharton.
+
+
+## User (2026-11-07)
+
+So I need your advice on a matter, my wife wants me to meet with one of the Nigerian Football Federation big guys whether he is part of the board or the chairman, I don't know, I don't know how she got his phone number, she has given me his whatsapp line to chat him up according to her, he can introduce me to many other big people and as such I could be offerred contract and other things, how do I approach this, I don't want to tell turn her down, this is not my way of doing things, but this is her own way she thinks we could make it
+
+## Assistant (2026-11-07)
+
+This is a classic dilemma that many people face: balancing respect for your partner’s genuine desire to see you succeed with staying true to your personal principles, dignity, and professional standards.
+
+Your wife is acting out of love and ambition for your family — in Nigeria, relationship-driven networking ("connection") is seen as the primary vehicle for breakthroughs. However, your hesitation is completely valid: cold-messaging powerful figures asking for favors or contracts feels uncomfortable, and in reality, high-ranking officials get dozens of unsolicited, needy messages every week that they simply ignore.
+
+Here is a strategic, dignified way to handle this so you honor your wife's efforts without compromising your self-respect or professional boundaries.
+
+---
+
+### Step 1: Discreetly Verify Who He Actually Is
+Before sending anything, do your homework:
+- Save the number and check the **WhatsApp profile name, photo, and bio**.
+- Search the number or name on **Truecaller** or LinkedIn/Google.
+- Confirm whether he is a current NFF Executive Committee member, state FA chairman, committee head, or intermediary.
+- Knowing his actual portfolio prevents awkward mistakes and allows you to address him with proper Nigerian protocol (e.g., "Alhaji", "Chief", "Barrister", "Coach", or "Honorable").
+
+---
+
+### Step 2: The Golden Rule — Never Ask for a "Favor" or "Contract"
+The reason you feel uncomfortable is likely because approaching someone with an open hand (*"Please connect me or give me contracts"*) feels undignified.
+
+Shift the posture entirely:
+- **Do not ask for a job, contract, or money.**
+- **Do not sound desperate.**
+- **Position yourself as a person of specific competence and value** (e.g., in sports data/analytics, technical scouting, administration, digital media, or technology).
+- If you reach out as a **peer professional offering value or paying respects**, you keep 100% of your dignity.
+
+---
+
+### Step 3: Honor Your Wife’s Effort
+Let your wife know you appreciate her looking out for you:
+> *"I really appreciate you going out of your way to find this contact. I will reach out, but I have to do it in a way that represents us with high class and dignity so he takes us seriously."*
+
+This shows her you value her support while keeping you in full control of how the communication is handled.
+
+---
+
+### Step 4: The WhatsApp Outreach Template
+
+Keep it brief (under 80 words), courteous, respectful of protocol, and completely pressure-free.
+
+#### Option A: Value & Capability Introduction (Recommended)
+> *"Good day [Sir / Alhaji / Chief / Honorable Name],*
+> 
+> *My name is [Your Name]. I am reaching out on a respectful recommendation. I work in [Your Professional Field, e.g., Sports Technology / Performance Analytics / Project Management], focusing on modernizing football operations and talent optimization.*
+> 
+> *I follow your leadership and service within Nigerian football. I simply wanted to introduce myself and express my respect for the work you do. If you or your office ever require technical perspectives or insights in modern football solutions, I would be honored to share value.*
+> 
+> *Wishing you continued success. Respectfully, [Your Name]."*
+
+#### Option B: Courteous Executive Introduction
+> *"Good day [Sir / Title Name],*
+> 
+> *My name is [Your Name]. Your contact was shared with me through a close family connection with the highest regards for your impact in Nigerian football administration.*
+> 
+> *I lead work in [your specific expertise / tech / business], and I wanted to respectfully introduce myself and register my highest regards. I know how demanding your schedule is, so no immediate reply is required — just wanted to connect and wish you continued strides in your mandate.*
+> 
+> *Warm regards, [Your Name]."*
+
+---
+
+### Step 5: What Happens Next & Maintaining Boundaries
+
+1. **If he replies warmly:** Thank him politely. If he asks what you do, send a crisp 2-sentence summary or a 1-page executive profile. Never rush to ask for favors.
+2. **If he reads and does not reply (or doesn't read it):** **Leave it completely.** Do not double-text or chase. You fulfilled your wife’s wish with elegance and poise, while protecting your reputation.
+3. **If he asks for money upfront to "facilitate contracts":** Treat it as an immediate red flag and politely disengage.
+
+By taking this approach, you maintain your principles, demonstrate leadership, and show your wife that you value her ambition for you while executing it with dignity.
+
+## User (2026-11-09)
+
+Why is GW 10 not updating as the GW 10 was going on in Career tab, just as presentation tab is always updating? It kept on showing 0 points for all players instead of instant updating of points
+
+## Assistant (2026-11-09)
+
+### Why GW10 Kept Showing `0 pts` in the Career Tab (While Presentation/Performance Tab Updated Live)
+
+1. **Static Disk Snapshot Only (`CareerService.getPlayerStats`):**
+   - The Presentation/Performance tab ([`PerformanceView.tsx`](file:///c:/Users/USER/Documents/fpl-admin/src/components/PerformanceView.tsx#L210-L228)) fetches real-time matchday scores directly from `/api/live/10` (`https://fantasy.premierleague.com/api/event/10/live/`).
+   - By contrast, [`CareerService`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts#L106-L162) only read static files on disk: [`data/snapshots/gw_10/player_points.json`](file:///c:/Users/USER/Documents/fpl-admin/data/snapshots/gw_10/player_points.json) and `data/snapshots/gw_10/player_stats.json`.
+   - Because `data/snapshots/gw_10/player_points.json` was generated at the GW10 deadline on Friday night (2026-11-06 at 21:01) before kickoff, all 672 players had `0` points in that file, and `CareerService` never queried the live FPL API during the weekend matches.
+
+2. **No Frontend Live Hydration in `CareerModeView.tsx`:**
+   - Unlike `PerformanceView.tsx`, [`CareerModeView.tsx`](file:///c:/Users/USER/Documents/fpl-admin/src/components/CareerModeView.tsx#L118-L210) never called `/api/live/${gw}` on the client side to overlay live matchday scores or poll for in-play updates.
+
+---
+
+### Fixes Implemented (Backend + Frontend + Snapshot Sync)
+
+1. **Backend Live FPL API Integration ([`api/_lib/career-service.ts`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts#L105-L160)):**
+   - Added [`CareerService.getLiveOrStoredPlayerStats()`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts#L108-L157), which automatically queries `https://fantasy.premierleague.com/api/event/${gw}/live/` whenever a gameweek is the active `currentEventId` or when the disk snapshot contains only `0`s.
+   - Reduced `CACHE_TTL` from 10 minutes to 60 seconds and wired both `getAutonomousCareer()` and `getSyncedCareerReplay()` to hydrate player points, minutes, captain points, net/gross points, cumulative season points, and decision logs from live data.
+
+2. **Frontend Real-Time Live Hydration & 60s Auto-Polling ([`src/components/CareerModeView.tsx`](file:///c:/Users/USER/Documents/fpl-admin/src/components/CareerModeView.tsx#L118-L246)):**
+   - Added [`hydrateLiveScores()`](file:///c:/Users/USER/Documents/fpl-admin/src/components/CareerModeView.tsx#L118-L200) inside `CareerModeView.tsx` to immediately fetch `/api/live/${latestGw}` on load and every 60 seconds in the background — matching the exact real-time behavior of the Presentation/Performance tab.
+
+3. **Synced GW10 Live Scores to Disk Snapshots:**
+   - Updated [`data/snapshots/gw_10/player_points.json`](file:///c:/Users/USER/Documents/fpl-admin/data/snapshots/gw_10/player_points.json), [`data/snapshots/gw_10/player_stats.json`](file:///c:/Users/USER/Documents/fpl-admin/data/snapshots/gw_10/player_stats.json), and [`data/snapshots/autonomous_career_history.json`](file:///c:/Users/USER/Documents/fpl-admin/data/snapshots/autonomous_career_history.json).
+
+---
+
+### Actual GW10 Live Scores for Your Autonomous AI Squad (`Native + Safe + Template Shield`)
+
+| Position | Player | Minutes | GW10 Points |
+| :--- | :--- | :--- | :--- |
+| **GKP** | Verbruggen (BHA) | 90 mins | **6 pts** |
+| **DEF** | Vuskovic (BHA) | 90 mins | **12 pts** |
+| **DEF** | De Cuyper (BHA) | 81 mins | **6 pts** |
+| **DEF** | Van Hecke (TOT) | 90 mins | **4 pts** |
+| **DEF** | Silva (BOU) | 90 mins | **3 pts** |
+| **MID** | Tavernier (BOU) | 90 mins | **3 pts** |
+| **MID** | Iwobi (FUL) | 90 mins | **2 pts** |
+| **MID** | Rudoni (COV) | 85 mins | **2 pts** |
+| **FWD** | N.Jackson (AVL) | 85 mins | **11 pts** |
+| **FWD** | Evanilson (BOU) (VC) | 84 mins | **9 pts** |
+| **FWD** | Haaland (MCI) (C, 2×) | 90 mins | **4 pts** (2 × 2) |
+| **BENCH** | Leno (3 pts), Manzambi (2 pts), Ouattara (4 pts), Wharton (2 pts) | All played | — |
+
+- **GW10 Score:** **62 pts** (vs GW10 Official Average of **25 pts** → **+37 pts** above average!)
+- **New Cumulative Season Total (GW1–10):** **660 pts** (`598 + 62`).
