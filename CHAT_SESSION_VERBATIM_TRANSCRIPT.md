@@ -27491,3 +27491,35 @@ Because that extra `{` was never closed inside `getAutonomousCareer()`:
 
 - Removed the stray duplicate `if (tResult && tResult.transfersIn.length > 0) {` line in both [`getAutonomousCareer()`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts#L484-L492) and [`getSyncedCareerReplay()`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts#L934-L942).
 - Verified zero TypeScript syntax/compiler diagnostics (`Diagnostics count: 0`) across both `fpl-admin` and `fpl-planner`, and pushed to `origin/main`.
+
+
+## User (2026-11-09)
+
+So the you vs AI is just what AI would have played with my account from GW 1 vs what I have actually played since same GW 1 right?
+
+While the Autonomous AI is just AI doing it thing all by itself right?
+
+## Assistant (2026-11-09)
+
+**Yes — 100% spot-on!** That is the exact difference between the two modes:
+
+---
+
+### 1. You vs AI Duel (`mode = 'synced'` — [`CareerService.getSyncedCareerReplay`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts#L711-L940))
+- **Starting Point:** Clones **your exact real-life GW1 squad** and bank balance from your FPL account (`532002`).
+- **How It Works:** From GW1 onward, it runs a side-by-side counterfactual comparison:
+  - **AI Co-Pilot Team:** What the AI would have done if you had handed your GW1 squad over to the AI (using 1 Free Transfer per week or rolling, taking 0 hits, and picking the optimal Starting XI and Captain each week).
+  - **Your Real Team:** What you actually did in real life each week (your real points, real transfers, and real hits taken).
+- **Purpose:** Shows the exact point difference (**Alpha**) between how you managed yourGW1 draft vs how the AI would have managed that exact same GW1 draft.
+
+---
+
+### 2. Autonomous AI (`mode = 'autonomous'` — [`CareerService.getAutonomousCareer`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts#L300-L706))
+- **Starting Point:** Starts with a blank slate and £100.0m budget before GW1, completely independent of your FPL account.
+- **How It Works:** The AI drafts its own GW1 squad from scratch and manages its own season week-by-week under official FPL rules (1 Free Transfer per week, rolling up to 5 FTs, auto-subs, and captaincy).
+- **Purpose:** Tracks how the pure AI engine performs on its own across the entire 38-gameweek season (arriving at your locked GW10 squad of `Verbruggen, De Cuyper, Van Hecke, Vuskovic, Silva, Tavernier, Iwobi, Rudoni, Haaland, Evanilson, N.Jackson`).
+
+---
+
+### 3. Forward Roadmap (`mode = 'forward'` — [`CareerService.getForwardCareerProjection`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts#L1170-L1458))
+- **Purpose:** Projects the **upcoming 6 Gameweeks** (e.g., GW11 → GW16), showing the planned week-by-week 1-FT moves for either the **Autonomous AI Squad** or **Your Current Synced Team**.
