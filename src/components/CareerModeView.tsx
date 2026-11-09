@@ -297,7 +297,7 @@ export const CareerModeView = ({
               {mode === 'synced' && teamId 
                 ? `Counterfactual Replay: Human vs AI starting from ${data?.managerName || 'Your'} GW1 Squad`
                 : mode === 'forward'
-                ? `Forward Roadmap: Projected 1-FT Moves for ${forwardSource === 'autonomous' ? 'Autonomous AI Squad (GW9 Seed)' : data?.managerName || 'Your Synced Team'} (GW${data?.startGw || 10} → GW${data?.endGw || 15})`
+                ? `Forward Roadmap: Projected 1-FT Moves for ${forwardSource === 'autonomous' ? `Autonomous AI Squad (GW${(data?.startGw || 11) - 1} Seed)` : data?.managerName || 'Your Synced Team'} (GW${data?.startGw || 11} → GW${data?.endGw || 16})`
                 : "Autonomous AI Manager navigating the season from £100.0m with squad continuity"}
             </p>
           </div>

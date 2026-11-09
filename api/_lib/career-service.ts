@@ -315,9 +315,12 @@ export class CareerService {
     if (fs.existsSync(historyFile)) {
       try {
         const histData = JSON.parse(fs.readFileSync(historyFile, 'utf8'));
-        const key = `${fuel}_${riskMode}_${scenario}`;
+        const normFuel = fuel === 'eye-test' ? 'eye_test' : fuel;
+        const key = `${normFuel}_${riskMode}_${scenario}`;
         if (Array.isArray(histData[key])) {
           lockedGameweeks = JSON.parse(JSON.stringify(histData[key]));
+        } else if (Array.isArray(histData[`${fuel}_${riskMode}_${scenario}`])) {
+          lockedGameweeks = JSON.parse(JSON.stringify(histData[`${fuel}_${riskMode}_${scenario}`]));
         }
       } catch (e) {
         console.warn('[CareerService] Failed to read autonomous_career_history.json:', e);
@@ -889,33 +892,62 @@ export class CareerService {
       };
     }
 
-    const initialSquad = userPicksGw1.map((p: any) => p.element);
-    const oracleGw1 = this.getOracleForGw(1, baseData, fuel, riskMode);
-
-    const purchasePrices: Record<number, number> = {};
-    initialSquad.forEach(id => {
-      purchasePrices[id] = oracleGw1.getCost(id);
-    });
-
-    let state: SquadState = {
-      squad: initialSquad,
-      bank: initialBank,
-      freeTransfers: 1,
-      chipState: { 'WC': 1, 'FH': 1, 'BB': 1, 'TC': 1 },
-      gameweek: 1,
-      accumulatedScore: 0,
-      purchasePrices
-    };
-
+    let state: SquadState;
     const gameweeks: CareerGameweek[] = [];
     let totalTransfersMade = 0;
     let totalTransfersRolled = 0;
     let totalHitsCost = 0;
     let cumulativeAlpha = 0;
+    let startGw = 1;
+
+    if (lockedSyncedGameweeks.length > 0) {
+      gameweeks.push(...lockedSyncedGameweeks);
+      startGw = lockedSyncedGameweeks.length + 1;
+      const lastLocked = lockedSyncedGameweeks[lockedSyncedGameweeks.length - 1];
+      const lastLockedSquad = [...lastLocked.startingXI.map(p => p.id), ...lastLocked.bench.map(p => p.id)];
+      const purchasePrices: Record<number, number> = {};
+      const lastOracle = this.getOracleForGw(lockedSyncedGameweeks.length, baseData, fuel, riskMode);
+      lastLockedSquad.forEach(id => {
+        purchasePrices[id] = lastOracle.getCost(id);
+      });
+
+      state = {
+        squad: lastLockedSquad,
+        bank: lastLocked.bank,
+        freeTransfers: lastLocked.freeTransfersRemaining,
+        chipState: { 'WC': 1, 'FH': 1, 'BB': 1, 'TC': 1 },
+        gameweek: lockedSyncedGameweeks.length,
+        accumulatedScore: lastLocked.cumulativePoints,
+        purchasePrices
+      };
+
+      totalTransfersMade = lockedSyncedGameweeks.reduce((acc, g) => acc + (g.transfersIn?.length || 0), 0);
+      totalTransfersRolled = lockedSyncedGameweeks.filter(g => g.isRolledTransfer).length;
+      totalHitsCost = lockedSyncedGameweeks.reduce((acc, g) => acc + (g.hitCostPoints || 0), 0);
+      cumulativeAlpha = lastLocked.humanComparison?.cumulativeAlphaDelta || 0;
+    } else {
+      const initialSquad = userPicksGw1.map((p: any) => p.element);
+      const oracleGw1 = this.getOracleForGw(1, baseData, fuel, riskMode);
+
+      const purchasePrices: Record<number, number> = {};
+      initialSquad.forEach(id => {
+        purchasePrices[id] = oracleGw1.getCost(id);
+      });
+
+      state = {
+        squad: initialSquad,
+        bank: initialBank,
+        freeTransfers: 1,
+        chipState: { 'WC': 1, 'FH': 1, 'BB': 1, 'TC': 1 },
+        gameweek: 1,
+        accumulatedScore: 0,
+        purchasePrices
+      };
+    }
 
     const maxGw = Math.max(effectiveEndGw, userHistoryEvents.length || effectiveEndGw);
 
-    for (let gw = 1; gw <= Math.min(effectiveEndGw, maxGw); gw++) {
+    for (let gw = startGw; gw <= Math.min(effectiveEndGw, maxGw); gw++) {
       const oracle = this.getOracleForGw(gw, baseData, fuel, riskMode);
       const playerStats = await this.getLiveOrStoredPlayerStats(gw, baseData.currentEventId);
       const actualPoints: Record<number, number> = {};
@@ -1206,7 +1238,7 @@ export class CareerService {
         console.warn(`[CareerService] Forward roadmap picks fetch failed for ${teamId}:`, e.message);
       }
     } else {
-      // Seed forward projection directly from the Autonomous AI's cumulative GW1-GW9 playthrough
+      // Seed forward projection directly from the Autonomous AI's frozen cumulative playthrough
       try {
         const autoCareer = await this.getAutonomousCareer(fuel, riskMode, currentGw, scenario);
         const lastGw = autoCareer.gameweeks[autoCareer.gameweeks.length - 1];
@@ -1216,7 +1248,7 @@ export class CareerService {
           initialFt = lastGw.freeTransfersRemaining;
           initialAccumulatedScore = autoCareer.totalPoints;
           managerName = 'Autonomous AI Squad';
-          teamName = 'AI Optimization Unit (GW9 Seed)';
+          teamName = `AI Optimization Unit (GW${currentGw} Seed)`;
         }
       } catch (e: any) {
         console.warn('[CareerService] Failed to seed from Autonomous Career:', e.message);
@@ -1270,7 +1302,10 @@ export class CareerService {
       let freeTransfersAvailable = state.freeTransfers;
 
       const tResult = solveOptimalTransfers(oracle, gw, state, 1, 6, params);
-      if (tResult && tResult.transfersIn.length > 0) {
+      const candidateXi = tResult && tResult.transfersIn.length > 0
+        ? solveStartingXI(oracle, gw, tResult.squad, params)
+        : [];
+      if (tResult && tResult.transfersIn.length > 0 && candidateXi.includes(tResult.transfersIn[0])) {
         const inId = tResult.transfersIn[0];
         const outId = tResult.transfersOut[0];
         const inCost = oracle.getCost(inId);

@@ -27523,3 +27523,29 @@ While the Autonomous AI is just AI doing it thing all by itself right?
 
 ### 3. Forward Roadmap (`mode = 'forward'` — [`CareerService.getForwardCareerProjection`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts#L1170-L1458))
 - **Purpose:** Projects the **upcoming 6 Gameweeks** (e.g., GW11 → GW16), showing the planned week-by-week 1-FT moves for either the **Autonomous AI Squad** or **Your Current Synced Team**.
+
+
+## User (2026-11-09)
+
+And all of these are all function with the historical frozen stuff right? That is all part of the career tab all obey that right?
+
+## Assistant (2026-11-09)
+
+**Yes — 100%!** Every single mode, fuel, risk strategy, and scenario inside the Career tab now strictly obeys **Historical Decision Freezing**:
+
+---
+
+### How Each Part of the Career Tab Obeys Historical Decision Freezing
+
+1. **Autonomous AI (`mode = 'autonomous'` — [`CareerService.getAutonomousCareer`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts#L312-L430)):**
+   - Reads directly from [`data/snapshots/autonomous_career_history.json`](file:///c:/Users/USER/Documents/fpl-admin/data/snapshots/autonomous_career_history.json) across all 18 strategy combinations (`native / fplform / eye-test` × `safe / aggressive / value` × `template / quant`).
+   - All past gameweek squads, transfers, captains, bench orders, and prices (`GW1 → GW10`) are permanently locked.
+   - When `GW11` starts, it seeds directly from the frozen `GW10` squad (`startGw = lockedGameweeks.length + 1`) so `GW1 → GW10` can never be altered retroactively.
+
+2. **You vs AI Duel (`mode = 'synced'` — [`CareerService.getSyncedCareerReplay`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts#L760-L945)):**
+   - Reads directly from [`data/snapshots/synced_career_history.json`](file:///c:/Users/USER/Documents/fpl-admin/data/snapshots/synced_career_history.json) across all 18 strategy combinations (`532002_native_safe_template`, etc.).
+   - All past AI Co-Pilot decisions, squads, transfers, captains, and prices (`GW1 → GW10`) starting from your real GW1 squad are permanently locked, while live matchday points and your real FPL history scores hydrate on top.
+   - When `GW11` starts, it also seeds directly from the frozen `GW10` duel squad (`startGw = lockedSyncedGameweeks.length + 1`) so `GW1 → GW10` remain 100% untouched.
+
+3. **Forward Roadmap (`mode = 'forward'` — [`CareerService.getForwardCareerProjection`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts#L1210-L1315)):**
+   - Seeds its 6-week future projection (`GW11 → GW16`) directly from the **frozen GW10 Autonomous AI squad** (or your current synced GW10 squad) and enforces the exact same starter-only 1-FT rule (`candidateXi.includes(tResult.transfersIn[0])`).
