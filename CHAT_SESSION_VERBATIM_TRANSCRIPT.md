@@ -27460,3 +27460,34 @@ Starting from your exact real-life GW1 squad (`Leno, Dubravka, Mitchell, Kayode,
   - **FWD:** N.Jackson (11 pts), Evanilson (VC, 9 pts), Haaland (C, 4 pts)
 - **GW10 Bench:** Leno (3 pts), Bogle (7 pts), Bassey (2 pts), Hughes (0 pts)
 - **GW10 Duel Result:** **You scored 48 pts** (64 gross − 16 hit) vs **AI Co-Pilot 77 pts** (**+29 pts** AI gain in GW10; Cumulative: **You 588 pts vs AI 678 pts**).
+
+
+## User (2026-11-09)
+
+Explain what this problem is and help me fix it: Declaration or statement expected. @[c:\Users\USER\Documents\fpl-admin\api\_lib\career-service.ts:L713] 
+
+## Assistant (2026-11-09)
+
+### Root Cause of `Declaration or statement expected` at Line 713
+
+In [`api/_lib/career-service.ts`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts#L483-L492) (and at line 936), a duplicate `if (tResult && tResult.transfersIn.length > 0) {` statement was left above the new `candidateXi` check without a matching closing brace `}`:
+
+```typescript
+if (tResult && tResult.transfersIn.length > 0) {
+const candidateXi = tResult && tResult.transfersIn.length > 0
+  ? solveStartingXI(oracle, gw, tResult.squad, params)
+  : [];
+if (tResult && tResult.transfersIn.length > 0 && candidateXi.includes(tResult.transfersIn[0])) {
+```
+
+Because that extra `{` was never closed inside `getAutonomousCareer()`:
+- The `}` at the end of the `for` loop only closed the inner `if` block.
+- The `}` at the end of `getAutonomousCareer()` only closed the `for` loop instead of closing the method.
+- When TypeScript reached `public static async getSyncedCareerReplay(` on line 713, the parser thought it was still inside the body of `getAutonomousCareer()`, where class method modifiers (`public static async`) are not allowed — triggering `Declaration or statement expected`.
+
+---
+
+### Fix Applied
+
+- Removed the stray duplicate `if (tResult && tResult.transfersIn.length > 0) {` line in both [`getAutonomousCareer()`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts#L484-L492) and [`getSyncedCareerReplay()`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts#L934-L942).
+- Verified zero TypeScript syntax/compiler diagnostics (`Diagnostics count: 0`) across both `fpl-admin` and `fpl-planner`, and pushed to `origin/main`.
