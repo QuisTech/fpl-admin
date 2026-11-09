@@ -12,7 +12,7 @@ on:
       force:
         description: 'Force run finalization regardless of check'
         required: false
-        default: 'false'
+        default: 'true'
 
 jobs:
   finalize-gameweek:

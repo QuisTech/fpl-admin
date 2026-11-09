@@ -12,7 +12,7 @@ on:
       force:
         description: 'Force run regardless of deadline window'
         required: false
-        default: 'false'
+        default: 'true'
 
 jobs:
   post-deadline-capture:

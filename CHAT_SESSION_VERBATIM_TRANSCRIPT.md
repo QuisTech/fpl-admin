@@ -28096,3 +28096,14 @@ I have added the **`Update Feeds`** button (matching the design and placement in
 ### 3. Backend Dispatch Endpoints (`api/admin.ts`)
 - Added `POST /api/admin/run-post-deadline` → dispatches `post-deadline-fetch.yml` (`ref: 'main'`, `inputs: { force: 'true' }`).
 - Added `POST /api/admin/run-gw-finalizer` → dispatches `gameweek-finalizer.yml` (`ref: 'main'`, `inputs: { force: 'true' }`).
+
+
+## User (2026-11-09)
+
+I was just about to ask that they should be set to true
+
+## Assistant (2026-11-09)
+
+Yes — I set `inputs: { force: 'true' }` directly in the API payload in [`api/admin.ts`](file:///c:/Users/USER/Documents/fpl-admin/api/admin.ts#L85-L91), and I also just updated the workflow YAML defaults in [`.github/workflows/post-deadline-fetch.yml`](file:///c:/Users/USER/Documents/fpl-admin/.github/workflows/post-deadline-fetch.yml#L12-L15) and [`.github/workflows/gameweek-finalizer.yml`](file:///c:/Users/USER/Documents/fpl-admin/.github/workflows/gameweek-finalizer.yml#L12-L15) from `default: 'false'` to `default: 'true'`.
+
+Now, whether you trigger them with 1 click from the **`Update Feeds`** button in the app or from GitHub, `force` is always `'true'` so they execute immediately without skipping.
