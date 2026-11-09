@@ -28057,3 +28057,42 @@ Whereas the fpl-admin localhost and its vercel app are these same as it should b
      - **`77 Net Pts`** (`AI Transferred Dubravka → Verbruggen. You scored 48 pts, AI scored 77 pts (+29 pts).`)
      - **`Cumulative Score after GW10: You 588 pts vs AI 678 pts.`**
    - Aligned the default fallback parameters in `server.ts` (`native`, `safe`, `template`, `autonomous`) and populated `squadValueDisplay` in `data/snapshots/synced_career_history.json` across both repositories.
+
+
+## User (2026-11-09)
+
+There is a button used to refresh and update on C:\Users\USER\Downloads\f1-fantasy-2026, I need a similar bittn here too but the one to be here now is to be used for 
+FPL Post-Deadline Elite Intelligence Fetch
+[post-deadline-fetch.yml](https://github.com/QuisTech/fpl-admin/blob/main/.github/workflows/post-deadline-fetch.yml)
+
+
+And 
+
+
+FPL Post-Gameweek Table Finalizer
+[gameweek-finalizer.yml](https://github.com/QuisTech/fpl-admin/blob/main/.github/workflows/gameweek-finalizer.yml)
+
+
+So I don't have to be going to github everytime to run them
+
+## Assistant (2026-11-09)
+
+I have added the **`Update Feeds`** button (matching the design and placement in `f1-fantasy-2026`) as well as direct workflow triggers in the **Snapshot & Feed Control Hub** modal across both `fpl-admin` and `fpl-planner`:
+
+### 1. `Update Feeds` Button in Top Manager Intelligence (`src/components/EngineDiagnostics.tsx`)
+- Placed right next to **Top Manager Intelligence** and the `Edge: XX%` badge (the exact same location as in `f1-fantasy-2026`).
+- Clicking **`Update Feeds`** opens a compact 2-button dispatch bar:
+  - **⚡ Post-Deadline Fetch (`post-deadline-fetch.yml`)** — Triggers **FPL Post-Deadline Elite Intelligence Fetch** (`force: 'true'`) on GitHub Actions to capture live Top 250 Manager picks, transfers, and captaincy.
+  - **🏆 GW Table Finalizer (`gameweek-finalizer.yml`)** — Triggers **FPL Post-Gameweek Table Finalizer** (`force: 'true'`) on GitHub Actions to lock finalized official post-gameweek Top Manager standings and points.
+- Displays live spinner feedback and a confirmation banner as soon as GitHub Actions accepts the dispatch.
+
+### 2. Also Added to the Top `Snapshot` Modal (`src/components/SnapshotModal.tsx`)
+- Expanded the **Snapshot & Feed Control Hub** modal (`Camera` button in the top bar) so you can also launch:
+  1. **Golden Hour Pre-Deadline Pipeline (`sniper-fetch.yml`)**
+  2. **FPL Post-Deadline Elite Intelligence Fetch (`post-deadline-fetch.yml`)**
+  3. **FPL Post-Gameweek Table Finalizer (`gameweek-finalizer.yml`)**
+  4. **Full Matrix Manual Snapshot (18 Combinations + Synced XI)**
+
+### 3. Backend Dispatch Endpoints (`api/admin.ts`)
+- Added `POST /api/admin/run-post-deadline` → dispatches `post-deadline-fetch.yml` (`ref: 'main'`, `inputs: { force: 'true' }`).
+- Added `POST /api/admin/run-gw-finalizer` → dispatches `gameweek-finalizer.yml` (`ref: 'main'`, `inputs: { force: 'true' }`).

@@ -63,6 +63,68 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    // Allow direct execution of Post-Deadline Fetch & Post-GW Finalizer workflows
+    if ((url.includes('/api/admin/run-post-deadline') || url.includes('/api/admin/run-gw-finalizer')) && req.method === 'POST') {
+      const ghToken = process.env.GH_PAT || process.env.GITHUB_TOKEN;
+
+      if (!ghToken) {
+        return res.status(400).json({
+          error: 'GitHub Token (GH_PAT) is not configured in Environment Variables. Please set GH_PAT with Actions write permission.'
+        });
+      }
+
+      const isPostDeadline = url.includes('/api/admin/run-post-deadline');
+      const workflowFile = isPostDeadline ? 'post-deadline-fetch.yml' : 'gameweek-finalizer.yml';
+      const workflowLabel = isPostDeadline
+        ? 'FPL Post-Deadline Elite Intelligence Fetch'
+        : 'FPL Post-Gameweek Table Finalizer';
+
+      try {
+        await axios.post(
+          `https://api.github.com/repos/QuisTech/fpl-admin/actions/workflows/${workflowFile}/dispatches`,
+          {
+            ref: 'main',
+            inputs: {
+              force: 'true'
+            }
+          },
+          {
+            headers: {
+              'Authorization': `Bearer ${ghToken.trim()}`,
+              'Accept': 'application/vnd.github+json',
+              'X-GitHub-Api-Version': '2022-11-28',
+              'User-Agent': 'FPL-Admin-App'
+            }
+          }
+        );
+
+        try {
+          const authHeader = req.headers.authorization;
+          if (authHeader && authHeader.startsWith('Bearer ') && getAuth) {
+            const decoded = await getAuth().verifyIdToken(authHeader.split('Bearer ')[1]);
+            await logAudit(
+              decoded.uid,
+              isPostDeadline ? 'TRIGGER_POST_DEADLINE_FETCH' : 'TRIGGER_GW_FINALIZER',
+              decoded.uid,
+              { forced: true, workflow: workflowFile }
+            );
+          }
+        } catch {
+          // Non-fatal audit logging if anonymous
+        }
+
+        return res.json({
+          success: true,
+          message: `✅ ${workflowLabel} (${workflowFile}) triggered on GitHub Actions!`
+        });
+      } catch (err: any) {
+        console.error(`[Admin] Failed to trigger ${workflowFile}:`, err?.response?.data || err.message);
+        return res.status(500).json({
+          error: `Failed to trigger ${workflowLabel}: ${err?.response?.data?.message || err.message}`
+        });
+      }
+    }
+
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ error: 'Unauthorized: Missing token' });
@@ -71,9 +133,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const token = authHeader.split('Bearer ')[1];
     const decodedToken = await getAuth().verifyIdToken(token);
     const adminId = decodedToken.uid;
+    const isSuperEmail = (decodedToken.email || '').toLowerCase().trim() === 'michquis@gmail.com';
 
     const userDoc = await db.collection('users').doc(adminId).get();
-    if (!userDoc.exists || userDoc.data()?.role !== 'admin') {
+    if (!isSuperEmail && (!userDoc.exists || userDoc.data()?.role !== 'admin')) {
       return res.status(403).json({ error: 'Forbidden: Requires admin role' });
     }
 

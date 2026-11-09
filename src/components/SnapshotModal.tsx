@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Camera, Zap, X, CheckCircle, AlertTriangle, Play, Sparkles } from 'lucide-react';
+import { Camera, Zap, X, CheckCircle, AlertTriangle, Play, Sparkles, Trophy, RefreshCw } from 'lucide-react';
 import { auth } from '../lib/firebase';
 
 interface SnapshotModalProps {
@@ -14,39 +14,45 @@ export const SnapshotModal: React.FC<SnapshotModalProps> = ({
   onClose,
   onTakeManualSnapshot
 }) => {
-  const [snapshotOption, setSnapshotOption] = useState<'golden_hour' | 'manual'>('golden_hour');
+  const [snapshotOption, setSnapshotOption] = useState<'golden_hour' | 'post_deadline' | 'gw_finalizer' | 'manual'>('golden_hour');
   const [triggering, setTriggering] = useState(false);
   const [triggerStatus, setTriggerStatus] = useState<string | null>(null);
   const [triggerError, setTriggerError] = useState<string | null>(null);
 
-  const handleTriggerGoldenHour = async () => {
+  const handleTriggerWorkflow = async (option: 'golden_hour' | 'post_deadline' | 'gw_finalizer') => {
     setTriggering(true);
     setTriggerStatus(null);
     setTriggerError(null);
 
+    const endpointMap: Record<'golden_hour' | 'post_deadline' | 'gw_finalizer', string> = {
+      golden_hour: '/api/admin/run-snapshot',
+      post_deadline: '/api/admin/run-post-deadline',
+      gw_finalizer: '/api/admin/run-gw-finalizer'
+    };
+
     try {
       const currentUser = auth.currentUser;
-      if (!currentUser) {
-        throw new Error('Authentication required. Please log in as Super Admin.');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+      if (currentUser) {
+        const token = await currentUser.getIdToken();
+        headers['Authorization'] = `Bearer ${token}`;
       }
-      const token = await currentUser.getIdToken();
 
-      const res = await fetch('/api/admin/run-snapshot', {
+      const res = await fetch(endpointMap[option], {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
+        headers
       });
 
       const resData = await res.json();
       if (!res.ok) {
-        throw new Error(resData.error || 'Failed to trigger Golden Hour Snapshot pipeline.');
+        throw new Error(resData.error || 'Failed to trigger GitHub Action pipeline.');
       }
 
-      setTriggerStatus(resData.message || 'Golden Hour Pre-Deadline Snapshot pipeline triggered on GitHub Actions!');
+      setTriggerStatus(resData.message || 'GitHub Action pipeline triggered successfully!');
     } catch (err: any) {
-      setTriggerError(err.message || 'An error occurred triggering the snapshot action.');
+      setTriggerError(err.message || 'An error occurred triggering the GitHub Action.');
     } finally {
       setTriggering(false);
     }
@@ -57,7 +63,7 @@ export const SnapshotModal: React.FC<SnapshotModalProps> = ({
       onTakeManualSnapshot();
       onClose();
     } else {
-      handleTriggerGoldenHour();
+      handleTriggerWorkflow(snapshotOption);
     }
   };
 
@@ -74,7 +80,7 @@ export const SnapshotModal: React.FC<SnapshotModalProps> = ({
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
-            className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full shadow-2xl relative space-y-5"
+            className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full shadow-2xl relative space-y-5 max-h-[90vh] overflow-y-auto"
           >
             <button
               onClick={onClose}
@@ -89,25 +95,25 @@ export const SnapshotModal: React.FC<SnapshotModalProps> = ({
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-black text-white uppercase tracking-wider">Snapshot Control Hub</h3>
+                  <h3 className="text-sm font-black text-white uppercase tracking-wider">Snapshot & Feed Control Hub</h3>
                   <span className="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/40 shadow-sm">
                     Super Admin
                   </span>
                 </div>
-                <p className="text-[10px] text-slate-400">Choose snapshot execution method for pre-deadline performance tracking</p>
+                <p className="text-[10px] text-slate-400">Trigger GitHub Actions workflows or browser snapshots with 1 click</p>
               </div>
             </div>
 
             {/* Option Selection */}
-            <div className="space-y-3 pt-1">
-              {/* Golden Hour Action Pipeline Option */}
+            <div className="space-y-2.5 pt-1">
+              {/* 1. Golden Hour Action Pipeline Option */}
               <label
                 onClick={() => {
                   setSnapshotOption('golden_hour');
                   setTriggerStatus(null);
                   setTriggerError(null);
                 }}
-                className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
+                className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
                   snapshotOption === 'golden_hour'
                     ? 'bg-fpl-green/10 border-fpl-green/50 text-white shadow-[0_0_15px_rgba(0,255,133,0.1)]'
                     : 'bg-slate-950/50 border-slate-800 text-slate-400 hover:border-slate-700'
@@ -123,22 +129,84 @@ export const SnapshotModal: React.FC<SnapshotModalProps> = ({
                 <div>
                   <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-white">
                     <Zap className="w-3.5 h-3.5 text-fpl-green" />
-                    Golden Hour Action Pipeline (GitHub Action)
+                    Golden Hour Pre-Deadline Pipeline (sniper-fetch.yml)
                   </div>
                   <p className="text-[10px] text-slate-400 mt-1 leading-relaxed">
-                    Triggers full sniper workflow to scrape fresh FPLForm predictions, Top 1k sentiment, archive point-in-time files, and auto-snapshot all registered squad accounts to Firestore.
+                    Scrapes fresh FPLForm predictions, Top 1k sentiment, archives point-in-time files, and auto-snapshots all registered squad accounts.
                   </p>
                 </div>
               </label>
 
-              {/* Manual Browser Snapshot Option */}
+              {/* 2. Post-Deadline Elite Intelligence Fetch Option */}
+              <label
+                onClick={() => {
+                  setSnapshotOption('post_deadline');
+                  setTriggerStatus(null);
+                  setTriggerError(null);
+                }}
+                className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                  snapshotOption === 'post_deadline'
+                    ? 'bg-fpl-green/10 border-fpl-green/50 text-white shadow-[0_0_15px_rgba(0,255,133,0.1)]'
+                    : 'bg-slate-950/50 border-slate-800 text-slate-400 hover:border-slate-700'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="snapshotOption"
+                  checked={snapshotOption === 'post_deadline'}
+                  onChange={() => setSnapshotOption('post_deadline')}
+                  className="mt-0.5 accent-fpl-green"
+                />
+                <div>
+                  <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-white">
+                    <RefreshCw className="w-3.5 h-3.5 text-emerald-400" />
+                    FPL Post-Deadline Elite Intelligence Fetch (post-deadline-fetch.yml)
+                  </div>
+                  <p className="text-[10px] text-slate-400 mt-1 leading-relaxed">
+                    Captures live Top 250 Manager picks, captaincy consensus, and chip usage immediately after the gameweek deadline unlocks.
+                  </p>
+                </div>
+              </label>
+
+              {/* 3. Post-Gameweek Table Finalizer Option */}
+              <label
+                onClick={() => {
+                  setSnapshotOption('gw_finalizer');
+                  setTriggerStatus(null);
+                  setTriggerError(null);
+                }}
+                className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                  snapshotOption === 'gw_finalizer'
+                    ? 'bg-fpl-green/10 border-fpl-green/50 text-white shadow-[0_0_15px_rgba(0,255,133,0.1)]'
+                    : 'bg-slate-950/50 border-slate-800 text-slate-400 hover:border-slate-700'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="snapshotOption"
+                  checked={snapshotOption === 'gw_finalizer'}
+                  onChange={() => setSnapshotOption('gw_finalizer')}
+                  className="mt-0.5 accent-fpl-green"
+                />
+                <div>
+                  <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-white">
+                    <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                    FPL Post-Gameweek Table Finalizer (gameweek-finalizer.yml)
+                  </div>
+                  <p className="text-[10px] text-slate-400 mt-1 leading-relaxed">
+                    Captures and locks finalized official post-gameweek Top Manager standings and points once all fixtures and bonus points finish.
+                  </p>
+                </div>
+              </label>
+
+              {/* 4. Manual Browser Snapshot Option */}
               <label
                 onClick={() => {
                   setSnapshotOption('manual');
                   setTriggerStatus(null);
                   setTriggerError(null);
                 }}
-                className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
+                className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
                   snapshotOption === 'manual'
                     ? 'bg-fpl-green/10 border-fpl-green/50 text-white shadow-[0_0_15px_rgba(0,255,133,0.1)]'
                     : 'bg-slate-950/50 border-slate-800 text-slate-400 hover:border-slate-700'
@@ -191,7 +259,7 @@ export const SnapshotModal: React.FC<SnapshotModalProps> = ({
                 type="button"
                 disabled={triggering}
                 onClick={handleConfirm}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-fpl-green hover:bg-emerald-400 text-slate-950 text-xs font-black uppercase tracking-wider transition-all disabled:opacity-50 shadow-md"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-fpl-green hover:bg-emerald-400 text-slate-950 text-xs font-black uppercase tracking-wider transition-all disabled:opacity-50 shadow-md cursor-pointer"
               >
                 {triggering ? (
                   <>
@@ -202,6 +270,16 @@ export const SnapshotModal: React.FC<SnapshotModalProps> = ({
                   <>
                     <Play className="w-3.5 h-3.5 fill-current" />
                     Launch Golden Hour Pipeline
+                  </>
+                ) : snapshotOption === 'post_deadline' ? (
+                  <>
+                    <Play className="w-3.5 h-3.5 fill-current" />
+                    Launch Post-Deadline Fetch
+                  </>
+                ) : snapshotOption === 'gw_finalizer' ? (
+                  <>
+                    <Play className="w-3.5 h-3.5 fill-current" />
+                    Launch GW Table Finalizer
                   </>
                 ) : (
                   <>

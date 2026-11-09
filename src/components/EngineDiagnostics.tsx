@@ -37,6 +37,32 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
     return data?.topManagerInsight ? { [currentGw]: data.topManagerInsight } : {};
   });
   const [loadingGw, setLoadingGw] = useState<boolean>(false);
+  const [showFeedUpdater, setShowFeedUpdater] = useState<boolean>(false);
+  const [runningWorkflow, setRunningWorkflow] = useState<'post-deadline' | 'gw-finalizer' | null>(null);
+  const [workflowFeedback, setWorkflowFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const handleTriggerWorkflow = async (workflow: 'post-deadline' | 'gw-finalizer') => {
+    setRunningWorkflow(workflow);
+    setWorkflowFeedback(null);
+    const endpoint = workflow === 'post-deadline'
+      ? '/api/admin/run-post-deadline'
+      : '/api/admin/run-gw-finalizer';
+
+    try {
+      const res = await axios.post(endpoint, {});
+      setWorkflowFeedback({
+        type: 'success',
+        message: res.data?.message || 'Workflow triggered on GitHub Actions!'
+      });
+    } catch (err: any) {
+      setWorkflowFeedback({
+        type: 'error',
+        message: err?.response?.data?.error || err.message || 'Failed to trigger GitHub Action.'
+      });
+    } finally {
+      setRunningWorkflow(null);
+    }
+  };
 
   useEffect(() => {
     if (data?.topManagerInsight && data?.nextEventId) {
@@ -311,6 +337,25 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
                   GW{topInsight?.gameweek || currentGw - 1} Baseline
                 </span>
               )}
+              <button
+                type="button"
+                onClick={() => {
+                  setShowFeedUpdater(prev => !prev);
+                  setWorkflowFeedback(null);
+                }}
+                disabled={runningWorkflow !== null}
+                title="Trigger FPL Post-Deadline Elite Intelligence Fetch or FPL Post-Gameweek Table Finalizer directly on GitHub Actions"
+                className={`flex items-center gap-1 px-2 py-0.5 rounded text-[8px] font-mono font-bold uppercase transition-all border cursor-pointer shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
+                  runningWorkflow !== null
+                    ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 cursor-wait animate-pulse'
+                    : showFeedUpdater
+                      ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50'
+                      : 'bg-slate-900/90 text-slate-300 border-slate-700 hover:text-cyan-300 hover:border-cyan-500/50'
+                }`}
+              >
+                <RefreshCw className={`w-2.5 h-2.5 ${runningWorkflow !== null ? 'animate-spin text-cyan-400' : ''}`} />
+                <span>{runningWorkflow !== null ? 'Running...' : 'Update Feeds'}</span>
+              </button>
               {topInsight && (
                 <span className="text-[8.5px] font-mono font-bold text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-2 py-0.5 rounded shrink-0 whitespace-nowrap shadow-sm">
                   Edge: {(() => {
@@ -323,6 +368,74 @@ export const EngineDiagnostics = ({ data, onSyncTeamId }: EngineDiagnosticsProps
               )}
             </div>
           </div>
+
+          {showFeedUpdater && (
+            <div className="mb-2.5 p-2.5 bg-slate-900/95 border border-cyan-500/30 rounded-xl space-y-2 shadow-lg">
+              <div className="flex items-center justify-between text-[9px] font-mono text-slate-300">
+                <span className="font-bold uppercase tracking-wider text-cyan-300">GitHub Actions Feed Dispatches</span>
+                <button
+                  type="button"
+                  onClick={() => setShowFeedUpdater(false)}
+                  className="text-slate-400 hover:text-white text-[9px] font-bold px-1 cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                <button
+                  type="button"
+                  disabled={runningWorkflow !== null}
+                  onClick={() => handleTriggerWorkflow('post-deadline')}
+                  title="Runs post-deadline-fetch.yml (FPL Post-Deadline Elite Intelligence Fetch)"
+                  className="flex flex-col items-start p-2 rounded-lg bg-slate-950/90 hover:bg-emerald-950/30 border border-slate-800 hover:border-fpl-green/50 transition-all text-left cursor-pointer disabled:opacity-50 group"
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <span className="text-[9.5px] font-black uppercase tracking-wider text-fpl-green group-hover:text-emerald-300">
+                      ⚡ Post-Deadline Fetch
+                    </span>
+                    {runningWorkflow === 'post-deadline' && (
+                      <RefreshCw className="w-3 h-3 text-fpl-green animate-spin" />
+                    )}
+                  </div>
+                  <span className="text-[8px] font-mono text-slate-400 mt-0.5">
+                    post-deadline-fetch.yml • Live Top 250 Picks
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  disabled={runningWorkflow !== null}
+                  onClick={() => handleTriggerWorkflow('gw-finalizer')}
+                  title="Runs gameweek-finalizer.yml (FPL Post-Gameweek Table Finalizer)"
+                  className="flex flex-col items-start p-2 rounded-lg bg-slate-950/90 hover:bg-cyan-950/30 border border-slate-800 hover:border-cyan-400/50 transition-all text-left cursor-pointer disabled:opacity-50 group"
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <span className="text-[9.5px] font-black uppercase tracking-wider text-cyan-300 group-hover:text-cyan-200">
+                      🏆 GW Table Finalizer
+                    </span>
+                    {runningWorkflow === 'gw-finalizer' && (
+                      <RefreshCw className="w-3 h-3 text-cyan-300 animate-spin" />
+                    )}
+                  </div>
+                  <span className="text-[8px] font-mono text-slate-400 mt-0.5">
+                    gameweek-finalizer.yml • Official Final Standings
+                  </span>
+                </button>
+              </div>
+
+              {workflowFeedback && (
+                <div
+                  className={`p-2 rounded-lg text-[9px] font-mono border ${
+                    workflowFeedback.type === 'success'
+                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                      : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+                  }`}
+                >
+                  {workflowFeedback.message}
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 space-y-2">
             {/* Gameweek Time Travel Ribbon */}
