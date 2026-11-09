@@ -684,7 +684,7 @@ export const CareerModeView = ({
                   {/* Financial State */}
                   <div className="flex items-center justify-between text-xs font-mono pt-2 border-t border-fpl-border/40 text-slate-400">
                     <span>Bank Balance: <strong className="text-white">{activeGwData.bankDisplay}</strong></span>
-                    <span>Squad Value: <strong className="text-white">{activeGwData.teamValueDisplay}</strong></span>
+                    <span>Squad Value: <strong className="text-white">£{((activeGwData.squadValue || 914) / 10).toFixed(1)}m</strong> <span className="text-slate-500">({activeGwData.teamValueDisplay})</span></span>
                   </div>
                 </div>
 
