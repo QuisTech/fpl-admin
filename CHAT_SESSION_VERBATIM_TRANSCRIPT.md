@@ -28783,3 +28783,74 @@ Look at the gameweek-by-gameweek delta between the World No. 1 and the AI Co-Pil
    - Don't trap 30+ points on your bench; invest value into your starting XI.
    - Don't leave £6m+ dormant in the bank when that cash could field a Salah, Saka, or premium defender.
    - Trust the quantitative process: even against the World Number 1, the AI's multi-horizon discipline outscored him by nearly 16 points per week over the last month.
+## User (2026-11-10)
+
+Perhaps this is what helped the first 4 GW since we just have to speak about this too:
+
+Chips
+Date
+Name
+Active
+Fri 21 Aug 14:34
+Bench Boost
+[GW1](https://fantasy.premierleague.com/en/entry/895045/event/1)
+Fri 4 Sep 17:56
+Triple Captain
+[GW3](https://fantasy.premierleague.com/en/entry/895045/event/3)
+Sat 5 Sep 08:56
+Wildcard
+[GW4](https://fantasy.premierleague.com/en/entry/895045/event/4)
+Fri 18 Sep 18:13
+Free Hit
+[GW5](https://fantasy.premierleague.com/en/entry/895045/event/5)
+
+## Assistant (2026-11-10)
+
+This is the definitive smoking gun that completely demystifies the World Number 1's early lead.
+
+Looking at his official entry history ([`entry/895045/history/`](https://fantasy.premierleague.com/api/entry/895045/history/)), he deployed **literally every single Set 1 chip in the first 5 weeks of the season**:
+
+| Gameweek | Chip Deployed | Official Rank | What Happened Behind the Numbers |
+| :--- | :--- | :--- | :--- |
+| **GW1** | **Bench Boost** | 2,744 | Scored **97 pts** because **all 15 players scored** (+25 pts straight off his bench: Verbruggen 6, Justin 9, Konsa 4, etc.). The AI had only 11 starters scoring! |
+| **GW2** | *None* | 395 | Scored **119 pts** riding pure high-variance momentum. |
+| **GW3** | **Triple Captain** | 2 | Scored **90 pts** via 3× captain returns (+9 pts extra). Jumped to **World #2**. |
+| **GW4** | **Wildcard** | 1 | Complete 15-man squad teardown and rebuild after only 3 weeks. Scored **99 pts** and hit **World #1**! |
+| **GW5** | **Free Hit** | 1 | A 100% custom one-week mercenary squad specifically engineered for GW5 matchups. |
+
+Here is the deep diagnostic breakdown of what this strategy is, why it worked early, and why it is already collapsing:
+
+---
+
+### 1. The Infamous FPL "Screenshot Strategy" (Frontloading All Chips)
+In high-level FPL analytics, this is known as the **"Sprint / Screenshot Strategy"**:
+- Thousands of casual managers enter teams with the sole objective of reaching **Overall Rank #1 in the world early**, taking a screenshot to post on social media and WhatsApp groups for bragging rights.
+- By blowing your entire arsenal (Bench Boost, Triple Captain, Wildcard, Free Hit) in a 5-week blitz, you artificially inflate your points total by **70–90+ bonus points** compared to managers playing normal 1-FT football.
+- In GW4 and GW5, while the AI Co-Pilot was playing with strict 1-FT continuity from the original GW1 squad, this manager was fielding brand new Wildcard and Free Hit squads tailored to the exact fixtures of that specific weekend.
+
+---
+
+### 2. The Inevitable "Hangover Phase" (GW6 to GW19)
+The fatal flaw of burning all 4 chips in 5 weeks is that you have to survive **14 consecutive gameweeks completely naked**:
+- From Gameweek 6 all the way to Gameweek 19, he has **ZERO chips remaining**:
+  - No Wildcard to navigate winter injuries, suspensions, or rotation.
+  - No Free Hit to dodge blank gameweeks.
+  - No Bench Boost.
+  - No Triple Captain.
+- Look at what immediately happened the moment his chips ran out:
+  - **GW8:** World No. 1 scored 65 pts vs **AI Co-Pilot 86 pts** (**AI +21 pts**)
+  - **GW9:** World No. 1 scored 58 pts vs **AI Co-Pilot 86 pts** (**AI +28 pts**)
+  - **GW10:** World No. 1 scored 82 pts vs **AI Co-Pilot 80 pts** (Human +2 pts)
+- **Over the last 3 weeks without chips, the AI Co-Pilot outscored him 252 to 205 (+47 points to the AI in just 3 weeks)!**
+- The AI has already clawed back **one-third of his entire chip-boosted lead in just 21 days**.
+
+---
+
+### 3. What This Means for the Next 9 Gameweeks (GW11 → GW19)
+- He must now endure the grueling November and December schedule (GW11 through GW19) relying strictly on 1 FT per week with zero structural safety nets.
+- Meanwhile, disciplined managers and the AI Co-Pilot have:
+  1. **Bench Boost** queued for an optimal high-ceiling bench (projected GW11: +12 xP).
+  2. **Triple Captain** queued for an elite single-fixture peak (projected GW12: +33 xP).
+  3. Complete tactical flexibility heading into the **GW20 fresh Set 2 Chip Renewal**.
+
+**The Verdict:** His early 825-point tally was an artificial chip sprint. Over a 38-gameweek marathon, mathematical gravity always catches up to chip-exhausted teams.
