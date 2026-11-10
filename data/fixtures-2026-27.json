@@ -33111,7 +33111,7 @@
   {
     "code": 2645288,
     "event": 10,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 94,
     "kickoff_time": "2026-11-06T20:00:00Z",
@@ -33479,7 +33479,7 @@
   {
     "code": 2645291,
     "event": 10,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 97,
     "kickoff_time": "2026-11-07T12:30:00Z",
@@ -33844,7 +33844,7 @@
   {
     "code": 2645285,
     "event": 10,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 91,
     "kickoff_time": "2026-11-07T15:00:00Z",
@@ -34214,7 +34214,7 @@
   {
     "code": 2645289,
     "event": 10,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 95,
     "kickoff_time": "2026-11-07T15:00:00Z",
@@ -34569,7 +34569,7 @@
   {
     "code": 2645293,
     "event": 10,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 99,
     "kickoff_time": "2026-11-07T17:30:00Z",
@@ -34928,7 +34928,7 @@
   {
     "code": 2645286,
     "event": 10,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 92,
     "kickoff_time": "2026-11-08T14:00:00Z",
@@ -35306,7 +35306,7 @@
   {
     "code": 2645287,
     "event": 10,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 93,
     "kickoff_time": "2026-11-08T14:00:00Z",
@@ -35694,7 +35694,7 @@
   {
     "code": 2645290,
     "event": 10,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 96,
     "kickoff_time": "2026-11-08T14:00:00Z",
@@ -36076,7 +36076,7 @@
   {
     "code": 2645294,
     "event": 10,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 100,
     "kickoff_time": "2026-11-08T14:00:00Z",
@@ -36438,7 +36438,7 @@
   {
     "code": 2645292,
     "event": 10,
-    "finished": false,
+    "finished": true,
     "finished_provisional": true,
     "id": 98,
     "kickoff_time": "2026-11-08T16:30:00Z",
