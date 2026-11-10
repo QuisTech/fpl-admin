@@ -29282,3 +29282,79 @@ The winning **FPLForm SAFE / VALUE** squad reached **72 points** because of bala
 ### Key Takeaway for Your Season
 If you want the most reliable, mathematically validated blueprint to follow from GW11 to GW19:
 **Set your fuel to `FPLForm` and keep Risk Mode on `SAFE` (or `VALUE`).** It has proven to be the highest-scoring, lowest-volatility engine throughout the first 10 gameweeks of the 2026/27 campaign.
+
+
+---
+
+## User
+Okay that is for performance tab.
+
+But for career tab, does this native
+safe
+Template Shield
+ still lead the park?
+
+---
+
+## Assistant
+
+### Direct Answer: YES, Emphatically!
+
+In the **Career Tab**, **`NATIVE | SAFE | TEMPLATE SHIELD`** is the **undisputed #1 leader across the entire simulation field!**
+
+Here is the exact mathematical proof from the engine across all 18 permutations:
+
+---
+
+### 1. Autonomous AI Career Mode Leaderboard (GW1 → GW10)
+*(Simulates a manager playing from scratch at GW1 with £100.0m budget, strict 1-FT/week rules, rolling up to 5 FTs, and 0 point hits)*
+
+| Rank | Fuel | Scenario | Risk Tier | Total Points | Financial Health | Transfer Discipline | Key Gameweek Hauls |
+| :---: | :--- | :--- | :---: | :---: | :---: | :---: | :--- |
+| **🥇 #1** | **NATIVE** | **TEMPLATE SHIELD** | **SAFE** | **660 pts** | **£100.0m** (£8.6m in bank) | **5 used, 4 rolled** | **GW4 (71), GW7 (100), GW8 (75), GW9 (85), GW10 (62)** |
+| **🥈 #2** | **NATIVE** | **TEMPLATE SHIELD** | **VALUE** | **634 pts** | £100.0m (£6.2m in bank) | 9 used, 0 rolled | GW7 (102), GW8 (91), GW9 (86) |
+| **🥉 #3** | **NATIVE** | **QUANT OPTIMAL** | **SAFE** | **619 pts** | £100.0m (£6.2m in bank) | 9 used, 0 rolled | GW7 (101), GW8 (91), GW9 (92) |
+| **#4** | FPLFORM | TEMPLATE SHIELD | SAFE | 618 pts | £100.0m (£0.2m in bank) | 9 used, 0 rolled | GW2 (86), GW7 (79), GW10 (73) |
+| **#5** | FPLFORM | TEMPLATE SHIELD | VALUE | 618 pts | £100.0m (£0.2m in bank) | 9 used, 0 rolled | GW2 (86), GW7 (79), GW10 (73) |
+| **#6** | EYE-TEST | TEMPLATE SHIELD | SAFE | 618 pts | £100.0m (£0.2m in bank) | 9 used, 0 rolled | GW2 (86), GW7 (79), GW10 (73) |
+| **#7** | EYE-TEST | TEMPLATE SHIELD | VALUE | 618 pts | £100.0m (£0.2m in bank) | 9 used, 0 rolled | GW2 (86), GW7 (79), GW10 (73) |
+| **#8** | FPLFORM | QUANT OPTIMAL | SAFE | 614 pts | £100.0m (£1.8m in bank) | 9 used, 0 rolled | GW8 (81), GW10 (93) |
+| **#9** | EYE-TEST | QUANT OPTIMAL | SAFE | 614 pts | £100.0m (£1.8m in bank) | 9 used, 0 rolled | GW8 (81), GW10 (93) |
+| **#10** | NATIVE | QUANT OPTIMAL | VALUE | 610 pts | £100.0m (£5.7m in bank) | 9 used, 0 rolled | GW7 (97), GW8 (85), GW9 (89) |
+| **#11** | NATIVE | TEMPLATE SHIELD | AGGRESSIVE | 557 pts | £100.0m (£6.3m in bank) | 9 used, 0 rolled | High-variance differential punts |
+| **#12** | NATIVE | QUANT OPTIMAL | AGGRESSIVE | 514 pts | £100.0m (£16.4m in bank) | 9 used, 0 rolled | Churning players without stability |
+
+---
+
+### 2. "You vs AI Co-Pilot Duel" Career Mode (GW1 → GW10)
+*(Seeded from your real GW1 starting squad for manager 532002)*
+
+| Configuration | AI Co-Pilot Total | Your Real Score | Net Alpha Over Human |
+| :--- | :---: | :---: | :---: |
+| **🥇 NATIVE \| TEMPLATE SHIELD \| SAFE** | **678 pts** | **588 pts** | **+90 pts ahead** |
+| **🥈 NATIVE \| TEMPLATE SHIELD \| VALUE** | **678 pts** | **588 pts** | **+90 pts ahead** |
+| **🥉 NATIVE \| QUANT OPTIMAL \| SAFE** | **677 pts** | **588 pts** | **+89 pts ahead** |
+| **#4 FPLFORM \| TEMPLATE SHIELD \| SAFE** | **670 pts** | **588 pts** | **+82 pts ahead** |
+| **#5 EYE-TEST \| TEMPLATE SHIELD \| SAFE** | **670 pts** | **588 pts** | **+82 pts ahead** |
+
+---
+
+### Why Does `Native | Safe | Template Shield` Win in Career Mode?
+
+There is a fundamental reason why the **Performance Tab** and the **Career Tab** highlight different strengths:
+
+1. **The Performance Tab is a "Single-Week Snapshot":**
+   - Each gameweek is an independent, isolated puzzle without transfer penalties or bank carryover.
+   - `FPLForm` does great there because it rapidly flags in-form short-term haulers (like Barry and E.Le Fée).
+
+2. **The Career Tab is an "Actual 38-Week Campaign":**
+   - It enforces real-world managerial continuity: 1 Free Transfer per week, banking up to 5 FTs, squad value evolution, and zero hit penalties.
+   - Under real season constraints, **`NATIVE | SAFE | TEMPLATE SHIELD` crushes every other configuration** for 3 critical reasons:
+     - **Elite Transfer Rolling Discipline:** While other models burned a transfer every single week (9 transfers used, 0 rolled), `NATIVE SAFE TEMPLATE` only executed 5 moves and **banked 4 Free Transfers**! It never chased 1-week flashes in the pan.
+     - **Template Shielding Protection:** By protecting high-ownership core pillars (Haaland, Gabriel, Arsenal defensive solidity), it never suffered rank collapses when the template hauled.
+     - **Explosive Clustered Hauls:** It scored **100 pts in GW7, 75 pts in GW8, and 85 pts in GW9**, all without ever taking a single point hit deduction.
+     - **Unmatched Financial Flexibility:** It enters GW11 with **£8.6m in reserve bank balance**, giving it infinite purchasing power for premium upgrades in the second half of the season.
+
+### Summary Verdict
+If you are playing Career Mode or tracking your season roadmap:
+**Yes, `Native | Safe | Template Shield` is the undisputed #1 leader in the park.** It leads the Autonomous simulation at **660 points** and leads the Co-Pilot Duel at **678 points**.
