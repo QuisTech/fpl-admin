@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Trophy, TrendingUp, TrendingDown, Shield, Zap, ChevronLeft, ChevronRight, 
   ArrowRight, RefreshCw, UserCheck, Sparkles, Clock, ArrowUpRight, 
-  CheckCircle2, DollarSign, Award, AlertCircle, Bot
+  CheckCircle2, DollarSign, Award, AlertCircle, Bot, Swords
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import axios from 'axios';
@@ -70,6 +70,7 @@ export interface CareerSeasonPayload {
   teamName?: string;
   fuel: string;
   riskMode: string;
+  forwardSource?: 'autonomous' | 'synced' | 'duel';
   startGw: number;
   endGw: number;
   totalPoints: number;
@@ -109,7 +110,19 @@ export const CareerModeView = ({
   activeScenario = 'template'
 }: CareerModeViewProps) => {
   const [mode, setMode] = useState<'autonomous' | 'synced' | 'forward'>('autonomous');
-  const [forwardSource, setForwardSource] = useState<'autonomous' | 'synced'>('autonomous');
+  const [forwardSource, setForwardSource] = useState<'autonomous' | 'synced' | 'duel'>(() => {
+    try {
+      const saved = localStorage.getItem('fpl_career_forward_source');
+      if (saved === 'autonomous' || saved === 'synced' || saved === 'duel') return saved;
+    } catch {}
+    return teamId ? 'duel' : 'autonomous';
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('fpl_career_forward_source', forwardSource);
+    } catch {}
+  }, [forwardSource]);
   const [data, setData] = useState<CareerSeasonPayload | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -280,7 +293,7 @@ export const CareerModeView = ({
               )}
               {mode === 'forward' && (
                 <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-sky-500/15 text-sky-300 border border-sky-500/30">
-                  SEASON FORECAST ({forwardSource.toUpperCase()})
+                  SEASON FORECAST ({forwardSource === 'duel' ? 'AI CO-PILOT DUEL' : forwardSource === 'synced' ? 'MY REAL SQUAD' : 'AUTONOMOUS AI'})
                 </span>
               )}
               <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 uppercase">
@@ -292,12 +305,25 @@ export const CareerModeView = ({
               <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-amber-500/10 text-amber-300 border border-amber-500/20 uppercase">
                 {activeScenario === 'template' ? 'Template Shield' : 'Quant Optimal'}
               </span>
+              {mode === 'forward' && forwardSource === 'duel' && (
+                <button
+                  onClick={() => setMode('synced')}
+                  className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 transition-all cursor-pointer flex items-center gap-1"
+                  title="Switch to GW1–GW10 You vs AI Duel Replay"
+                >
+                  <span>← Back to Duel Replay</span>
+                </button>
+              )}
             </div>
             <p className="text-[11px] text-slate-400">
               {mode === 'synced' && teamId 
                 ? `Counterfactual Replay: Human vs AI starting from ${data?.managerName || 'Your'} GW1 Squad`
                 : mode === 'forward'
-                ? `Forward Roadmap: Projected 1-FT Moves for ${forwardSource === 'autonomous' ? `Autonomous AI Squad (GW${(data?.startGw || 11) - 1} Seed)` : data?.managerName || 'Your Synced Team'} (GW${data?.startGw || 11} → GW${data?.endGw || 16})`
+                ? forwardSource === 'duel'
+                  ? `Forward Roadmap: Projected 1-FT Moves for AI Co-Pilot (${data?.teamName || 'Duel Branch'}, GW1–10 Base: ${data?.basePoints || 678} pts) from GW${data?.startGw || 11} → GW${data?.endGw || 16}`
+                  : forwardSource === 'synced'
+                  ? `Forward Roadmap: Projected 1-FT Moves for Your Real Team (${data?.managerName || 'Current FPL Squad'}, GW1–10 Base: ${data?.basePoints || 588} pts) from GW${data?.startGw || 11} → GW${data?.endGw || 16}`
+                  : `Forward Roadmap: Projected 1-FT Moves for Autonomous AI (£100.0m Draft, GW1–10 Base: ${data?.basePoints || 660} pts) from GW${data?.startGw || 11} → GW${data?.endGw || 16}`
                 : "Autonomous AI Manager navigating the season from £100.0m with squad continuity"}
             </p>
           </div>
@@ -307,38 +333,58 @@ export const CareerModeView = ({
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 self-start md:self-auto">
           {mode === 'forward' && (
             <div className="flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800 text-[11px]">
+              {teamId && (
+                <button
+                  onClick={() => {
+                    setForwardSource('duel');
+                    setSelectedGwIndex(0);
+                  }}
+                  className={cn(
+                    "px-2.5 py-1 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer",
+                    forwardSource === 'duel'
+                      ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm"
+                      : "text-slate-400 hover:text-slate-200"
+                  )}
+                  title="Project forward from the AI Co-Pilot's squad that branched from your GW1 selection (GW10: 678 pts)"
+                >
+                  <Swords className="w-3 h-3 text-amber-400" />
+                  <span>AI Co-Pilot (Duel)</span>
+                </button>
+              )}
+              {teamId && (
+                <button
+                  onClick={() => {
+                    setForwardSource('synced');
+                    setSelectedGwIndex(0);
+                  }}
+                  className={cn(
+                    "px-2.5 py-1 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer",
+                    forwardSource === 'synced'
+                      ? "bg-fpl-green/20 text-fpl-green border border-fpl-green/40 shadow-sm"
+                      : "text-slate-400 hover:text-slate-200"
+                  )}
+                  title="Project forward from your actual current FPL team on fantasy.premierleague.com (GW10: 588 pts)"
+                >
+                  <UserCheck className="w-3 h-3 text-fpl-green" />
+                  <span>My Real Squad</span>
+                </button>
+              )}
               <button
                 onClick={() => {
                   setForwardSource('autonomous');
                   setSelectedGwIndex(0);
                 }}
                 className={cn(
-                  "px-2.5 py-1 rounded-lg font-bold transition-all flex items-center gap-1.5",
+                  "px-2.5 py-1 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer",
                   forwardSource === 'autonomous'
-                    ? "bg-purple-500/20 text-purple-300 border border-purple-500/40"
+                    ? "bg-purple-500/20 text-purple-300 border border-purple-500/40 shadow-sm"
                     : "text-slate-400 hover:text-slate-200"
                 )}
+                title="Project forward from the Autonomous AI £100.0m draft (GW10: 660 pts)"
               >
-                <Bot className="w-3 h-3" />
-                <span>Autonomous Squad</span>
+                <Bot className="w-3 h-3 text-purple-400" />
+                <span>Autonomous AI</span>
               </button>
-              {teamId && (
-                <button
-                  onClick={() => {
-                  setForwardSource('synced');
-                  setSelectedGwIndex(0);
-                }}
-                  className={cn(
-                    "px-2.5 py-1 rounded-lg font-bold transition-all flex items-center gap-1.5",
-                    forwardSource === 'synced'
-                      ? "bg-fpl-green/20 text-fpl-green border border-fpl-green/40"
-                      : "text-slate-400 hover:text-slate-200"
-                  )}
-                >
-                  <UserCheck className="w-3 h-3" />
-                  <span>My Synced Team</span>
-                </button>
-              )}
             </div>
           )}
 
@@ -729,6 +775,20 @@ export const CareerModeView = ({
                     <div className="text-[11px] text-slate-400 pt-1">
                       Cumulative Score after GW{activeGwData.gameweek}: You <strong className="text-white">{activeGwData.humanComparison.cumulativePoints} pts</strong> vs AI <strong className="text-emerald-400">{activeGwData.cumulativePoints} pts</strong>.
                     </div>
+
+                    <button
+                      onClick={() => {
+                        setForwardSource('duel');
+                        setMode('forward');
+                        setSelectedGwIndex(0);
+                      }}
+                      className="w-full mt-2 py-2 px-3 bg-gradient-to-r from-amber-500/15 via-emerald-500/15 to-purple-500/15 hover:from-amber-500/25 hover:to-purple-500/25 border border-amber-500/40 rounded-xl text-xs font-bold text-amber-300 flex items-center justify-center gap-2 transition-all cursor-pointer group shadow-sm active:scale-[0.99]"
+                      title="See where the AI Co-Pilot goes next from GW11 to GW16"
+                    >
+                      <Swords className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
+                      <span>Project AI Co-Pilot Forward (GW11 → GW16)</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-amber-400 group-hover:translate-x-0.5 transition-transform" />
+                    </button>
                   </div>
                 )}
               </div>

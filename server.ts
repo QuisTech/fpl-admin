@@ -166,26 +166,26 @@ async function startServer() {
 
       const lockedStr = (req.query.locked as string) || req.body?.locked || '';
       const excludedStr = (req.query.excluded as string) || req.body?.excluded || '';
-      const lockedIds = Array.isArray(req.body?.lockedIds) 
-        ? req.body.lockedIds 
+      const lockedIds = Array.isArray(req.body?.lockedIds)
+        ? req.body.lockedIds
         : (lockedStr ? lockedStr.split(',').map((s: string) => parseInt(s.trim())).filter((n: number) => !isNaN(n)) : []);
-      const excludedIds = Array.isArray(req.body?.excludedIds) 
-        ? req.body.excludedIds 
+      const excludedIds = Array.isArray(req.body?.excludedIds)
+        ? req.body.excludedIds
         : (excludedStr ? excludedStr.split(',').map((s: string) => parseInt(s.trim())).filter((n: number) => !isNaN(n)) : []);
       const skipComparison = req.query.skipComparison === 'true' || req.body?.skipComparison === true;
       const targetGw = (req.query.gw || req.body?.gw) ? parseInt((req.query.gw || req.body?.gw) as string, 10) : undefined;
-      
+
       console.log(`[Local Dev] Recommendations: riskMode=${riskMode}, budget=${budget}, fuel=${fuel}, scenario=${scenario}, locked=${lockedIds.length}, excluded=${excludedIds.length}, tier=${tier}`);
-      
+
       const result = await FPLService.getRecommendations(
-        riskMode, 
-        budget, 
-        tier, 
-        fuel, 
-        scenario, 
-        lockedIds, 
-        excludedIds, 
-        targetGw, 
+        riskMode,
+        budget,
+        tier,
+        fuel,
+        scenario,
+        lockedIds,
+        excludedIds,
+        targetGw,
         skipComparison
       );
       res.json(result);
@@ -277,7 +277,7 @@ async function startServer() {
       const fuel = ((req.query.fuel || req.body?.fuel) as string) || 'native';
       const riskMode = ((req.query.riskMode || req.body?.riskMode) as string) || 'safe';
       const scenario = (((req.query.scenario || req.body?.scenario) as string) || 'template') as 'quant' | 'template';
-      const forwardSource = (((req.query.forwardSource || req.body?.forwardSource) as string) || 'autonomous') as 'autonomous' | 'synced';
+      const forwardSource = (((req.query.forwardSource || req.body?.forwardSource) as string) || 'autonomous') as 'autonomous' | 'synced' | 'duel';
       const endGw = (req.query.endGw || req.body?.endGw) ? parseInt((req.query.endGw || req.body?.endGw) as string, 10) : undefined;
 
       const { CareerService } = await import("./api/_lib/career-service");

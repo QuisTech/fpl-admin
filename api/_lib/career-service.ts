@@ -73,6 +73,7 @@ export interface CareerSeasonPayload {
   fuel: string;
   riskMode: string;
   scenario?: 'quant' | 'template';
+  forwardSource?: 'autonomous' | 'synced' | 'duel';
   startGw: number;
   endGw: number;
   totalPoints: number;
@@ -1196,7 +1197,7 @@ export class CareerService {
     riskMode: string = 'safe',
     horizonGws: number = 6,
     scenario: 'quant' | 'template' = 'quant',
-    forwardSource: 'autonomous' | 'synced' = 'autonomous'
+    forwardSource: 'autonomous' | 'synced' | 'duel' = 'autonomous'
   ): Promise<CareerSeasonPayload> {
     const params = getParamsForRiskMode(riskMode, DEFAULT_PARAMETERS, scenario);
     const baseData = await FPLService.getBaseData();
@@ -1211,7 +1212,23 @@ export class CareerService {
     let managerName = 'Autonomous Squad';
     let teamName = 'AI Optimization Unit';
 
-    if (forwardSource === 'synced' && teamId) {
+    if (forwardSource === 'duel' && teamId) {
+      const cleanId = String(teamId).trim();
+      try {
+        const duelCareer = await this.getSyncedCareerReplay(cleanId, fuel, riskMode, currentGw, scenario);
+        const lastGw = duelCareer.gameweeks[duelCareer.gameweeks.length - 1];
+        if (lastGw) {
+          squad = [...lastGw.startingXI.map(p => p.id), ...lastGw.bench.map(p => p.id)];
+          bank = typeof lastGw.bank === 'number' ? lastGw.bank : 0;
+          initialFt = typeof lastGw.freeTransfersRemaining === 'number' ? lastGw.freeTransfersRemaining : 1;
+          initialAccumulatedScore = duelCareer.totalPoints;
+          managerName = duelCareer.managerName ? `${duelCareer.managerName} (AI Co-Pilot)` : 'AI Co-Pilot (Duel)';
+          teamName = duelCareer.teamName ? `${duelCareer.teamName} (AI Co-Pilot)` : 'AI Co-Pilot Team';
+        }
+      } catch (e: any) {
+        console.warn(`[CareerService] Forward roadmap duel fetch failed for ${teamId}:`, e.message);
+      }
+    } else if (forwardSource === 'synced' && teamId) {
       const cleanId = String(teamId).trim();
       try {
         const [picksRes, entryRes, histRes] = await Promise.all([
@@ -1467,6 +1484,7 @@ export class CareerService {
       fuel,
       riskMode,
       scenario,
+      forwardSource,
       startGw,
       endGw,
       totalPoints: state.accumulatedScore,

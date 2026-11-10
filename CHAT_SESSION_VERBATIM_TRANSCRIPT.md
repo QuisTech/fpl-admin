@@ -28100,10 +28100,102 @@ I have added the **`Update Feeds`** button (matching the design and placement in
 
 ## User (2026-11-09)
 
-I was just about to ask that they should be set to true
+What is the value of this squad?
+FWD
+Haaland
+99% Start
+58% Cap
+MID
+Rogers
+87% Start
+1% Cap
+DEF
+Konsa
+78% Start
+MID
+Groß
+76% Start
+DEF
+De Cuyper
+73% Start
+DEF
+Calafiori
+67% Start
+7% Cap
+FWD
+N.Jackson
+69% Start
+2% Cap
+MID
+Palmer
+67% Start
+0% Cap
+GKP
+Raya
+65% Start
+MID
+Tavernier
+61% Start
+2% Cap
+FWD
+Barry
+53% Start
+4% Cap
+DEF
+Gabriel
+37% Start
+12% Cap
+
+Check the real price in fpl api
 
 ## Assistant (2026-11-09)
 
-Yes — I set `inputs: { force: 'true' }` directly in the API payload in [`api/admin.ts`](file:///c:/Users/USER/Documents/fpl-admin/api/admin.ts#L85-L91), and I also just updated the workflow YAML defaults in [`.github/workflows/post-deadline-fetch.yml`](file:///c:/Users/USER/Documents/fpl-admin/.github/workflows/post-deadline-fetch.yml#L12-L15) and [`.github/workflows/gameweek-finalizer.yml`](file:///c:/Users/USER/Documents/fpl-admin/.github/workflows/gameweek-finalizer.yml#L12-L15) from `default: 'false'` to `default: 'true'`.
+Here are the exact live prices from the official FPL API (`bootstrap-static`) right now for those 12 players:
 
-Now, whether you trigger them with 1 click from the **`Update Feeds`** button in the app or from GitHub, `force` is always `'true'` so they execute immediately without skipping.
+| # | Pos | Player | Live FPL API Price |
+| :--- | :--- | :--- | :--- |
+| 1 | **FWD** | **Haaland** | **£15.8m** |
+| 2 | **MID** | **Rogers** | **£8.2m** |
+| 3 | **DEF** | **Konsa** | **£4.8m** |
+| 4 | **MID** | **Groß** | **£6.3m** |
+| 5 | **DEF** | **De Cuyper** | **£5.5m** |
+| 6 | **DEF** | **Calafiori** | **£5.9m** |
+| 7 | **FWD** | **N.Jackson** | **£7.1m** |
+| 8 | **MID** | **Palmer** | **£9.8m** |
+| 9 | **GKP** | **Raya** | **£6.2m** |
+| 10 | **MID** | **Tavernier** | **£6.7m** |
+| 11 | **FWD** | **Barry** | **£5.7m** |
+| 12 | **DEF** | **Gabriel** | **£8.1m** |
+
+---
+
+### Total Value Summary
+- **All 12 Listed Players (1 GKP, 4 DEF, 4 MID, 3 FWD):** **`£90.1m`**
+- **Top 11 Starters (excluding 12th man Gabriel at £8.1m):** **`£82.0m`**
+- **Full 15-Man Squad Estimate (adding 3 minimum-price bench players: £4.0m GKP + £4.0m DEF + £4.3m MID = £12.3m):**
+  - With all 12 listed players + 3 cheapest bench fillers (1 GKP £4.0m + 1 DEF £4.0m + 1 MID £4.3m): **`£102.4m`**
+  - With the Top 11 Starters (`£82.0m`) + 4 standard budget bench players (`£4.0m GKP + £4.0m DEF + £4.0m DEF + £4.3m MID = £16.3m`): **`£98.3m`** (leaves **£1.7m ITB** under a £100.0m budget).
+
+
+## User (2026-11-10)
+
+Is it possible to have the forward looking of You vs AI Duel as well, I really like what the AI has really played using my starting team selection from GW 1, that is amazing what AI has played, however I understand we currently have a forward roadmap for my sync team but that is for what I am playing right now with my team, which is quite different from what the You vs AI Duel is playing, so I want the two, and I don't know how we can incorporate this?
+
+## Assistant (2026-11-10)
+
+Yes! This has now been incorporated across both `fpl-admin` and `fpl-planner`.
+
+You now have a dedicated **3-Way Forward Roadmap** selector that lets you project the future of:
+1. **AI Co-Pilot (Duel)** (`forwardSource = 'duel'`):
+   - Seeds directly from your **AI Co-Pilot's squad that evolved from your GW1 picks** (GW1–GW10 base: **678 pts** vs human 588 pts, squad value £100.5m with Verbruggen, De Cuyper, Vuskovic, Van Hecke, B.Fernandes, Palmer, E.Le Fée, Ndiaye, Haaland, Evanilson, N.Jackson).
+   - Projects GW11 → GW16 under optimal 1-FT rules (+634 xP projected, reaching **1,312 pts** by GW16).
+2. **My Real Squad** (`forwardSource = 'synced'`):
+   - Seeds from what you actually own right now on the official FPL website (GW1–GW10 base: **588 pts**, +574 xP projected, reaching **1,162 pts** by GW16).
+3. **Autonomous AI** (`forwardSource = 'autonomous'`):
+   - Seeds from the independent AI squad drafted from £100.0m in GW1 (GW1–GW10 base: **660 pts**, +650 xP projected, reaching **1,310 pts** by GW16).
+
+### Quick 1-Click Transition from the Duel
+- When reviewing **You vs AI Duel** (`mode = 'synced'`), you will now see a prominent quick action button right inside the comparison card:
+  **`"Project AI Co-Pilot Forward (GW11 → GW16) →"`**
+- Clicking it immediately launches the AI Co-Pilot's forward roadmap.
+- When inside the AI Co-Pilot Roadmap, a **`"← Back to Duel Replay"`** button is displayed in the header so you can return to GW1–GW10 at any time with zero friction.
