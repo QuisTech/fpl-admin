@@ -28941,3 +28941,76 @@ Here is your exact tactical roadmap:
 - Remember: **In Gameweek 20, everyone receives a brand new Set 2 Wildcard, Triple Captain, Free Hit, and Bench Boost.**
 - Your mission right now is simple: **stabilize your rank and stop the bleeding between GW11 and GW19 using 1-FT discipline.**
 - The moment GW20 hits, you activate your fresh Set 2 Wildcard, rebuild your squad into the AI's optimal template, and sprint through the final 19 gameweeks of the season with a full chip arsenal!
+## User (2026-11-10)
+
+So even if I see AI removing Decuyper in FT for a week or a high ceiling player for FT in a week, I should still follow the AI? or how do I follow this to heart? If the AI is rolling or recommending a patient 1-FT upgrade, do not override it with a rage-hit. Use the AI's objective mathematical discipline to shield you from recency bias.
+
+## Assistant (2026-11-10)
+
+This is the most critical mindset shift in competitive fantasy sports.
+
+You should **never follow an AI blindly like a robot**. The highest-performing players in modern data analytics (from Wall Street trading desks to chess grandmasters) follow the **"Centaur Framework"** (Kasparov’s Law):
+**Human Intuition + Algorithmic Discipline is vastly superior to AI alone, and vastly superior to Human alone.**
+
+Here is the exact operating protocol for how to "follow the AI to heart" while still retaining your personal judgment and flair:
+
+---
+
+### 1. Understand the "WHY" Behind the Move (Why De Cuyper → Gabriel?)
+When the AI recommends moving a high-ceiling fan-favorite like Maxim De Cuyper to Gabriel in GW14, it isn’t saying *"De Cuyper is a bad player"*.
+
+It is calculating a cold 6-gameweek fixture swing:
+- **Arsenal’s Defensive Floor:** Arsenal possesses the highest clean sheet probability in the Premier League (over 45% clean sheet odds per match), and Gabriel is the #1 aerial set-piece goal threat among defenders in Europe.
+- **Brighton’s Fixture Difficulty:** In GW14–17, Brighton hits a difficult schedule where clean sheet odds drop below 20%.
+- The AI is projecting that over that 6-gameweek horizon, **Gabriel will deliver +8 to +12 more points than De Cuyper**, while protecting you against defensive blanks.
+
+---
+
+### 2. The Golden Rule of Disagreement: The "Roll Veto"
+What happens if you watch Brighton and you believe passionately that De Cuyper is on fire, taking set-pieces, and will score or assist regardless of the opponent?
+
+Here is how you handle it without falling into the "Human Tilt Trap":
+
+#### The WRONG Human Reaction (What caused the drop to 588):
+- Disagreeing with the AI, panicking, making 4 transfers, and taking a **-12 or -16 point hit** to buy 3 other players.
+
+#### The RIGHT Centaur Reaction (The "Roll Veto"):
+- If you don't want to sell De Cuyper, **simply ROLL your Free Transfer!**
+- Do not take a hit. Do not force an unwanted move.
+- By rolling, you:
+  1. Keep De Cuyper in your starting lineup.
+  2. Protect yourself from the -4 point penalty.
+  3. **Bank a 2nd Free Transfer for next week**, giving you the flexibility to make a free double move later!
+
+---
+
+### 3. What to ALWAYS Obey (The "Iron Laws" You Never Override)
+There are 3 specific mathematical principles where the human brain is demonstrably inferior to the algorithm. **Never override the AI on these three rules:**
+
+1. **The Strict Zero-Hit Law:**
+   - Never take a -4, -8, or -12 point hit unless you have fewer than 10 fit players due to sudden injuries. Hits are mathematical suicide over a 38-game season.
+2. **The "Starter-Only" Law:**
+   - Never waste a Free Transfer upgrading your 2nd or 3rd bench player. The AI only transfers players who will actively start and score points on your pitch.
+3. **The Patience on Blanks (The Anti-Rage-Sell Law):**
+   - If an elite player (e.g. Palmer, Haaland, Saka) blanks for 2 games in a row, human emotion screams *"sell him!"*
+   - The AI knows underlying expected goals (npxG) haven't changed. Do not rage-sell premium players right before they haul.
+
+---
+
+### 4. Adjust the Engine to Match Your Style (`Eye-Test` vs `Native`)
+If your personal football philosophy values attacking flair and aggressive fullbacks over conservative center-backs, you don't have to fight the engine:
+- In the top header bar, switch the **Fuel** toggle from `Native` or `FPLForm` to **`Eye-Test`**!
+- The engine will immediately re-weight its linear solver:
+  - It increases the utility bonus on **high xGI, attacking wingbacks** (favoring De Cuyper, Pedro Porro, Robinson, Ait-Nouri).
+  - It deprioritizes low-ceiling defensive clean sheet grinders.
+
+---
+
+### Summary Checklist Before Every Deadline
+Before the Friday/Saturday deadline:
+1. **Check the AI Co-Pilot Recommendation.** Look at its 1-FT transfer and starting XI.
+2. **If you agree with the logic:** Execute the 1-FT move smoothly.
+3. **If you have a strong human eye-test hunch (e.g. keeping De Cuyper):** Exercise your **Roll Veto**. Keep your player, spend 0 hits, and bank your transfer.
+4. **Never, under any circumstance, take a point hit.**
+
+Follow this protocol from GW11 to GW19, and you will arrive at Gameweek 20 with a stabilized rank, a banked transfer, and a fresh Set 2 Wildcard ready to explode.
