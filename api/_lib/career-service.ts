@@ -1466,7 +1466,10 @@ export class CareerService {
       const capXp = oracle.getXP(captain, gw);
       const benchXp = benchIds.reduce((sum, id) => sum + oracle.getXP(id, gw), 0);
 
-      if (state.chipState['TC'] > 0 && (capXp >= tcThreshold || gw === chipDeadline)) {
+      const capPlayer = baseData.players.find((p: any) => p.id === captain);
+      const isEliteTalisman = capPlayer && (capPlayer.now_cost >= 90 || (oracle.getPosition(captain) === 'FWD' && capPlayer.now_cost >= 75));
+
+      if (state.chipState['TC'] > 0 && isEliteTalisman && (capXp >= tcThreshold || gw === chipDeadline)) {
         activeChip = 'TC';
         state.chipState['TC'] -= 1;
       } else if (state.chipState['BB'] > 0 && (benchXp >= bbThreshold || gw === chipDeadline)) {

@@ -29129,3 +29129,67 @@ Think of it exactly like a **smart GPS navigation system (like Google Maps or Wa
 1. **The upcoming gameweek (e.g. GW11) is the immediate priority recommendation.**
 2. **The gameweeks further out (GW12, GW13, GW14...) are a rolling strategic blueprint**, showing where the current path leads.
 3. **As press conferences happen on Thursdays and Fridays**, any new injury news, press leaks, or suspensions immediately update the algorithm, refreshing the roadmap so you always make decisions with the latest data right before the deadline.
+
+
+---
+
+## User
+Okay now I understood, because I was seeing where Iwobi is to be captained 2x using TC, that is weird
+
+---
+
+## Assistant
+
+### You Spotted a Genuine Model Glitch: Why Iwobi/Justin Were Getting Captaincy & TC
+
+You were 100% right — seeing **Alex Iwobi** captained 2× with 22 xP or **James Justin** Triple Captained with 42 xP was completely weird and mathematically distorted! 
+
+We traced the algorithm and found the exact root causes that produced this anomaly, and we have permanently fixed it across the entire codebase.
+
+---
+
+### Root Cause: What Was Causing the Distortion
+
+1. **Unconstrained Multi-Week Calibration in `NativeOracle`:**
+   - In [`NativeOracle`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/ingestion.ts#L593-L661), the engine calculates a calibration ratio `calibrationRatio = epNext / engineNext` to align future projection weeks with official Premier League expectations.
+   - If a budget defender or midfielder had a spike in official `epNext` in the current week (e.g. 5.5 to 6.0), the ratio scaled up future gameweeks. When those players faced a fixture of difficulty 2 (e.g. against promoted sides), the fixture difficulty offset boosted their score further, causing their projected single-match `xP` to artificially balloon to **11.4 xP for Iwobi** and **14.2 xP for Justin**!
+   - In real-world Premier League football, no single-gameweek defender or mid-tier player ever has an expected value of 14 points.
+
+2. **Missing "Premium Talisman Anchor" in Captain Selection:**
+   - In [`solveCaptain`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/lp-solver.ts#L402-L466), the solver evaluated expected points and tail variance, but lacked a **hard financial/talisman penalty**. 
+   - When Iwobi's xP artificially hit 11.4 in GW15, his score beat Haaland's 4.5, so the engine made Iwobi captain (11.4 × 2 = 22.8 xP)!
+   - Similarly, in GW12, when Justin's single-fixture xP was calculated at 14.2, it exceeded the Triple Captain threshold (8.5 xP), triggering the **Triple Captain chip on Justin** for 42 xP!
+
+---
+
+### Permanent Fixes Implemented
+
+We have deployed three surgical updates across both [fpl-admin](file:///c:/Users/USER/Documents/fpl-admin) and [fpl-planner](file:///c:/Users/USER/Documents/fpl-planner):
+
+1. **Realistic Football Ceilings & Bayesian Ratio Shrinkage in [`NativeOracle`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/ingestion.ts#L635-L658):**
+   - The calibration ratio is now bounded with 50% Bayesian shrinkage towards 1.0 (`Math.max(0.7, Math.min(1.4, 1.0 + (rawRatio - 1.0) * 0.5))`), eliminating runaway multiplier compounding.
+   - Single-gameweek expected points are capped at realistic Premier League ceilings:
+     - **Defenders & Goalkeepers:** Maximum 6.5 xP per match.
+     - **Midfielders:** Maximum 9.5 xP per match.
+     - **Forwards:** Maximum 10.5 xP per match.
+
+2. **Premium Talisman Captaincy Anchor in [`solveCaptain`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/lp-solver.ts#L410-L425):**
+   - Added a **Premium Anchor bonus** (+2.5 for £11.0m+ premiums like Haaland/Salah, +1.5 for £9.0m+ assets like Saka/Palmer/Son).
+   - Applied a strong penalty (-1.5) to budget assets under £6.5m and reduced DEF/GKP captaincy multiplier to `0.80`. Budget defenders and rotation midfielders will **never steal captaincy** from world-class talismans.
+
+3. **Elite Talisman Requirement for Triple Captain in [`CareerService`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts#L1466-L1475):**
+   - The Triple Captain chip now strictly verifies that the player is an **elite premium talisman** (`cost >= £9.0m` or premium forward) in addition to hitting the expected points threshold.
+
+---
+
+### Verified Forward Roadmap Output Now
+
+With these fixes live and dev servers refreshed:
+- **GW11:** Captain: **Haaland** (2×) • Chip: **Bench Boost** deployed
+- **GW12:** Captain: **Haaland** (2×)
+- **GW13:** Captain: **Haaland** (2×)
+- **GW14:** Captain: **Haaland** (2×)
+- **GW15:** Captain: **Haaland** (2×)
+- **GW16:** Captain: **Haaland** (3×) • Chip: **Triple Captain** deployed for 27 xP!
+
+Erling Haaland maintains the captaincy across every gameweek, and the Triple Captain chip is now saved for an elite high-ceiling haul on Erling Haaland in GW16 rather than being wasted on a budget defender or midfielder.

@@ -633,10 +633,9 @@ export class NativeOracle extends BaseOracle {
       ).expected;
 
       // Calibration ratio between official FPL perspective and underlying engine
-      // Bounded safely between 0.5 and 2.0 to avoid runaway ratios
-      const calibrationRatio = (engineNext > 0 && epNext > 0)
-        ? Math.max(0.5, Math.min(2.0, epNext / engineNext))
-        : 1.0;
+      // Shrink calibration ratio towards 1.0 (Bayesian shrinkage) to avoid runaway denominator distortion
+      const rawRatio = (engineNext > 0 && epNext > 0) ? epNext / engineNext : 1.0;
+      const calibrationRatio = Math.max(0.7, Math.min(1.4, 1.0 + (rawRatio - 1.0) * 0.5));
 
       // Project forward gameweeks (GW+1 to GW+14) using the calibrated structural engine
       for (let step = 1; step < 15; step++) {
@@ -652,7 +651,10 @@ export class NativeOracle extends BaseOracle {
           ? Math.round(engineFuture * calibrationRatio * 10) / 10
           : engineFuture;
 
-        this.xpMatrix[fplId][gw] = Math.min(25.0, Math.max(0, projectedXp));
+        // Cap single-gameweek expectations at realistic football ceilings:
+        // Def/Gkp max 6.5 xP, Mid max 9.5 xP, Fwd max 10.5 xP
+        const maxSgwXp = (p.element_type === 1 || p.element_type === 2) ? 6.5 : (p.element_type === 3 ? 9.5 : 10.5);
+        this.xpMatrix[fplId][gw] = Math.min(maxSgwXp, Math.max(0, projectedXp));
       }
     });
 

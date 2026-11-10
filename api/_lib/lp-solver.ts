@@ -411,14 +411,19 @@ export function solveCaptain(
     const dist = oracle.getDistribution(id, gameweek);
     const eo = oracle.getTop1kEO?.(id) ?? 0;
     const pos = oracle.getPosition(id);
-    const posMultiplier = (pos === 'FWD' || pos === 'MID') ? 1.25 : 1.0;
+    const cost = oracle.getCost(id);
+    const posMultiplier = (pos === 'FWD' || pos === 'MID') ? 1.25 : 0.80; // Heavily penalize defenders/GKPs as captains
     
+    // Premium Talisman Weight: Captaincy belongs to elite talismans (Haaland, Salah, Palmer, Saka, etc.)
+    // Budget assets (< £6.5m) or low-ceiling players are strongly discouraged from captaincy
+    const premiumAnchor = cost >= 110 ? 2.5 : cost >= 90 ? 1.5 : cost >= 75 ? 0.5 : (cost < 65 ? -1.5 : 0.0);
+
     const targetTail = params.betaVariance > 0 ? (dist.tails[15] || 0) : (dist.tails[8] || 0);
     const tailWeight = Math.abs(params.betaVariance) * 10; 
     const skewReward = params.betaVariance > 0 ? ((dist.skewness || 0) * 0.5) : 0;
     const capEOWeight = Math.max(0, params.betaEO);
 
-    return (dist.mean + (tailWeight * targetTail) + skewReward + (capEOWeight * eo / 100)) * posMultiplier;
+    return (dist.mean + premiumAnchor + (tailWeight * targetTail) + skewReward + (capEOWeight * eo / 100)) * posMultiplier;
   };
 
   const playersWithScores = xiIds.map(id => ({
@@ -438,12 +443,14 @@ export function solveCaptain(
     const dist = oracle.getDistribution(id, gameweek);
     const eo = oracle.getTop1kEO?.(id) ?? 0;
     const pos = oracle.getPosition(id);
-    const posMultiplier = (pos === 'FWD' || pos === 'MID') ? 1.25 : 1.0;
+    const cost = oracle.getCost(id);
+    const posMultiplier = (pos === 'FWD' || pos === 'MID') ? 1.25 : 0.80;
+    const premiumAnchor = cost >= 110 ? 2.5 : cost >= 90 ? 1.5 : cost >= 75 ? 0.5 : (cost < 65 ? -1.5 : 0.0);
     
     const targetTail = vcParams.betaVariance > 0 ? (dist.tails[15] || 0) : (dist.tails[8] || 0);
     const tailWeight = Math.abs(vcParams.betaVariance) * 10; 
     
-    const baseScore = dist.mean + (tailWeight * targetTail) + (vcParams.betaEO * eo / 100);
+    const baseScore = dist.mean + premiumAnchor + (tailWeight * targetTail) + (vcParams.betaEO * eo / 100);
     const lambda = 5.0;
     const correlation = getCorrelation(oracle, captain.id, id);
     
