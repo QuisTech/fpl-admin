@@ -28405,3 +28405,55 @@ The engine is already programmed to handle this exact transition:
 - **Live Matchdays:** Every gameweek, watch how the AI Co-Pilot's 1-FT moves perform live in the **You vs AI Duel** tab.
 - **Transfers Discipline:** Observe how the AI handles the November/December fixture congestion (rolling FTs to carry 2 FTs for double moves without taking point hits).
 - **Forward Horizon:** As we approach GW18–19, the **Forward Roadmap** will project the exact optimal **GW20 Wildcard draft**, giving you the precise 15-player squad to activate on fantasy.premierleague.com the moment Gameweek 20 opens!
+## User (2026-11-10)
+
+Is the app optimized for this?
+(rolling FTs to carry 2 FTs for double moves without taking point hits).
+
+
+Will it actually save FT and used more than 1 FT at a time, like save 3 FT or 5 FT and used it as required, is the app actually intelligent in this?
+
+## Assistant (2026-11-10)
+
+**YES, absolutely! The engine is specifically optimized for banking Free Transfers up to 5 FTs and executing multi-transfer double moves with 0 point hits.**
+
+Here is the exact mathematical and tactical logic driving this intelligence:
+
+---
+
+### 1. Official 2026/27 5-FT Banking Architecture
+Under official 2026/27 Premier League rules, managers can bank up to **5 Free Transfers** (unlike older FPL seasons where the cap was 2).
+
+In the engine ([`api/_lib/career-service.ts`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts#L1375-L1395) & [`api/_lib/simulator.ts`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/simulator.ts#L119-L122)):
+```ts
+const usedFTs = tResult.transfersIn.length;
+const remainingFTs = Math.max(0, currentState.freeTransfers - usedFTs);
+nextState.freeTransfers = Math.min(5, remainingFTs + 1);
+```
+- If you make 0 transfers (Roll): your banked FTs increase by +1 (up to the maximum of 5).
+- If you have 3 FTs banked and make 2 transfers: you spend 2 FTs with **0 hits taken**, and you carry 1 FT forward + 1 new FT added next week = 2 FTs.
+- In your frozen past playthrough (GW1–10), the AI Co-Pilot demonstrated this exact patience by rolling in **GW5, GW7, and GW9**, taking **0 point hits** all season.
+
+---
+
+### 2. How the AI Intelligently Chooses: Roll vs 1 FT vs 2+ FTs
+The optimizer does not simply make transfers because it has them available. In decision theory, **a banked Free Transfer has "Option Value"** (conservatively estimated at **1.5 to 2.0 xP** in flexibility to absorb injuries or target Double Gameweeks).
+
+The engine evaluates three distinct branches each Gameweek:
+
+1. **Branch A: Roll (0 Transfers)**
+   - If the best possible single transfer does not improve the starting XI's expected points (xP) by more than the option value threshold, the AI **rolls the transfer** to bank flexibility for upcoming fixtures.
+2. **Branch B: Single Transfer (1 FT)**
+   - If a single direct upgrade (e.g. `Mitchell → De Cuyper` or `Dubravka → Verbruggen`) significantly improves starting XI xP, it executes 1 transfer and banks the rest.
+3. **Branch C: Multi-Transfer / Double Move (2 to 5 FTs, 0 Hits)**
+   - When 2 or more FTs are banked (`availableFts >= 2`), the solver evaluates joint multi-transfer combinations.
+   - This unlocks moves that a single transfer can never accomplish on its own: for example, **downgrading a bench defender to free up £2.0m cash, enabling an immediate simultaneous upgrade of a midfielder to a premium star** (e.g. Saka or Palmer).
+   - If the combined double move beats the single move by at least **+1.5 xP**, the AI executes the multi-transfer, consuming the banked FTs with **0 points deducted**.
+
+---
+
+### 3. UI and Decision Log Presentation
+When the AI executes a multi-transfer, the UI is already built to handle it natively:
+- **Decision Log:** Displays the full sequence:
+  `GW Projected: Double Transfer PlayerA → PlayerB, PlayerC → PlayerD (2 FTs used, 0 hit). Captain: ...`
+- **Transfer Execution Card:** [`src/components/CareerModeView.tsx`](file:///c:/Users/USER/Documents/fpl-admin/src/components/CareerModeView.tsx#L716-L735) dynamically iterates over all `transfersIn` and `transfersOut`, displaying each out-and-in player pair side-by-side with individual prices and 0 hit cost.

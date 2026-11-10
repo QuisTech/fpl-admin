@@ -994,44 +994,71 @@ export class CareerService {
       let hitCostPoints = 0;
       let freeTransfersAvailable = state.freeTransfers;
 
-      // AI transfer decisions from GW2 onward using the user's squad — only execute if incoming player makes the Starting XI
+      // AI transfer decisions from GW2 onward using the user's squad — supports single or banked multi-transfers (0 hit)
       if (gw > 1) {
-        const tResult = solveOptimalTransfers(oracle, gw, state, 1, 8, params);
-        const candidateXi = tResult && tResult.transfersIn.length > 0
-          ? solveStartingXI(oracle, gw, tResult.squad, params)
+        const availableFts = Math.min(5, state.freeTransfers);
+
+        // Evaluate single transfer (k = 1)
+        const tResult1 = solveOptimalTransfers(oracle, gw, state, 1, 8, params);
+        const candidateXi1 = tResult1 && tResult1.transfersIn.length > 0
+          ? solveStartingXI(oracle, gw, tResult1.squad, params)
           : [];
-        if (tResult && tResult.transfersIn.length > 0 && candidateXi.includes(tResult.transfersIn[0])) {
-          const inId = tResult.transfersIn[0];
-          const outId = tResult.transfersOut[0];
-          const inCost = oracle.getCost(inId);
-          const outSell = getSellingPrice(oracle.getCost(outId), state.purchasePrices[outId] || oracle.getCost(outId));
+        const isValid1 = tResult1 && tResult1.transfersIn.length > 0 && candidateXi1.includes(tResult1.transfersIn[0]);
+
+        let tResult = isValid1 ? tResult1 : null;
+
+        // When 2 or more FTs are banked, evaluate a Double Transfer (k = 2) with 0 hit penalty
+        if (availableFts >= 2) {
+          const maxK = Math.min(availableFts, 2);
+          const tResultMulti = solveOptimalTransfers(oracle, gw, state, maxK, 8, params);
+          if (tResultMulti && tResultMulti.transfersIn.length >= 2) {
+            const candidateXiMulti = solveStartingXI(oracle, gw, tResultMulti.squad, params);
+            const startersIn = tResultMulti.transfersIn.filter(id => candidateXiMulti.includes(id));
+            if (startersIn.length > 0) {
+              const score1 = isValid1 ? candidateXi1.reduce((sum, id) => sum + (oracle.getXP(id, gw) || 0), 0) : 0;
+              const scoreMulti = candidateXiMulti.reduce((sum, id) => sum + (oracle.getXP(id, gw) || 0), 0);
+              if (scoreMulti >= score1 + 1.5) {
+                tResult = tResultMulti;
+              }
+            }
+          }
+        }
+
+        if (tResult && tResult.transfersIn.length > 0) {
+          for (let i = 0; i < tResult.transfersIn.length; i++) {
+            const inId = tResult.transfersIn[i];
+            const outId = tResult.transfersOut[i];
+            if (!inId || !outId) continue;
+            const inCost = oracle.getCost(inId);
+            const outSell = getSellingPrice(oracle.getCost(outId), state.purchasePrices[outId] || oracle.getCost(outId));
+
+            state.bank = state.bank + outSell - inCost;
+            delete state.purchasePrices[outId];
+            state.purchasePrices[inId] = inCost;
+
+            const pIn = baseData.players.find((p: any) => p.id === inId);
+            const pOut = baseData.players.find((p: any) => p.id === outId);
+
+            transfersInList.push({
+              id: inId,
+              name: pIn ? pIn.web_name : `Player ${inId}`,
+              position: oracle.getPosition(inId),
+              cost: inCost,
+              costDisplay: `£${(inCost / 10).toFixed(1)}m`
+            });
+            transfersOutList.push({
+              id: outId,
+              name: pOut ? pOut.web_name : `Player ${outId}`,
+              position: oracle.getPosition(outId),
+              cost: oracle.getCost(outId),
+              sellPrice: outSell,
+              costDisplay: `£${(outSell / 10).toFixed(1)}m`
+            });
+          }
 
           state.squad = tResult.squad;
-          state.bank = state.bank + outSell - inCost;
-          delete state.purchasePrices[outId];
-          state.purchasePrices[inId] = inCost;
-
-          const pIn = baseData.players.find((p: any) => p.id === inId);
-          const pOut = baseData.players.find((p: any) => p.id === outId);
-
-          transfersInList.push({
-            id: inId,
-            name: pIn ? pIn.web_name : `Player ${inId}`,
-            position: oracle.getPosition(inId),
-            cost: inCost,
-            costDisplay: `£${(inCost / 10).toFixed(1)}m`
-          });
-          transfersOutList.push({
-            id: outId,
-            name: pOut ? pOut.web_name : `Player ${outId}`,
-            position: oracle.getPosition(outId),
-            cost: oracle.getCost(outId),
-            sellPrice: outSell,
-            costDisplay: `£${(outSell / 10).toFixed(1)}m`
-          });
-
-          totalTransfersMade += 1;
-          state.freeTransfers = Math.min(5, Math.max(0, state.freeTransfers - 1) + 1);
+          totalTransfersMade += tResult.transfersIn.length;
+          state.freeTransfers = Math.min(5, Math.max(0, state.freeTransfers - tResult.transfersIn.length) + 1);
         } else {
           isRolled = true;
           totalTransfersRolled += 1;
@@ -1144,6 +1171,9 @@ export class CareerService {
         log = `Identical GW1 base squad. AI Captain: ${activeCapModel.web_name} (${activeCapModel.points * 2} pts).`;
       } else if (isRolled) {
         log = `AI Rolled FT (Saved for future). You scored ${humanNet} pts, AI scored ${netPoints} pts (${alphaDelta >= 0 ? `+${alphaDelta}` : alphaDelta} pts).`;
+      } else if (transfersInList.length > 1) {
+        const moves = transfersInList.map((t, i) => `${transfersOutList[i]?.name || 'Player'} → ${t.name}`).join(', ');
+        log = `AI Executed Double Transfer: ${moves} (${transfersInList.length} FTs used, 0 hit). You scored ${humanNet} pts, AI scored ${netPoints} pts (${alphaDelta >= 0 ? `+${alphaDelta}` : alphaDelta} pts).`;
       } else {
         const tIn = transfersInList[0]?.name || '';
         const tOut = transfersOutList[0]?.name || '';
@@ -1348,42 +1378,70 @@ export class CareerService {
       let isRolled = false;
       let freeTransfersAvailable = state.freeTransfers;
 
-      const tResult = solveOptimalTransfers(oracle, gw, state, 1, 6, params);
-      const candidateXi = tResult && tResult.transfersIn.length > 0
-        ? solveStartingXI(oracle, gw, tResult.squad, params)
+      const availableFts = Math.min(5, state.freeTransfers);
+
+      // Evaluate single transfer (k = 1)
+      const tResult1 = solveOptimalTransfers(oracle, gw, state, 1, 6, params);
+      const candidateXi1 = tResult1 && tResult1.transfersIn.length > 0
+        ? solveStartingXI(oracle, gw, tResult1.squad, params)
         : [];
-      if (tResult && tResult.transfersIn.length > 0 && candidateXi.includes(tResult.transfersIn[0])) {
-        const inId = tResult.transfersIn[0];
-        const outId = tResult.transfersOut[0];
-        const inCost = oracle.getCost(inId);
-        const outSell = getSellingPrice(oracle.getCost(outId), state.purchasePrices[outId] || oracle.getCost(outId));
+      const isValid1 = tResult1 && tResult1.transfersIn.length > 0 && candidateXi1.includes(tResult1.transfersIn[0]);
+
+      let tResult = isValid1 ? tResult1 : null;
+
+      // When 2 or more FTs are banked, evaluate a Double Transfer (k = 2) with 0 hit penalty
+      if (availableFts >= 2) {
+        const maxK = Math.min(availableFts, 2);
+        const tResultMulti = solveOptimalTransfers(oracle, gw, state, maxK, 6, params);
+        if (tResultMulti && tResultMulti.transfersIn.length >= 2) {
+          const candidateXiMulti = solveStartingXI(oracle, gw, tResultMulti.squad, params);
+          const startersIn = tResultMulti.transfersIn.filter(id => candidateXiMulti.includes(id));
+          if (startersIn.length > 0) {
+            // Require double transfer to beat single transfer by at least 1.5 xP hurdle to justify burning the 2nd banked FT
+            const score1 = isValid1 ? candidateXi1.reduce((sum, id) => sum + (oracle.getXP(id, gw) || 0), 0) : 0;
+            const scoreMulti = candidateXiMulti.reduce((sum, id) => sum + (oracle.getXP(id, gw) || 0), 0);
+            if (scoreMulti >= score1 + 1.5) {
+              tResult = tResultMulti;
+            }
+          }
+        }
+      }
+
+      if (tResult && tResult.transfersIn.length > 0) {
+        for (let i = 0; i < tResult.transfersIn.length; i++) {
+          const inId = tResult.transfersIn[i];
+          const outId = tResult.transfersOut[i];
+          if (!inId || !outId) continue;
+          const inCost = oracle.getCost(inId);
+          const outSell = getSellingPrice(oracle.getCost(outId), state.purchasePrices[outId] || oracle.getCost(outId));
+
+          state.bank = state.bank + outSell - inCost;
+          delete state.purchasePrices[outId];
+          state.purchasePrices[inId] = inCost;
+
+          const pIn = baseData.players.find((p: any) => p.id === inId);
+          const pOut = baseData.players.find((p: any) => p.id === outId);
+
+          transfersInList.push({
+            id: inId,
+            name: pIn ? pIn.web_name : `Player ${inId}`,
+            position: oracle.getPosition(inId),
+            cost: inCost,
+            costDisplay: `£${(inCost / 10).toFixed(1)}m`
+          });
+          transfersOutList.push({
+            id: outId,
+            name: pOut ? pOut.web_name : `Player ${outId}`,
+            position: oracle.getPosition(outId),
+            cost: oracle.getCost(outId),
+            sellPrice: outSell,
+            costDisplay: `£${(outSell / 10).toFixed(1)}m`
+          });
+        }
 
         state.squad = tResult.squad;
-        state.bank = state.bank + outSell - inCost;
-        delete state.purchasePrices[outId];
-        state.purchasePrices[inId] = inCost;
-
-        const pIn = baseData.players.find((p: any) => p.id === inId);
-        const pOut = baseData.players.find((p: any) => p.id === outId);
-
-        transfersInList.push({
-          id: inId,
-          name: pIn ? pIn.web_name : `Player ${inId}`,
-          position: oracle.getPosition(inId),
-          cost: inCost,
-          costDisplay: `£${(inCost / 10).toFixed(1)}m`
-        });
-        transfersOutList.push({
-          id: outId,
-          name: pOut ? pOut.web_name : `Player ${outId}`,
-          position: oracle.getPosition(outId),
-          cost: oracle.getCost(outId),
-          sellPrice: outSell,
-          costDisplay: `£${(outSell / 10).toFixed(1)}m`
-        });
-
-        totalTransfersMade += 1;
-        state.freeTransfers = Math.min(5, Math.max(0, state.freeTransfers - 1) + 1);
+        totalTransfersMade += tResult.transfersIn.length;
+        state.freeTransfers = Math.min(5, Math.max(0, state.freeTransfers - tResult.transfersIn.length) + 1);
       } else {
         isRolled = true;
         totalTransfersRolled += 1;
@@ -1470,6 +1528,8 @@ export class CareerService {
       let capPts = (dummyActualStats[captain]?.points ?? 0) * (activeChip === 'TC' ? 3 : 2);
       let log = isRolled
         ? `${logPrefix}GW${gw} Projected: Roll Free Transfer (Bank: ${state.freeTransfers} FTs). Captain: ${capModel.web_name} (${capPts} xP).`
+        : transfersInList.length > 1
+        ? `${logPrefix}GW${gw} Projected: Double Transfer ${transfersInList.map((t, i) => `${transfersOutList[i]?.name || 'Player'} → ${t.name}`).join(', ')} (${transfersInList.length} FTs used, 0 hit). Captain: ${capModel.web_name} (${capPts} xP).`
         : `${logPrefix}GW${gw} Projected: Transfer ${transfersOutList[0]?.name} → ${transfersInList[0]?.name}. Captain: ${capModel.web_name} (${capPts} xP).`;
       if (activeChip === 'BB') {
         const benchPtsSum = benchIds.reduce((sum, id) => sum + (dummyActualStats[id]?.points ?? 0), 0);
