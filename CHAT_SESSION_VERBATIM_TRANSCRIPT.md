@@ -29072,3 +29072,60 @@ We have resolved all three root causes across both [fpl-admin](file:///c:/Users/
      ```
    - Added `type="button"` to the timeline buttons so clicking them never triggers any synthetic form submission.
    - When you click on GW1, GW2, or any other week, your selected week remains locked and active even while background live scores hydrate.
+
+
+---
+
+## User
+So I want to ask if all these Forward Roadmap
+ Gameweek Timeline
+Click a Gameweek to inspect matchday are cast in stone already and can never change as the GW approaches? if there is an injury or suspension etc
+
+---
+
+## Assistant
+
+### Short Answer: Absolutely NOT Cast in Stone!
+
+The **Forward Roadmap** is **never static or set in stone**. It is powered by **Model Predictive Control (Rolling Horizon Dynamic Optimization)**. 
+
+Think of it exactly like a **smart GPS navigation system (like Google Maps or Waze)**:
+- Right now, it maps out the most optimal route for the next 6 Gameweeks (e.g. GW11 → GW16) based on **current information**.
+- If a road closes ahead (an injury, red card suspension, blank gameweek, or benching), or if you take a detour (you roll a transfer or pick a different player), the system **instantly recalculates and re-routes** the entire future path.
+
+---
+
+### How the Engine Automatically Adapts to Live Changes
+
+#### 1. Real-Time Injury & Suspension Detection
+- The app continuously ingests the official Premier League data (`bootstrap-static`) via [`FPLService.getBaseData()`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts#L1254).
+- When a player gets injured (status `'i'`), suspended (status `'s'`), ruled out (status `'u'`), or red-flagged (chance of playing next round `< 50%`), our ingestion engine in [`ingestion.ts`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/ingestion.ts#L237-L265) immediately flags `isAvail = false`.
+- Their expected playing minutes immediately drop to `0`, causing their expected points (`xP`) for upcoming fixtures to drop to **`0.0`**.
+- When [`solveOptimalTransfers`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/optimizer.ts) runs for the next gameweek, it detects the 0 xP dead weight in your Starting XI and automatically switches its transfer target to replace the injured or suspended player first!
+
+#### 2. Price Changes & Dynamic Bank Balances
+- Players rise and fall by £0.1m every night based on transfer volume.
+- When you open the Forward Roadmap, it uses your **exact, live squad selling values and bank balance**.
+- If a player you planned to buy rises in price or your player drops, the linear programming solver re-evaluates affordability in real time to ensure you never get trapped in an impossible transfer.
+
+#### 3. Moving Gameweek Baseline (Rolling 6-GW Window)
+- As each real-world Gameweek finishes (e.g. GW10 completes), the "current" anchor point moves forward:
+  - GW10 moves into the historical replay log.
+  - The Forward Roadmap recalculates with **GW11 as the immediate decision gameweek**, extending its projection forward across GW11 → GW16, then GW12 → GW17, and so on.
+- The actual transfers you made, your actual banked Free Transfers (e.g. 1, 2, or 3 FTs), and your actual bank balance become the new starting point.
+
+#### 4. Human "Roll Veto" & Tactical Overrides
+- If the AI previously projected a transfer for GW11, but you decide to **roll your transfer** instead:
+  - You now have **2 Free Transfers** in hand for GW12.
+  - When the Forward Roadmap recalculates, it acknowledges your 2 banked FTs and can now evaluate higher-ceiling **2-FT double moves** with 0 hit penalty!
+
+#### 5. Fixture Rescheduling & Double/Blank Gameweeks
+- If the Premier League announces postponed fixtures (e.g. due to FA Cup clashes or European knockouts), the fixture matrix updates.
+- If a team gets a Double Gameweek (DGW), their players' xP doubles for that week. The AI solver will dynamically re-route transfers to bring in key DGW assets before that peak.
+
+---
+
+### Summary: What to Expect Every Week
+1. **The upcoming gameweek (e.g. GW11) is the immediate priority recommendation.**
+2. **The gameweeks further out (GW12, GW13, GW14...) are a rolling strategic blueprint**, showing where the current path leads.
+3. **As press conferences happen on Thursdays and Fridays**, any new injury news, press leaks, or suspensions immediately update the algorithm, refreshing the roadmap so you always make decisions with the latest data right before the deadline.
