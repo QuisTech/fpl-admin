@@ -65,6 +65,9 @@ async function startServer() {
     server: {
       middlewareMode: true,
       hmr: process.env.DISABLE_HMR === 'true' ? false : { server },
+      watch: {
+        ignored: ['**/data/**', '**/data/snapshots/**', '**/*.md', '**/dist/**', '**/.git/**']
+      }
     },
     appType: "spa",
   });

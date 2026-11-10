@@ -138,15 +138,6 @@ export class CareerService {
 
           if (Object.values(liveStats).some(s => s.points !== 0 || s.minutes > 0)) {
             this.liveStatsCache.set(gw, { stats: liveStats, timestamp: Date.now() });
-            try {
-              const dir = path.join(process.cwd(), `data/snapshots/gw_${gw}`);
-              if (fs.existsSync(dir)) {
-                fs.writeFileSync(path.join(dir, 'player_points.json'), JSON.stringify(pointsMap, null, 2));
-                fs.writeFileSync(path.join(dir, 'player_stats.json'), JSON.stringify(liveStats, null, 2));
-              }
-            } catch {
-              // Ignore write errors in read-only serverless environments
-            }
             return liveStats;
           }
         }

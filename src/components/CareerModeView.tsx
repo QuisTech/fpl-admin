@@ -239,7 +239,8 @@ export const CareerModeView = ({
       setData(hydrated);
       if (hydrated.gameweeks.length > 0) {
         const isForward = hydrated.mode === 'forward' || mode === 'forward';
-        setSelectedGwIndex(isForward ? 0 : hydrated.gameweeks.length - 1);
+        const defaultIndex = isForward ? 0 : hydrated.gameweeks.length - 1;
+        setSelectedGwIndex(prev => (prev >= 0 && prev < hydrated.gameweeks.length) ? prev : defaultIndex);
       }
     } catch (err: any) {
       console.error("Career Mode Fetch Error:", err);
@@ -649,6 +650,7 @@ export const CareerModeView = ({
                 const alpha = gw.humanComparison?.alphaDelta;
                 return (
                   <button
+                    type="button"
                     key={gw.gameweek}
                     onClick={() => setSelectedGwIndex(idx)}
                     className={cn(

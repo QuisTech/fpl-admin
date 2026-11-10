@@ -29014,3 +29014,61 @@ Before the Friday/Saturday deadline:
 4. **Never, under any circumstance, take a point hit.**
 
 Follow this protocol from GW11 to GW19, and you will arrive at Gameweek 20 with a stabilized rank, a banked transfer, and a fresh Set 2 Wildcard ready to explode.
+
+
+---
+
+## User
+Okay while using the app each time I'm going through all the Gameweek Timeline
+Click a Gameweek to inspect matchday to change GW, the app refreshes and distrupt what I'm doing, why is this? perhaps team sync is engaing each time, look into a solution, this happen while using localhost not vercel app
+
+---
+
+## Assistant
+
+### Root Cause Analysis: Why This Happened Only on Localhost
+
+The page refresh when clicking through the **Gameweek Timeline** on `localhost` was caused by three interconnected issues between Vite's file watcher, runtime disk writes, and component state handling:
+
+1. **Vite's Local Dev File-Watcher (`[vite] page reload`):**
+   - Whenever you clicked on a Gameweek in the timeline, the app called `/api/career` or `/api/live/:eventId` to retrieve or hydrate the matchday stats.
+   - Inside [`CareerService.getLiveOrStoredPlayerStats`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts#L109-L159), whenever live player stats were retrieved from the FPL API, it executed:
+     ```ts
+     fs.writeFileSync(path.join(dir, 'player_points.json'), JSON.stringify(pointsMap, null, 2));
+     fs.writeFileSync(path.join(dir, 'player_stats.json'), JSON.stringify(liveStats, null, 2));
+     ```
+   - On `localhost`, Vite runs with active Hot Module Replacement (HMR) and watches the project filesystem. Because the `data/` and `data/snapshots/` directories were not ignored by Vite's watcher, Vite caught the file modification on disk and assumed application code had changed. Because JSON snapshot files are not React components that support hot-swapping, Vite issued a full browser reload:
+     `[vite] (client) page reload data/snapshots/gw_10/player_points.json`
+     followed immediately by `[REQUEST] GET /` (a destructive full browser reload).
+   - **Why this never happened on Vercel:** On Vercel, the app is deployed as a pre-built static bundle and serverless functions where no Vite dev file watcher runs, and serverless environments operate with read-only filesystems.
+
+2. **Redundant Runtime Disk Writes During Read Queries:**
+   - [`CareerService`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts#L102-L160) already maintains an in-memory cache (`liveStatsCache`) with a 45-second TTL (`LIVE_CACHE_TTL = 45 * 1000`). Writing to disk during client read queries was redundant, slow, and created unnecessary disk churn. Snapshot files on disk are intended strictly for frozen historical checkpoints.
+
+3. **Gameweek Index Overwrite in React State:**
+   - In [`CareerModeView.tsx`](file:///c:/Users/USER/Documents/fpl-admin/src/components/CareerModeView.tsx#L238-L245), `fetchCareerData()` was doing:
+     ```tsx
+     setSelectedGwIndex(isForward ? 0 : hydrated.gameweeks.length - 1);
+     ```
+   - Whenever any background hydration completed, it unconditionally wiped out your current selection (e.g. GW3 or GW4) and forced the view back to GW10.
+
+---
+
+### Permanent Fixes Implemented
+
+We have resolved all three root causes across both [fpl-admin](file:///c:/Users/USER/Documents/fpl-admin) and [fpl-planner](file:///c:/Users/USER/Documents/fpl-planner):
+
+1. **Configured Vite Dev Watcher to Ignore Data Snapshots:**
+   - In [`vite.config.ts`](file:///c:/Users/USER/Documents/fpl-admin/vite.config.ts#L16-L25) and [`server.ts`](file:///c:/Users/USER/Documents/fpl-admin/server.ts#L64-L73), added `server.watch.ignored: ['**/data/**', '**/data/snapshots/**', '**/*.md', '**/dist/**', '**/.git/**']`. Vite will now ignore any data or snapshot modifications on localhost.
+
+2. **Eliminated Runtime Disk Writes in [`CareerService`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts#L102-L160):**
+   - Removed `fs.writeFileSync` from [`getLiveOrStoredPlayerStats`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts#L109-L155). Live stats are served 100% in-memory via `liveStatsCache`. Read queries never write to disk.
+
+3. **Preserved User-Selected Gameweek in React State:**
+   - In [`CareerModeView.tsx`](file:///c:/Users/USER/Documents/fpl-admin/src/components/CareerModeView.tsx#L238-L245):
+     ```tsx
+     const defaultIndex = isForward ? 0 : hydrated.gameweeks.length - 1;
+     setSelectedGwIndex(prev => (prev >= 0 && prev < hydrated.gameweeks.length) ? prev : defaultIndex);
+     ```
+   - Added `type="button"` to the timeline buttons so clicking them never triggers any synthetic form submission.
+   - When you click on GW1, GW2, or any other week, your selected week remains locked and active even while background live scores hydrate.
