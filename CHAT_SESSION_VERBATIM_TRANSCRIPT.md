@@ -28199,3 +28199,70 @@ You now have a dedicated **3-Way Forward Roadmap** selector that lets you projec
   **`"Project AI Co-Pilot Forward (GW11 → GW16) →"`**
 - Clicking it immediately launches the AI Co-Pilot's forward roadmap.
 - When inside the AI Co-Pilot Roadmap, a **`"← Back to Duel Replay"`** button is displayed in the header so you can return to GW1–GW10 at any time with zero friction.
+
+## User (2026-11-10)
+
+Can you arrange these well, they are all going out of the div class box?
+
+AI Co-Pilot (Duel)
+
+My Real Squad
+
+Autonomous AI
+Autonomous AI
+
+You vs AI Duel
+Forward Roadmap
+
+
+
+
+the refresh button cannot be seen again 
+
+
+Also make sure the that div class is smartphone responsive
+
+## Assistant (2026-11-10)
+
+I have completely reorganized and redesigned the top navigation controls in [CareerModeView.tsx](file:///c:/Users/USER/Documents/fpl-admin/src/components/CareerModeView.tsx) across both **fpl-admin** and **fpl-planner**.
+
+### What Was Happening:
+1. **Horizontal Cramming & Duplicate Confusion:**
+   - When **Forward Roadmap** was selected, the 3 sub-source buttons (AI Co-Pilot (Duel), My Real Squad, Autonomous AI) and the 3 primary mode buttons (Autonomous AI, You vs AI Duel, Forward Roadmap) were forced into the same horizontal flex row alongside the title.
+   - This crammed 7 buttons into one line, placing **Autonomous AI** right next to **Autonomous AI**, bursting out of the container on standard screens.
+2. **Missing Refresh Button:**
+   - The refresh button was attached at the very end of the second button group without a pinned position. As the buttons expanded, the refresh button was pushed completely off-screen.
+3. **Mobile Screen Overflow:**
+   - On smartphones, fixed padding caused the buttons to exceed mobile viewport widths (360px–412px), causing severe horizontal cut-off.
+
+---
+
+### What Was Fixed & Restructured:
+
+#### 1. Row 1: Header + Permanently Pinned Refresh Button
+- **Top Left:** Bot icon, **AI Season Career** title, official rules badge, and active status tags.
+- **Top Right (Pinned):** A dedicated, standalone **Refresh button** (RefreshCw icon + "Refresh" label) anchored firmly at the top-right corner. It is guaranteed to remain visible at all times across all screen sizes and can never be pushed off-screen.
+
+#### 2. Row 2: Primary Career Mode Selection (Clean 3-Tab Grid)
+- Labeled clearly: **Select Mode:**
+- Structured as an equal-width 3-column responsive grid (grid grid-cols-3):
+  1. **Autonomous AI** (with Bot icon)
+  2. **You vs AI Duel** (with Swords icon and live pulsing indicator)
+  3. **Forward Roadmap** (with TrendingUp icon)
+- Each button occupies exactly 33.3% of the container width with centered text and rounded highlight states. It fits neatly on any screen without overflowing.
+
+#### 3. Row 3: Dedicated "Forecast Starting Squad" Sub-Bar (When Forward Roadmap is Active)
+- Rendered in its own distinct styled sub-card (g-sky-950/20 border border-sky-500/25 rounded-xl) clearly separated from the primary mode row.
+- Labeled: **Forecast Starting Squad:** (with a "← Back to Past Duel Replay" shortcut when viewing the Co-Pilot Duel).
+- The 3 starting squad sources are arranged cleanly:
+  1. **AI Co-Pilot (Duel)** (Amber theme, Swords icon)
+  2. **My Real Squad** (FPL Green theme, UserCheck icon)
+  3. **Autonomous AI** (Purple theme, Bot icon)
+- **100% Smartphone Responsive:** On mobile devices, this sub-bar automatically switches to full-width stacked cards (grid-cols-1 sm:grid-cols-3), giving thumb-friendly tap targets that will never wrap awkwardly or clip. On desktop, it aligns as a sleek 3-column pill bar.
+
+---
+
+### Files Updated & Verified:
+- [pl-admin/src/components/CareerModeView.tsx](file:///c:/Users/USER/Documents/fpl-admin/src/components/CareerModeView.tsx)
+- [pl-planner/src/components/CareerModeView.tsx](file:///c:/Users/USER/Documents/fpl-planner/src/components/CareerModeView.tsx)
+- Both local dev servers (localhost:3000 and localhost:3001) verified running and compiling with 0 TypeScript errors.

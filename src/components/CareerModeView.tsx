@@ -270,69 +270,152 @@ export const CareerModeView = ({
   return (
     <div className="space-y-6">
       {/* Top Banner & Mode Toggle */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-950/80 p-4 rounded-2xl border border-fpl-border">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-fpl-green/10 border border-fpl-green/30 flex items-center justify-center text-fpl-green shadow-[0_0_15px_rgba(0,255,133,0.2)]">
-            <Bot className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-sm font-black uppercase tracking-wider text-white">AI Season Career</h2>
-              <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30">
-                OFFICIAL 1 FT / GW RULES
-              </span>
-              {mode === 'autonomous' && (
-                <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-fpl-green/15 text-fpl-green border border-fpl-green/30">
-                  AUTONOMOUS AI SQUAD
-                </span>
-              )}
-              {mode === 'synced' && (
-                <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                  YOU VS AI DUEL
-                </span>
-              )}
-              {mode === 'forward' && (
-                <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-sky-500/15 text-sky-300 border border-sky-500/30">
-                  SEASON FORECAST ({forwardSource === 'duel' ? 'AI CO-PILOT DUEL' : forwardSource === 'synced' ? 'MY REAL SQUAD' : 'AUTONOMOUS AI'})
-                </span>
-              )}
-              <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 uppercase">
-                {activeFuel}
-              </span>
-              <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 uppercase">
-                {activeRisk}
-              </span>
-              <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-amber-500/10 text-amber-300 border border-amber-500/20 uppercase">
-                {activeScenario === 'template' ? 'Template Shield' : 'Quant Optimal'}
-              </span>
-              {mode === 'forward' && forwardSource === 'duel' && (
-                <button
-                  onClick={() => setMode('synced')}
-                  className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 transition-all cursor-pointer flex items-center gap-1"
-                  title="Switch to GW1–GW10 You vs AI Duel Replay"
-                >
-                  <span>← Back to Duel Replay</span>
-                </button>
-              )}
+      <div className="bg-slate-950/80 p-3.5 sm:p-5 rounded-2xl border border-fpl-border shadow-xl space-y-3.5 sm:space-y-4">
+        {/* ROW 1: Header (Icon, Title, Badges, and Top-Right Refresh Button) */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start sm:items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-fpl-green/10 border border-fpl-green/30 flex items-center justify-center text-fpl-green shadow-[0_0_15px_rgba(0,255,133,0.2)] shrink-0 mt-0.5 sm:mt-0">
+              <Bot className="w-5 h-5" />
             </div>
-            <p className="text-[11px] text-slate-400">
-              {mode === 'synced' && teamId 
-                ? `Counterfactual Replay: Human vs AI starting from ${data?.managerName || 'Your'} GW1 Squad`
-                : mode === 'forward'
-                ? forwardSource === 'duel'
-                  ? `Forward Roadmap: Projected 1-FT Moves for AI Co-Pilot (${data?.teamName || 'Duel Branch'}, GW1–10 Base: ${data?.basePoints || 678} pts) from GW${data?.startGw || 11} → GW${data?.endGw || 16}`
-                  : forwardSource === 'synced'
-                  ? `Forward Roadmap: Projected 1-FT Moves for Your Real Team (${data?.managerName || 'Current FPL Squad'}, GW1–10 Base: ${data?.basePoints || 588} pts) from GW${data?.startGw || 11} → GW${data?.endGw || 16}`
-                  : `Forward Roadmap: Projected 1-FT Moves for Autonomous AI (£100.0m Draft, GW1–10 Base: ${data?.basePoints || 660} pts) from GW${data?.startGw || 11} → GW${data?.endGw || 16}`
-                : "Autonomous AI Manager navigating the season from £100.0m with squad continuity"}
-            </p>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <h2 className="text-sm sm:text-base font-black uppercase tracking-wider text-white">AI Season Career</h2>
+                <span className="px-1.5 sm:px-2 py-0.5 rounded text-[8.5px] sm:text-[9px] font-mono font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30 whitespace-nowrap">
+                  OFFICIAL 1 FT / GW
+                </span>
+                {mode === 'autonomous' && (
+                  <span className="px-1.5 sm:px-2 py-0.5 rounded text-[8.5px] sm:text-[9px] font-mono font-bold bg-fpl-green/15 text-fpl-green border border-fpl-green/30 whitespace-nowrap">
+                    AUTONOMOUS AI SQUAD
+                  </span>
+                )}
+                {mode === 'synced' && (
+                  <span className="px-1.5 sm:px-2 py-0.5 rounded text-[8.5px] sm:text-[9px] font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 whitespace-nowrap">
+                    YOU VS AI DUEL
+                  </span>
+                )}
+                {mode === 'forward' && (
+                  <span className="px-1.5 sm:px-2 py-0.5 rounded text-[8.5px] sm:text-[9px] font-mono font-bold bg-sky-500/15 text-sky-300 border border-sky-500/30 whitespace-nowrap">
+                    FORWARD ROADMAP
+                  </span>
+                )}
+                <span className="hidden md:inline-block px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 uppercase whitespace-nowrap">
+                  {activeFuel}
+                </span>
+                <span className="hidden md:inline-block px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 uppercase whitespace-nowrap">
+                  {activeRisk}
+                </span>
+                <span className="hidden lg:inline-block px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-amber-500/10 text-amber-300 border border-amber-500/20 uppercase whitespace-nowrap">
+                  {activeScenario === 'template' ? 'Template Shield' : 'Quant Optimal'}
+                </span>
+              </div>
+              <p className="text-[11px] sm:text-xs text-slate-400 mt-1 line-clamp-2 sm:line-clamp-none">
+                {mode === 'synced' && teamId 
+                  ? `Counterfactual Replay: Human vs AI starting from ${data?.managerName || 'Your'} GW1 Squad`
+                  : mode === 'forward'
+                  ? forwardSource === 'duel'
+                    ? `Forward Roadmap: Projected 1-FT Moves for AI Co-Pilot (${data?.teamName || 'Duel Branch'}, GW1–10 Base: ${data?.basePoints || 678} pts) from GW${data?.startGw || 11} → GW${data?.endGw || 16}`
+                    : forwardSource === 'synced'
+                    ? `Forward Roadmap: Projected 1-FT Moves for Your Real Team (${data?.managerName || 'Current FPL Squad'}, GW1–10 Base: ${data?.basePoints || 588} pts) from GW${data?.startGw || 11} → GW${data?.endGw || 16}`
+                    : `Forward Roadmap: Projected 1-FT Moves for Autonomous AI (£100.0m Draft, GW1–10 Base: ${data?.basePoints || 660} pts) from GW${data?.startGw || 11} → GW${data?.endGw || 16}`
+                  : "Autonomous AI Manager navigating the season from £100.0m with squad continuity"}
+              </p>
+            </div>
+          </div>
+
+          {/* Dedicated Refresh Button - Pinned Top Right */}
+          <button 
+            onClick={fetchCareerData}
+            disabled={loading}
+            className="shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 bg-slate-900/90 hover:bg-slate-800 active:scale-95 text-slate-300 hover:text-white rounded-xl border border-slate-700/80 shadow-sm transition-all cursor-pointer"
+            title="Re-run Simulation / Refresh Data"
+          >
+            <RefreshCw className={cn("w-3.5 h-3.5 text-fpl-green shrink-0", loading && "animate-spin")} />
+            <span className="text-[11px] sm:text-xs font-bold hidden sm:inline">Refresh</span>
+          </button>
+        </div>
+
+        {/* ROW 2: Primary Mode Selector Tabs */}
+        <div className="pt-2 sm:pt-3 border-t border-slate-800/80">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">
+              Select Mode:
+            </span>
+            <div className="flex items-center gap-2 md:hidden text-[9px] font-mono text-slate-400">
+              <span className="uppercase">{activeFuel}</span>
+              <span>•</span>
+              <span className="uppercase">{activeRisk}</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-2 bg-slate-900/90 p-1 sm:p-1.5 rounded-xl border border-fpl-border w-full">
+            <button
+              onClick={() => setMode('autonomous')}
+              className={cn(
+                "px-2 sm:px-3 py-2 rounded-lg text-[11px] sm:text-xs font-bold transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer truncate",
+                mode === 'autonomous'
+                  ? "bg-fpl-green text-slate-950 shadow-[0_0_12px_rgba(0,255,133,0.3)] font-black"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+              )}
+            >
+              <Bot className="w-3.5 h-3.5 shrink-0 hidden xs:inline sm:inline" />
+              <span className="truncate">Autonomous AI</span>
+            </button>
+            
+            <button
+              onClick={() => setMode('synced')}
+              disabled={!teamId}
+              title={!teamId ? "Enter a Team ID in the header to unlock Synced Replay" : "Replay with your actual GW1 squad"}
+              className={cn(
+                "px-2 sm:px-3 py-2 rounded-lg text-[11px] sm:text-xs font-bold transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer truncate",
+                mode === 'synced'
+                  ? "bg-fpl-green text-slate-950 shadow-[0_0_12px_rgba(0,255,133,0.3)] font-black"
+                  : teamId 
+                  ? "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+                  : "text-slate-600 opacity-50 cursor-not-allowed"
+              )}
+            >
+              <Swords className="w-3.5 h-3.5 shrink-0 hidden xs:inline sm:inline" />
+              <span className="truncate">You vs AI Duel</span>
+              {teamId && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>}
+            </button>
+
+            <button
+              onClick={() => {
+                setMode('forward');
+                setSelectedGwIndex(0);
+              }}
+              className={cn(
+                "px-2 sm:px-3 py-2 rounded-lg text-[11px] sm:text-xs font-bold transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer truncate",
+                mode === 'forward'
+                  ? "bg-fpl-green text-slate-950 shadow-[0_0_12px_rgba(0,255,133,0.3)] font-black"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+              )}
+            >
+              <TrendingUp className="w-3.5 h-3.5 shrink-0 hidden xs:inline sm:inline" />
+              <span className="truncate">Forward Roadmap</span>
+            </button>
           </div>
         </div>
 
-        {/* Mode Selector Tabs */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 self-start md:self-auto">
-          {mode === 'forward' && (
-            <div className="flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800 text-[11px]">
+        {/* ROW 3: Dedicated Forecast Source Sub-Bar (Rendered only when Forward Roadmap is active) */}
+        {mode === 'forward' && (
+          <div className="p-2 sm:p-2.5 bg-sky-950/20 border border-sky-500/25 rounded-xl space-y-1.5">
+            <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-sky-400 font-semibold px-0.5">
+              <span className="flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-sky-400 shrink-0" />
+                <span>Forecast Starting Squad:</span>
+              </span>
+              {forwardSource === 'duel' && (
+                <button
+                  onClick={() => setMode('synced')}
+                  className="text-[10px] text-amber-300 hover:underline flex items-center gap-1 cursor-pointer font-sans normal-case"
+                  title="Switch to GW1–GW10 You vs AI Duel Replay"
+                >
+                  <span>← Back to Past Duel Replay</span>
+                </button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
               {teamId && (
                 <button
                   onClick={() => {
@@ -340,15 +423,15 @@ export const CareerModeView = ({
                     setSelectedGwIndex(0);
                   }}
                   className={cn(
-                    "px-2.5 py-1 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer",
+                    "w-full px-2.5 py-1.5 sm:py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer border text-center",
                     forwardSource === 'duel'
-                      ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm"
-                      : "text-slate-400 hover:text-slate-200"
+                      ? "bg-amber-500/25 text-amber-300 border-amber-500/50 shadow-sm font-black"
+                      : "bg-slate-900/80 text-slate-400 border-slate-800 hover:text-slate-200 hover:bg-slate-800"
                   )}
                   title="Project forward from the AI Co-Pilot's squad that branched from your GW1 selection (GW10: 678 pts)"
                 >
-                  <Swords className="w-3 h-3 text-amber-400" />
-                  <span>AI Co-Pilot (Duel)</span>
+                  <Swords className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <span className="truncate">AI Co-Pilot (Duel)</span>
                 </button>
               )}
               {teamId && (
@@ -358,15 +441,15 @@ export const CareerModeView = ({
                     setSelectedGwIndex(0);
                   }}
                   className={cn(
-                    "px-2.5 py-1 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer",
+                    "w-full px-2.5 py-1.5 sm:py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer border text-center",
                     forwardSource === 'synced'
-                      ? "bg-fpl-green/20 text-fpl-green border border-fpl-green/40 shadow-sm"
-                      : "text-slate-400 hover:text-slate-200"
+                      ? "bg-fpl-green/25 text-fpl-green border-fpl-green/50 shadow-sm font-black"
+                      : "bg-slate-900/80 text-slate-400 border-slate-800 hover:text-slate-200 hover:bg-slate-800"
                   )}
                   title="Project forward from your actual current FPL team on fantasy.premierleague.com (GW10: 588 pts)"
                 >
-                  <UserCheck className="w-3 h-3 text-fpl-green" />
-                  <span>My Real Squad</span>
+                  <UserCheck className="w-3.5 h-3.5 text-fpl-green shrink-0" />
+                  <span className="truncate">My Real Squad</span>
                 </button>
               )}
               <button
@@ -375,74 +458,19 @@ export const CareerModeView = ({
                   setSelectedGwIndex(0);
                 }}
                 className={cn(
-                  "px-2.5 py-1 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer",
+                  "w-full px-2.5 py-1.5 sm:py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer border text-center",
                   forwardSource === 'autonomous'
-                    ? "bg-purple-500/20 text-purple-300 border border-purple-500/40 shadow-sm"
-                    : "text-slate-400 hover:text-slate-200"
+                    ? "bg-purple-500/25 text-purple-300 border-purple-500/50 shadow-sm font-black"
+                    : "bg-slate-900/80 text-slate-400 border-slate-800 hover:text-slate-200 hover:bg-slate-800"
                 )}
                 title="Project forward from the Autonomous AI £100.0m draft (GW10: 660 pts)"
               >
-                <Bot className="w-3 h-3 text-purple-400" />
-                <span>Autonomous AI</span>
+                <Bot className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                <span className="truncate">Autonomous AI</span>
               </button>
             </div>
-          )}
-
-          <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-fpl-border">
-            <button
-              onClick={() => setMode('autonomous')}
-              className={cn(
-                "px-3 py-1.5 rounded-lg text-xs font-bold transition-all",
-                mode === 'autonomous'
-                  ? "bg-fpl-green text-slate-950 shadow-[0_0_12px_rgba(0,255,133,0.3)]"
-                  : "text-slate-400 hover:text-slate-200"
-              )}
-            >
-              Autonomous AI
-            </button>
-            
-            <button
-              onClick={() => setMode('synced')}
-              disabled={!teamId}
-              title={!teamId ? "Enter a Team ID in the header to unlock Synced Replay" : "Replay with your actual GW1 squad"}
-              className={cn(
-                "px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5",
-                mode === 'synced'
-                  ? "bg-fpl-green text-slate-950 shadow-[0_0_12px_rgba(0,255,133,0.3)]"
-                  : teamId 
-                  ? "text-slate-400 hover:text-slate-200"
-                  : "text-slate-600 opacity-50 cursor-not-allowed"
-              )}
-            >
-              <span>You vs AI Duel</span>
-              {teamId && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>}
-            </button>
-
-            <button
-              onClick={() => {
-                setMode('forward');
-                setSelectedGwIndex(0);
-              }}
-              className={cn(
-                "px-3 py-1.5 rounded-lg text-xs font-bold transition-all",
-                mode === 'forward'
-                  ? "bg-fpl-green text-slate-950 shadow-[0_0_12px_rgba(0,255,133,0.3)]"
-                  : "text-slate-400 hover:text-slate-200"
-              )}
-            >
-              Forward Roadmap
-            </button>
-
-            <button 
-              onClick={fetchCareerData}
-              disabled={loading}
-              className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors ml-1"
-              title="Re-run Simulation"
-            >
-              <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin text-fpl-green")} />
-            </button>
           </div>
-        </div>
+        )}
       </div>
 
       {error && (
