@@ -29193,3 +29193,92 @@ With these fixes live and dev servers refreshed:
 - **GW16:** Captain: **Haaland** (3×) • Chip: **Triple Captain** deployed for 27 xP!
 
 Erling Haaland maintains the captaincy across every gameweek, and the Triple Captain chip is now saved for an elite high-ceiling haul on Erling Haaland in GW16 rather than being wasted on a budget defender or midfielder.
+
+
+---
+
+## User
+So which is performing best now at GW 10?
+
+[User pasted performance tables for Gameweeks 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 across all 21 scenarios]
+
+---
+
+## Assistant
+
+### Executive Summary: Which Scenario is Performing Best?
+
+Based on the official 21-scenario performance tracker, there are two distinct answers:
+
+1. **In Gameweek 10 Alone:**
+   - **🥇 #1 Winner:** **`FPLForm | Risky Template Shield | SAFE`** and **`FPLForm | Risky Template Shield | VALUE`** tied for **1st place with 72 points** (Expected: 50.9 xP • Beat projection by **+21.1 pts**).
+   - **🥉 #3:** `FPLForm | Quant Optimal | SAFE` scored **70 points** (+17.6 vs xP).
+   - **#5 (Your Team):** Your real squad (**`My Team`**) scored **64 points**, beating expected by **+14.9 pts** and outperforming 16 of the 18 AI model variations in GW10!
+
+2. **Across the Entire Season (Cumulative Leaderboard GW1 → GW10):**
+   - **🥇 Overall Season Champion:** **`FPLForm | Risky Template Shield | SAFE`** is #1 with **653 points** (averaging an elite 72.6 pts/GW from GW2–GW10).
+   - **🥈 Overall Season #2:** **`Native FPL | Quant Optimal | VALUE`** is #2 with **630 points** (delivered massive explosive hauls: 116 pts in GW4, 95 pts in GW9, 86 pts in GW6).
+   - **🥉 Overall Season #3:** **`FPLForm | Risky Template Shield | VALUE`** is #3 with **624 points**.
+   - **#5 Overall (Your Team):** Your real human squad (**`fplhorizon`**) sits at **603 points**, beating 14 of the 18 AI scenario permutations across the season!
+
+---
+
+### Full Cumulative Season Standings (GW1 → GW10)
+
+| Rank | Model Configuration | Cumulative Points | Key Season Hauls | Strategy Notes |
+| :---: | :--- | :---: | :--- | :--- |
+| **🥇 #1** | **FPLForm \| Risky Template Shield \| SAFE** | **653 pts** | GW2 (98), GW4 (100), GW9 (80), GW10 (72) | **Most consistent.** Protects high-EO template assets while capitalizing on in-form value picks. |
+| **🥈 #2** | **Native FPL \| Quant Optimal \| VALUE** | **630 pts** | GW4 (116), GW6 (86), GW9 (95) | **Highest ceiling.** Boom-or-bust knapsack solver. Hit monster triple-digit scores but suffered in GW2 (41) and GW7 (53). |
+| **🥉 #3** | **FPLForm \| Risky Template Shield \| VALUE** | **624 pts** | GW4 (104), GW7 (74), GW9 (80), GW10 (72) | Highly disciplined budget deployment without taking hit penalties. |
+| **#4** | **Eye Test \| Quant Optimal \| VALUE** | **610 pts** | GW4 (105), GW6 (83), GW9 (75) | Strong eye-test attacking wingbacks and creative midfielders. |
+| **#5** | **👤 My Team (Human Manager / fplhorizon)** | **603 pts** | GW2 (92), GW4 (82), GW7 (66), GW10 (64) | **Beating 78% of the AI solver configurations!** |
+| **#6** | FPLForm \| Risky Template Shield \| AGGRESSIVE | 602 pts | GW3 (88), GW7 (79), GW9 (66) | High variance differential punts. |
+| **#7** | FPLForm \| Quant Optimal \| VALUE | 594 pts | GW4 (93), GW7 (78), GW9 (80) | Pure linear programming under FPLForm data. |
+| **#8** | Native FPL \| Risky Template Shield \| SAFE | 587 pts | GW2 (92), GW4 (91), GW6 (80) | Official FPL projection safety model. |
+| **#9** | Native FPL \| Quant Optimal \| SAFE | 581 pts | GW2 (88), GW4 (87), GW5 (70) | Conservative official data solver. |
+| **#10** | FPLForm \| Quant Optimal \| SAFE | 576 pts | GW4 (81), GW7 (84), GW10 (70) | Pure math baseline under FPLForm. |
+
+---
+
+### Fuel Source Showdown: Which Engine Performs Best?
+
+When averaging all scenario variants across the full season:
+
+1. **`FPLForm` (Average: 594.7 pts across 7 models) — CLEAR WINNER:**
+   - Consistently beats its expected points projection (`+15` to `+30` pts alpha per week).
+   - Highly realistic xP modeling grounded in true underlying expected goal involvement (npxG + xA) and fixture-specific conversion rates.
+   - Captured the #1 spot in GW2 (98 pts), GW3 (88 pts), GW7 (84 pts), GW8 (73 pts), and GW10 (72 pts).
+
+2. **`Native FPL` (Average: 568.3 pts across 7 models) — CEILING CHASER:**
+   - Possesses explosive single-week ceilings (116 pts in GW4, 95 pts in GW9).
+   - Suffers from higher volatility because official FPL `ep_next` projections can be sticky and slow to react to manager benchings or tactical shifts.
+
+3. **`Eye Test` (Average: 548.0 pts across 7 models) — OVER-OPTIMISTIC xP:**
+   - Suffers from chronic optimistic bias in its expected points (frequently projects 80–90 xP, but actual outcomes average 50–65 pts).
+   - Produces solid squads but lags slightly due to overvaluing volatile differential attack stats.
+
+---
+
+### Risk Profile Breakdown: `SAFE` vs `VALUE` vs `AGGRESSIVE`
+
+- **`SAFE` & `VALUE` dominate `AGGRESSIVE` across all 10 weeks:**
+  - The top 3 season models are all **SAFE** or **VALUE**.
+  - **`AGGRESSIVE`** variants ranked near the bottom (466 to 518 pts). Chasing low-ownership differentials and gambling on high-variance captaincies (e.g. captaining Rice, Tavernier, or Cunha over Haaland) repeatedly lost ground over a 10-gameweek sample.
+
+---
+
+### Why `FPLForm | Risky Template Shield | SAFE` Won GW10
+
+In GW10, Erling Haaland blanked with only 2 points (4 pts as captain). Squads that relied solely on Haaland captaincy failed to reach 60 points.
+
+The winning **FPLForm SAFE / VALUE** squad reached **72 points** because of balanced, high-yield differential returns:
+- **Barry** (Everton forward): **16 pts** (brace + maximum bonus)
+- **E.Le Fée** (Sunderland midfielder): **11 pts** (goal + assist + clean sheet)
+- **Groß** (Brighton midfielder): **10 pts** (creative haul)
+- **Gabriel** (Arsenal defender): **8 pts** (clean sheet + bonus)
+- **Calafiori** (Arsenal defender): **6 pts** (clean sheet)
+- **Verbruggen** (Brighton goalkeeper): **6 pts** (clean sheet + save points)
+
+### Key Takeaway for Your Season
+If you want the most reliable, mathematically validated blueprint to follow from GW11 to GW19:
+**Set your fuel to `FPLForm` and keep Risk Mode on `SAFE` (or `VALUE`).** It has proven to be the highest-scoring, lowest-volatility engine throughout the first 10 gameweeks of the 2026/27 campaign.
