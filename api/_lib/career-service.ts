@@ -747,6 +747,31 @@ export class CareerService {
         userPicksGw1 = picks1Res.data.picks;
         initialBank = picks1Res.data.entry_history?.bank || 0;
       }
+
+      // If current active gameweek is underway and not yet finalized in history, fetch live picks
+      const activeEventId = baseData.currentEventId;
+      if (activeEventId && !userHistoryEvents.some((e: any) => e.event === activeEventId)) {
+        try {
+          const livePicksRes = await axios.get(`${this.FPL_BASE}/entry/${cleanId}/event/${activeEventId}/picks/`, {
+            headers: { 'User-Agent': 'Mozilla/5.0' },
+            timeout: 6000
+          });
+          if (livePicksRes.data?.picks && Array.isArray(livePicksRes.data.picks)) {
+            const entryHist = livePicksRes.data.entry_history || {};
+            userHistoryEvents.push({
+              event: activeEventId,
+              points: entryHist.points || 0,
+              event_transfers: entryHist.event_transfers || 0,
+              event_transfers_cost: entryHist.event_transfers_cost || 0,
+              total_points: entryHist.total_points || 0,
+              overall_rank: entryHist.overall_rank || 0,
+              livePicks: livePicksRes.data.picks
+            });
+          }
+        } catch {
+          // Live picks may not be published yet if deadline just passed
+        }
+      }
     } catch (e: any) {
       console.warn(`[CareerService] Error fetching user history for ${cleanId}:`, e.message);
       // Fallback to autonomous mode if sync fails
@@ -824,10 +849,15 @@ export class CareerService {
 
         const userGwRecord = userHistoryEvents.find((e: any) => e.event === g.gameweek);
         if (userGwRecord) {
-          const humanGross = userGwRecord.points;
+          let humanGross = userGwRecord.points;
+          if (userGwRecord.livePicks && Array.isArray(userGwRecord.livePicks) && Object.keys(stats).length > 0) {
+            humanGross = userGwRecord.livePicks
+              .filter((p: any) => p.position <= 11)
+              .reduce((sum: number, p: any) => sum + (stats[p.element]?.points || 0) * (p.multiplier || 1), 0);
+          }
           const humanHit = userGwRecord.event_transfers_cost || 0;
           const humanNet = humanGross - humanHit;
-          const humanCum = userGwRecord.total_points;
+          const humanCum = userGwRecord.total_points || (runningTotal - runningAlpha + humanNet);
           const alphaDelta = g.netPoints - humanNet;
           runningAlpha += alphaDelta;
 

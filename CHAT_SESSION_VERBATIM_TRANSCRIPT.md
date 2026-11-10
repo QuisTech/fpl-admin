@@ -28317,3 +28317,48 @@ To guarantee that upcoming gameweeks (GW11, GW12, etc.) are frozen with the exac
    - The frozen decisions are committed to Git (`git commit -m "Auto-update: Finalized official post-GW... Standings & Career Decisions"`).
 
 This ensures an unbroken, tamper-proof audit trail where the AI Co-Pilot's true performance can be verified week after week with zero hindsight bias.
+## User (2026-11-10)
+
+Will the points be updating as GW is going on too?
+
+## Assistant (2026-11-10)
+
+**Yes, absolutely! The points update live in real time while matches are actively being played.**
+
+Both the frontend UI and the backend engine are architected with a live dual-tier matchday pipeline:
+
+---
+
+### 1. Dual-Tier Live Matchday Pipeline
+
+#### Tier 1: Client Auto-Polling (Every 60 Seconds)
+- In [`src/components/CareerModeView.tsx`](file:///c:/Users/USER/Documents/fpl-admin/src/components/CareerModeView.tsx#L256-L266), the app automatically polls `/api/live/${activeGw}` every 60 seconds while viewing the career or duel view.
+- You do not even have to click anything: as goals, assists, saves, clean sheets, and provisional bonus points register on the pitch, the scores update automatically in the browser.
+- You can also hit the pinned **Refresh** button at any second to force an instant re-sync.
+
+#### Tier 2: Server-Side Real-Time FPL Feed
+- When fetching data, [`CareerService.getLiveOrStoredPlayerStats()`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts#L109-L159) checks if the target Gameweek is the active gameweek (`gw === currentEventId`).
+- It connects directly to the official Premier League live matchday endpoint:
+  `https://fantasy.premierleague.com/api/event/{gw}/live/`
+- It uses a rapid 45-second cache (`LIVE_CACHE_TTL = 45000`) so you get up-to-the-minute Opta data without getting rate-limited by the FPL API.
+
+---
+
+### 2. Both Sides Update Live (AI Co-Pilot vs Human)
+During live matchdays, the duel tracker calculates both teams dynamically:
+1. **AI Co-Pilot Team:**
+   - Evaluates the AI's 11 frozen starters and captain against live Opta element stats.
+   - If the AI captain (e.g. Haaland) scores, his points double live (e.g. 8 pts × 2 = 16 pts).
+   - If an AI transfer (e.g. Verbruggen or Jackson) keeps a clean sheet or scores, the AI tally increases instantly.
+2. **Your Real Human Team:**
+   - The engine automatically fetches your active gameweek live picks from:
+     `https://fantasy.premierleague.com/api/entry/{teamId}/event/{gw}/picks/`
+   - It computes your live gross score, subtracts any transfer hit costs you took, and tracks your live score alongside the AI.
+3. **Live Alpha Tracker:**
+   - The delta (`AI Net Pts - Human Net Pts`) updates live throughout Saturday and Sunday, showing whether the AI Co-Pilot is currently ahead or behind as the action unfolds.
+
+---
+
+### 3. Transition from "Live" to "Frozen"
+- **While the GW is in progress:** Scores are dynamic, fluctuating with every goal, sub, card, and provisional bonus point.
+- **When the GW finishes:** As soon as the final match ends and FPL finishes calculating official bonus points and global table ranks, the automated workflow triggers [`scripts/freeze-career-gameweek.ts`](file:///c:/Users/USER/Documents/fpl-admin/scripts/freeze-career-gameweek.ts), which writes the finalized points into [`data/snapshots/synced_career_history.json`](file:///c:/Users/USER/Documents/fpl-admin/data/snapshots/synced_career_history.json) and permanently locks it into Git.
