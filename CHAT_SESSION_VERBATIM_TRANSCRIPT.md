@@ -29597,3 +29597,119 @@ When all 18 permutations are run across the 10 completed gameweeks:
   2. It refused to take negative hits and anchored to reliable premium performers (`Safe`).
   3. It protected against rank drops by holding the high-ownership template core (`Template Shield`).
   4. It patiently banked 4 free transfers and kept £8.6m in reserve, leaving it perfectly primed for upcoming gameweeks.
+
+
+---
+
+## User
+I understand this:
+
+Template Shield (scenario: 'template'):
+Philosophy: Game-Theoretic Rank Protection.
+Behavior: Factors in Effective Ownership (EO) among the top 10,000 managers (betaEO = 2.5, minEoTotal = 180). If an elite player is owned by 70%+ of the top managers, the AI shields your rank by owning them, ensuring you don't plummet down the leaderboard when the consensus template hauls.
+Quant Optimal (scenario: 'quant'):
+Philosophy: Pure Mathematical Knapsack Optimization.
+Behavior: Completely ignores crowd psychology and ownership percentages (betaEO = 0.0). It evaluates players strictly on raw projected points divided by cost, building the mathematically highest-scoring 15-man squad without caring whether a player is 2% owned or 80% owned.
+
+
+
+
+But how exactly does it work with career tab?
+
+---
+
+## Assistant
+
+### How Template Shield vs Quant Optimal Works Inside the Career Tab
+
+To understand how **Template Shield** and **Quant Optimal** operate in the **Career Tab**, you have to look at the **continuous decision loop** that executes every single gameweek from GW1 to GW38.
+
+Unlike a static 1-week solver that merely solves a single lineup, the Career Tab runs a sequential simulation where each week\'s squad, bank balance, and free transfers flow into the next week.
+
+Here is the exact algorithmic breakdown of how `scenario: 'template'` vs `scenario: 'quant'` changes every managerial decision inside the Career engine:
+
+---
+
+### 1. The Core Utility Equation Inside the Solver
+
+In [`api/_lib/utility.ts`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/utility.ts#L3-L27), every player\'s evaluation score inside the Linear Programming solver is computed by:
+
+`score = sum(xP) + betaVariance × sqrt(variance) + betaEO × (EO / 100)`
+
+Where:
+- Under **Quant Optimal** (`scenario: 'quant'`):
+  - `betaEO = 0.0`
+  - `minEoTotal = 0`
+  - The solver evaluates players **strictly on mathematical expected points (xP) and cost**.
+- Under **Template Shield** (`scenario: 'template'`):
+  - `betaEO = 2.5`
+  - `minEoTotal = 180`
+  - The solver adds a **game-theoretic consensus bonus** scaled by Effective Ownership among top 10k managers.
+
+---
+
+### 2. Gameweek 1: Initial Squad Generation ([`solveOptimalSquad`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/lp-solver.ts#L41-L81))
+
+When the Career Tab initializes the £100.0m squad in GW1:
+
+- **Template Shield:**
+  - Enforces a hard constraint on the 15-man roster: `model.constraints['eo_total'] = { min: 180 }`.
+  - The solver is **mathematically prohibited** from building an obscure squad. It is forced to incorporate the consensus spine (e.g. Haaland, Gabriel, Palmer/Saka) that 70%+ of elite managers own.
+  - The remaining slots are filled with optimal value enablers that fit under the £100.0m ceiling.
+- **Quant Optimal:**
+  - Has zero ownership constraints (`minEoTotal = 0`).
+  - Solves a pure knapsack problem: if an 8% owned forward has 0.1 higher projected xP-per-pound than a 70% owned talisman, Quant picks the 8% forward without hesitation.
+  - Result: Builds a high-risk, unheralded squad that differs heavily from the public template.
+
+---
+
+### 3. Gameweek 2 to 38: Weekly Transfer Optimization ([`solveOptimalTransfers`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/lp-solver.ts#L472-L550))
+
+Every week, the Career engine evaluates potential transfers over an 8-gameweek rolling horizon:
+
+- **When a consensus player begins hauling (e.g. Mbeumo or Semenyo):**
+  - **Template Shield:** As elite managers transfer the player in, their Top-10k Effective Ownership rises (e.g. from 15% to 55%). With `betaEO = 2.5`, this player\'s utility score surges. The Career AI recognizes: *"If this player scores and I don\'t own him, my overall rank will suffer massive damage."* The AI prioritizes bringing in this template shield with a free transfer.
+  - **Quant Optimal:** Completely ignores that 55% of managers bought the player. If an alternate budget player with 3% ownership has an identical 4.8 xP, Quant stays with or buys the 3% player.
+- **Transfer Rolling vs Chasing:**
+  - **Template Shield** tends to **roll transfers** more patiently because its core squad already matches the high-ownership template, requiring fewer reactionary moves.
+  - **Quant Optimal** tends to churn transfers more aggressively as short-term fixture xP swings oscillate from week to week.
+
+---
+
+### 4. Weekly Starting XI Selection ([`solveStartingXI`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/lp-solver.ts#L271-L378))
+
+Each week, the AI must pick 11 starters and bench 4 outfielders:
+
+- **Template Shield:**
+  - Because high-EO players receive the `+ betaEO × (EO / 100)` bonus, a 65% owned core defender (e.g. Gabriel or Calafiori) will almost always start over a 2% owned budget punt.
+  - **Why this matters in Career Mode:** Benching a high-ownership player who scores a goal creates massive negative rank drag (a "bench disaster"). Template Shield virtually eliminates bench regret.
+- **Quant Optimal:**
+  - Starters are chosen strictly by 1-week raw xP. If an obscure £4.5m defender happens to have a home fixture yielding 4.2 xP vs a premium defender\'s 4.1 xP away at Anfield, Quant will bench the premium defender.
+
+---
+
+### 5. Captaincy Selection ([`solveCaptain`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/lp-solver.ts#L402-L460))
+
+The captain\'s score is doubled (2× multiplier):
+
+- **Template Shield:**
+  - Combines raw xP with the Effective Ownership weight and the premium talisman anchor.
+  - When Haaland or Salah has 140%+ captaincy EO, Template Shield locks the armband to them. If the template captain hauls, your score matches the top of the leaderboard; if they blank, the entire world blanks with you.
+- **Quant Optimal:**
+  - If a mid-priced forward (like Evanilson or Isak) has a slight theoretical matchup advantage yielding 0.2 higher raw xP, Quant Optimal will give them the captain\'s armband, accepting huge volatility against the rest of the world.
+
+---
+
+### 6. Season-Long Financial and Rank Impact in Career Mode
+
+Across the first 10 gameweeks in our Career simulations:
+
+| Dynamic | Template Shield (`scenario: 'template'`) | Quant Optimal (`scenario: 'quant'`) |
+| :--- | :--- | :--- |
+| **Rank Trajectory** | Smooth, steady upward climb; immune to template haul shocks. | High volatility; spikes upwards on differential weeks, plummets when popular assets haul. |
+| **Free Transfer Discipline** | Banked 4 Free Transfers, made only 5 high-impact transfers, £8.6m banked. | Burned transfers chasing single-week xP fluctuations, less bank flexibility. |
+| **Team Value Accumulation** | Early adoption of rising consensus assets led to steady squad value appreciation. | Slower value growth due to holding low-demand, low-ownership assets. |
+| **Actual GW1–GW10 Score (Native Safe)** | **660 points (Autonomous #1 Leader)** | **631 points (−29 pts behind)** |
+
+### Summary
+In the Career Tab, **Template Shield** acts like an index fund: it holds the elite consensus backbone to protect your rank floor, while making targeted 1-FT upgrades to pull ahead. **Quant Optimal** acts like a pure algorithmic hedge fund: it ignores what everyone else owns, betting purely on raw numbers, which incurs heavy variance when the consensus template inevitably scores.
