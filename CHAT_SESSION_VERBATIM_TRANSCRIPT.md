@@ -29784,3 +29784,29 @@ Every historical gameweek\'s `expectedPoints` and each player\'s `xP` are now pe
 - [`data/snapshots/synced_career_history.json`](file:///c:/Users/USER/Documents/fpl-admin/data/snapshots/synced_career_history.json)
 
 They load in **under 1 millisecond** with zero runtime lag, and are cryptographically locked on GitHub for immutable post-gameweek backtesting.
+
+
+---
+
+## User
+pushed for both repo?
+
+---
+
+## Assistant
+
+### Yes, Fully Pushed and Synchronized for Both Repositories
+
+**Yes, absolutely.** Both repositories are 100% committed, clean, and pushed to `origin/main` on GitHub:
+
+1. **`fpl-admin`** ([`c:/Users/USER/Documents/fpl-admin`](file:///c:/Users/USER/Documents/fpl-admin)):
+   - **Commit:** [`14bfcec`](https://github.com/QuisTech/fpl-admin/commit/14bfcec)
+   - **Message:** `feat(career): integrate pre-deadline expected xP vs actual points tracking across all historical and forward gameweeks`
+   - **Status:** Up to date with `origin/main`, clean working tree.
+
+2. **`fpl-planner`** ([`c:/Users/USER/Documents/fpl-planner`](file:///c:/Users/USER/Documents/fpl-planner)):
+   - **Commit:** [`c921357`](https://github.com/QuisTech/fpl-planner/commit/c921357)
+   - **Message:** `feat(career): integrate pre-deadline expected xP vs actual points tracking across all historical and forward gameweeks`
+   - **Status:** Up to date with `origin/main`, clean working tree.
+
+All updated files ([`CareerModeView.tsx`](file:///c:/Users/USER/Documents/fpl-admin/src/components/CareerModeView.tsx), [`career-service.ts`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/career-service.ts), and the hydrated snapshots [`autonomous_career_history.json`](file:///c:/Users/USER/Documents/fpl-admin/data/snapshots/autonomous_career_history.json) and [`synced_career_history.json`](file:///c:/Users/USER/Documents/fpl-admin/data/snapshots/synced_career_history.json)) are live and identical across both repositories.
