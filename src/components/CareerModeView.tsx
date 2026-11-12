@@ -22,6 +22,7 @@ export interface CareerPlayer {
   multiplier: number;
   isAutoSubIn?: boolean;
   isAutoSubOut?: boolean;
+  xP?: number;
 }
 
 export interface CareerGameweek {
@@ -41,6 +42,7 @@ export interface CareerGameweek {
   autoSubs: { outPlayer: string; inPlayer: string; points: number }[];
   grossPoints: number;
   netPoints: number;
+  expectedPoints?: number;
   cumulativePoints: number;
   bank: number;
   bankDisplay: string;
@@ -705,9 +707,28 @@ export const CareerModeView = ({
                         GW{activeGwData.gameweek} Manager Decision
                       </h3>
                     </div>
-                    <span className="text-[10px] font-mono text-emerald-400 font-bold">
-                      {activeGwData.netPoints} Net Pts
-                    </span>
+                    <div className="flex items-center gap-2.5">
+                      {activeGwData.expectedPoints !== undefined && (
+                        <div className="flex items-center gap-1.5 font-mono text-[10px]">
+                          <span className="text-slate-400">
+                            Exp: <strong className="text-white">{activeGwData.expectedPoints.toFixed(1)} xP</strong>
+                          </span>
+                          <span className="text-slate-600">•</span>
+                          <span className={cn(
+                            "px-1.5 py-0.5 rounded font-black border",
+                            activeGwData.netPoints >= activeGwData.expectedPoints
+                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                              : "bg-rose-500/10 text-rose-400 border-rose-500/30"
+                          )}>
+                            {(activeGwData.netPoints - activeGwData.expectedPoints) >= 0 ? '+' : ''}
+                            {(activeGwData.netPoints - activeGwData.expectedPoints).toFixed(1)} vs xP
+                          </span>
+                        </div>
+                      )}
+                      <span className="text-[10px] font-mono text-emerald-400 font-bold">
+                        {activeGwData.netPoints} Net Pts
+                      </span>
+                    </div>
                   </div>
 
                   <p className="text-xs text-slate-300 leading-relaxed font-sans">
@@ -882,7 +903,12 @@ export const CareerModeView = ({
                             )}
                           </div>
 
-                          <div className="flex items-center gap-3 font-mono">
+                          <div className="flex items-center gap-2.5 sm:gap-3.5 font-mono">
+                            {p.xP !== undefined && (
+                              <span className="text-[10px] text-slate-400">
+                                Exp: <span className="text-slate-300 font-bold">{(isCap ? p.xP * 2 : p.xP).toFixed(1)} xP</span>
+                              </span>
+                            )}
                             <span className="text-[10px] text-slate-500">{p.costDisplay}</span>
                             <span className={cn(
                               "text-xs font-black min-w-[28px] text-right",
@@ -934,7 +960,11 @@ export const CareerModeView = ({
                           {b.web_name}
                         </div>
                         <div className="flex items-center justify-between mt-1 text-[10px] font-mono">
-                          <span className="text-slate-500">{b.costDisplay}</span>
+                          {b.xP !== undefined ? (
+                            <span className="text-slate-400">Exp: {b.xP.toFixed(1)} xP</span>
+                          ) : (
+                            <span className="text-slate-500">{b.costDisplay}</span>
+                          )}
                           <span className={cn("font-bold", b.isAutoSubOut ? "text-rose-400" : "text-slate-300")}>{b.points} pts</span>
                         </div>
                       </div>

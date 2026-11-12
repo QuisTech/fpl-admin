@@ -24,6 +24,7 @@ export interface CareerPlayer {
   multiplier: number;
   isAutoSubIn?: boolean;
   isAutoSubOut?: boolean;
+  xP?: number;
 }
 
 export interface CareerGameweek {
@@ -43,6 +44,7 @@ export interface CareerGameweek {
   autoSubs: { outPlayer: string; inPlayer: string; points: number }[];
   grossPoints: number;
   netPoints: number;
+  expectedPoints?: number;
   cumulativePoints: number;
   bank: number;
   bankDisplay: string;
@@ -207,7 +209,14 @@ export class CareerService {
     return result;
   }
 
+  private static oracleCache = new Map<string, XPOracle>();
+
   private static getOracleForGw(gw: number, baseData: any, fuel: string, riskMode: string): XPOracle {
+    const cacheKey = `${gw}_${fuel}_${riskMode}`;
+    if (this.oracleCache.has(cacheKey)) {
+      return this.oracleCache.get(cacheKey)!;
+    }
+
     let csvPath = path.join(process.cwd(), `data/snapshots/gw_${gw}/fplform.csv`);
     if (fuel === 'native') {
       csvPath = path.join(process.cwd(), `data/snapshots/gw_${gw}/fpl_native.csv`);
@@ -229,7 +238,7 @@ export class CareerService {
       }
     }
 
-    return OracleFactory.create(
+    const oracle = OracleFactory.create(
       csvPath,
       baseData.players,
       fuel,
@@ -238,6 +247,8 @@ export class CareerService {
       gw,
       riskMode
     );
+    this.oracleCache.set(cacheKey, oracle);
+    return oracle;
   }
 
   private static mapPlayer(
@@ -247,7 +258,8 @@ export class CareerService {
     actualStats: Record<number, { points: number; minutes: number }>,
     isCaptain: boolean,
     isViceCaptain: boolean,
-    multiplier: number
+    multiplier: number,
+    gw?: number
   ): CareerPlayer {
     const p = baseData.players.find((pl: any) => pl.id === id);
     const pos = (oracle.getPosition(id) || (p?.element_type === 1 ? 'GKP' : p?.element_type === 2 ? 'DEF' : p?.element_type === 3 ? 'MID' : 'FWD')).toUpperCase() as 'GKP' | 'DEF' | 'MID' | 'FWD';
@@ -257,6 +269,7 @@ export class CareerService {
     const stat = actualStats[id];
     const points = stat ? stat.points : 0;
     const minutes = stat ? stat.minutes : 0;
+    const xP = gw ? Number((oracle.getXP(id, gw) || 0).toFixed(1)) : undefined;
 
     return {
       id,
@@ -269,7 +282,8 @@ export class CareerService {
       minutes,
       isCaptain,
       isViceCaptain,
-      multiplier
+      multiplier,
+      xP
     };
   }
 
@@ -323,8 +337,35 @@ export class CareerService {
     if (lockedGameweeks.length > 0 && effectiveEndGw <= lockedGameweeks.length) {
       const gws = lockedGameweeks.slice(0, effectiveEndGw);
 
-      // Update actual match points using live FPL API or stored player_stats.json for live/recent gameweeks
+      // Update actual match points and pre-deadline expected points
       for (const g of gws) {
+        if (g.expectedPoints === undefined || g.startingXI[0]?.xP === undefined) {
+          let oracle: XPOracle | null = null;
+          try {
+            oracle = this.getOracleForGw(g.gameweek, baseData, fuel, riskMode);
+          } catch {}
+
+          if (oracle) {
+            let expectedSum = 0;
+            g.startingXI.forEach(p => {
+              if (oracle && p.xP === undefined) {
+                p.xP = Number((oracle.getXP(p.id, g.gameweek) || 0).toFixed(1));
+              }
+              const isCap = p.id === (g.activeCaptain?.id || g.captain?.id);
+              const mult = isCap ? (g.activeCaptain?.multiplier || 2) : 1;
+              if (p.xP !== undefined) {
+                expectedSum += p.xP * mult;
+              }
+            });
+            g.bench.forEach(p => {
+              if (oracle && p.xP === undefined) {
+                p.xP = Number((oracle.getXP(p.id, g.gameweek) || 0).toFixed(1));
+              }
+            });
+            g.expectedPoints = Number(expectedSum.toFixed(1));
+          }
+        }
+
         const stats = await this.getLiveOrStoredPlayerStats(g.gameweek, baseData.currentEventId);
         if (Object.keys(stats).length > 0) {
           let gross = 0;
@@ -799,6 +840,33 @@ export class CareerService {
       let runningAlpha = 0;
 
       for (const g of gws) {
+        if (g.expectedPoints === undefined || g.startingXI[0]?.xP === undefined) {
+          let oracle: XPOracle | null = null;
+          try {
+            oracle = this.getOracleForGw(g.gameweek, baseData, fuel, riskMode);
+          } catch {}
+
+          if (oracle) {
+            let expectedSum = 0;
+            g.startingXI.forEach(p => {
+              if (oracle && p.xP === undefined) {
+                p.xP = Number((oracle.getXP(p.id, g.gameweek) || 0).toFixed(1));
+              }
+              const isCap = p.id === (g.activeCaptain?.id || g.captain?.id);
+              const mult = isCap ? (g.activeCaptain?.multiplier || 2) : 1;
+              if (p.xP !== undefined) {
+                expectedSum += p.xP * mult;
+              }
+            });
+            g.bench.forEach(p => {
+              if (oracle && p.xP === undefined) {
+                p.xP = Number((oracle.getXP(p.id, g.gameweek) || 0).toFixed(1));
+              }
+            });
+            g.expectedPoints = Number(expectedSum.toFixed(1));
+          }
+        }
+
         const stats = await this.getLiveOrStoredPlayerStats(g.gameweek, baseData.currentEventId);
         if (Object.keys(stats).length > 0) {
           let gross = 0;
