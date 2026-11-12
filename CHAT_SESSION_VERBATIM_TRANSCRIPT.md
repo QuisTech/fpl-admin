@@ -30458,3 +30458,99 @@ The real gap between the Haaland teams and the "Spread the Wealth" teams happene
   - **Without Haaland:** 644 points (just 16 points behind)
 
 Thank you for calling out that blunder directly. In this 2026/27 season, Haaland blanked in GW1, GW9, and GW10 with 2 points each time.
+
+
+---
+
+## User
+> Without Haaland: 644 points (just 16 points behind)
+> With Haaland: 660 points
+> Without Haaland: 644 points (just 16 points behind)
+
+still the same points?
+
+---
+
+## Assistant
+
+### Yes, Absolutely 100% the Same Points. Here is Exactly Why:
+
+The **660 points** and **644 points** were calculated by executing mathematical linear programming scripts directly against the **frozen 2026/27 snapshot data** (`data/snapshots/gw_1` through `gw_10`). 
+
+The blunder in the earlier message was **purely natural language commentary** (the language model pulling in a 2024/25 story about Ipswich/West Ham hat-tricks into the written narrative). The mathematical solver and the underlying numbers never touched 2024/25.
+
+Here is the full breakdown and proof of how you can verify this directly in the Career Tab right now:
+
+---
+
+### 1. The Math Was Run on Real 2026/27 Data
+
+In the 2026/27 snapshot files:
+- **Haaland's official GW1 score** is recorded as **2 points** (90 mins, 0G, 0A).
+- In the With-Haaland baseline (`native_safe_template`), the AI captained Haaland in GW1 for **2 × 2 = 4 points**, and the total team score was **29 net points**.
+- Over the next 9 gameweeks, that team scored:
+  - GW2: 71 pts (Haaland C, 26 pts)
+  - GW3: 65 pts (Haaland C, 18 pts)
+  - GW4: 67 pts (Haaland C, 18 pts)
+  - GW5: 41 pts (Haaland C, 12 pts)
+  - GW6: 49 pts (Haaland C, 12 pts)
+  - GW7: 77 pts (Haaland C, 26 pts)
+  - GW8: 91 pts (Haaland C, 16 pts)
+  - GW9: 83 pts (Haaland C, 4 pts)
+  - GW10: 87 pts (Haaland C, 4 pts)
+  - **Sum: 29 + 71 + 65 + 67 + 41 + 49 + 77 + 91 + 83 + 87 = 660 points.**
+
+In the No-Haaland LP simulation (`excludedIds = new Set([411])`):
+- In GW1, the team captained Nicolas Jackson (0 pts, 0 mins) and scored **34 net points** (outscoring the Haaland team in GW1!).
+- Over the next 9 gameweeks, that team scored:
+  - GW2: 37 pts (Jackson C, 4 pts)
+  - GW3: 54 pts
+  - GW4: 62 pts
+  - GW5: 43 pts
+  - GW6: 45 pts
+  - GW7: 80 pts
+  - GW8: 109 pts (Jackson C, 26 pts)
+  - GW9: 89 pts (Jackson C, 18 pts)
+  - GW10: 91 pts (Jackson C, 22 pts)
+  - **Sum: 34 + 37 + 54 + 62 + 43 + 45 + 80 + 109 + 89 + 91 = 644 points.**
+
+---
+
+### 2. You Can Observe a "No-Haaland" Team in the Career Tab UI Right Now!
+
+You don't even need a custom script to see a 100% No-Haaland team in the app. Several existing permutations in the Career Tab already completely exclude Haaland because of their mathematical formulation!
+
+In the **Career Tab**, set your controls to:
+- **Mode:** `Autonomous`
+- **Fuel:** `fplform` (or `eye-test`)
+- **Risk Profile:** `Safe`
+- **Strategic Scenario:** `Quant Optimal`
+
+Inspect the starting XI and bench across all 10 gameweeks:
+- **Haaland Ownership:** **0% across all 10 Gameweeks (GW1 → GW10).**
+- **Captaincy:** Handed to Bruno Fernandes and Marcus Tavernier.
+- **Total Net Score:** **614 points** (61.4 pts/GW average, with 0 hits!).
+- **Gameweek Progression:**
+  - GW1: 43 pts
+  - GW2: 84 pts
+  - GW3: 51 pts
+  - GW4: 65 pts
+  - GW5: 31 pts
+  - GW6: 37 pts
+  - GW7: 58 pts
+  - GW8: 81 pts
+  - GW9: 71 pts
+  - GW10: 93 pts
+
+---
+
+### 3. Summary of Career Tab Strategies (2026/27 Season)
+
+| Permutation | Haaland Owned? | GW1–10 Total | Captain Anchor | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **Native Safe Template** | **Yes** (100% of weeks) | **660 pts** | Erling Haaland | In Career Tab UI |
+| **Native Safe (Excluded Haaland)** | **No** (0% of weeks) | **644 pts** | Nicolas Jackson | Simulation run |
+| **FPLForm Safe Quant** | **No** (0% of weeks) | **614 pts** | Bruno Fernandes / Tavernier | **Live in Career Tab UI right now!** |
+| **Native Safe Quant** | **Yes** (100% of weeks) | **619 pts** | Erling Haaland | In Career Tab UI |
+
+So yes, the **660 vs 644** points are 100% real, calculated on the actual 2026/27 dataset, and **614 points** is already live and selectable in your Career Tab UI right now under `fplform` or `eye-test` + `quant`.
