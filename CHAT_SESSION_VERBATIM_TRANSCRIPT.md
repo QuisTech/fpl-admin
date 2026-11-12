@@ -30042,3 +30042,88 @@ Beyond suspensions, yellow cards directly harm FPL scorelines:
 - Each yellow card is an **immediate −1 point deduction** on the matchday score.
 - Yellow cards heavily penalize the player in the **Bonus Points System (BPS)**, deducting −3 BPS and making it far harder for them to earn 1, 2, or 3 bonus points.
 - This historical drag is captured in the player\'s underlying Form, ICT Index, and Bayesian projections in both `Native` and `FPLForm` engines.
+
+
+---
+
+## User
+What should I message this person?
+
+I’m Rehan from the InfoBay AI Data Procurement Team.
+
+We’re looking for private/organizational repositories, including archived, inactive, unused, or unlaunched projects. Eligible repositories may receive 100–10,000+ USD, depending on the repository evaluation, in exchange for 24–48 hours of temporary read-only access.
+
+The collaboration is covered by an NDA and clear data-use terms, with no transfer of ownership or exclusivity required.
+
+If you have a project that may meet our requirements, let me know and I’ll share the next steps.
+
+
+Are you interested in exploring this paid collaboration with us? We'd be happy to share the details and discuss the next steps if you're interested.
+
+
+
+
+Plus what exactly are they looking for?
+
+---
+
+## Assistant
+
+### 1. What Exactly Are They Looking For?
+
+**InfoBay AI** (formerly EduGorilla) is an Indian AI data curation and training infrastructure vendor. What Rehan is doing is part of a massive industry-wide trend known as **commercial code data harvesting**.
+
+Here is what is happening behind the scenes:
+
+1. **The Public Data Wall:**
+   - Frontier AI companies (OpenAI, Anthropic, Google, Meta, Mistral) have already scraped and trained their models on nearly **every public open-source repository on GitHub**, GitLab, and Stack Overflow.
+   - AI labs are experiencing a critical shortage of **unseen, proprietary code** ("out-of-distribution" code) to train their next-generation code models and prevent benchmark contamination.
+2. **Why They Want Private / Archived Repos:**
+   - Private, unlaunched, or inactive enterprise repos contain real-world software architecture, internal business logic, edge-case fixes, and custom scripts that web scrapers cannot find on the public web.
+3. **The Reality of "24–48 Hours Temporary Read-Only Access":**
+   - **In Git, "Read-Only" means "Permanent Full Copy".** There is no such thing as temporary viewing in Git.
+   - The moment you grant read access, an automated script runs `git clone --mirror`, pulling:
+     - Every single line of source code across every branch.
+     - The entire git commit history, commit messages, and author emails.
+     - All historical diffs and unreleased features.
+   - Once downloaded to their offshore servers, your code is processed, tokenized, and packaged into training corpora sold to AI labs.
+
+---
+
+### 2. The Severe Security & IP Risks
+
+As CEO & Principal Systems Architect at InspireNova Enterprises, you should be aware of the critical hazards:
+
+- **Hardcoded Secrets & API Key Exposure:**
+  - Even if you remove an API key, database password, or secret token in your latest commit, **it remains permanently visible in your past Git commit history** unless surgically scrubbed with tools like `git-filter-repo` or BFG. Automated credential scanners can extract your AWS, Firebase, Stripe, or database credentials within seconds.
+- **Proprietary IP Exfiltration:**
+  - If this involves your enterprise AI platforms, football analytics engines, or verification algorithms, your proprietary competitive advantage is permanently surrendered to third-party AI models.
+- **The "NDA" Illusion:**
+  - An NDA signed with an overseas data broker is virtually impossible to enforce. You cannot audit whether a model with billions of parameters was trained on your code.
+- **The "Bait-and-Switch" Payout:**
+  - The "100 to 10,000+ USD" headline is almost always a funnel tactic. Developers who engage typically report being offered minimal payouts (e.g. 50 to 150 USD) after their repo has already been evaluated and cloned, with the high figures reserved for massive enterprise monorepos.
+
+---
+
+### 3. What Should You Message Him?
+
+#### Option A: Ignore and Block (Strongly Recommended)
+- In cybersecurity and enterprise governance, the gold standard response to unsolicited data procurement outreach is **no response at all**.
+- Replying confirms that your contact information is active and responsive, which often leads to more aggressive outreach or sharing your contact across lead lists.
+
+#### Option B: Professional Corporate Decline (If You Choose to Reply)
+If you wish to close the loop formally and leave a record on behalf of InspireNova Enterprises:
+
+> "Hello Rehan,
+> 
+> Thank you for reaching out.
+> 
+> As a matter of corporate policy and strict intellectual property governance, InspireNova Enterprises does not provide third-party access to private or organizational repositories, nor do we participate in external data procurement programs.
+> 
+> Best regards,  
+> Marquis Michael  
+> CEO & Principal Systems Architect  
+> InspireNova Enterprises"
+
+#### Crucial Warning:
+Never click any links sent in follow-up messages or install any GitHub Apps / OAuth integrations from them, as malicious actors sometimes spoof data procurement outreach to gain OAuth administrative access to GitHub organizations.
