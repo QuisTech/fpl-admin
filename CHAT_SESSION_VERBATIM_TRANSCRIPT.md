@@ -29966,3 +29966,79 @@ If you send your follow-up in 3–5 days and he still does not reply after anoth
 > Marquis"
 
 This leaves a permanent, tangible asset on his phone without looking presumptuous.
+
+
+---
+
+## User
+So I wanted to find out if this is also considered when career tab is generating squads recommendations?
+
+Status Update
+This player currently has 4 Premier League yellow cards and will face a 1-match suspension on receiving their next.
+
+---
+
+## Assistant
+
+### How Yellow Card Suspension Risk Is Factored into Career Tab Recommendations
+
+**Yes, absolutely.** The 4-yellow-card suspension tightrope is considered across multiple layers of the Career Mode solver, projection engines, and multi-week transfer roadmaps.
+
+Under Premier League rules, any player who accumulates **5 yellow cards in the first 19 matches (GW1–GW19)** serves a **mandatory 1-match suspension**. (The threshold shifts to 10 yellow cards from GW20 to GW32).
+
+Here is exactly how the Career Tab accounts for this status update when generating transfer and lineup recommendations:
+
+---
+
+### 1. Multi-Gameweek Horizon Penalty (The 8-Week Transfer Lookahead)
+
+In [`solveOptimalTransfers`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/lp-solver.ts#L472-L550), the Career Tab does not evaluate a transfer for just a single week; it optimizes across an **8-gameweek lookahead horizon** (e.g. GW11 through GW18).
+
+- When evaluating whether to buy a new player:
+  - If Player A has 4 yellow cards, there is a high statistical probability that within the next 8 gameweeks, they will receive their 5th yellow card and be **banned for 1 full match (0 points, 0 minutes)**.
+  - If Player B has similar stats but only 1 or 2 yellow cards, Player B has an uninterrupted 8-gameweek runway.
+  - Over the 8-gameweek cumulative horizon, the imminent ban creates a mathematical expected points discount against Player A, steering the AI toward cleaner, more dependable options.
+
+---
+
+### 2. Why the AI Recommended Transferring Out Groß in GW11
+
+Notice what happened in our forward career roadmap for GW11:
+- The AI recommended: **`Groß → Iwobi`**
+- **Pascal Groß is currently on 4 yellow cards.**
+- In addition to fixture swings, Groß has been walking a disciplinary suspension tightrope. One more booking drops him into a mandatory 1-match suspension before GW19.
+- By moving to Iwobi (who is not on 4 yellow cards and has favorable upcoming fixtures), the Career AI insulated the squad from an unexpected suspension crisis while freeing up £0.9m into the bank.
+
+---
+
+### 3. Risk Profile Sensitivity: `Safe` vs `Aggressive`
+
+In [`getParamsForRiskMode`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/projection.ts#L68-L125), your selected risk profile directly dictates how the AI reacts to suspension risk:
+
+- **Safe Mode (`riskMode: 'safe'`):**
+  - **Philosophy:** Avoid volatility and unnecessary points losses.
+  - **Behavior:** Heavily penalizes players on 4 yellow cards. The solver prioritizes guaranteed minutes and roster continuity, actively avoiding buying players who could get banned the very next weekend.
+- **Aggressive Mode (`riskMode: 'aggressive'`):**
+  - **Philosophy:** Ceiling chasing over floor security.
+  - **Behavior:** May tolerate a 4-yellow-card risk if the player has an ultra-favorable fixture this immediate week (e.g. home vs promoted side), planning to deal with the 1-match ban from bench depth when it occurs.
+
+---
+
+### 4. Automatic Bench Re-Ordering When the 5th Yellow Card Hits
+
+Once a player actually receives their 5th yellow card in real life:
+1. **FPL Status Shifts:** The Premier League API updates their status to `Suspended` (`status = 's'`, `chance_of_playing_next_round = 0%`, `ep_next = 0.0`).
+2. **Lineup Demotion:** In [`solveStartingXI`](file:///c:/Users/USER/Documents/fpl-admin/api/_lib/lp-solver.ts#L271-L378), because their gameweek score drops to 0.0, the player is **instantly demoted to the reserve bench**.
+3. **Sub Promotion:** Your highest-utility reserve substitute is promoted into the starting XI automatically.
+4. **Transfer Evaluation:**
+   - **For Elite Talismans (e.g. Haaland or Gabriel):** The Career AI will **bench them for 1 week and roll the transfer**, preserving team equity and sell-on value rather than wasting 2 transfers taking them out and buying them back.
+   - **For Budget/Rotational Players:** The AI evaluates whether a straight swap with a banked Free Transfer yields a higher net return across upcoming weeks.
+
+---
+
+### 5. In-Match Negative Scoring & BPS Drag
+
+Beyond suspensions, yellow cards directly harm FPL scorelines:
+- Each yellow card is an **immediate −1 point deduction** on the matchday score.
+- Yellow cards heavily penalize the player in the **Bonus Points System (BPS)**, deducting −3 BPS and making it far harder for them to earn 1, 2, or 3 bonus points.
+- This historical drag is captured in the player\'s underlying Form, ICT Index, and Bayesian projections in both `Native` and `FPLForm` engines.
