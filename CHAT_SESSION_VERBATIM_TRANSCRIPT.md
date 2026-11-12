@@ -30932,3 +30932,70 @@ Your research proves that winning FPL requires **zero hits, high patience, and s
 Because of the 89-point gap created in GW8–GW10:
 - **Template Shield** will not crown you World Champion because it refuses to gamble on reckless differentials.
 - But **Template Shield** WILL do something incredible: it will take your team from **Rank 3,460,000** up into the **Top 50,000 (Top ~0.5% in the world)**, sweep every mini-league you are in, and finish within ~100–150 points of the champion without ever putting your squad in jeopardy.
+
+
+---
+
+## User
+So which of the quant engine is the best so far in the career tab?
+
+---
+
+## Assistant
+
+### The Undisputed Best Quant Engine: `Native | Safe | Quant Optimal`
+
+Across both **Autonomous Mode** (from scratch) and **Synced Co-Pilot Mode** (evolving from your squad), **`Native | Safe | Quant Optimal`** is the highest-scoring and most mathematically stable Quant engine in the entire Career Tab.
+
+Here is the exact leaderboard across every single Quant engine in the platform:
+
+---
+
+### 1. The Official Quant Leaderboard (GW1 → GW10)
+
+| Rank | Quant Engine Permutation | Synced Co-Pilot Score | Autonomous Score | Bank Left | Strategy Description |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **🥇 #1** | **`Native | Safe | Quant Optimal`** | **677 points** | **619 points** | **£6.2m** | **Pure knapsack efficiency with official FPL minutes calibration.** |
+| **🥈 #2** | **`FPLForm | Safe | Quant Optimal`** | **670 points** | **614 points** | £1.8m | Pure statistical xP regression (0% Haaland autonomous). |
+| **🥉 #3** | **`Eye-Test | Safe | Quant Optimal`** | **670 points** | **614 points** | £1.8m | Latent underlying team attacking metrics. |
+| **4** | `Native | Value | Quant Optimal` | 677 points | 610 points | £5.7m | Penalizes premiums; hyper-efficient budget spine. |
+| **5** | `Native | Aggressive | Quant Optimal`| 677 points | 514 points | £16.4m | High variance speculative punts. |
+| **6** | `FPLForm | Value | Quant Optimal` | 670 points | 497 points | £1.1m | Over-indexed on cheap form players. |
+| **7** | `FPLForm | Aggressive | Quant Optimal`| 670 points | 492 points | £1.7m | Chased high-risk differential minutes. |
+
+*(Note: In Synced Mode, your human GW1 picks had Haaland, so the Synced Quant engine inherited him and delivered a monstrous 677 points, just 1 point behind Template Shield's 678).*
+
+---
+
+### 2. Why `Native Safe Quant` Outperforms All Other Quant Engines
+
+1. **The `betaEO = 0.0` Knapsack Advantage:**
+   - Unlike Template Shield (which forces 70%+ owned players into your team to avoid rank drop), **Quant Optimal sets `betaEO = 0.0`**.
+   - It ignores crowd psychology completely. It evaluates every player strictly on:
+     **Projected Points ÷ Cost (Value per Million).**
+2. **Why `Native` Beats `FPLForm` in Quant:**
+   - The **Native** engine uses official Premier League data that includes precise manager press-conference injury flags, domestic cup workload, and true expected minutes.
+   - **FPLForm** relies purely on 4-gameweek statistical form. When a mid-priced player has a lucky 2-goal week, FPLForm over-projects them, whereas Native keeps their baseline grounded.
+3. **Why `Safe` Beats `Aggressive` in Quant (619 vs 514 pts!):
+   - Notice the massive drop from **Safe (619 pts)** to **Aggressive (514 pts)**: a **−105 point collapse**!
+   - In Quant mode, an **Aggressive** risk profile chases explosive per-minute differentials (like supersubs who average 1.2 xG per 90 mins off the bench). The solver gambles on them starting, but they often get benched for 1 point.
+   - The **Safe** profile forces the solver to demand **guaranteed 85+ minutes starters**. That is why it scored 619 points autonomously and 677 points in your Co-Pilot.
+
+---
+
+### 3. Key Tactical Differences: Template Shield vs Safe Quant
+
+| Dynamic | `Native Safe Template Shield` (678 pts) | `Native Safe Quant Optimal` (677 pts) |
+| :--- | :--- | :--- |
+| **Crowd Psychology** | **Cares deeply:** Owns players solely because 70% of the top 10k own them. | **Completely blind to ownership:** Evaluates players purely on mathematical xP/cost. |
+| **Bench Construction** | Holds minimum-cost enablers (£4.0m) to afford consensus premiums. | Spreads value into active £5.0m–£6.0m starters with genuine haul potential. |
+| **Autonomous Total** | **660 pts** | **619 pts** (£6.2m cash saved in the bank) |
+| **Synced Co-Pilot Total**| **678 pts** | **677 pts** (Only 1 point apart!) |
+
+---
+
+### Bottom Line Recommendation
+
+If you want to play a **pure mathematical strategy that ignores the crowd**:
+- Select **`Fuel: native`**, **`Risk Mode: safe`**, and **`Scenario: quant`**.
+- In your Career Co-Pilot, it scored **677 points** (crushing your human 588 score by **+89 points**, with 0 hits), proving that pure mathematical optimization without fear of ownership works brilliantly.
