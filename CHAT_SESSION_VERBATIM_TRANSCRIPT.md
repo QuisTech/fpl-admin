@@ -29890,3 +29890,79 @@ Here are two targeted follow-up templates depending on the channel:
 - **Keep It On WhatsApp:** If you sent this via WhatsApp, that is the single most effective channel in Nigeria. Ensure your WhatsApp profile picture and bio look sharp, professional, and credible.
 - **Low Friction:** Never ask for a 30-minute formal Zoom meeting on the first reply. Always ask for a "2-minute brief" or "short 1-page overview" — low commitment makes it 10× easier for him to reply *"Sure, share it."*
 - **Reference the Mutual Connection:** If an influential person shared his contact with you, casually mentioning their name (e.g., *"When [Name] recommended I connect with you..."*) instantly multiplies your response rate.
+
+
+---
+
+## User
+At what point can I share proposal?
+
+---
+
+## Assistant
+
+### When to Share a Proposal: The 4-Stage Pathway
+
+In enterprise tech and sports governance — especially in Nigeria — **never send a formal proposal uninvited**. 
+
+A cold, unsolicited 10-page proposal is viewed as a sales pitch and almost always gets ignored or forwarded to an assistant where it dies. A proposal only carries power when **he asks for it** or agrees that a specific problem needs solving.
+
+Here is the exact roadmap showing **at what point** to transition from conversation to proposal:
+
+---
+
+### Stage 1: The First Response (Connection & Curiosity)
+- **Where you are now:** Waiting for initial contact.
+- **Goal:** Get him to reply with *anything* positive (e.g. *"Thanks Marquis"*, *"What exactly do you do?"*, or *"Share more details"*).
+- **Proposal status:** **DO NOT SEND.** It is way too early.
+
+---
+
+### Stage 2: The "Permission Hook" (The Executive Teaser)
+- **When this happens:** After he replies to your follow-up, or if you offer a low-friction asset.
+- **What to send:** NOT a formal proposal, but a **1-Page Executive Concept Note** or a **2-minute video demo** of the InspireNova football analytics engine.
+  - Showcases capability, Nigerian football relevance, and visual credibility.
+  - No commercial pricing or heavy contractual terms yet.
+- **How to ask:**
+  > *"I have a 1-page executive brief illustrating how our analytics and player verification system tracks domestic NPFL and academy talent. May I share that here for your review?"*
+- Once he says *"Yes, send it"*, you have crossed the threshold from cold outreach to **invited conversation**.
+
+---
+
+### Stage 3: The 10-Minute Alignment Call / Chat (Diagnosing the Need)
+- **When this happens:** After he reviews the 1-page brief.
+- **Goal:** Find out his exact immediate headache:
+  - Is he focused on scouting domestic talent for overseas transfers?
+  - Is he concerned about age fraud, identity, and transfer passport records?
+  - Is he looking to improve match performance for a specific club or national team setup?
+- **Why this matters:** A proposal written without knowing his exact priority will miss the mark. A proposal written around his specific stated problem is nearly impossible to reject.
+
+---
+
+### Stage 4: The Formal Proposal (The Green Light)
+- **The Exact Point to Share:** **Only after he verbally or via text invites it**, for example:
+  - *"Send me a formal proposal on this."*
+  - *"What would it take to implement this for our club / academy?"*
+  - *"Put your pricing and rollout roadmap together and send to my email."*
+- **What to include at this point:**
+  1. **Executive Summary:** His exact goals in his words.
+  2. **Technical Scope:** InspireNova AI analytics & digital verification platform deliverables.
+  3. **Implementation Timeline:** Phase 1 rollout (e.g. 4–6 weeks pilot).
+  4. **Commercial Investment:** Clear fee structure (Pilot fee vs Enterprise license).
+  5. **Next Step:** A simple sign-off / kickoff date.
+
+---
+
+### The One Exception: The "Unsolicited 1-Page Concept Note"
+If you send your follow-up in 3–5 days and he still does not reply after another week, you can send **one final, highly visual 1-page PDF** (Concept Note, not a pricing proposal) with a gracious note:
+
+> "Good day Sir, trust you are well.
+> 
+> As a courtesy, I've attached our 1-page Executive Concept Note on how InspireNova's analytics engine benchmarks Nigerian football talent against European leagues.
+> 
+> Leaving this with you for reference whenever the timing aligns with your initiatives.
+> 
+> Warm regards,  
+> Marquis"
+
+This leaves a permanent, tangible asset on his phone without looking presumptuous.
