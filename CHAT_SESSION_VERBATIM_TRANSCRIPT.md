@@ -32758,3 +32758,48 @@ Your mindset is 100% on point:
 - **Your midfield differentials:** Groß and Gomez are in great attacking rhythm for Brighton.
 
 You have a very strong, well-balanced squad for GW11. Back your players, trust Evanilson at home, and let the weekend play out!
+
+
+**User:**
+So Gomez on the bench after scoring in GW 10, what should I do about this? Any ideas, my starting 11 is already good
+
+**Assistant:**
+Having an in-form, 9-point scorer like **Gomez (Brighton)** sitting on your bench is the ultimate "good problem to have" in FPL. 
+
+Here is the exact tactical breakdown of what you can do with him for GW11:
+
+---
+
+### The Matchup Facts for GW11
+- **Gomez (Brighton):** @ **Hull City (A) [FDR 2]** — 51 pts, form 5.5, fresh off a 9-point haul in GW10.
+- **Tavernier (Bournemouth):** vs **Nott'm Forest (H) [FDR 3]** — 58 pts, form 6.5.
+- **Rogers (Chelsea):** vs **Leeds (H) [FDR 3]** — 52 pts, form 3.5.
+
+Because you are playing a **3-4-3**, Gomez is directly competing with **Tavernier** and **Rogers** for that final midfield slot.
+
+---
+
+### Your 3 Tactical Options
+
+#### **Option 1: Start Gomez over Tavernier (The Diversification & Fixture Play)**
+- **Why do it:** 
+  1. Brighton away to **Hull City (FDR 2)** is an easier fixture on paper than Bournemouth hosting a stubborn Nottingham Forest side (FDR 3).
+  2. You already own **Evanilson** in attack. If Bournemouth struggle to break down Forest, having both Tavernier AND Evanilson starting means your midfield and attack both suffer. 
+  3. Starting Gomez diversifies your risk across two different high-scoring attacks (Brighton + Bournemouth).
+
+#### **Option 2: Start Gomez over Rogers (The Chelsea Talisman Play)**
+- **Why do it:**
+  - You already have **Cole Palmer** starting for Chelsea against Leeds.
+  - If Chelsea dominate, Palmer gets the penalty and bonus points. Swapping Rogers for Gomez gives you exposure to Brighton's FDR 2 fixture against Hull rather than holding two Chelsea midfielders.
+
+#### **Option 3: Leave Gomez as Sub 1 (The "Bench Fortress" Strategy)**
+- **Why do it:**
+  - Having Gomez as your **1st Auto-Sub** gives you god-tier insurance. 
+  - If any of your 4 midfielders (Palmer, Groß, Rogers, Tavernier) or 3 forwards (Haaland, Isak, Evanilson) gets an unexpected rest or late injury, Gomez automatically enters your team with a 90-minute run against Hull City (FDR 2).
+
+---
+
+### My Recommendation
+If you want to capitalize on momentum and avoid Bournemouth attack duplication, **start Gomez and move Tavernier to Sub 1**. 
+
+If you prefer having home advantage on your side (Forest at Bournemouth), leave Tavernier in the XI and keep Gomez as your elite **Sub 1 security blanket**!
