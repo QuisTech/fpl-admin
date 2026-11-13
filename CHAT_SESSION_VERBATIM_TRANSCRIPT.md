@@ -32949,3 +32949,53 @@ This is the hidden gem of your squad architecture:
 - When you deploy Bench Boost on a green fixture swing (like GW12 or GW14), both Dasilva and Davis will be on the pitch playing 90 minutes and banking points for your overall score!
 
 That is top-tier squad value extraction for just £4.0m each!
+
+
+**User:**
+So GW 13 is good for my BB?
+
+**Assistant:**
+**GW13 has one massive advantage, but also one big hidden trap you must watch out for!**
+
+Here is the exact fixture analysis for all 15 players in your squad for Gameweek 13:
+
+---
+
+### 1. The Good News: Your Bench Has a Dream Run (All FDR 2!)
+If we look strictly at the players who would sit on your bench, GW13 is almost unprecedented for cheap enablers:
+- **Dubravka (Spurs):** vs **Fulham (H) [FDR 2]**
+- **Van Hecke (Spurs):** vs **Fulham (H) [FDR 2]**
+- **Dasilva (Coventry):** vs **Ipswich (H) [FDR 2]**
+- **Davis (Ipswich):** @ **Coventry (A) [FDR 2]**
+- Plus your premiums: **Palmer & Rogers (Chelsea)** vs **Crystal Palace (H) [FDR 2]**, **Isak (Liverpool)** vs **Sunderland (H) [FDR 2]**.
+
+Having every single one of your £4.0m bench defenders and backup keeper facing **FDR 2** opponents in the same gameweek is extraordinarily rare.
+
+---
+
+### 2. The Big Trap: Intra-Squad Cannibalization (5 Players Clash!)
+Here is why GW13 is dangerous if left unadjusted:
+
+1. **Brighton vs Bournemouth Clashing (5 Players!):**
+   - **Brighton:** De Cuyper, Groß, Gomez
+   - **Bournemouth:** Evanilson, Tavernier
+   - They play **against each other** at the Vitality Stadium! 
+   - If Brighton keep a clean sheet, De Cuyper gets points, but Evanilson and Tavernier blank.
+   - If Evanilson scores, De Cuyper loses his clean sheet! They will cannibalize each other's points.
+2. **Coventry vs Ipswich (Dasilva vs Davis):**
+   - Dasilva and Davis also play **against each other**! One team scoring automatically wipes out the other defender's clean sheet.
+3. **Arsenal at Brentford (FDR 4):**
+   - Raya and Konsa face a tricky away trip to Brentford.
+
+---
+
+### The Tactical Verdict for Your Bench Boost
+
+- **If you do NOT make transfers:** **Skip GW13 for Bench Boost.** Having 7 of your players playing head-to-head against each other caps your ceiling because they cancel out each other's clean sheets and goals.
+- **If you DO want to Bench Boost in GW13:**
+  - You will enter GW13 with **2 Free Transfers**.
+  - You can use those 2 Free Transfers to trade out one Brighton and one Bournemouth asset, diversifying your attack so nobody cancels each other out.
+- **The Alternative (Double Gameweek):**
+  - Holding your Bench Boost for a second-half **Double Gameweek (GW25–GW37)** gives your bench 180 minutes of action (two matches each), which is the traditional gold standard.
+
+**Bottom Line:** Keep GW13 on your radar as a potential single-gameweek Bench Boost, but only pull the trigger if you use your Free Transfers to break up the Brighton vs Bournemouth civil war!
