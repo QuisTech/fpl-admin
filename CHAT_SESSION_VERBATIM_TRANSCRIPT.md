@@ -31406,3 +31406,91 @@ Notice the formula:
 | **Attacking Defender (Gabriel, Porro, Gvardiol)** | Lower clean sheet odds, but set-piece upside. | **Start** for attacking ceiling. |
 | **Pure Defending Centre-Back (£4.5m)** | 75%+ chance of conceding 1+ goals. | **Bench** if you have an alternative with FDR 2. |
 | **Goalkeeper (Leno, Pickford, Flekken)** | Clean sheet unlikely, but high save volume potential. | **Startable**, often scores 3–5 pts via saves. |
+
+
+---
+
+## User
+Explain this :
+
+GW11 Manager Decision
+103 Net Pts
+[CHIP: Bench Boost] GW11 Projected: Double Transfer Vuskovic → Gabriel, Palmer → Iwobi (2 FTs used, 0 hit). Captain: Evanilson (18 xP). Bench Boost added +16 xP from bench.
+
+Transfer Execution
+Vuskovic
+Gabriel
+£8.1m
+Palmer
+Iwobi
+£5.4m
+Bank Balance: £1.6m
+Squad Value: £99.6m (£101.2m)
+
+---
+
+## Assistant
+
+### Detailed Breakdown of the GW11 Manager Decision
+
+This card in the **Career Tab Forward Roadmap** represents the AI's optimized tactical masterplan for your upcoming Gameweek 11. It projects a monstrous **103 Net Points** with **0 point deductions**.
+
+Here is the exact explanation of why the AI made every single move on this card:
+
+---
+
+### 1. Why Activate [CHIP: Bench Boost] in GW11?
+
+Under official 2026/27 rules, you have **Set 1 Chips** (which must be used between GW1 and GW19, or they expire permanently).
+
+- **The Expiration Clock:** You only have 9 gameweeks left before your Set 1 Bench Boost is wiped out.
+- **The Bench Score Trigger:** The AI requires your bench to project at least **11.0 xP** to justify burning the chip.
+- **Why GW11 is Prime:** In GW11, all four of your substitute players (reserve goalkeeper + 3 outfield subs) are confirmed starters with favorable fixtures, combining for **+16.0 xP** (averaging an elite 4.0 xP per sub!).
+- In December, rotation and fatigue cause bench players to get rested. Cashing in Bench Boost in GW11 guarantees you capture points from all 15 players while squads are fresh.
+
+---
+
+### 2. The Financial Rebalance: Why Sell Palmer (£10.8m) to Buy Gabriel (£8.1m)?
+
+Notice the paired transfer execution:
+1. **Cole Palmer → Alex Iwobi (£5.4m):**
+   - Palmer is your most expensive midfielder. Selling him frees up over **£5.4m in liquid cash**.
+   - Alex Iwobi is an in-form 90-minute talisman with a high value-per-million rating and set-piece duty.
+2. **Vuskovic → Gabriel (£8.1m):**
+   - The AI takes that freed-up cash and immediately upgrades Vuskovic (a cheap £4.2m budget defender with low ceiling) to **Gabriel**.
+   - Gabriel is the #1 ranked defender in the entire game: Arsenal boasts the highest clean sheet probability in the league, plus Gabriel is a massive aerial goal threat on set pieces and corners.
+3. **The Tactical Purpose:**
+   - To make Bench Boost work, you cannot carry a "dead" £4.0m defender who scores 1 point.
+   - By selling Palmer and spreading the money into Gabriel and Iwobi, the AI turns a weak spot on your pitch into a world-class defensive titan, while still leaving **£1.6m cash in the bank**!
+4. **Hit Cost:** **0 Points.** You had 2 Free Transfers banked, so this major structural upgrade cost you nothing.
+
+---
+
+### 3. The Captaincy: Why Evanilson (18 xP)?
+
+- This decision reflects the **Aggressive Quant** profile we discussed earlier.
+- Bournemouth plays Brentford away in what statistical models project as an open, high-scoring match (Brentford fixtures average 3.8 goals per game).
+- Rather than default to Haaland away at Brighton (where Brighton's high press creates tricky away games for City), the solver targets Evanilson's explosive ceiling as a high-reward differential captain.
+
+---
+
+### 4. How 103 Net Points Is Calculated
+
+- **Starting XI Base Output:** ~69 xP
+- **Captaincy Doubling (Evanilson):** +9 xP bonus (making 18 xP total)
+- **Bench Boost (4 Subs Playing):** **+16 xP**
+- **Transfer Hit Deductions:** **0 pts**
+- **Total Projected Net Score:** **~103 Net Points**
+
+---
+
+### 5. Squad Financial Health
+
+- **Bank Balance: £1.6m** (Leaves you with substantial liquid cash to make any move you want in GW12).
+- **Squad Value: £99.6m Selling Value (£101.2m Purchase Value)** (Confirms you have built healthy team equity without taking hits).
+
+---
+
+### Summary Checklist for You
+- **If you agree with the Bench Boost:** You deploy your 2 banked FTs on `Vuskovic → Gabriel` and `Palmer → Iwobi`, activate Bench Boost, and lock in all 15 players.
+- **Captaincy Choice:** You can choose between backing the AI's differential punt on **Evanilson**, or moving the armband back to **Haaland** for template safety.
