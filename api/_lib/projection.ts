@@ -56,6 +56,8 @@ export interface UtilityParameters {
   maxStandardDefendersPerTeam?: number;
   maxEliteDefendersPerTeam?: number;
   eliteDefensePercentile?: number;
+  // Multi-Week Optimization Time-Decay Discounting
+  horizonDecayFactor?: number;
 }
 
 export interface ProjectionInput {
@@ -120,6 +122,7 @@ export function getParamsForRiskMode(
   params.maxStandardDefendersPerTeam = params.maxStandardDefendersPerTeam ?? 1;
   params.maxEliteDefendersPerTeam = params.maxEliteDefendersPerTeam ?? 2;
   params.eliteDefensePercentile = params.eliteDefensePercentile ?? 0.80;
+  params.horizonDecayFactor = params.horizonDecayFactor ?? 0.88;
 
   return params;
 }

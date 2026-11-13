@@ -22,6 +22,7 @@ export interface XPOracle {
   getTop1kOwnership?(playerId: number): number;
   getTeamDefenseRating?(teamShort: string): number;
   getEliteDefensiveTeams?(percentile?: number): Set<string>;
+  getFixtureDifficulty?(playerId: number, gameweek: number): number;
   playerNames: Record<number, string>;
 }
 
@@ -422,6 +423,17 @@ export abstract class BaseOracle implements XPOracle {
     });
 
     return eliteSet;
+  }
+
+  getFixtureDifficulty(playerId: number, gameweek: number): number {
+    const features = this.featuresMatrix[playerId];
+    if (features && features.fixturesByGw && features.fixturesByGw[gameweek]) {
+      const fixes = features.fixturesByGw[gameweek];
+      if (fixes && fixes.length > 0) {
+        return fixes[0].difficulty || 3;
+      }
+    }
+    return 3;
   }
 }
 

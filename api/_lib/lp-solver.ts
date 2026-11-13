@@ -20,20 +20,23 @@ interface LPSolverModel {
 }
 
 function getPlayerScore(oracle: XPOracle, gameweek: number, id: number, horizon: number, params: UtilityParameters): number {
+  const decay = params.horizonDecayFactor ?? 0.88;
   let xp = 0;
   let varSum = 0;
   for (let i = 0; i < horizon; i++) {
-    xp += oracle.getXP(id, gameweek + i);
-    varSum += oracle.getVariance(id, gameweek + i);
+    const weight = Math.pow(decay, i);
+    xp += oracle.getXP(id, gameweek + i) * weight;
+    varSum += oracle.getVariance(id, gameweek + i) * weight;
   }
   const eo = oracle.getTop1kEO?.(id) ?? 0;
   return calculateUtility(xp, varSum, eo, params, id);
 }
 
-function getRawXP(oracle: XPOracle, gameweek: number, id: number, horizon: number): number {
+function getRawXP(oracle: XPOracle, gameweek: number, id: number, horizon: number, decay: number = 0.88): number {
   let xp = 0;
   for (let i = 0; i < horizon; i++) {
-    xp += oracle.getXP(id, gameweek + i);
+    const weight = Math.pow(decay, i);
+    xp += oracle.getXP(id, gameweek + i) * weight;
   }
   return xp;
 }
@@ -542,11 +545,22 @@ export function solveOptimalTransfers(
       }
     }
     
-    const score = getPlayerScore(oracle, gameweek, id, horizon, params);
+    let score = getPlayerScore(oracle, gameweek, id, horizon, params);
     const isCurrent = currentSet.has(id);
     const cost = isCurrent 
       ? getSellingPrice(oracle.getCost(id), state.purchasePrices[id] || oracle.getCost(id)) 
       : oracle.getCost(id);
+
+    // Immediate Transfer-In Fixture Gate:
+    // If transferring in a new player (!isCurrent) whose immediate fixture in `gameweek` is an FDR 5 match
+    // (e.g. away at Man City / Arsenal), apply an immediate timing discount so the solver prefers
+    // rolling the transfer or acquiring them on their green fixture swing instead.
+    if (!isCurrent) {
+      const immediateDiff = oracle.getFixtureDifficulty?.(id, gameweek) ?? 3;
+      if (immediateDiff >= 5) {
+        score *= 0.65;
+      }
+    }
 
     if (isCurrent || score > 0 || cost <= 45) {
       model.variables[v] = { 
