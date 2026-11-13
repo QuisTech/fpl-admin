@@ -32383,3 +32383,93 @@ If you had stayed calm:
 
 ### The Strategic Lesson
 This is the single most valuable lesson high-ranking FPL managers swear by: **Rolling Free Transfers is a superpower.** When your core spine (Haaland, Isak, Rogers, Gvardiol) is solid, banking transfers gives you the ammunition to reshape your team in one clean surgical strike without ever bleeding hit penalties!
+
+
+**User:**
+But this is my current squad now:
+
+GKP
+Raya ARS
+DEF Konsa ARS
+DEF Van Hecke
+TOT
+DEF
+De Cuyper BHA
+MID Tavernier BOU
+MID
+Gomez BHA
+FWD Evanilson BOU
+FWD Isak LIV
+FWD Haaland MCI
+MID Groß BHA
+MID
+Rogers CHE
+
+GK Sub
+GKP
+Dubravka
+
+Sub 1
+MID
+Palmer
+
+Sub 2
+DEF
+Dasilva
+
+Sub 3
+DEF
+Davis
+
+
+
+So I don't understand you
+
+**Assistant:**
+Ah, now I see exactly where the confusion came from! Let me break this down clearly.
+
+When you look at your 15-man squad today, you actually made **8 player changes** between GW7 and GW10. Here is the exact side-by-side comparison:
+
+---
+
+### 1. The 7 Players You Already Owned in GW7 (Untouched)
+These 7 players were already in your squad back in GW7:
+1. **Haaland**
+2. **Isak**
+3. **De Cuyper**
+4. **Rogers**
+5. **Gomez**
+6. **Groß**
+7. **Davis** (Bench 3)
+
+---
+
+### 2. Why It Felt Like More Than 4 Swaps (The Churn)
+When I said you could have gotten your core team with **4 Free Transfers**, I was referring to the **4 high-impact upgrades** that actually drive your score.
+
+In reality, between GW8 and GW10, you made **10 transfers and took -28 points in hits** because you also made 4 "churn" or side-grade swaps:
+
+| Category | The Move You Made | Impact on Team |
+| :--- | :--- | :--- |
+| **Big Upgrade 1** | `João Pedro → Evanilson` | Replaced injured striker with starting talisman |
+| **Big Upgrade 2** | `Mbeumo → Palmer` | Brought in Chelsea's premium penalty taker |
+| **Big Upgrade 3** | `Calafiori → Van Hecke` | Secured starting defender with green fixture run |
+| **Big Upgrade 4** | `Rushworth → Raya` | Secured Arsenal's clean sheet floor |
+| *Side-grade 1* | `Gvardiol → Konsa` | Defensive sideways swap (cost hits) |
+| *Side-grade 2* | `Grimes → Tavernier` | Midfield rotational swap (via Foden) |
+| *Side-grade 3* | `Scherpen → Dubravka` | Backup goalkeeper swap (cost hits) |
+| *Side-grade 4* | `Amenda → Dasilva` | Bench defender swap (cost hits) |
+
+Those 4 side-grades (swapping backup keepers and rotating defenders like Konsa, Dasilva, Tavernier) are why you took so many hits (-28 pts)! 
+
+Had you only used 4 banked transfers on the **4 Big Upgrades** (Raya, Van Hecke, Palmer, Evanilson) and kept Gvardiol and your bench untouched, you would have had almost this exact starting XI with **zero hits and 4 free transfers**.
+
+---
+
+### 3. CRITICAL SQUAD ALERT: Palmer is on Your Bench!
+Looking at your current lineup:
+- **Starting Midfield:** Tavernier, Gomez, Groß, Rogers
+- **Bench Sub 1:** **Cole Palmer**
+
+**Do not leave Cole Palmer on your bench!**
+Palmer is one of the top 3 highest-projected midfielders in the entire Premier League. You should start **Cole Palmer** over Tavernier or Gomez in your Starting XI immediately ahead of the GW11 deadline!
