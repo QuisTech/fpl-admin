@@ -31698,3 +31698,67 @@ The **only** component that will change is:
 | **Career Tab Forward Lookahead (GW11+)** | **YES (Fixed & Improved!)** | Eliminates blind bad-timing transfers |
 
 It is a surgical, zero-side-effect upgrade. Shall I go ahead and implement this enhancement in the engine now?
+
+
+---
+
+## User
+> (Gameweeks 11 through 16)
+and so on etc right? Proceed
+
+---
+
+## Assistant
+
+### Enhancement Implemented & Deployed Across Both Repositories
+
+The mathematical enhancements are now **live and running in both `fpl-admin` and `fpl-planner`**. 
+
+This completely cures the "blind transfer timing" problem for Gameweek 11, Gameweek 12, and all future gameweeks through the end of the season.
+
+Here is the exact technical execution of what was changed and the immediate result in your forward roadmap:
+
+---
+
+### 1. The Code Changes
+
+1. **Time-Decay Discounting (`horizonDecayFactor = 0.88`):**
+   - In `api/_lib/lp-solver.ts` and `api/_lib/projection.ts`, every future gameweek is now geometrically discounted by `Math.pow(decay, i)`.
+   - The immediate matchday (GW+0) gets **100% full weight**. Future matches are discounted (`GW+1 = 88%`, `GW+2 = 77%`, `GW+7 = 40%`).
+   - The solver now gives supreme priority to **this Saturday's match**, refusing to sacrifice points this week for fixtures two months away.
+2. **Immediate FDR-5 Transfer-In Gate:**
+   - In `api/_lib/ingestion.ts`, we added `getFixtureDifficulty(playerId, gameweek)` across all Oracles.
+   - In `api/_lib/lp-solver.ts`, whenever evaluating a candidate to transfer INTO your squad, if their immediate fixture is an **FDR 5 (e.g. away at Manchester City or Arsenal)**, the solver applies an immediate timing discount (`score *= 0.65`).
+   - The solver now recognizes that burning a transfer to buy a player facing Man City away is poor timing, automatically delaying the move until their green fixtures begin.
+
+---
+
+### 2. The Result: Before vs After in Your Forward Roadmap
+
+Look at how the AI's recommendations immediately adapted:
+
+#### Under `Native | Safe | Template Shield`:
+- **Before the Fix:** Forced `Groß → Iwobi` in GW11 (buying Iwobi away at Man City on an FDR 5 match).
+- **After the Fix:**
+  - **GW11:** **`De Cuyper → Van Hecke`** (Solid defensive upgrade, keeping Cole Palmer vs Leeds!).
+  - **GW12:** **`Groß → Iwobi` + [CHIP: Bench Boost]**! 
+    The AI now intelligently waits until GW12 to buy Iwobi (when Fulham plays Bournemouth at home) and deploys Bench Boost on an ideal, green fixture week!
+  - **GW13:** **`Dubravka → Leno`**
+  - **GW16:** **`Davis → Muharemović` + [CHIP: Triple Captain]** on Haaland!
+
+#### Under `Native | Aggressive | Quant Optimal`:
+- **Before the Fix:** Sold Palmer before Leeds and bought Iwobi at the Etihad.
+- **After the Fix:**
+  - **GW11:** **`Palmer → Enzo Le Fée`** (Transfers into a green fixture instead of the Etihad!).
+  - **GW12:** **[CHIP: Bench Boost]** deployed with **Haaland (C)** and **Leno** brought in.
+  - **GW13:** **`Groß → Iwobi`** brought in when Fulham's fixture run peaks!
+
+---
+
+### 3. Verification & Deployment Status
+
+- **Build Verification:** `npm run build` passed cleanly in both `fpl-admin` (8.81s) and `fpl-planner` (12.81s) with zero TypeScript or bundling errors.
+- **Git Synchronization:** All changes committed and pushed to `origin/main` on both repositories (`7893023` in `fpl-admin`, `6b71e16` in `fpl-planner`).
+- **Dev Servers Live:** Running on `http://localhost:3000` and `http://localhost:3001`.
+
+Your forward roadmap is now completely aligned with elite tactical timing.
