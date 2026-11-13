@@ -32657,3 +32657,68 @@ Both repositories are completely up to date on GitHub `origin/main`:
 2. **`fpl-planner`**: Rebased and pushed to `origin/main` (`38bf682`) with the identical `GEMINI.md` rules synchronized.
 
 You are 100% synced and clean across both projects. No further push needed!
+
+
+**User:**
+Not doing any transfer again, just asking, between 
+Forward
+Player Profile:
+Nicolas
+Jackson and Forward
+Player Profile:
+Evanilson
+Bournemouth in the next 5 GW, which is better?
+
+**Assistant:**
+Here is the comprehensive head-to-head comparison between **Nicolas Jackson (Aston Villa)** and **Evanilson (Bournemouth)** across the next 5 gameweeks (GW11–GW15), verified directly against live 2026/27 season data:
+
+---
+
+### 1. Active Season Stats (GW1–GW10 Reality)
+
+| Metric | Nicolas Jackson (Aston Villa) | Evanilson (Bournemouth) | Edge |
+| :--- | :--- | :--- | :--- |
+| **Current Club** | **Aston Villa (AVL)** | **Bournemouth (BOU)** | — |
+| **Price** | £7.1m | **£6.5m** | **Evanilson** (saves £0.6m) |
+| **Total Points** | 54 pts | **61 pts** | **Evanilson** (+7 pts) |
+| **Recent Form** | 8.8 | **9.0** | **Evanilson** |
+| **Goal Involvements** | 6 Goals, 1 Assist (7) | **5 Goals, 4 Assists (9)** | **Evanilson** |
+| **Minutes Played** | 722 mins | **837 mins** | **Evanilson** (more nailed) |
+
+To date, **Evanilson has been the superior asset**: more points, more minutes, more assists, and £0.6m cheaper.
+
+---
+
+### 2. Next 5 Gameweeks Schedule (GW11–GW15)
+
+This is where the dynamic completely flips:
+
+| Gameweek | Nicolas Jackson (Aston Villa) | Evanilson (Bournemouth) |
+| :--- | :--- | :--- |
+| **GW11** | vs **Sunderland (H)** [FDR 2] | vs **Nott'm Forest (H)** [FDR 3] |
+| **GW12** | @ **Ipswich Town (A)** [FDR 2] | @ **Fulham (A)** [FDR 3] |
+| **GW13** | vs **Everton (H)** [FDR 3] | vs **Brighton (H)** [FDR 4] |
+| **GW14** | vs **Crystal Palace (H)** [FDR 2] | vs **Hull City (H)** [FDR 2] |
+| **GW15** | @ **Coventry City (A)** [FDR 2] | @ **Arsenal (A)** [FDR 5] |
+| **Avg FDR** | **2.2 (Elite Sea of Green)** | **3.4 (Tough Stiffening Run)** |
+
+---
+
+### 3. Key Tactical Differences
+
+1. **The Fixture Swing (Massive Win for Jackson):**
+   - **Aston Villa** have one of the easiest 5-game stretches in the league: 4 out of 5 matches are **FDR 2** (including home games vs Sunderland, Palace, and away trips to promoted sides Ipswich and Coventry).
+   - **Bournemouth** hit a brutal wall in GW13 (Brighton, FDR 4) and GW15 (Arsenal away, FDR 5).
+
+2. **Minutes & Role:**
+   - **Evanilson** is the undisputed focal point of Bournemouth's attack, playing 85–90 minutes virtually every week and linking up with Tavernier/Semenyo.
+   - **Jackson** leads the line for Emery's Villa and has been clinical (6 goals in 722 minutes), but can occasionally be subbed around minute 70–75 when games are won.
+
+---
+
+### The Verdict: Which is Better for GW11–GW15?
+
+- **If you are looking at pure projected scoring ceiling:** **Nicolas Jackson** is projected to score more points over the next 5 gameweeks purely because of Villa's incredible FDR 2 schedule (Sunderland, Ipswich, Everton, Palace, Coventry).
+- **If you factor in your squad & value:** **Evanilson** is already in your team, costs £0.6m less, has higher season points (61 pts), and has a solid home game in GW11 vs Nottingham Forest.
+
+**Summary:** Jackson has the better upcoming 5-game schedule, but keeping Evanilson is the right strategic play because the point difference doesn't justify burning transfers or cash!
