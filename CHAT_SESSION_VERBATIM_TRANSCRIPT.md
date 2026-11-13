@@ -31494,3 +31494,74 @@ Notice the paired transfer execution:
 ### Summary Checklist for You
 - **If you agree with the Bench Boost:** You deploy your 2 banked FTs on `Vuskovic → Gabriel` and `Palmer → Iwobi`, activate Bench Boost, and lock in all 15 players.
 - **Captaincy Choice:** You can choose between backing the AI's differential punt on **Evanilson**, or moving the armband back to **Haaland** for template safety.
+
+
+---
+
+## User
+But then Iwobi against Man city, I don't understand that part
+
+---
+
+## Assistant
+
+### You Are 100% Right: Your Human Football Instinct Just Caught a Blind Mathematical Artifact
+
+Your skepticism is spot on. Selling **Cole Palmer** (who plays **Leeds at home**) to buy **Alex Iwobi** (who plays **Manchester City away at the Etihad, an FDR 5 fixture**) on the exact week you activate Bench Boost looks completely counter-intuitive.
+
+Here is the exact explanation of why the computer suggested this, why it is a tactical flaw in single-week timing, and what you should actually do instead:
+
+---
+
+### 1. Why Did the Computer Suggest It? (The 8-Week Knapsack Math)
+
+The linear solver did **not** pick Iwobi because of Gameweek 11. It picked Iwobi because of an **8-week financial constraint (GW11 → GW18)**:
+
+1. **The Obsession with Gabriel (£8.1m):**
+   - The algorithm desperately wanted Arsenal's **Gabriel** in your squad.
+   - Gabriel costs **£8.1m**. Upgrading your defender (Vuskovic, £4.2m) to Gabriel required finding **+£3.9m in new cash**.
+2. **Where Can the Computer Find £3.9m Instantly?**
+   - It looked across your squad and realized the only way to fund Gabriel with 0 hits was to downgrade your most expensive midfielder: **Cole Palmer (£10.8m)**.
+   - Selling Palmer and buying **Alex Iwobi (£5.4m)** freed up £5.4m in cash, paying for Gabriel and leaving £1.6m in the bank.
+3. **The 8-Week Multi-Horizon Trap:**
+   - The solver looks at the sum of expected points over the **next 8 weeks (GW11–GW18)**.
+   - After the Man City fixture in GW11, Fulham has an incredible green run: Bournemouth (H), Spurs (A), Everton (A), Brentford (H), Leeds (A).
+   - Over 8 gameweeks, the computer calculated that `Gabriel + Iwobi` scores more total points than `Vuskovic + Palmer`.
+
+---
+
+### 2. Why the Computer's Timing in GW11 Is Flawed (The Tactical Reality)
+
+While the math works over 8 weeks, the **single-week timing for GW11 is terrible**:
+
+1. **Cole Palmer plays Leeds at home:**
+   - Leeds is a promoted side conceding high xG away from home.
+   - Palmer is on penalties, free kicks, and open-play talismancy. Palmer at Stamford Bridge vs Leeds has one of the highest individual ceilings in the entire Premier League (hat-trick potential!).
+   - Selling him right before Leeds at home is throwing away a potential 15–20 point haul.
+2. **Alex Iwobi plays Man City away at the Etihad (FDR 5):**
+   - Fulham will likely have less than 35% possession.
+   - Starting or boosting Iwobi away at the Etihad on Bench Boost means you are banking on a player in the hardest away fixture in the league.
+3. **Luka Vuskovic plays Hull City away (FDR 2):**
+   - Vuskovic's Brighton team plays Hull City away, an **FDR 2** fixture with high clean sheet potential!
+   - You don't even need to urgently sell Vuskovic in GW11 because he already has a fantastic fixture.
+
+---
+
+### 3. The Human Co-Pilot Solution: Delay the Move to GW12!
+
+This is the exact reason why the **AI Co-Pilot** exists: to combine the computational power of linear programming with human tactical common sense.
+
+**The Superior Strategy:**
+1. **KEEP Cole Palmer for GW11:** Let Palmer feast on Leeds at home.
+2. **KEEP Luka Vuskovic for GW11:** Let Vuskovic play against Hull City away (FDR 2).
+3. **Roll Your Free Transfer in GW11:** You bank 3 Free Transfers with 0 hits.
+4. **Execute the Gabriel/Iwobi Restructure in GW12:**
+   - In GW12, Fulham plays **Bournemouth at home (FDR 3)**.
+   - In GW12, you can bring in Iwobi when his favorable fixture run actually begins, without sacrificing Palmer against Leeds!
+5. **What about Bench Boost?**
+   - With Palmer vs Leeds (H) and Vuskovic vs Hull (A), your squad is already loaded for GW11.
+   - If you want to Bench Boost in GW11, you can do it with your existing squad without forcing Iwobi at the Etihad.
+   - Or you can hold Bench Boost for GW12 when Fulham and Arsenal's fixtures line up perfectly.
+
+### Bottom Line
+Trust your instinct here. **Do NOT sell Palmer before Leeds at home, and do NOT buy Iwobi to play at the Etihad.** Let Palmer play GW11, and re-evaluate the downgrade in GW12 when Fulham's green fixture run begins.
