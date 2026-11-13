@@ -32722,3 +32722,39 @@ This is where the dynamic completely flips:
 - **If you factor in your squad & value:** **Evanilson** is already in your team, costs £0.6m less, has higher season points (61 pts), and has a solid home game in GW11 vs Nottingham Forest.
 
 **Summary:** Jackson has the better upcoming 5-game schedule, but keeping Evanilson is the right strategic play because the point difference doesn't justify burning transfers or cash!
+
+
+**User:**
+So what if Jackson scores more, will that affect my ranking? And Jackson scoring more will obviously make his price go up more further and become out of reach if I want to swap in the future without selling to upgrade, no issues, let just hope my differentials helps me cushion whatever blows may come and Evanilson too should perform
+
+**Assistant:**
+Here is the honest game-theoretic reality on both your rank and his price:
+
+---
+
+### 1. Will Jackson Scoring Hurt Your Ranking?
+**Much less than you think!**
+- **Jackson's Ownership:** **31.2%**
+- **Evanilson's Ownership:** **23.8%**
+
+Because nearly **70% of the entire game does NOT own Nicolas Jackson**, if he scores, ~70% of managers don't get those points either! 
+- Unlike Haaland (where 85%+ own him and a goal wipes out your rank), Jackson is not a template killer.
+- Meanwhile, if **Evanilson** delivers against Nottingham Forest at home, you are in the top **23.8% bracket gaining green arrows** on three-quarters of the entire game.
+
+---
+
+### 2. Will Jackson Become "Out of Reach" If His Price Rises?
+**Not at all.**
+- Even if Jackson scores in GW11 and rises £0.1m (from £7.1m → £7.2m), price changes in FPL are capped at a maximum of £0.3m per gameweek.
+- More importantly: remember our financial roadmap! If you choose to downgrade Palmer to Le Fée in GW12 or GW13, you unlock **£4.1m in liquid bank cash**.
+- When you have £3m to £4m sitting in your bank, a £0.1m or £0.2m price fluctuation on a striker is just pocket change. Jackson will **never** be out of reach for your team.
+
+---
+
+### 3. Your Differentials Are in Prime Position
+Your mindset is 100% on point:
+- **Evanilson is in blistering form:** 9.0 form, 61 season points (7 points higher than Jackson!), and playing at home this weekend.
+- **Your differential defense is elite:** Van Hecke (vs Ipswich at home) and De Cuyper (vs Hull away) have incredible clean sheet equity.
+- **Your midfield differentials:** Groß and Gomez are in great attacking rhythm for Brighton.
+
+You have a very strong, well-balanced squad for GW11. Back your players, trust Evanilson at home, and let the weekend play out!
