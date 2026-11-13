@@ -31565,3 +31565,82 @@ This is the exact reason why the **AI Co-Pilot** exists: to combine the computat
 
 ### Bottom Line
 Trust your instinct here. **Do NOT sell Palmer before Leeds at home, and do NOT buy Iwobi to play at the Etihad.** Let Palmer play GW11, and re-evaluate the downgrade in GW12 when Fulham's green fixture run begins.
+
+
+---
+
+## User
+Is there something we can do to fix this in the engine or leave as is?
+
+---
+
+## Assistant
+
+### We Should Definitely Fix It: Here Is Why and How
+
+Leaving this as is means the AI will occasionally make "blind algorithm" blunders—like telling you to sell Cole Palmer before Leeds at home, or buying a player whose first game is away at Manchester City.
+
+Here is the exact mathematical flaw causing it, how we can cleanly fix it, and why fixing it makes the entire platform significantly smarter:
+
+---
+
+### 1. The Root Cause in the Code: "Undiscounted 8-Week Sum"
+
+If you look inside our solver code (`api/_lib/lp-solver.ts`), look at how player scores are calculated:
+
+```typescript
+function getPlayerScore(oracle, gameweek, id, horizon, params) {
+  let xp = 0;
+  for (let i = 0; i < horizon; i++) {
+    xp += oracle.getXP(id, gameweek + i); // Linear sum over 8 weeks!
+  }
+  return xp;
+}
+```
+
+Notice the flaw:
+- It treats **Gameweek 18 (two months away in January) with the EXACT same 100% weight as Gameweek 11 (this Saturday)**!
+- Because Fulham's fixtures from GW12 to GW18 are good, the 8-week sum for Iwobi looks high.
+- The computer buys Iwobi now because it is blind to the fact that his immediate fixture in GW11 is an FDR 5 match at the Etihad!
+
+---
+
+### 2. The Solution: Two Mathematical Fixes
+
+We can implement two industry-standard algorithmic enhancements in `lp-solver.ts`:
+
+#### Fix A: Time-Decay Discounting (`horizonDecayFactor = 0.85`)
+In reinforcement learning and financial decision theory, future rewards are discounted:
+- **Gameweek 11 (This Week):** Weight = **1.00** (100% priority)
+- **Gameweek 12 (Next Week):** Weight = **0.85**
+- **Gameweek 13:** Weight = **0.72**
+- **Gameweek 14:** Weight = **0.61**
+- **Gameweek 18:** Weight = **0.32**
+
+**What this does:**
+Because the immediate gameweek has the heaviest weight, the solver will see that Palmer vs Leeds (7.8 xP) crushes Iwobi at Man City (2.1 xP). The solver will refuse to make the transfer in GW11 because the immediate points drop is too severe!
+
+#### Fix B: Immediate Transfer-In Fixture Gate
+When evaluating a transfer into your squad:
+- If a candidate's immediate fixture has a difficulty of **FDR 5 (e.g. away at Man City or Arsenal)**, the solver applies an **Immediate Fixture Penalty**.
+- The solver's logic becomes: *"Why burn a transfer to buy this player against Man City this week when we can simply wait 1 week and buy him in GW12 when his green fixtures begin?"*
+
+---
+
+### 3. Fix It vs Leave As Is: The Comparison
+
+| Dynamic | Leave As Is | Implement the Fix (Decay & Fixture Gate) |
+| :--- | :--- | :--- |
+| **Immediate Fixture Awareness** | Blind: Treats games 2 months away as equal to this Saturday. | **Razor-sharp:** Heavily weights the immediate gameweek you are playing. |
+| **Palmer vs Leeds** | Sells Palmer before an easy home match to balance budget. | **Keeps Palmer:** Refuses to sell an elite talisman before a promoted home game. |
+| **Transfer Timing** | Rushes transfers 1 or 2 weeks too early (e.g. buying Iwobi at the Etihad). | **Perfect Timing:** Waits for the green fixture swing (GW12) before buying. |
+| **Human Trust** | Frustrating: You have to manually second-guess the computer. | **Aligned with Football Common Sense.** |
+
+---
+
+### Recommendation
+**We should fix it.** 
+
+Adding time-decay discounting and an immediate-fixture transfer gate is a clean, mathematically rigorous upgrade that solves the problem permanently across all career modes. 
+
+Would you like me to implement this fix in the engine right now?
