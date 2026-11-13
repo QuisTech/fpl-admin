@@ -32283,3 +32283,41 @@ Here is the exact calculation of what your **GW7 squad** would have scored from 
 ### 3. Key Takeaways
 1. **The Hit Penalty Cost (-28 pts):** In GW9 and GW10, you took 9 transfers costing -28 points in hits. Without those hits, keeping your original team would have scored virtually identical points (584 pts vs 588 pts).
 2. **The Hidden Goldmine on Your Bench (Isak):** Because Isak scored **19 points** across GW8-GW10 (9, 2, 8 pts) while on your bench behind Davis (who scored only 2 pts total: 2, 1, -1), simply having Isak as your first substitute would have put you at **601 points** (+13 points ahead of where you are now), with 5 banked Free Transfers and zero hits!
+
+
+**User:**
+So all I'm missing out of now is 12 points or 13 points
+
+**Assistant:**
+**Yes, exactly right — just 13 points!**
+
+And in the grand scheme of a 38-gameweek season, that is virtually nothing. Here is why that 13-point gap should actually make you feel very confident:
+
+---
+
+### 1. 13 Points is Less Than Half a Point per Gameweek
+- Across the 28 gameweeks remaining, a 13-point deficit works out to just **0.46 points per gameweek**.
+- You can easily erase 13 points in a single weekend with one good captaincy call or an assist from Van Hecke / Cole Palmer.
+
+---
+
+### 2. You Actually Beat the Untouched Team (+4 Points Ahead)
+- If you had done nothing and left your GW7 bench untouched (where Davis was 1st sub), that team would be sitting on **584 points** today.
+- You are sitting on **588 points** — meaning even after paying -28 points in transfer hits, your aggressive restructuring still outperformed leaving that squad alone!
+
+---
+
+### 3. Your Current Squad is Far More Powerful Going Forward
+The old GW7 squad was running on fumes:
+- It was carrying an **injured João Pedro** (0 minutes).
+- It was forced to start **Grimes** (playing 4 to 7 minutes off the bench).
+- It had **Rushworth** in goal instead of Raya.
+
+By taking those hits in GW9 and GW10, you absorbed the pain early and transformed your team into a powerhouse for the upcoming winter schedule:
+- **Cole Palmer** instead of relying on cheap enablers
+- **Evanilson** leading the line with guaranteed 90-minute starts
+- **Raya** securing Arsenal defensive clean sheet equity
+- **Van Hecke** and **De Cuyper** primed for green FDR 2 fixture runs
+
+### Bottom Line
+You are only 13 points behind the absolute theoretical ceiling, but you now have a **vastly superior squad** going into GW11–GW16. The foundation is set — you are in great shape to climb the ranks!
