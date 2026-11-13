@@ -32104,3 +32104,58 @@ In your Career and Forward Planner tabs, you have tools specifically built to br
 
 ### Bottom Line
 You don't need 11 differentials to break free. **You only need 2 or 3 high-impact differentials and sharper timing than the crowd.** Protect your floor with the spine, attack the ceiling with your 3 swing slots!
+
+
+**User:**
+Like so?
+
+GW11 Manager Decision
+93 Net Pts
+[CHIP: Triple Captain] GW11 Projected: Transfer De Cuyper → Robertson. Captain: Haaland (30 xP).
+
+Transfer Execution
+De Cuyper
+Robertson
+£4.3m
+Bank Balance: £1.2m
+Squad Value: £100.8m (£102.0m)
+
+**Assistant:**
+**This is a perfect illustration of how the engine chases the ceiling — but do NOT actually pull this trigger for GW11!**
+
+Here is why: what you are looking at is the solver in **"All-In Aggressive Ceiling"** mode. It threw the kitchen sink at GW11 by drafting an attacking Liverpool full-back (Robertson) and burning your once-a-season **Triple Captain chip on Haaland (30 xP)** to reach that 93 Net Pts headline.
+
+Here is the tactical reality check on why you should admire the projection, but hold back on executing it:
+
+---
+
+### 1. You Already Made Your GW11 Transfer!
+- You already locked in **`Calafiori → Van Hecke`** (£5.1m, £0.8m in the bank).
+- To buy Robertson now would require taking a **-4 point hit**, immediately wiping out half the defensive advantage.
+- De Cuyper also has a great upcoming fixture run, so dumping him now for a hit would be negative expected value (negative EV).
+
+---
+
+### 2. The Triple Captain Trap in a Single Gameweek
+Triple Captaining Haaland in GW11 *feels* like a differential move, but it is actually a massive trap:
+- **In a Single Gameweek (GW11):**
+  - Haaland plays 90 minutes. Baseline xP is ~10.
+  - With regular captaincy (2×), you get **20 pts**.
+  - With Triple Captain (3×), you get **30 pts**.
+  - The actual net gain from using your most precious chip is only **+10 pts** (and if he blanks with 2 pts, you gain a measly +2 pts and the chip is gone forever).
+- **In a Double Gameweek (Later this season, GW25–GW37):**
+  - Haaland plays **two matches (180 minutes)** in one gameweek.
+  - Baseline xP is **18 to 22 xP**.
+  - Triple Captain yields **54 to 66+ points**!
+- If you burn the TC chip now on a single match, when the inevitable Double Gameweek arrives, the entire FPL world will Triple Captain Haaland for 60+ points while you will be stuck watching from the sidelines.
+
+---
+
+### 3. What a Real "Break Free" Plan Looks Like
+Breaking free from the template is about **sustainable edge**, not reckless gambling:
+
+1. **Keep Your Chips Safe:** Hold **Triple Captain** for a confirmed Manchester City Double Gameweek.
+2. **Execute the Bench Boost Window:** Look at **GW12 or GW14** in your Forward Roadmap where your 4 bench assets all have green home fixtures (FDR 2). Gaining +16 to +20 extra bench points on a quiet week is how you jump 500k ranks without risk.
+3. **Roll to 2 Free Transfers:** Because you already have Van Hecke and De Cuyper set for GW11, going into GW12 with **2 Free Transfers** gives you ultimate agility to target explosive attacking differentials (like Evanilson, Mbeumo, or Iwobi) right as their fixture swing starts.
+
+**Verdict:** Keep your team as currently set with **Van Hecke** and **regular Haaland (C)**. Don't take a hit for Robertson, and save that Triple Captain chip for the Double Gameweek goldmine!
