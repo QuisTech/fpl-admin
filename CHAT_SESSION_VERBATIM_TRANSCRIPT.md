@@ -32574,3 +32574,56 @@ Letting GW11 play out first is the smartest move you can make:
 3. Once the final whistle blows on GW11, the engine will recalculate with all the fresh metrics, giving us the perfect launching pad for GW12 with 2 Free Transfers ready to deploy.
 
 Sit back, enjoy GW11, and let's see what the numbers look like once the dust settles!
+
+
+**User:**
+@[Quote] stop regurgitating old season stuff please, what can I add to this antigravity to make you stop spilling old stuff, like I can add something to your skill.md or something, give me ideas
+
+**Assistant:**
+You are completely right to call this out. In the live 2026/27 FPL season right now, **Enzo Le Fée has 46 points** (not 147!). 
+
+The 147 points came from a static mock file in the codebase (`fpl_test.json`), and the Robertson mistake happened because my base pre-training weights are heavily anchored on historical Premier League seasons (Robertson at Liverpool for 7 years).
+
+Here is why it happens, and **exactly what we can add to your Antigravity configuration right now to permanently stop this behavior:**
+
+---
+
+### The 2 Root Causes
+1. **Pre-training Memory Bias:** Base LLMs default to historical memory (2018–2024) for player clubs and roles unless explicitly forbidden from trusting internal memory.
+2. **Mock/Test Data Poisoning:** Files like `fpl_test.json` contain dummy or old season data that the model mistakenly reads instead of querying live tables.
+
+---
+
+### Solution: Update Your Workspace `GEMINI.md` Directives
+Because Antigravity loads `GEMINI.md` on **every single turn** as an unbreakable system-level rule, adding a **Strict Temporal Grounding Directive** directly to `GEMINI.md` is the most bulletproof fix.
+
+Here is the exact rule to add to `c:\Users\USER\Documents\fpl-admin\GEMINI.md`:
+
+```markdown
+# Temporal Grounding & Active Season Directives (2026/27 Campaign)
+
+CRITICAL RULES:
+1. ZERO TRUST ON HISTORICAL PRE-TRAINING MEMORY:
+   - NEVER assume a player's current club, position, role, or historical points from pre-2026 memory.
+   - Example: Andrew Robertson plays for Tottenham Hotspur (Spurs), NOT Liverpool.
+   - Always treat player affiliations and stats from prior years as strictly obsolete.
+
+2. NEVER CITE STATIC TEST/MOCK DATA:
+   - Do NOT use 'fpl_test.json' or mock fixture dumps to state player points or values.
+   - ALWAYS verify current player stats (points, team, price) using live FPL API endpoints ('bootstrap-static') or verified active database tables.
+
+3. CURRENT GAMEWEEK SANITY CHECK:
+   - We are currently in Gameweek 10/11 of the 2026/27 season.
+   - At GW10, top-scoring assets have ~70 to 80 points total. If any file or calculation reports 120+ or 140+ season points, REJECT IT as mock/stale data.
+```
+
+---
+
+### What Else You Can Add (Custom Skill / Hook)
+If you want even tighter integration, we can also:
+1. **Create an Antigravity Skill (`fpl-player-lookup`):**
+   A dedicated skill with a 1-line script that automatically checks `https://fantasy.premierleague.com/api/bootstrap-static/` before answering any question about a player's current club, points, or cost.
+2. **Delete or Rename Mock Files:**
+   Rename `fpl_test.json` to `fpl_test.mock.json` or add a header inside it so the agent never treats it as real data.
+
+Would you like me to update your `GEMINI.md` with this directive right now?
