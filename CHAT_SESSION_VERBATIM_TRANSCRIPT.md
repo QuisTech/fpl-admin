@@ -32803,3 +32803,48 @@ Because you are playing a **3-4-3**, Gomez is directly competing with **Tavernie
 If you want to capitalize on momentum and avoid Bournemouth attack duplication, **start Gomez and move Tavernier to Sub 1**. 
 
 If you prefer having home advantage on your side (Forest at Bournemouth), leave Tavernier in the XI and keep Gomez as your elite **Sub 1 security blanket**!
+
+
+**User:**
+it will hurt to see Gomez perform again and have him on the bench the 2nd time, this has happened to me a lot this season, with Isak, Joao Pedro, while Tervanier doesn't, and at the same time, this may also be the other way around so this is confusing honestly, what does pro do in situation like this?
+
+**Assistant:**
+This is the single most agonizing feeling in FPL: **"Bench Regret"**. 
+
+Every top-ranking manager experiences this exact dilemma. When elite/pro managers are torn 50/50 between two players (like Gomez vs Tavernier), they **never flip a coin** and they **never play based on fear**. 
+
+Instead, they apply **3 strict objective tie-breaker rules**:
+
+---
+
+### Rule 1: The "Basket Diversification" Rule (Most Important)
+Pros look at their entire squad, not players in isolation:
+- You are **already starting Evanilson** (Bournemouth's striker).
+- If Nottingham Forest play their classic stubborn low-block and Bournemouth get shut out, **both Tavernier AND Evanilson blank simultaneously**. You take a double hit from one match.
+- Starting **Gomez** splits your exposure: you get an attacker in Bournemouth vs Forest, AND an attacker in Brighton vs Hull City.
+- **The Pro verdict:** Never double up on a mid-table attack when a viable alternative in a softer fixture is sitting on your bench.
+
+---
+
+### Rule 2: Target the Weaker Defense (FDR & Conceded xG)
+When recent form is close, pros always defer to defensive vulnerability:
+- **Hull City (Gomez's opponent):** Bottom-table defense, porous backline, conceded heavy chances in recent weeks. FDR 2.
+- **Nottingham Forest (Tavernier's opponent):** One of the most organized, stingy defenses in the league. They do not give away open-play goals easily. FDR 3.
+- **The Pro verdict:** Attackers thrive against open, fragile teams. Hull City is a vastly superior target for goals than Nottingham Forest.
+
+---
+
+### Rule 3: The "Soft Landing" Psychology
+Here is how pros eliminate the emotional pain of benching someone:
+- **If you start Gomez and bench Tavernier:**
+  - If Bournemouth score 3 goals against Forest, **Evanilson will almost certainly get a goal or assist**. You still win! You don't feel left out because you had Bournemouth coverage.
+- **If you start Tavernier and bench Gomez:**
+  - If Brighton score 3 goals against Hull City, and Gomez hauls on your bench, **you get zero reward from Gomez's points** (even though Groß might get one). That is the kind of benching that stings for days.
+
+---
+
+### The Final Pro Call for GW11
+1. **Start Gomez** in your Starting XI (takes advantage of Hull City's weak defense and separates you from double Bournemouth risk).
+2. **Put Tavernier as Sub 1** (elite 1st substitute insurance if anyone gets a surprise rest).
+
+Trust the process and the fixture advantage. Making the mathematically logical decision gives you peace of mind regardless of random variance!
