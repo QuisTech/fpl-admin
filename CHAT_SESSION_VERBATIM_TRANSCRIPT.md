@@ -32005,3 +32005,48 @@ Notice that FPLForm has left **£3.4m sitting unspent in your bank balance**!
 - **Do NOT panic when FPLForm says 52.2 xP/GW.** It is not saying your team will fail; it is giving you the **guaranteed bare minimum floor** of what your team will score even if nobody hauls.
 - When you want to see **how many points you will actually score on a normal Saturday**, switch to **`Native`** (which reflects true attacking ceiling and captaincy multipliers).
 - Use **`FPLForm`** when you want an ultra-cautious reality check on whether an expensive transfer is truly worth the money!
+
+
+**User:**
+Okay now I understand floor, ceiling and ultra high, but while still in the same modes right, just changing the fuel source or do I need to change scenario too?
+
+I could see fplfprm 51, native 79 and eye test93 all while just change the fuel sources
+
+**Assistant:**
+**Yes, exactly right! You do NOT need to change the scenario.**
+
+Just switching the **Fuel Source** alone is what gives you that exact **51 → 79 → 93 xP** range while keeping your Mode (`Forward`), Risk Profile (`Safe`), and Scenario (`Template Shield`) completely unchanged.
+
+Here is the clean separation of duties between **Fuel Source** and **Scenario**:
+
+---
+
+### 1. Fuel Source = *The Valuation Engine* (How points are estimated)
+The Fuel Source decides **how optimistic or conservative the mathematical model is**:
+
+| Fuel Source | GW11 Projection | What It Represents | Best Used For |
+| :--- | :--- | :--- | :--- |
+| **`FPLForm`** | **51 xP** | **The Actuarial Floor:** Mean-reverting, heavily discounts for rotation risk, caps captain returns. | Stress-testing: *"What is my guaranteed minimum score if games are cagey and nobody hauls?"* |
+| **`Native`** | **79 xP** | **Realistic Expected Baseline:** Official Premier League baseline + team Poisson attack models. | **Your weekly default:** Realistic expected score for a balanced squad with a prime captain (Haaland). |
+| **`Eye Test`** | **93 xP** | **Attacking Ceiling:** Latent non-penalty xG, key passes, shot creation, and momentum. | Explosive potential: *"What is the score if attacks click and chances are finished clinical style?"* |
+
+---
+
+### 2. Strategic Scenario = *Crowd Defense vs Differential Offense* (Who to pick)
+The Scenario does **not** change how many points a player is forecast to score; it dictates **how the solver reacts to crowd ownership (Effective Ownership - EO)**:
+
+- **`Template Shield` (Defense):**
+  - **Logic:** High crowd protection (`betaEO = 2.5`).
+  - **Behavior:** Prioritizes high-ownership consensus assets (Haaland, Gabriel, Palmer). If they haul, you rise with the crowd; if they blank, nobody overtakes you.
+- **`Quant Optimal` (Offense):**
+  - **Logic:** Ownership-blind (`betaEO = 0.0`).
+  - **Behavior:** Pure knapsack math. Doesn't care if 80% of managers own a player or 2%. It picks purely on xP yield per pound (£).
+
+---
+
+### Key Takeaway for Your Planning
+- **Keep your Scenario on `Template Shield`** (to safeguard your rank) and **leave your Risk Profile on `Safe`**.
+- **Simply toggle the Fuel Source** as your lens:
+  - Check **`Native` (79 xP)** for your everyday target.
+  - Peek at **`FPLForm` (51 xP)** when you want to know your safety net floor.
+  - Glance at **`Eye Test` (93 xP)** to see your team's explosive ceiling!
