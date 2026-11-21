@@ -669,7 +669,9 @@ export const CareerModeView = ({
                       GW{gw.gameweek}
                     </span>
                     <span className="text-xs font-black font-mono text-white mt-0.5">
-                      {gw.netPoints} pts
+                      {mode === 'forward'
+                        ? `${(gw.expectedPoints ?? gw.netPoints).toFixed(1)} xP`
+                        : `${gw.netPoints} pts`}
                     </span>
                     {gw.chipActive && (
                       <span className="text-[8px] font-mono font-black px-1.5 py-0.2 rounded bg-purple-500/30 text-purple-300 border border-purple-500/50 uppercase mt-0.5">
@@ -708,26 +710,34 @@ export const CareerModeView = ({
                       </h3>
                     </div>
                     <div className="flex items-center gap-2.5">
-                      {activeGwData.expectedPoints !== undefined && (
-                        <div className="flex items-center gap-1.5 font-mono text-[10px]">
-                          <span className="text-slate-400">
-                            Exp: <strong className="text-white">{activeGwData.expectedPoints.toFixed(1)} xP</strong>
+                      {mode === 'forward' ? (
+                        <span className="text-xs font-mono text-emerald-400 font-bold">
+                          {(activeGwData.expectedPoints ?? activeGwData.netPoints).toFixed(1)} Projected xP
+                        </span>
+                      ) : (
+                        <>
+                          {activeGwData.expectedPoints !== undefined && (
+                            <div className="flex items-center gap-1.5 font-mono text-[10px]">
+                              <span className="text-slate-400">
+                                Exp: <strong className="text-white">{activeGwData.expectedPoints.toFixed(1)} xP</strong>
+                              </span>
+                              <span className="text-slate-600">•</span>
+                              <span className={cn(
+                                "px-1.5 py-0.5 rounded font-black border",
+                                activeGwData.netPoints >= activeGwData.expectedPoints
+                                  ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                                  : "bg-rose-500/10 text-rose-400 border-rose-500/30"
+                              )}>
+                                {(activeGwData.netPoints - activeGwData.expectedPoints) >= 0 ? '+' : ''}
+                                {(activeGwData.netPoints - activeGwData.expectedPoints).toFixed(1)} vs xP
+                              </span>
+                            </div>
+                          )}
+                          <span className="text-[10px] font-mono text-emerald-400 font-bold">
+                            {activeGwData.netPoints} Net Pts
                           </span>
-                          <span className="text-slate-600">•</span>
-                          <span className={cn(
-                            "px-1.5 py-0.5 rounded font-black border",
-                            activeGwData.netPoints >= activeGwData.expectedPoints
-                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                              : "bg-rose-500/10 text-rose-400 border-rose-500/30"
-                          )}>
-                            {(activeGwData.netPoints - activeGwData.expectedPoints) >= 0 ? '+' : ''}
-                            {(activeGwData.netPoints - activeGwData.expectedPoints).toFixed(1)} vs xP
-                          </span>
-                        </div>
+                        </>
                       )}
-                      <span className="text-[10px] font-mono text-emerald-400 font-bold">
-                        {activeGwData.netPoints} Net Pts
-                      </span>
                     </div>
                   </div>
 
@@ -904,18 +914,29 @@ export const CareerModeView = ({
                           </div>
 
                           <div className="flex items-center gap-2.5 sm:gap-3.5 font-mono">
-                            {p.xP !== undefined && (
-                              <span className="text-[10px] text-slate-400">
-                                Exp: <span className="text-slate-300 font-bold">{(isCap ? p.xP * 2 : p.xP).toFixed(1)} xP</span>
-                              </span>
+                            {mode === 'forward' ? (
+                              <>
+                                <span className="text-[10px] text-slate-500">{p.costDisplay}</span>
+                                <span className="text-xs font-black min-w-[28px] text-right text-emerald-400">
+                                  {p.xP !== undefined ? `${(isCap ? p.xP * (activeGwData.chipActive === 'TC' ? 3 : 2) : p.xP).toFixed(1)} xP` : '—'}
+                                </span>
+                              </>
+                            ) : (
+                              <>
+                                {p.xP !== undefined && (
+                                  <span className="text-[10px] text-slate-400">
+                                    Exp: <span className="text-slate-300 font-bold">{(isCap ? p.xP * (activeGwData.chipActive === 'TC' ? 3 : 2) : p.xP).toFixed(1)} xP</span>
+                                  </span>
+                                )}
+                                <span className="text-[10px] text-slate-500">{p.costDisplay}</span>
+                                <span className={cn(
+                                  "text-xs font-black min-w-[28px] text-right",
+                                  scoreDisplay >= 10 ? "text-amber-400" : scoreDisplay >= 6 ? "text-emerald-400" : "text-white"
+                                )}>
+                                  {scoreDisplay} pts
+                                </span>
+                              </>
                             )}
-                            <span className="text-[10px] text-slate-500">{p.costDisplay}</span>
-                            <span className={cn(
-                              "text-xs font-black min-w-[28px] text-right",
-                              scoreDisplay >= 10 ? "text-amber-400" : scoreDisplay >= 6 ? "text-emerald-400" : "text-white"
-                            )}>
-                              {scoreDisplay} pts
-                            </span>
                           </div>
                         </div>
                       );
@@ -960,12 +981,23 @@ export const CareerModeView = ({
                           {b.web_name}
                         </div>
                         <div className="flex items-center justify-between mt-1 text-[10px] font-mono">
-                          {b.xP !== undefined ? (
-                            <span className="text-slate-400">Exp: {b.xP.toFixed(1)} xP</span>
+                          {mode === 'forward' ? (
+                            <>
+                              <span className="text-slate-500">{b.costDisplay}</span>
+                              <span className="font-bold text-slate-300">
+                                {b.xP !== undefined ? `${b.xP.toFixed(1)} xP` : '—'}
+                              </span>
+                            </>
                           ) : (
-                            <span className="text-slate-500">{b.costDisplay}</span>
+                            <>
+                              {b.xP !== undefined ? (
+                                <span className="text-slate-400">Exp: {b.xP.toFixed(1)} xP</span>
+                              ) : (
+                                <span className="text-slate-500">{b.costDisplay}</span>
+                              )}
+                              <span className={cn("font-bold", b.isAutoSubOut ? "text-rose-400" : "text-slate-300")}>{b.points} pts</span>
+                            </>
                           )}
-                          <span className={cn("font-bold", b.isAutoSubOut ? "text-rose-400" : "text-slate-300")}>{b.points} pts</span>
                         </div>
                       </div>
                     );

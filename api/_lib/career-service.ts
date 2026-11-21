@@ -1604,16 +1604,28 @@ export class CareerService {
       const capModel = startingXIModels.find(p => p.id === captain) || this.mapPlayer(captain, baseData, oracle, dummyActualStats, true, false, 2, gw);
       const vcModel = startingXIModels.find(p => p.id === viceCaptain) || this.mapPlayer(viceCaptain, baseData, oracle, dummyActualStats, false, true, 1, gw);
 
-      let logPrefix = activeChip ? `[CHIP: ${activeChip === 'TC' ? 'Triple Captain' : activeChip === 'BB' ? 'Bench Boost' : activeChip}] ` : '';
-      let capPts = (dummyActualStats[captain]?.points ?? 0) * (activeChip === 'TC' ? 3 : 2);
-      let log = isRolled
-        ? `${logPrefix}GW${gw} Projected: Roll Free Transfer (Bank: ${state.freeTransfers} FTs). Captain: ${capModel.web_name} (${capPts} xP).`
-        : transfersInList.length > 1
-        ? `${logPrefix}GW${gw} Projected: Double Transfer ${transfersInList.map((t, i) => `${transfersOutList[i]?.name || 'Player'} → ${t.name}`).join(', ')} (${transfersInList.length} FTs used, 0 hit). Captain: ${capModel.web_name} (${capPts} xP).`
-        : `${logPrefix}GW${gw} Projected: Transfer ${transfersOutList[0]?.name} → ${transfersInList[0]?.name}. Captain: ${capModel.web_name} (${capPts} xP).`;
+      let expectedSum = 0;
+      xiIds.forEach(id => {
+        const mult = id === captain ? (activeChip === 'TC' ? 3 : 2) : 1;
+        expectedSum += oracle.getXP(id, gw) * mult;
+      });
       if (activeChip === 'BB') {
-        const benchPtsSum = benchIds.reduce((sum, id) => sum + (dummyActualStats[id]?.points ?? 0), 0);
-        log += ` Bench Boost added +${benchPtsSum} xP from bench.`;
+        benchIds.forEach(id => {
+          expectedSum += oracle.getXP(id, gw);
+        });
+      }
+      const expectedPoints = Number(expectedSum.toFixed(1));
+
+      let logPrefix = activeChip ? `[CHIP: ${activeChip === 'TC' ? 'Triple Captain' : activeChip === 'BB' ? 'Bench Boost' : activeChip}] ` : '';
+      let capXpFormatted = Number((oracle.getXP(captain, gw) * (activeChip === 'TC' ? 3 : 2)).toFixed(1));
+      let log = isRolled
+        ? `${logPrefix}GW${gw} Projected: Roll Free Transfer (Bank: ${state.freeTransfers} FTs). Captain: ${capModel.web_name} (${capXpFormatted} xP).`
+        : transfersInList.length > 1
+        ? `${logPrefix}GW${gw} Projected: Double Transfer ${transfersInList.map((t, i) => `${transfersOutList[i]?.name || 'Player'} → ${t.name}`).join(', ')} (${transfersInList.length} FTs used, 0 hit). Captain: ${capModel.web_name} (${capXpFormatted} xP).`
+        : `${logPrefix}GW${gw} Projected: Transfer ${transfersOutList[0]?.name} → ${transfersInList[0]?.name}. Captain: ${capModel.web_name} (${capXpFormatted} xP).`;
+      if (activeChip === 'BB') {
+        const benchXpSum = benchIds.reduce((sum, id) => sum + oracle.getXP(id, gw), 0);
+        log += ` Bench Boost added +${benchXpSum.toFixed(1)} xP from bench.`;
       }
 
       gameweeks.push({
@@ -1633,6 +1645,7 @@ export class CareerService {
         autoSubs: [],
         grossPoints,
         netPoints: grossPoints,
+        expectedPoints,
         cumulativePoints: state.accumulatedScore,
         bank: state.bank,
         bankDisplay: `£${(state.bank / 10).toFixed(1)}m`,
