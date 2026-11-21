@@ -643,7 +643,7 @@ export class CareerService {
       const startingXIModels: CareerPlayer[] = finalStarters.map(id => {
         const isCap = id === activeCapId;
         const isVc = id === viceCaptain && activeCapId !== viceCaptain;
-        const pModel = this.mapPlayer(id, baseData, oracle, playerStats, isCap, isVc, isCap ? 2 : 1);
+        const pModel = this.mapPlayer(id, baseData, oracle, playerStats, isCap, isVc, isCap ? 2 : 1, gw);
         if (autoSubs.some(as => as.inPlayer === pModel.web_name)) {
           pModel.isAutoSubIn = true;
         }
@@ -651,15 +651,15 @@ export class CareerService {
       });
 
       const benchModels: CareerPlayer[] = finalBench.map(id => {
-        const pModel = this.mapPlayer(id, baseData, oracle, playerStats, false, false, 0);
+        const pModel = this.mapPlayer(id, baseData, oracle, playerStats, false, false, 0, gw);
         if (autoSubs.some(as => as.outPlayer === pModel.web_name)) {
           pModel.isAutoSubOut = true;
         }
         return pModel;
       });
 
-      const capModel = startingXIModels.find(p => p.id === captain) || this.mapPlayer(captain, baseData, oracle, playerStats, true, false, 2);
-      const vcModel = startingXIModels.find(p => p.id === viceCaptain) || this.mapPlayer(viceCaptain, baseData, oracle, playerStats, false, true, 1);
+      const capModel = startingXIModels.find(p => p.id === captain) || this.mapPlayer(captain, baseData, oracle, playerStats, true, false, 2, gw);
+      const vcModel = startingXIModels.find(p => p.id === viceCaptain) || this.mapPlayer(viceCaptain, baseData, oracle, playerStats, false, true, 1, gw);
       const activeCapModel = startingXIModels.find(p => p.id === activeCapId) || capModel;
 
       // Decision log sentence
@@ -683,6 +683,14 @@ export class CareerService {
       const defaultAverages = [0, 57, 59, 44, 52, 58, 62, 54, 38, 55];
       const avgScore = defaultAverages[gw] || 50;
 
+      let expectedSum = 0;
+      startingXIModels.forEach(p => {
+        if (p.xP !== undefined) {
+          expectedSum += p.xP * (p.multiplier || 1);
+        }
+      });
+      const expectedPoints = Number(expectedSum.toFixed(1));
+
       gameweeks.push({
         gameweek: gw,
         startingXI: startingXIModels,
@@ -700,6 +708,7 @@ export class CareerService {
         autoSubs,
         grossPoints,
         netPoints,
+        expectedPoints,
         cumulativePoints: state.accumulatedScore,
         bank: state.bank,
         bankDisplay: `£${(state.bank / 10).toFixed(1)}m`,
@@ -1206,7 +1215,7 @@ export class CareerService {
       const startingXIModels = finalStarters.map(id => {
         const isCap = id === activeCapId;
         const isVc = id === viceCaptain && activeCapId !== viceCaptain;
-        const pModel = this.mapPlayer(id, baseData, oracle, playerStats, isCap, isVc, isCap ? 2 : 1);
+        const pModel = this.mapPlayer(id, baseData, oracle, playerStats, isCap, isVc, isCap ? 2 : 1, gw);
         if (autoSubs.some(as => as.inPlayer === pModel.web_name)) {
           pModel.isAutoSubIn = true;
         }
@@ -1214,15 +1223,15 @@ export class CareerService {
       });
 
       const benchModels = finalBench.map(id => {
-        const pModel = this.mapPlayer(id, baseData, oracle, playerStats, false, false, 0);
+        const pModel = this.mapPlayer(id, baseData, oracle, playerStats, false, false, 0, gw);
         if (autoSubs.some(as => as.outPlayer === pModel.web_name)) {
           pModel.isAutoSubOut = true;
         }
         return pModel;
       });
 
-      const capModel = startingXIModels.find(p => p.id === captain) || this.mapPlayer(captain, baseData, oracle, playerStats, true, false, 2);
-      const vcModel = startingXIModels.find(p => p.id === viceCaptain) || this.mapPlayer(viceCaptain, baseData, oracle, playerStats, false, true, 1);
+      const capModel = startingXIModels.find(p => p.id === captain) || this.mapPlayer(captain, baseData, oracle, playerStats, true, false, 2, gw);
+      const vcModel = startingXIModels.find(p => p.id === viceCaptain) || this.mapPlayer(viceCaptain, baseData, oracle, playerStats, false, true, 1, gw);
       const activeCapModel = startingXIModels.find(p => p.id === activeCapId) || capModel;
 
       let log = '';
@@ -1238,6 +1247,14 @@ export class CareerService {
         const tOut = transfersOutList[0]?.name || '';
         log = `AI Transferred ${tOut} → ${tIn}. You scored ${humanNet} pts, AI scored ${netPoints} pts (${alphaDelta >= 0 ? `+${alphaDelta}` : alphaDelta} pts).`;
       }
+
+      let expectedSum = 0;
+      startingXIModels.forEach(p => {
+        if (p.xP !== undefined) {
+          expectedSum += p.xP * (p.multiplier || 1);
+        }
+      });
+      const expectedPoints = Number(expectedSum.toFixed(1));
 
       gameweeks.push({
         gameweek: gw,
@@ -1256,6 +1273,7 @@ export class CareerService {
         autoSubs,
         grossPoints,
         netPoints,
+        expectedPoints,
         cumulativePoints: state.accumulatedScore,
         bank: state.bank,
         bankDisplay: `£${(state.bank / 10).toFixed(1)}m`,
@@ -1576,15 +1594,15 @@ export class CareerService {
         const isCap = id === captain;
         const isVc = id === viceCaptain;
         const mult = isCap ? (activeChip === 'TC' ? 3 : 2) : 1;
-        return this.mapPlayer(id, baseData, oracle, dummyActualStats, isCap, isVc, mult);
+        return this.mapPlayer(id, baseData, oracle, dummyActualStats, isCap, isVc, mult, gw);
       });
 
       const benchModels = benchIds.map(id => {
-        return this.mapPlayer(id, baseData, oracle, dummyActualStats, false, false, 0);
+        return this.mapPlayer(id, baseData, oracle, dummyActualStats, false, false, 0, gw);
       });
 
-      const capModel = startingXIModels.find(p => p.id === captain) || this.mapPlayer(captain, baseData, oracle, dummyActualStats, true, false, 2);
-      const vcModel = startingXIModels.find(p => p.id === viceCaptain) || this.mapPlayer(viceCaptain, baseData, oracle, dummyActualStats, false, true, 1);
+      const capModel = startingXIModels.find(p => p.id === captain) || this.mapPlayer(captain, baseData, oracle, dummyActualStats, true, false, 2, gw);
+      const vcModel = startingXIModels.find(p => p.id === viceCaptain) || this.mapPlayer(viceCaptain, baseData, oracle, dummyActualStats, false, true, 1, gw);
 
       let logPrefix = activeChip ? `[CHIP: ${activeChip === 'TC' ? 'Triple Captain' : activeChip === 'BB' ? 'Bench Boost' : activeChip}] ` : '';
       let capPts = (dummyActualStats[captain]?.points ?? 0) * (activeChip === 'TC' ? 3 : 2);
