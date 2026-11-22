@@ -1563,10 +1563,8 @@ export class CareerService {
         state.chipState['BB'] -= 1;
       }
 
-      const dummyActualStats: Record<number, { points: number; minutes: number }> = {};
       state.squad.forEach(id => {
         const xp = Math.round(oracle.getXP(id, gw));
-        dummyActualStats[id] = { points: xp, minutes: 90 };
         if (xiSet.has(id)) {
           if (id === captain) {
             grossPoints += activeChip === 'TC' ? xp * 3 : xp * 2;
@@ -1590,19 +1588,20 @@ export class CareerService {
       });
       const teamValue = squadValue + state.bank;
 
+      const emptyActualStats: Record<number, { points: number; minutes: number }> = {};
       const startingXIModels = xiIds.map(id => {
         const isCap = id === captain;
         const isVc = id === viceCaptain;
         const mult = isCap ? (activeChip === 'TC' ? 3 : 2) : 1;
-        return this.mapPlayer(id, baseData, oracle, dummyActualStats, isCap, isVc, mult, gw);
+        return this.mapPlayer(id, baseData, oracle, emptyActualStats, isCap, isVc, mult, gw);
       });
 
       const benchModels = benchIds.map(id => {
-        return this.mapPlayer(id, baseData, oracle, dummyActualStats, false, false, 0, gw);
+        return this.mapPlayer(id, baseData, oracle, emptyActualStats, false, false, 0, gw);
       });
 
-      const capModel = startingXIModels.find(p => p.id === captain) || this.mapPlayer(captain, baseData, oracle, dummyActualStats, true, false, 2, gw);
-      const vcModel = startingXIModels.find(p => p.id === viceCaptain) || this.mapPlayer(viceCaptain, baseData, oracle, dummyActualStats, false, true, 1, gw);
+      const capModel = startingXIModels.find(p => p.id === captain) || this.mapPlayer(captain, baseData, oracle, emptyActualStats, true, false, 2, gw);
+      const vcModel = startingXIModels.find(p => p.id === viceCaptain) || this.mapPlayer(viceCaptain, baseData, oracle, emptyActualStats, false, true, 1, gw);
 
       let expectedSum = 0;
       xiIds.forEach(id => {
