@@ -852,13 +852,16 @@ export const CareerModeView = ({
                     <div className="flex items-center justify-between border-b border-fpl-border/60 pb-2">
                       <div className="flex items-center gap-2">
                         <UserCheck className="w-4 h-4 text-cyan-400" />
-                        <h4 className="text-xs font-black uppercase tracking-wider text-white">You vs AI Co-Pilot</h4>
+                        <div>
+                          <h4 className="text-xs font-black uppercase tracking-wider text-white">You vs AI Co-Pilot</h4>
+                          <span className="text-[9px] text-slate-400 block font-mono">Head-to-head matchup duel</span>
+                        </div>
                       </div>
                       <span className={cn(
                         "text-[10px] font-mono font-bold px-2 py-0.5 rounded",
                         activeGwData.humanComparison.alphaDelta >= 0 
                           ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                          : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                          : "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"
                       )}>
                         {activeGwData.humanComparison.alphaDelta >= 0 
                           ? `AI +${activeGwData.humanComparison.alphaDelta} pts ahead` 
@@ -866,26 +869,73 @@ export const CareerModeView = ({
                       </span>
                     </div>
 
+                    {/* Both squads compared side-by-side (Clickable to switch view) */}
                     <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
-                        <div className="text-[10px] text-slate-500 uppercase font-mono font-bold mb-1">Your Real Team</div>
-                        <div className="text-lg font-black text-white font-mono">{activeGwData.humanComparison.netPoints} pts</div>
-                        <div className="text-[10px] text-slate-400 mt-1">
+                      <button
+                        onClick={() => setLineupSource('human')}
+                        className={cn(
+                          "p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between",
+                          isHumanView 
+                            ? "bg-cyan-950/30 border-cyan-500/50 ring-1 ring-cyan-500/40 shadow-sm" 
+                            : "bg-slate-900/60 border-slate-800 hover:border-cyan-500/30 opacity-75 hover:opacity-100"
+                        )}
+                        title="Click to view My Real XI on the pitch"
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className={cn(
+                            "text-[10px] uppercase font-mono font-bold",
+                            isHumanView ? "text-cyan-400" : "text-slate-400"
+                          )}>
+                            Your Real Team
+                          </span>
+                          {isHumanView && (
+                            <span className="text-[8px] font-mono uppercase px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/40">
+                              Viewing
+                            </span>
+                          )}
+                        </div>
+                        <div className={cn("text-lg font-black font-mono", isHumanView ? "text-cyan-300" : "text-white")}>
+                          {activeGwData.humanComparison.netPoints} pts
+                        </div>
+                        <div className="text-[10px] text-slate-400 mt-1 font-mono">
                           Hits: {activeGwData.humanComparison.transfersCost ? `-${activeGwData.humanComparison.transfersCost} pts` : '0 pts'}
                         </div>
-                      </div>
+                      </button>
 
-                      <div className="bg-slate-900/80 p-3 rounded-xl border border-emerald-500/30">
-                        <div className="text-[10px] text-emerald-400 uppercase font-mono font-bold mb-1">AI Co-Pilot Team</div>
-                        <div className="text-lg font-black text-emerald-400 font-mono">{activeGwData.netPoints} pts</div>
-                        <div className="text-[10px] text-slate-400 mt-1">
+                      <button
+                        onClick={() => setLineupSource('ai')}
+                        className={cn(
+                          "p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between",
+                          !isHumanView 
+                            ? "bg-emerald-950/30 border-emerald-500/50 ring-1 ring-emerald-500/40 shadow-sm" 
+                            : "bg-slate-900/60 border-slate-800 hover:border-emerald-500/30 opacity-75 hover:opacity-100"
+                        )}
+                        title="Click to view AI Co-Pilot XI on the pitch"
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className={cn(
+                            "text-[10px] uppercase font-mono font-bold",
+                            !isHumanView ? "text-emerald-400" : "text-slate-400"
+                          )}>
+                            AI Co-Pilot Team
+                          </span>
+                          {!isHumanView && (
+                            <span className="text-[8px] font-mono uppercase px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40">
+                              Viewing
+                            </span>
+                          )}
+                        </div>
+                        <div className={cn("text-lg font-black font-mono", !isHumanView ? "text-emerald-400" : "text-white")}>
+                          {activeGwData.netPoints} pts
+                        </div>
+                        <div className="text-[10px] text-slate-400 mt-1 font-mono">
                           Hits: {activeGwData.hitCostPoints ? `-${activeGwData.hitCostPoints} pts` : '0 pts'}
                         </div>
-                      </div>
+                      </button>
                     </div>
 
-                    <div className="text-[11px] text-slate-400 pt-1">
-                      Cumulative Score after GW{activeGwData.gameweek}: You <strong className="text-white">{activeGwData.humanComparison.cumulativePoints} pts</strong> vs AI <strong className="text-emerald-400">{activeGwData.cumulativePoints} pts</strong>.
+                    <div className="text-[11px] text-slate-400 pt-1 font-sans">
+                      Cumulative Score after GW{activeGwData.gameweek}: You <strong className="text-white font-mono">{activeGwData.humanComparison.cumulativePoints} pts</strong> vs AI <strong className="text-emerald-400 font-mono">{activeGwData.cumulativePoints} pts</strong>.
                     </div>
 
                     {(() => {
