@@ -46,6 +46,17 @@ jobs:
         if: steps.checker.outputs.should_run == 'true'
         run: npx tsx scripts/capture-top-managers.ts --limit 250
 
+      - name: Archive Pre-Deadline XP CSVs
+        if: steps.checker.outputs.should_run == 'true'
+        run: |
+          mkdir -p data/snapshots/gw_${{ steps.checker.outputs.gw }}
+          cp -f data/fplform.csv data/snapshots/gw_${{ steps.checker.outputs.gw }}/fplform.csv 2>/dev/null || true
+          cp -f data/fpl_native.csv data/snapshots/gw_${{ steps.checker.outputs.gw }}/fpl_native.csv 2>/dev/null || true
+
+      - name: Freeze Career Decisions at Deadline
+        if: steps.checker.outputs.should_run == 'true'
+        run: npx tsx scripts/freeze-career-gameweek.ts --gw ${{ steps.checker.outputs.gw }}
+
       - name: Commit and Push New Decision Snapshot
         if: steps.checker.outputs.should_run == 'true'
         run: |

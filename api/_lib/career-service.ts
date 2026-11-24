@@ -946,7 +946,10 @@ export class CareerService {
           } else if (g.isRolledTransfer) {
             g.decisionLog = `AI Rolled FT (Saved for future). You scored ${humanNet} pts, AI scored ${g.netPoints} pts (${alphaDelta >= 0 ? `+${alphaDelta}` : alphaDelta} pts).`;
           } else if (g.transfersIn?.length > 0 && g.transfersOut?.length > 0) {
-            g.decisionLog = `AI Transferred ${g.transfersOut[0].name} → ${g.transfersIn[0].name}. You scored ${humanNet} pts, AI scored ${g.netPoints} pts (${alphaDelta >= 0 ? `+${alphaDelta}` : alphaDelta} pts).`;
+            const transferDesc = g.transfersIn.length > 1
+              ? `Executed Double Transfer: ${g.transfersIn.map((t, i) => `${g.transfersOut[i]?.name || 'Player'} → ${t.name}`).join(', ')} (${g.transfersIn.length} FTs used, 0 hit)`
+              : `Transferred ${g.transfersOut[0].name} → ${g.transfersIn[0].name}`;
+            g.decisionLog = `AI ${transferDesc}. You scored ${humanNet} pts, AI scored ${g.netPoints} pts (${alphaDelta >= 0 ? `+${alphaDelta}` : alphaDelta} pts).`;
           }
         }
       }
