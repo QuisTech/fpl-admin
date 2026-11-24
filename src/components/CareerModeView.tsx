@@ -316,10 +316,10 @@ export const CareerModeView = ({
                   ? `Counterfactual Replay: Human vs AI starting from ${data?.managerName || 'Your'} GW1 Squad`
                   : mode === 'forward'
                   ? forwardSource === 'duel'
-                    ? `Forward Roadmap: Projected 1-FT Moves for AI Co-Pilot (${data?.teamName || 'Duel Branch'}, GW1–10 Base: ${data?.basePoints || 678} pts) from GW${data?.startGw || 11} → GW${data?.endGw || 16}`
+                    ? `Forward Roadmap: Projected 1-FT Moves for AI Co-Pilot (${data?.teamName || 'Duel Branch'}, GW1–${(data?.startGw || 12) - 1} Base: ${data?.basePoints ?? 0} pts) from GW${data?.startGw || 12} → GW${data?.endGw || 17}`
                     : forwardSource === 'synced'
-                    ? `Forward Roadmap: Projected 1-FT Moves for Your Real Team (${data?.managerName || 'Current FPL Squad'}, GW1–10 Base: ${data?.basePoints || 588} pts) from GW${data?.startGw || 11} → GW${data?.endGw || 16}`
-                    : `Forward Roadmap: Projected 1-FT Moves for Autonomous AI (£100.0m Draft, GW1–10 Base: ${data?.basePoints || 660} pts) from GW${data?.startGw || 11} → GW${data?.endGw || 16}`
+                    ? `Forward Roadmap: Projected 1-FT Moves for Your Real Team (${data?.managerName || 'Current FPL Squad'}, GW1–${(data?.startGw || 12) - 1} Base: ${data?.basePoints ?? 0} pts) from GW${data?.startGw || 12} → GW${data?.endGw || 17}`
+                    : `Forward Roadmap: Projected 1-FT Moves for Autonomous AI (£100.0m Draft, GW1–${(data?.startGw || 12) - 1} Base: ${data?.basePoints ?? 0} pts) from GW${data?.startGw || 12} → GW${data?.endGw || 17}`
                   : "Autonomous AI Manager navigating the season from £100.0m with squad continuity"}
               </p>
             </div>
@@ -411,7 +411,7 @@ export const CareerModeView = ({
                 <button
                   onClick={() => setMode('synced')}
                   className="text-[10px] text-amber-300 hover:underline flex items-center gap-1 cursor-pointer font-sans normal-case"
-                  title="Switch to GW1–GW10 You vs AI Duel Replay"
+                  title="Switch to You vs AI Duel Replay"
                 >
                   <span>← Back to Past Duel Replay</span>
                 </button>
@@ -431,7 +431,7 @@ export const CareerModeView = ({
                       ? "bg-amber-500/25 text-amber-300 border-amber-500/50 shadow-sm font-black"
                       : "bg-slate-900/80 text-slate-400 border-slate-800 hover:text-slate-200 hover:bg-slate-800"
                   )}
-                  title="Project forward from the AI Co-Pilot's squad that branched from your GW1 selection (GW10: 678 pts)"
+                  title="Project forward from the AI Co-Pilot's squad that branched from your GW1 selection"
                 >
                   <Swords className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                   <span className="truncate">AI Co-Pilot (Duel)</span>
@@ -449,7 +449,7 @@ export const CareerModeView = ({
                       ? "bg-fpl-green/25 text-fpl-green border-fpl-green/50 shadow-sm font-black"
                       : "bg-slate-900/80 text-slate-400 border-slate-800 hover:text-slate-200 hover:bg-slate-800"
                   )}
-                  title="Project forward from your actual current FPL team on fantasy.premierleague.com (GW10: 588 pts)"
+                  title="Project forward from your actual current FPL team on fantasy.premierleague.com"
                 >
                   <UserCheck className="w-3.5 h-3.5 text-fpl-green shrink-0" />
                   <span className="truncate">My Real Squad</span>
@@ -466,7 +466,7 @@ export const CareerModeView = ({
                     ? "bg-purple-500/25 text-purple-300 border-purple-500/50 shadow-sm font-black"
                     : "bg-slate-900/80 text-slate-400 border-slate-800 hover:text-slate-200 hover:bg-slate-800"
                 )}
-                title="Project forward from the Autonomous AI £100.0m draft (GW10: 660 pts)"
+                title="Project forward from the Autonomous AI £100.0m draft"
               >
                 <Bot className="w-3.5 h-3.5 text-purple-400 shrink-0" />
                 <span className="truncate">Autonomous AI</span>
@@ -507,7 +507,7 @@ export const CareerModeView = ({
                 <div className="text-[10px] text-slate-400 mt-1 flex items-center gap-1">
                   {mode === 'forward' ? (
                     <span>
-                      GW1-{(data.startGw || 10) - 1} Base: <strong className="text-white">{data.basePoints ?? 0} pts</strong> • Projected: <strong className="text-emerald-400">+{data.forwardPoints ?? (data.totalPoints - (data.basePoints ?? 0))} xP</strong>
+                      GW1-{(data.startGw || 12) - 1} Base: <strong className="text-white">{data.basePoints ?? 0} pts</strong> • Projected: <strong className="text-emerald-400">+{data.forwardPoints ?? (data.totalPoints - (data.basePoints ?? 0))} xP</strong>
                     </span>
                   ) : (
                     <span>Avg: {(data.totalPoints / (data.gameweeks?.length || 1)).toFixed(1)} pts/GW</span>
@@ -837,19 +837,26 @@ export const CareerModeView = ({
                       Cumulative Score after GW{activeGwData.gameweek}: You <strong className="text-white">{activeGwData.humanComparison.cumulativePoints} pts</strong> vs AI <strong className="text-emerald-400">{activeGwData.cumulativePoints} pts</strong>.
                     </div>
 
-                    <button
-                      onClick={() => {
-                        setForwardSource('duel');
-                        setMode('forward');
-                        setSelectedGwIndex(0);
-                      }}
-                      className="w-full mt-2 py-2 px-3 bg-gradient-to-r from-amber-500/15 via-emerald-500/15 to-purple-500/15 hover:from-amber-500/25 hover:to-purple-500/25 border border-amber-500/40 rounded-xl text-xs font-bold text-amber-300 flex items-center justify-center gap-2 transition-all cursor-pointer group shadow-sm active:scale-[0.99]"
-                      title="See where the AI Co-Pilot goes next from GW11 to GW16"
-                    >
-                      <Swords className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
-                      <span>Project AI Co-Pilot Forward (GW11 → GW16)</span>
-                      <ArrowRight className="w-3.5 h-3.5 text-amber-400 group-hover:translate-x-0.5 transition-transform" />
-                    </button>
+                    {(() => {
+                      const latestGw = data?.gameweeks?.[data.gameweeks.length - 1]?.gameweek || activeGwData.gameweek || 11;
+                      const nextGw = latestGw + 1;
+                      const nextHorizonEnd = Math.min(38, latestGw + 6);
+                      return (
+                        <button
+                          onClick={() => {
+                            setForwardSource('duel');
+                            setMode('forward');
+                            setSelectedGwIndex(0);
+                          }}
+                          className="w-full mt-2 py-2 px-3 bg-gradient-to-r from-amber-500/15 via-emerald-500/15 to-purple-500/15 hover:from-amber-500/25 hover:to-purple-500/25 border border-amber-500/40 rounded-xl text-xs font-bold text-amber-300 flex items-center justify-center gap-2 transition-all cursor-pointer group shadow-sm active:scale-[0.99]"
+                          title={`See where the AI Co-Pilot goes next from GW${nextGw} to GW${nextHorizonEnd}`}
+                        >
+                          <Swords className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
+                          <span>Project AI Co-Pilot Forward (GW{nextGw} → GW{nextHorizonEnd})</span>
+                          <ArrowRight className="w-3.5 h-3.5 text-amber-400 group-hover:translate-x-0.5 transition-transform" />
+                        </button>
+                      );
+                    })()}
                   </div>
                 )}
               </div>
