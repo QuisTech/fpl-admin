@@ -33053,3 +33053,17 @@ Why does the toggle comparison (AI XI vs My Real XI) only show for team 532002 a
 - Other team IDs query the FPL API's fast summary endpoint (/entry/{teamId}/history/) which provides total points, hits, and rank, but requires 11 individual picks requests (/entry/{teamId}/event/{gw}/picks/) to build pitch lineups for every gameweek.
 - Clarified UI guard in CareerModeView.tsx: the toggle only renders when activeGwData.humanComparison?.startingXI is populated.
 - Offered on-demand picks fetching for third-party team IDs with disk caching.
+
+### User Request
+@[Quote] you mean to hull city dumb
+@[Quote] Yes
+
+### Assistant Response
+- Corrected match fixture fact: Brighton conceded two goals to Hull City (2 - 0, Fixture 106) in GW11, not Manchester City.
+- Implemented and deployed universal real lineup sync across both repositories:
+  - Added on-demand picks and transfers fetching via `ensureUserRealHistory` in `api/_lib/career-service.ts`.
+  - Automatically caches picks in `data/snapshots/user_real_history_{teamId}.json` for any manager ID entered.
+  - Generates full 11-man starting XI and 4-man bench with captaincy and point multipliers for any third-party squad.
+  - Updated `CareerModeView.tsx` with dynamic labels ('My Real XI' for team 532002, 'Real XI' for any other team ID).
+  - Verified with Team ID 1, successfully generating `user_real_history_1.json` and rendering both pitch lineups.
+- Confirmed pre-deadline monitoring and zero-mutation freeze status for the upcoming GW12 deadline (Friday 27 Nov, 19:30 UTC).
