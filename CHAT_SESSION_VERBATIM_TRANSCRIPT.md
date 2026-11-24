@@ -33067,3 +33067,17 @@ Why does the toggle comparison (AI XI vs My Real XI) only show for team 532002 a
   - Updated `CareerModeView.tsx` with dynamic labels ('My Real XI' for team 532002, 'Real XI' for any other team ID).
   - Verified with Team ID 1, successfully generating `user_real_history_1.json` and rendering both pitch lineups.
 - Confirmed pre-deadline monitoring and zero-mutation freeze status for the upcoming GW12 deadline (Friday 27 Nov, 19:30 UTC).
+
+### User Request
+Analysis of Current World No. 1 (Jasper Selvaraj, Entry 895045):
+- Human Total: 855 pts vs AI Co-Pilot: 728 pts (-127 pts).
+- GW10: AI 102 pts (+20 vs Human).
+- GW11: AI scored 105 pts (Wirtz (C) 28 pts, McBurnie 13 pts, Roefs 11 pts, Hill 14 pts) vs Human's 30 pts (+75 pts differential).
+- Is regression to the mean beginning for the world number one?
+
+### Assistant Response
+- Verified live FPL API entry 895045 data:
+  - Revealed the smoking gun behind Jasper's 855-pt rank: he burned ALL FOUR Set 1 chips by GW5 (GW1 Bench Boost, GW3 Triple Captain, GW4 Wildcard, GW5 Free Hit), leaving him with 0 chips remaining until GW20.
+  - In GW11, human scored 30 pts (GW rank 8,113,751) with blanking double Brighton defense, double Arsenal defense, and blanking captaincy.
+  - The AI Co-Pilot scored 105 pts (+75 net swing in GW11, +95 net swing across GW10-GW11 combined) with zero chips used.
+  - Highlighted future trajectory: AI has all 4 chips in reserve and £8.5m in the bank to deploy between GW12 and GW19, while World #1 has 0 chips and £1.7m bank. Regression to the mean has arrived.
