@@ -722,13 +722,17 @@ export const CareerModeView = ({
                     <div className="flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-fpl-green" />
                       <h3 className="text-xs font-black uppercase tracking-wider text-white">
-                        GW{activeGwData.gameweek} Manager Decision
+                        GW{activeGwData.gameweek} {isHumanView ? "Your Real Decision" : "Manager Decision"}
                       </h3>
                     </div>
                     <div className="flex items-center gap-2.5">
                       {mode === 'forward' ? (
                         <span className="text-xs font-mono text-emerald-400 font-bold">
                           {(activeGwData.expectedPoints ?? activeGwData.netPoints).toFixed(1)} Projected xP
+                        </span>
+                      ) : isHumanView ? (
+                        <span className="text-[10px] font-mono text-cyan-400 font-bold">
+                          {activeGwData.humanComparison?.netPoints || 43} Net Pts
                         </span>
                       ) : (
                         <>
@@ -758,7 +762,11 @@ export const CareerModeView = ({
                   </div>
 
                   <p className="text-xs text-slate-300 leading-relaxed font-sans">
-                    {activeGwData.decisionLog}
+                    {isHumanView 
+                      ? (activeGwData.humanComparison?.decisionLog || (displayedTransfersIn.length > 0 
+                          ? `Real Transfer: ${displayedTransfersIn.map((t, i) => `${displayedTransfersOut[i]?.name || 'Player'} → ${t.name}`).join(', ')}. Captain: ${displayedCaptain?.web_name || 'Haaland'} (2×).`
+                          : "No transfers made in real life (Free Transfer rolled)."))
+                      : activeGwData.decisionLog}
                   </p>
 
                   {/* Transfer Action Details */}
@@ -802,8 +810,8 @@ export const CareerModeView = ({
                     )}
                   </div>
 
-                  {/* Auto-Subs Callout (if any triggered) */}
-                  {(activeGwData.autoSubs?.length || 0) > 0 && (
+                  {/* Auto-Subs Callout (if any triggered, ONLY for AI view) */}
+                  {!isHumanView && (activeGwData.autoSubs?.length || 0) > 0 && (
                     <div className="space-y-1.5 pt-2 border-t border-fpl-border/40">
                       <div className="text-[10px] font-mono uppercase font-bold text-amber-400 flex items-center gap-1.5">
                         <Clock className="w-3 h-3" />
@@ -820,8 +828,21 @@ export const CareerModeView = ({
 
                   {/* Financial State */}
                   <div className="flex items-center justify-between text-xs font-mono pt-2 border-t border-fpl-border/40 text-slate-400">
-                    <span>Bank Balance: <strong className="text-white">{activeGwData.bankDisplay}</strong></span>
-                    <span>Squad Value: <strong className="text-white">£{((activeGwData.squadValue || 914) / 10).toFixed(1)}m</strong> <span className="text-slate-500">({activeGwData.teamValueDisplay})</span></span>
+                    <span>
+                      Bank Balance: <strong className="text-white">
+                        {isHumanView ? (activeGwData.humanComparison?.bankDisplay || "£0.4m") : activeGwData.bankDisplay}
+                      </strong>
+                    </span>
+                    <span>
+                      Squad Value: <strong className="text-white">
+                        {isHumanView 
+                          ? (activeGwData.humanComparison?.squadValueDisplay || "£101.8m") 
+                          : `£${((activeGwData.squadValue || 914) / 10).toFixed(1)}m`}
+                      </strong>{" "}
+                      <span className="text-slate-500">
+                        ({isHumanView ? (activeGwData.humanComparison?.teamValueDisplay || "£102.2m") : activeGwData.teamValueDisplay})
+                      </span>
+                    </span>
                   </div>
                 </div>
 
