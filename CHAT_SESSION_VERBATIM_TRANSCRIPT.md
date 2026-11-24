@@ -33043,3 +33043,13 @@ Correcting agent for referencing Pep Guardiola (who is no longer managing in the
 - Acknowledged error in citing obsolete manager from pre-2026 memory.
 - Created global skill fpl-live-grounding in ~/.gemini/config/skills/fpl_grounding/SKILL.md.
 - Updated GEMINI.md in both fpl-planner and fpl-admin strictly prohibiting referencing obsolete managers and mandating live FPL API verification.
+
+
+### User Request
+Why does the toggle comparison (AI XI vs My Real XI) only show for team 532002 and not for any other team ID synced in the Career tab?
+
+### Assistant Response
+- Explained architectural difference: Team 532002 has full 15-man pitch lineups, bench order, and captaincy cached in the local database.
+- Other team IDs query the FPL API's fast summary endpoint (/entry/{teamId}/history/) which provides total points, hits, and rank, but requires 11 individual picks requests (/entry/{teamId}/event/{gw}/picks/) to build pitch lineups for every gameweek.
+- Clarified UI guard in CareerModeView.tsx: the toggle only renders when activeGwData.humanComparison?.startingXI is populated.
+- Offered on-demand picks fetching for third-party team IDs with disk caching.

@@ -757,6 +757,184 @@ export class CareerService {
   }
 
   /**
+   * Helper to ensure user real picks and transfers are cached locally on disk for ANY team ID.
+   */
+  private static async ensureUserRealHistory(cleanId: string, effectiveEndGw: number): Promise<{ teamId: string; picksByGw: Record<string, any>; transfers: any[] }> {
+    const userRealPicksFile = path.join(process.cwd(), `data/snapshots/user_real_history_${cleanId}.json`);
+    let userRealHistory: { teamId: string; picksByGw: Record<string, any>; transfers: any[] } = {
+      teamId: cleanId,
+      picksByGw: {},
+      transfers: []
+    };
+
+    if (fs.existsSync(userRealPicksFile)) {
+      try {
+        userRealHistory = JSON.parse(fs.readFileSync(userRealPicksFile, 'utf8'));
+        if (!userRealHistory.picksByGw) userRealHistory.picksByGw = {};
+        if (!Array.isArray(userRealHistory.transfers)) userRealHistory.transfers = [];
+      } catch (e: any) {
+        console.warn(`[CareerService] Error reading ${userRealPicksFile}:`, e.message);
+      }
+    }
+
+    const missingGws: number[] = [];
+    for (let gw = 1; gw <= effectiveEndGw; gw++) {
+      if (!userRealHistory.picksByGw[String(gw)] && !userRealHistory.picksByGw[gw]) {
+        missingGws.push(gw);
+      }
+    }
+
+    if (missingGws.length > 0 || !userRealHistory.transfers || userRealHistory.transfers.length === 0) {
+      try {
+        const fetchPromises: Promise<any>[] = [];
+        if (!userRealHistory.transfers || userRealHistory.transfers.length === 0) {
+          fetchPromises.push(
+            axios.get(`${this.FPL_BASE}/entry/${cleanId}/transfers/`, { headers: { 'User-Agent': 'Mozilla/5.0' }, timeout: 6000 })
+              .then(res => { if (Array.isArray(res.data)) userRealHistory.transfers = res.data; })
+              .catch(() => {})
+          );
+        }
+        for (const gw of missingGws) {
+          fetchPromises.push(
+            axios.get(`${this.FPL_BASE}/entry/${cleanId}/event/${gw}/picks/`, { headers: { 'User-Agent': 'Mozilla/5.0' }, timeout: 6000 })
+              .then(res => { if (res.data?.picks) userRealHistory.picksByGw[String(gw)] = res.data; })
+              .catch(() => {})
+          );
+        }
+        await Promise.all(fetchPromises);
+        try {
+          fs.writeFileSync(userRealPicksFile, JSON.stringify(userRealHistory, null, 2), 'utf8');
+        } catch {}
+      } catch (e: any) {
+        console.warn(`[CareerService] Failed to fetch full picks for ${cleanId}:`, e.message);
+      }
+    }
+
+    return userRealHistory;
+  }
+
+  /**
+   * Helper to construct humanComparison with real 15-player lineup, bench, captaincy, and transfers.
+   */
+  private static buildHumanComparison(
+    gw: number,
+    cleanId: string,
+    userGwRecord: any,
+    userRealHistory: any,
+    baseData: any,
+    oracle: XPOracle | null,
+    actualStats: Record<number, { points: number; minutes: number }>,
+    aiNetPoints: number,
+    runningAlpha: number,
+    existingHuman?: any
+  ): any {
+    const humanGross = userGwRecord ? (typeof userGwRecord.points === 'number' ? userGwRecord.points : aiNetPoints) : aiNetPoints;
+    const humanHit = userGwRecord ? (userGwRecord.event_transfers_cost || 0) : 0;
+    const humanNet = humanGross - humanHit;
+    const humanCum = userGwRecord?.total_points || humanNet;
+    const alphaDelta = aiNetPoints - humanNet;
+
+    let startingXI = existingHuman?.startingXI;
+    let bench = existingHuman?.bench;
+    let captain = existingHuman?.captain;
+    let viceCaptain = existingHuman?.viceCaptain;
+    let transfersIn = existingHuman?.transfersIn || [];
+    let transfersOut = existingHuman?.transfersOut || [];
+    let bankDisplay = existingHuman?.bankDisplay;
+    let squadValueDisplay = existingHuman?.squadValueDisplay;
+    let teamValueDisplay = existingHuman?.teamValueDisplay;
+
+    const gwPickData = userRealHistory?.picksByGw?.[String(gw)] || userRealHistory?.picksByGw?.[gw];
+    if ((!startingXI || startingXI.length === 0) && gwPickData?.picks && Array.isArray(gwPickData.picks)) {
+      const starters = gwPickData.picks.filter((p: any) => p.position <= 11);
+      const reserves = gwPickData.picks.filter((p: any) => p.position > 11);
+      const capPick = gwPickData.picks.find((p: any) => p.is_captain);
+      const vcPick = gwPickData.picks.find((p: any) => p.is_vice_captain);
+
+      const dummyOracle: XPOracle = oracle || {
+        getPosition: (id: number) => {
+          const pl = baseData.players.find((p: any) => p.id === id);
+          return pl?.element_type === 1 ? 'GKP' : pl?.element_type === 2 ? 'DEF' : pl?.element_type === 3 ? 'MID' : 'FWD';
+        },
+        getCost: (id: number) => {
+          const pl = baseData.players.find((p: any) => p.id === id);
+          return pl?.now_cost || 50;
+        },
+        getTeam: (id: number) => {
+          const pl = baseData.players.find((p: any) => p.id === id);
+          const t = baseData.teams.find((tm: any) => tm.id === pl?.team);
+          return t?.short_name || 'FPL';
+        },
+        getXP: () => 0
+      } as any;
+
+      startingXI = starters.map((p: any) => 
+        this.mapPlayer(p.element, baseData, dummyOracle, actualStats, p.is_captain, p.is_vice_captain, p.multiplier || 1, gw)
+      );
+      bench = reserves.map((p: any) => 
+        this.mapPlayer(p.element, baseData, dummyOracle, actualStats, false, false, 0, gw)
+      );
+      if (capPick) {
+        captain = this.mapPlayer(capPick.element, baseData, dummyOracle, actualStats, true, false, capPick.multiplier || 2, gw);
+      }
+      if (vcPick) {
+        viceCaptain = this.mapPlayer(vcPick.element, baseData, dummyOracle, actualStats, false, true, 1, gw);
+      }
+
+      if (gwPickData.entry_history) {
+        bankDisplay = `£${((gwPickData.entry_history.bank || 0) / 10).toFixed(1)}m`;
+        const val = gwPickData.entry_history.value || 1000;
+        const bnk = gwPickData.entry_history.bank || 0;
+        squadValueDisplay = `£${((val - bnk) / 10).toFixed(1)}m`;
+        teamValueDisplay = `£${(val / 10).toFixed(1)}m`;
+      }
+
+      if (transfersIn.length === 0 && Array.isArray(userRealHistory?.transfers)) {
+        const gwTransfers = userRealHistory.transfers.filter((t: any) => t.event === gw);
+        transfersIn = gwTransfers.map((t: any) => {
+          const pIn = baseData.players.find((pl: any) => pl.id === t.element_in);
+          return {
+            id: t.element_in,
+            name: pIn ? pIn.web_name : `Player ${t.element_in}`,
+            position: pIn?.element_type === 1 ? 'GKP' : pIn?.element_type === 2 ? 'DEF' : pIn?.element_type === 3 ? 'MID' : 'FWD',
+            costDisplay: `£${((t.element_in_cost || 0) / 10).toFixed(1)}m`
+          };
+        });
+        transfersOut = gwTransfers.map((t: any) => {
+          const pOut = baseData.players.find((pl: any) => pl.id === t.element_out);
+          return {
+            id: t.element_out,
+            name: pOut ? pOut.web_name : `Player ${t.element_out}`,
+            position: pOut?.element_type === 1 ? 'GKP' : pOut?.element_type === 2 ? 'DEF' : pOut?.element_type === 3 ? 'MID' : 'FWD',
+            costDisplay: `£${((t.element_out_cost || 0) / 10).toFixed(1)}m`
+          };
+        });
+      }
+    }
+
+    return {
+      gameweek: gw,
+      transfers: userGwRecord?.event_transfers || 0,
+      transfersCost: humanHit,
+      grossPoints: humanGross,
+      netPoints: humanNet,
+      cumulativePoints: humanCum,
+      overallRank: userGwRecord?.overall_rank,
+      alphaDelta,
+      cumulativeAlphaDelta: runningAlpha,
+      startingXI,
+      bench,
+      captain,
+      viceCaptain,
+      transfersIn,
+      transfersOut,
+      bankDisplay,
+      squadValueDisplay,
+      teamValueDisplay
+    };
+  }
+
+  /**
    * Run the Synced Team Replay / Counterfactual Duel starting from a user's real GW1 squad.
    */
   public static async getSyncedCareerReplay(
@@ -829,6 +1007,9 @@ export class CareerService {
       console.warn(`[CareerService] Incomplete GW1 picks for ${cleanId}, falling back to autonomous mode.`);
       return this.getAutonomousCareer(fuel, riskMode, endGw);
     }
+
+    // Ensure real historical picks and transfers are available for any team ID
+    const userRealHistory = await this.ensureUserRealHistory(cleanId, effectiveEndGw);
 
     // Check for locked historical decisions in synced_career_history.json for permanent historical immutability
     const syncedHistoryFile = path.join(process.cwd(), 'data/snapshots/synced_career_history.json');
@@ -936,23 +1117,20 @@ export class CareerService {
           runningAlpha += alphaDelta;
 
           const existingHuman = g.humanComparison;
-          g.humanComparison = {
-            gameweek: g.gameweek,
-            transfers: userGwRecord.event_transfers || 0,
-            transfersCost: humanHit,
-            grossPoints: humanGross,
-            netPoints: humanNet,
-            cumulativePoints: humanCum,
-            overallRank: userGwRecord.overall_rank,
-            alphaDelta,
-            cumulativeAlphaDelta: runningAlpha,
-            startingXI: existingHuman?.startingXI,
-            bench: existingHuman?.bench,
-            captain: existingHuman?.captain,
-            viceCaptain: existingHuman?.viceCaptain,
-            transfersIn: existingHuman?.transfersIn,
-            transfersOut: existingHuman?.transfersOut
-          };
+          const humanComparison = this.buildHumanComparison(
+            g.gameweek,
+            cleanId,
+            userGwRecord,
+            userRealHistory,
+            baseData,
+            null,
+            stats,
+            g.netPoints,
+            runningAlpha,
+            existingHuman
+          );
+          runningAlpha = humanComparison.cumulativeAlphaDelta;
+          g.humanComparison = humanComparison;
 
           if (g.gameweek === 1 && g.activeCaptain) {
             g.decisionLog = `Identical GW1 base squad. AI Captain: ${g.activeCaptain.web_name} (${g.activeCaptain.points * (g.activeCaptain.multiplier || 2)} pts).`;
@@ -1298,17 +1476,22 @@ export class CareerService {
         teamValueDisplay: `£${(teamValue / 10).toFixed(1)}m`,
         decisionLog: log,
         averageScore: 50,
-        humanComparison: {
-          gameweek: gw,
-          transfers: userGwRecord?.event_transfers || 0,
-          transfersCost: humanHit,
-          grossPoints: humanGross,
-          netPoints: humanNet,
-          cumulativePoints: humanCum,
-          overallRank: userGwRecord?.overall_rank,
-          alphaDelta,
-          cumulativeAlphaDelta: cumulativeAlpha
-        }
+        humanComparison: (() => {
+          const comp = this.buildHumanComparison(
+            gw,
+            cleanId,
+            userGwRecord,
+            userRealHistory,
+            baseData,
+            oracle,
+            playerStats,
+            netPoints,
+            cumulativeAlpha,
+            undefined
+          );
+          cumulativeAlpha = comp.cumulativeAlphaDelta;
+          return comp;
+        })()
       });
     }
 

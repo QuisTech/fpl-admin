@@ -722,7 +722,7 @@ export const CareerModeView = ({
                     <div className="flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-fpl-green" />
                       <h3 className="text-xs font-black uppercase tracking-wider text-white">
-                        GW{activeGwData.gameweek} {isHumanView ? "Your Real Decision" : "Manager Decision"}
+                        GW{activeGwData.gameweek} {isHumanView ? (teamId === '532002' ? "Your Real Decision" : "Real Manager Decision") : "Manager Decision"}
                       </h3>
                     </div>
                     <div className="flex items-center gap-2.5">
@@ -772,13 +772,13 @@ export const CareerModeView = ({
                   {/* Transfer Action Details */}
                   <div className="space-y-2 pt-2 border-t border-fpl-border/40">
                     <div className="flex items-center justify-between text-[10px] font-mono uppercase font-bold text-slate-400">
-                      <span>{isHumanView ? "Your Real Transfer Execution" : "Transfer Execution"}</span>
+                      <span>{isHumanView ? (teamId === '532002' ? "Your Real Transfer Execution" : "Real Transfer Execution") : "Transfer Execution"}</span>
                       {mode === 'synced' && activeGwData.humanComparison?.startingXI && (
                         <button
                           onClick={() => setLineupSource(prev => prev === 'ai' ? 'human' : 'ai')}
                           className="text-[9px] text-cyan-400 hover:underline normal-case font-sans cursor-pointer"
                         >
-                          Switch to {isHumanView ? "AI Lineup" : "My Real Squad"}
+                          Switch to {isHumanView ? "AI Lineup" : (teamId === '532002' ? "My Real Squad" : "Real Squad")}
                         </button>
                       )}
                     </div>
@@ -879,14 +879,14 @@ export const CareerModeView = ({
                             ? "bg-cyan-950/30 border-cyan-500/50 ring-1 ring-cyan-500/40 shadow-sm" 
                             : "bg-slate-900/60 border-slate-800 hover:border-cyan-500/30 opacity-75 hover:opacity-100"
                         )}
-                        title="Click to view My Real XI on the pitch"
+                        title={teamId === '532002' ? "Click to view My Real XI on the pitch" : "Click to view Real Manager XI on the pitch"}
                       >
                         <div className="flex items-center justify-between mb-1">
                           <span className={cn(
                             "text-[10px] uppercase font-mono font-bold",
                             isHumanView ? "text-cyan-400" : "text-slate-400"
                           )}>
-                            Your Real Team
+                            {teamId === '532002' ? "Your Real Team" : (data?.managerName ? `${data.managerName}'s Team` : "Real Team")}
                           </span>
                           {isHumanView && (
                             <span className="text-[8px] font-mono uppercase px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/40">
@@ -968,7 +968,7 @@ export const CareerModeView = ({
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-fpl-border/60 pb-2.5 mb-3 gap-2">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-xs font-black uppercase tracking-wider text-white">
-                        GW{activeGwData.gameweek} {isHumanView ? "My Real Lineup" : "Starting Lineup"}
+                        GW{activeGwData.gameweek} {isHumanView ? (teamId === '532002' ? "My Real Lineup" : "Real Lineup") : "Starting Lineup"}
                       </span>
                       {mode === 'synced' && activeGwData.humanComparison?.startingXI && (
                         <div className="flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5 text-[10px]">
@@ -990,7 +990,7 @@ export const CareerModeView = ({
                             )}
                           >
                             <UserCheck className="w-3 h-3 text-cyan-400" />
-                            <span>My Real XI ({activeGwData.humanComparison.netPoints} pts)</span>
+                            <span>{teamId === '532002' ? 'My Real XI' : 'Real XI'} ({activeGwData.humanComparison.netPoints} pts)</span>
                           </button>
                         </div>
                       )}
@@ -1084,7 +1084,7 @@ export const CareerModeView = ({
                 {/* Bench Section */}
                 <div className="mt-4 pt-3 border-t border-fpl-border/60">
                   <div className="text-[10px] font-mono uppercase font-bold text-slate-400 mb-2">
-                    {isHumanView ? "Your Real Substitutes Bench" : "Substitutes Bench (Reserve GK + Ordered Priority)"}
+                    {isHumanView ? (teamId === '532002' ? "Your Real Substitutes Bench" : "Real Substitutes Bench") : "Substitutes Bench (Reserve GK + Ordered Priority)"}
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {(() => {
