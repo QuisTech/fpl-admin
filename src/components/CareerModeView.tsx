@@ -62,6 +62,12 @@ export interface CareerGameweek {
     overallRank?: number;
     alphaDelta: number;
     cumulativeAlphaDelta: number;
+    startingXI?: CareerPlayer[];
+    bench?: CareerPlayer[];
+    captain?: CareerPlayer;
+    viceCaptain?: CareerPlayer;
+    transfersIn?: { id?: number; name: string; position?: string; costDisplay?: string }[];
+    transfersOut?: { id?: number; name: string; position?: string; costDisplay?: string }[];
   };
 }
 
@@ -129,6 +135,7 @@ export const CareerModeView = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedGwIndex, setSelectedGwIndex] = useState<number>(0);
+  const [lineupSource, setLineupSource] = useState<'ai' | 'human'>('ai');
 
   const hydrateLiveScores = async (payload: CareerSeasonPayload): Promise<CareerSeasonPayload> => {
     if (!payload || payload.mode === 'forward' || !Array.isArray(payload.gameweeks) || payload.gameweeks.length === 0) {
@@ -696,7 +703,16 @@ export const CareerModeView = ({
           </div>
 
           {/* Active Gameweek Detail Card */}
-          {activeGwData && (
+          {activeGwData && (() => {
+            const isHumanView = mode === 'synced' && lineupSource === 'human' && !!activeGwData.humanComparison?.startingXI;
+            const displayedStartingXI = isHumanView ? activeGwData.humanComparison!.startingXI! : (activeGwData.startingXI || []);
+            const displayedBench = isHumanView ? (activeGwData.humanComparison!.bench || []) : (activeGwData.bench || []);
+            const displayedCaptain = isHumanView ? (activeGwData.humanComparison!.captain || activeGwData.activeCaptain) : activeGwData.activeCaptain;
+            const displayedViceCaptain = isHumanView ? (activeGwData.humanComparison!.viceCaptain || activeGwData.viceCaptain) : activeGwData.viceCaptain;
+            const displayedTransfersIn = isHumanView ? (activeGwData.humanComparison!.transfersIn || []) : (activeGwData.transfersIn || []);
+            const displayedTransfersOut = isHumanView ? (activeGwData.humanComparison!.transfersOut || []) : (activeGwData.transfersOut || []);
+
+            return (
             <div className="grid grid-cols-12 gap-4">
               {/* Left Column: Manager Decision Log & Human Head-to-Head */}
               <div className="col-span-12 lg:col-span-5 space-y-4">
@@ -747,11 +763,21 @@ export const CareerModeView = ({
 
                   {/* Transfer Action Details */}
                   <div className="space-y-2 pt-2 border-t border-fpl-border/40">
-                    <div className="text-[10px] font-mono uppercase font-bold text-slate-400">Transfer Execution</div>
-                    {(activeGwData.transfersIn?.length || 0) > 0 ? (
+                    <div className="flex items-center justify-between text-[10px] font-mono uppercase font-bold text-slate-400">
+                      <span>{isHumanView ? "Your Real Transfer Execution" : "Transfer Execution"}</span>
+                      {mode === 'synced' && activeGwData.humanComparison?.startingXI && (
+                        <button
+                          onClick={() => setLineupSource(prev => prev === 'ai' ? 'human' : 'ai')}
+                          className="text-[9px] text-cyan-400 hover:underline normal-case font-sans cursor-pointer"
+                        >
+                          Switch to {isHumanView ? "AI Lineup" : "My Real Squad"}
+                        </button>
+                      )}
+                    </div>
+                    {displayedTransfersIn.length > 0 ? (
                       <div className="space-y-1.5">
-                        {(activeGwData.transfersIn || []).map((tIn, i) => {
-                          const tOut = activeGwData.transfersOut?.[i];
+                        {displayedTransfersIn.map((tIn, i) => {
+                          const tOut = displayedTransfersOut[i];
                           return (
                             <div key={i} className="flex items-center justify-between bg-slate-900 p-2.5 rounded-xl border border-slate-800 text-xs">
                               <div className="flex items-center gap-2">
@@ -767,7 +793,11 @@ export const CareerModeView = ({
                     ) : (
                       <div className="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800 text-xs text-cyan-300 font-mono flex items-center gap-2">
                         <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                        <span>Rolled Free Transfer — Banked {activeGwData.freeTransfersRemaining} FTs for next week</span>
+                        <span>
+                          {isHumanView 
+                            ? "No transfers made in real life (Free Transfer rolled)" 
+                            : `Rolled Free Transfer — Banked ${activeGwData.freeTransfersRemaining} FTs for next week`}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -864,20 +894,46 @@ export const CareerModeView = ({
               {/* Right Column: Matchday Lineup Pitch Sheet */}
               <div className="col-span-12 lg:col-span-7 bg-slate-950 border border-fpl-border rounded-2xl p-4 shadow-sm flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between border-b border-fpl-border/60 pb-2.5 mb-3">
-                    <span className="text-xs font-black uppercase tracking-wider text-white">
-                      GW{activeGwData.gameweek} Starting Lineup
-                    </span>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-fpl-border/60 pb-2.5 mb-3 gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-xs font-black uppercase tracking-wider text-white">
+                        GW{activeGwData.gameweek} {isHumanView ? "My Real Lineup" : "Starting Lineup"}
+                      </span>
+                      {mode === 'synced' && activeGwData.humanComparison?.startingXI && (
+                        <div className="flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5 text-[10px]">
+                          <button
+                            onClick={() => setLineupSource('ai')}
+                            className={cn(
+                              "px-2 py-0.5 rounded font-bold transition-all flex items-center gap-1 cursor-pointer",
+                              !isHumanView ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-black" : "text-slate-400 hover:text-white"
+                            )}
+                          >
+                            <Bot className="w-3 h-3 text-emerald-400" />
+                            <span>AI XI ({activeGwData.netPoints} pts)</span>
+                          </button>
+                          <button
+                            onClick={() => setLineupSource('human')}
+                            className={cn(
+                              "px-2 py-0.5 rounded font-bold transition-all flex items-center gap-1 cursor-pointer",
+                              isHumanView ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-black" : "text-slate-400 hover:text-white"
+                            )}
+                          >
+                            <UserCheck className="w-3 h-3 text-cyan-400" />
+                            <span>My Real XI ({activeGwData.humanComparison.netPoints} pts)</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
                     <span className="text-[10px] font-mono text-slate-400">
-                      Captain: <strong className="text-emerald-400">{activeGwData.activeCaptain.web_name} (2×)</strong>
+                      Captain: <strong className={isHumanView ? "text-cyan-400" : "text-emerald-400"}>{displayedCaptain?.web_name || 'Captain'} (2×)</strong>
                     </span>
                   </div>
 
                   {/* Starting XI List Cards */}
                   <div className="space-y-1.5">
-                    {(activeGwData.startingXI || []).map((p) => {
-                      const isCap = p.id === activeGwData.activeCaptain.id;
-                      const isVc = p.id === activeGwData.viceCaptain.id && !isCap;
+                    {displayedStartingXI.map((p) => {
+                      const isCap = p.id === displayedCaptain?.id || p.isCaptain;
+                      const isVc = (p.id === displayedViceCaptain?.id || p.isViceCaptain) && !isCap;
                       const scoreDisplay = isCap ? p.points * 2 : p.points;
 
                       return (
@@ -886,7 +942,7 @@ export const CareerModeView = ({
                           className={cn(
                             "flex items-center justify-between px-3 py-2 rounded-xl border transition-all text-xs",
                             isCap 
-                              ? "bg-emerald-500/10 border-emerald-500/40" 
+                              ? (isHumanView ? "bg-cyan-500/10 border-cyan-500/40" : "bg-emerald-500/10 border-emerald-500/40")
                               : "bg-slate-900 border-slate-800"
                           )}
                         >
@@ -904,7 +960,10 @@ export const CareerModeView = ({
                             <span className="text-[10px] text-slate-500">{p.team_short_name}</span>
                             
                             {isCap && (
-                              <span className="px-1.5 py-0.2 rounded text-[8.5px] font-black bg-emerald-500 text-slate-950">
+                              <span className={cn(
+                                "px-1.5 py-0.2 rounded text-[8.5px] font-black",
+                                isHumanView ? "bg-cyan-500 text-slate-950" : "bg-emerald-500 text-slate-950"
+                              )}>
                                 (C) 2×
                               </span>
                             )}
@@ -954,12 +1013,12 @@ export const CareerModeView = ({
                 {/* Bench Section */}
                 <div className="mt-4 pt-3 border-t border-fpl-border/60">
                   <div className="text-[10px] font-mono uppercase font-bold text-slate-400 mb-2">
-                    Substitutes Bench (Reserve GK + Ordered Priority)
+                    {isHumanView ? "Your Real Substitutes Bench" : "Substitutes Bench (Reserve GK + Ordered Priority)"}
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {(() => {
                     let outfieldCounter = 0;
-                    return (activeGwData.bench || []).map((b) => {
+                    return displayedBench.map((b) => {
                       const isGkp = b.position === 'GKP';
                       if (!isGkp) outfieldCounter += 1;
                       const slotLabel = isGkp ? 'GK Sub' : `Sub ${outfieldCounter}`;
@@ -1014,7 +1073,8 @@ export const CareerModeView = ({
                 </div>
               </div>
             </div>
-          )}
+            );
+          })()}
         </>
       ) : null}
     </div>

@@ -64,6 +64,12 @@ export interface CareerGameweek {
     overallRank?: number;
     alphaDelta: number;
     cumulativeAlphaDelta: number;
+    startingXI?: CareerPlayer[];
+    bench?: CareerPlayer[];
+    captain?: CareerPlayer;
+    viceCaptain?: CareerPlayer;
+    transfersIn?: { id?: number; name: string; position?: string; costDisplay?: string }[];
+    transfersOut?: { id?: number; name: string; position?: string; costDisplay?: string }[];
   };
 }
 
@@ -929,6 +935,7 @@ export class CareerService {
           const alphaDelta = g.netPoints - humanNet;
           runningAlpha += alphaDelta;
 
+          const existingHuman = g.humanComparison;
           g.humanComparison = {
             gameweek: g.gameweek,
             transfers: userGwRecord.event_transfers || 0,
@@ -938,7 +945,13 @@ export class CareerService {
             cumulativePoints: humanCum,
             overallRank: userGwRecord.overall_rank,
             alphaDelta,
-            cumulativeAlphaDelta: runningAlpha
+            cumulativeAlphaDelta: runningAlpha,
+            startingXI: existingHuman?.startingXI,
+            bench: existingHuman?.bench,
+            captain: existingHuman?.captain,
+            viceCaptain: existingHuman?.viceCaptain,
+            transfersIn: existingHuman?.transfersIn,
+            transfersOut: existingHuman?.transfersOut
           };
 
           if (g.gameweek === 1 && g.activeCaptain) {
