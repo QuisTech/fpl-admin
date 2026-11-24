@@ -3279,7 +3279,7 @@
       "squadValue": 943,
       "teamValue": 1013,
       "teamValueDisplay": "£101.3m",
-      "decisionLog": "AI Executed Double Transfer: Haaland → Barry, Hughes → Wirtz (2 FTs used, 0 hit). You scored 43 pts, AI scored 44 pts (+1 pts).",
+      "decisionLog": "AI Transferred Haaland → Barry. You scored 43 pts, AI scored 44 pts (+1 pts).",
       "averageScore": 50,
       "humanComparison": {
         "gameweek": 11,
@@ -3288,7 +3288,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": 1,
         "cumulativeAlphaDelta": 91
       }
@@ -6574,7 +6574,7 @@
       "squadValue": 943,
       "teamValue": 1013,
       "teamValueDisplay": "£101.3m",
-      "decisionLog": "AI Executed Double Transfer: Haaland → Barry, Hughes → Wirtz (2 FTs used, 0 hit). You scored 43 pts, AI scored 44 pts (+1 pts).",
+      "decisionLog": "AI Transferred Haaland → Barry. You scored 43 pts, AI scored 44 pts (+1 pts).",
       "averageScore": 50,
       "humanComparison": {
         "gameweek": 11,
@@ -6583,7 +6583,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": 1,
         "cumulativeAlphaDelta": 91
       }
@@ -9886,7 +9886,7 @@
       "squadValue": 932,
       "teamValue": 1016,
       "teamValueDisplay": "£101.6m",
-      "decisionLog": "AI Executed Double Transfer: Ndiaye → Barry, Haaland → Wirtz (2 FTs used, 0 hit). You scored 43 pts, AI scored 71 pts (+28 pts).",
+      "decisionLog": "AI Transferred Ndiaye → Barry. You scored 43 pts, AI scored 71 pts (+28 pts).",
       "averageScore": 50,
       "humanComparison": {
         "gameweek": 11,
@@ -9895,7 +9895,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": 28,
         "cumulativeAlphaDelta": 117
       }
@@ -13198,7 +13198,7 @@
       "squadValue": 932,
       "teamValue": 1016,
       "teamValueDisplay": "£101.6m",
-      "decisionLog": "AI Executed Double Transfer: Ndiaye → Barry, Haaland → Wirtz (2 FTs used, 0 hit). You scored 43 pts, AI scored 71 pts (+28 pts).",
+      "decisionLog": "AI Transferred Ndiaye → Barry. You scored 43 pts, AI scored 71 pts (+28 pts).",
       "averageScore": 50,
       "humanComparison": {
         "gameweek": 11,
@@ -13207,7 +13207,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": 28,
         "cumulativeAlphaDelta": 117
       }
@@ -16493,7 +16493,7 @@
       "squadValue": 941,
       "teamValue": 1013,
       "teamValueDisplay": "£101.3m",
-      "decisionLog": "AI Executed Double Transfer: Haaland → McBurnie, Hughes → Wirtz (2 FTs used, 0 hit). You scored 43 pts, AI scored 67 pts (+24 pts).",
+      "decisionLog": "AI Transferred Haaland → McBurnie. You scored 43 pts, AI scored 67 pts (+24 pts).",
       "averageScore": 50,
       "humanComparison": {
         "gameweek": 11,
@@ -16502,7 +16502,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": 24,
         "cumulativeAlphaDelta": 114
       }
@@ -19788,7 +19788,7 @@
       "squadValue": 941,
       "teamValue": 1013,
       "teamValueDisplay": "£101.3m",
-      "decisionLog": "AI Executed Double Transfer: Haaland → McBurnie, Hughes → Wirtz (2 FTs used, 0 hit). You scored 43 pts, AI scored 67 pts (+24 pts).",
+      "decisionLog": "AI Transferred Haaland → McBurnie. You scored 43 pts, AI scored 67 pts (+24 pts).",
       "averageScore": 50,
       "humanComparison": {
         "gameweek": 11,
@@ -19797,7 +19797,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": 24,
         "cumulativeAlphaDelta": 114
       }
@@ -23100,7 +23100,7 @@
       "squadValue": 993,
       "teamValue": 1016,
       "teamValueDisplay": "£101.6m",
-      "decisionLog": "AI Executed Double Transfer: Verbruggen → Roefs, Palmer → Wirtz (2 FTs used, 0 hit). You scored 43 pts, AI scored 80 pts (+37 pts).",
+      "decisionLog": "AI Transferred Verbruggen → Roefs. You scored 43 pts, AI scored 80 pts (+37 pts).",
       "averageScore": 50,
       "humanComparison": {
         "gameweek": 11,
@@ -23109,7 +23109,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": 37,
         "cumulativeAlphaDelta": 126
       }
@@ -26412,7 +26412,7 @@
       "squadValue": 993,
       "teamValue": 1016,
       "teamValueDisplay": "£101.6m",
-      "decisionLog": "AI Executed Double Transfer: Verbruggen → Roefs, Palmer → Wirtz (2 FTs used, 0 hit). You scored 43 pts, AI scored 80 pts (+37 pts).",
+      "decisionLog": "AI Transferred Verbruggen → Roefs. You scored 43 pts, AI scored 80 pts (+37 pts).",
       "averageScore": 50,
       "humanComparison": {
         "gameweek": 11,
@@ -26421,7 +26421,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": 37,
         "cumulativeAlphaDelta": 126
       }
@@ -29707,7 +29707,7 @@
       "squadValue": 943,
       "teamValue": 1013,
       "teamValueDisplay": "£101.3m",
-      "decisionLog": "AI Executed Double Transfer: Haaland → Barry, Hughes → Wirtz (2 FTs used, 0 hit). You scored 43 pts, AI scored 56 pts (+13 pts).",
+      "decisionLog": "AI Transferred Haaland → Barry. You scored 43 pts, AI scored 56 pts (+13 pts).",
       "averageScore": 50,
       "humanComparison": {
         "gameweek": 11,
@@ -29716,7 +29716,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": 13,
         "cumulativeAlphaDelta": 103
       }
@@ -33002,7 +33002,7 @@
       "squadValue": 943,
       "teamValue": 1013,
       "teamValueDisplay": "£101.3m",
-      "decisionLog": "AI Executed Double Transfer: Haaland → Barry, Hughes → Wirtz (2 FTs used, 0 hit). You scored 43 pts, AI scored 56 pts (+13 pts).",
+      "decisionLog": "AI Transferred Haaland → Barry. You scored 43 pts, AI scored 56 pts (+13 pts).",
       "averageScore": 50,
       "humanComparison": {
         "gameweek": 11,
@@ -33011,7 +33011,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": 13,
         "cumulativeAlphaDelta": 103
       }
@@ -36314,7 +36314,7 @@
       "squadValue": 994,
       "teamValue": 1016,
       "teamValueDisplay": "£101.6m",
-      "decisionLog": "AI Executed Double Transfer: Vuskovic → Wirtz, Palmer → Araujo (2 FTs used, 0 hit). You scored 43 pts, AI scored 77 pts (+34 pts).",
+      "decisionLog": "AI Transferred Vuskovic → Wirtz. You scored 43 pts, AI scored 77 pts (+34 pts).",
       "averageScore": 50,
       "humanComparison": {
         "gameweek": 11,
@@ -36323,7 +36323,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": 34,
         "cumulativeAlphaDelta": 123
       }
@@ -39626,7 +39626,7 @@
       "squadValue": 994,
       "teamValue": 1016,
       "teamValueDisplay": "£101.6m",
-      "decisionLog": "AI Executed Double Transfer: Vuskovic → Wirtz, Palmer → Araujo (2 FTs used, 0 hit). You scored 43 pts, AI scored 77 pts (+34 pts).",
+      "decisionLog": "AI Transferred Vuskovic → Wirtz. You scored 43 pts, AI scored 77 pts (+34 pts).",
       "averageScore": 50,
       "humanComparison": {
         "gameweek": 11,
@@ -39635,7 +39635,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": 34,
         "cumulativeAlphaDelta": 123
       }
@@ -42915,7 +42915,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": -7,
         "cumulativeAlphaDelta": 75
       }
@@ -46195,7 +46195,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": -7,
         "cumulativeAlphaDelta": 75
       }
@@ -49475,7 +49475,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": -7,
         "cumulativeAlphaDelta": 75
       }
@@ -52755,7 +52755,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": -7,
         "cumulativeAlphaDelta": 75
       }
@@ -56041,7 +56041,7 @@
       "squadValue": 1021,
       "teamValue": 1027,
       "teamValueDisplay": "£102.7m",
-      "decisionLog": "AI Executed Double Transfer: N.Jackson → Barry, Bassey → Murillo (2 FTs used, 0 hit). You scored 43 pts, AI scored 28 pts (-15 pts).",
+      "decisionLog": "AI Transferred N.Jackson → Barry. You scored 43 pts, AI scored 28 pts (-15 pts).",
       "averageScore": 50,
       "humanComparison": {
         "gameweek": 11,
@@ -56050,7 +56050,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": -15,
         "cumulativeAlphaDelta": 67
       }
@@ -59336,7 +59336,7 @@
       "squadValue": 1021,
       "teamValue": 1027,
       "teamValueDisplay": "£102.7m",
-      "decisionLog": "AI Executed Double Transfer: N.Jackson → Barry, Bassey → Murillo (2 FTs used, 0 hit). You scored 43 pts, AI scored 28 pts (-15 pts).",
+      "decisionLog": "AI Transferred N.Jackson → Barry. You scored 43 pts, AI scored 28 pts (-15 pts).",
       "averageScore": 50,
       "humanComparison": {
         "gameweek": 11,
@@ -59345,7 +59345,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": -15,
         "cumulativeAlphaDelta": 67
       }
@@ -62625,7 +62625,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": -10,
         "cumulativeAlphaDelta": 72
       }
@@ -65905,7 +65905,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": -10,
         "cumulativeAlphaDelta": 72
       }
@@ -69185,7 +69185,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": -7,
         "cumulativeAlphaDelta": 75
       }
@@ -72465,7 +72465,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": -7,
         "cumulativeAlphaDelta": 75
       }
@@ -75751,7 +75751,7 @@
       "squadValue": 1021,
       "teamValue": 1027,
       "teamValueDisplay": "£102.7m",
-      "decisionLog": "AI Executed Double Transfer: N.Jackson → Barry, Bassey → Murillo (2 FTs used, 0 hit). You scored 43 pts, AI scored 28 pts (-15 pts).",
+      "decisionLog": "AI Transferred N.Jackson → Barry. You scored 43 pts, AI scored 28 pts (-15 pts).",
       "averageScore": 50,
       "humanComparison": {
         "gameweek": 11,
@@ -75760,7 +75760,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": -15,
         "cumulativeAlphaDelta": 67
       }
@@ -79046,7 +79046,7 @@
       "squadValue": 1021,
       "teamValue": 1027,
       "teamValueDisplay": "£102.7m",
-      "decisionLog": "AI Executed Double Transfer: N.Jackson → Barry, Bassey → Murillo (2 FTs used, 0 hit). You scored 43 pts, AI scored 28 pts (-15 pts).",
+      "decisionLog": "AI Transferred N.Jackson → Barry. You scored 43 pts, AI scored 28 pts (-15 pts).",
       "averageScore": 50,
       "humanComparison": {
         "gameweek": 11,
@@ -79055,7 +79055,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": -15,
         "cumulativeAlphaDelta": 67
       }
@@ -82349,7 +82349,7 @@
       "squadValue": 1022,
       "teamValue": 1027,
       "teamValueDisplay": "£102.7m",
-      "decisionLog": "AI Executed Double Transfer: Verbruggen → Dasilva, Vuskovic → A.Becker (2 FTs used, 0 hit). You scored 43 pts, AI scored 43 pts (+0 pts).",
+      "decisionLog": "AI Transferred Verbruggen → Dasilva. You scored 43 pts, AI scored 43 pts (+0 pts).",
       "averageScore": 50,
       "humanComparison": {
         "gameweek": 11,
@@ -82358,7 +82358,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": 0,
         "cumulativeAlphaDelta": 82
       }
@@ -85652,7 +85652,7 @@
       "squadValue": 1022,
       "teamValue": 1027,
       "teamValueDisplay": "£102.7m",
-      "decisionLog": "AI Executed Double Transfer: Verbruggen → Dasilva, Vuskovic → A.Becker (2 FTs used, 0 hit). You scored 43 pts, AI scored 43 pts (+0 pts).",
+      "decisionLog": "AI Transferred Verbruggen → Dasilva. You scored 43 pts, AI scored 43 pts (+0 pts).",
       "averageScore": 50,
       "humanComparison": {
         "gameweek": 11,
@@ -85661,7 +85661,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": 0,
         "cumulativeAlphaDelta": 82
       }
@@ -88955,7 +88955,7 @@
       "squadValue": 1022,
       "teamValue": 1027,
       "teamValueDisplay": "£102.7m",
-      "decisionLog": "AI Executed Double Transfer: Verbruggen → Dasilva, Vuskovic → A.Becker (2 FTs used, 0 hit). You scored 43 pts, AI scored 43 pts (+0 pts).",
+      "decisionLog": "AI Transferred Verbruggen → Dasilva. You scored 43 pts, AI scored 43 pts (+0 pts).",
       "averageScore": 50,
       "humanComparison": {
         "gameweek": 11,
@@ -88964,7 +88964,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": 0,
         "cumulativeAlphaDelta": 82
       }
@@ -92258,7 +92258,7 @@
       "squadValue": 1022,
       "teamValue": 1027,
       "teamValueDisplay": "£102.7m",
-      "decisionLog": "AI Executed Double Transfer: Verbruggen → Dasilva, Vuskovic → A.Becker (2 FTs used, 0 hit). You scored 43 pts, AI scored 43 pts (+0 pts).",
+      "decisionLog": "AI Transferred Verbruggen → Dasilva. You scored 43 pts, AI scored 43 pts (+0 pts).",
       "averageScore": 50,
       "humanComparison": {
         "gameweek": 11,
@@ -92267,7 +92267,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": 0,
         "cumulativeAlphaDelta": 82
       }
@@ -95561,7 +95561,7 @@
       "squadValue": 1022,
       "teamValue": 1027,
       "teamValueDisplay": "£102.7m",
-      "decisionLog": "AI Executed Double Transfer: Verbruggen → Dasilva, Vuskovic → A.Becker (2 FTs used, 0 hit). You scored 43 pts, AI scored 43 pts (+0 pts).",
+      "decisionLog": "AI Transferred Verbruggen → Dasilva. You scored 43 pts, AI scored 43 pts (+0 pts).",
       "averageScore": 50,
       "humanComparison": {
         "gameweek": 11,
@@ -95570,7 +95570,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": 0,
         "cumulativeAlphaDelta": 82
       }
@@ -98864,7 +98864,7 @@
       "squadValue": 1022,
       "teamValue": 1027,
       "teamValueDisplay": "£102.7m",
-      "decisionLog": "AI Executed Double Transfer: Verbruggen → Dasilva, Vuskovic → A.Becker (2 FTs used, 0 hit). You scored 43 pts, AI scored 43 pts (+0 pts).",
+      "decisionLog": "AI Transferred Verbruggen → Dasilva. You scored 43 pts, AI scored 43 pts (+0 pts).",
       "averageScore": 50,
       "humanComparison": {
         "gameweek": 11,
@@ -98873,7 +98873,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": 0,
         "cumulativeAlphaDelta": 82
       }
@@ -102167,7 +102167,7 @@
       "squadValue": 1022,
       "teamValue": 1027,
       "teamValueDisplay": "£102.7m",
-      "decisionLog": "AI Executed Double Transfer: Verbruggen → A.Becker, Vuskovic → Dasilva (2 FTs used, 0 hit). You scored 43 pts, AI scored 45 pts (+2 pts).",
+      "decisionLog": "AI Transferred Verbruggen → A.Becker. You scored 43 pts, AI scored 45 pts (+2 pts).",
       "averageScore": 50,
       "humanComparison": {
         "gameweek": 11,
@@ -102176,7 +102176,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": 2,
         "cumulativeAlphaDelta": 84
       }
@@ -105470,7 +105470,7 @@
       "squadValue": 1022,
       "teamValue": 1027,
       "teamValueDisplay": "£102.7m",
-      "decisionLog": "AI Executed Double Transfer: Verbruggen → A.Becker, Vuskovic → Dasilva (2 FTs used, 0 hit). You scored 43 pts, AI scored 45 pts (+2 pts).",
+      "decisionLog": "AI Transferred Verbruggen → A.Becker. You scored 43 pts, AI scored 45 pts (+2 pts).",
       "averageScore": 50,
       "humanComparison": {
         "gameweek": 11,
@@ -105479,7 +105479,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": 2,
         "cumulativeAlphaDelta": 84
       }
@@ -108773,7 +108773,7 @@
       "squadValue": 1022,
       "teamValue": 1027,
       "teamValueDisplay": "£102.7m",
-      "decisionLog": "AI Executed Double Transfer: Verbruggen → Dasilva, Vuskovic → A.Becker (2 FTs used, 0 hit). You scored 43 pts, AI scored 43 pts (+0 pts).",
+      "decisionLog": "AI Transferred Verbruggen → Dasilva. You scored 43 pts, AI scored 43 pts (+0 pts).",
       "averageScore": 50,
       "humanComparison": {
         "gameweek": 11,
@@ -108782,7 +108782,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": 0,
         "cumulativeAlphaDelta": 82
       }
@@ -112076,7 +112076,7 @@
       "squadValue": 1022,
       "teamValue": 1027,
       "teamValueDisplay": "£102.7m",
-      "decisionLog": "AI Executed Double Transfer: Verbruggen → Dasilva, Vuskovic → A.Becker (2 FTs used, 0 hit). You scored 43 pts, AI scored 43 pts (+0 pts).",
+      "decisionLog": "AI Transferred Verbruggen → Dasilva. You scored 43 pts, AI scored 43 pts (+0 pts).",
       "averageScore": 50,
       "humanComparison": {
         "gameweek": 11,
@@ -112085,7 +112085,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": 0,
         "cumulativeAlphaDelta": 82
       }
@@ -115379,7 +115379,7 @@
       "squadValue": 1022,
       "teamValue": 1027,
       "teamValueDisplay": "£102.7m",
-      "decisionLog": "AI Executed Double Transfer: Verbruggen → Dasilva, Vuskovic → A.Becker (2 FTs used, 0 hit). You scored 43 pts, AI scored 43 pts (+0 pts).",
+      "decisionLog": "AI Transferred Verbruggen → Dasilva. You scored 43 pts, AI scored 43 pts (+0 pts).",
       "averageScore": 50,
       "humanComparison": {
         "gameweek": 11,
@@ -115388,7 +115388,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": 0,
         "cumulativeAlphaDelta": 82
       }
@@ -118682,7 +118682,7 @@
       "squadValue": 1022,
       "teamValue": 1027,
       "teamValueDisplay": "£102.7m",
-      "decisionLog": "AI Executed Double Transfer: Verbruggen → Dasilva, Vuskovic → A.Becker (2 FTs used, 0 hit). You scored 43 pts, AI scored 43 pts (+0 pts).",
+      "decisionLog": "AI Transferred Verbruggen → Dasilva. You scored 43 pts, AI scored 43 pts (+0 pts).",
       "averageScore": 50,
       "humanComparison": {
         "gameweek": 11,
@@ -118691,7 +118691,7 @@
         "grossPoints": 43,
         "netPoints": 43,
         "cumulativePoints": 631,
-        "overallRank": 3095203,
+        "overallRank": 3095212,
         "alphaDelta": 0,
         "cumulativeAlphaDelta": 82
       }
