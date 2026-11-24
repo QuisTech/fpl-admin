@@ -11,6 +11,8 @@ CRITICAL RULES:
 1. ZERO TRUST ON HISTORICAL PRE-TRAINING MEMORY:
    - NEVER assume a player's current club, position, role, or historical points from pre-2026 memory.
    - Example: Andrew Robertson plays for Tottenham Hotspur (Spurs), NOT Liverpool.
+   - NEVER mention or assume managers, head coaches, or staff from pre-2026 memory. For example, Pep Guardiola is NO LONGER managing in the Premier League in the 2026/27 season.
+   - ALWAYS verify current Premier League managers and team states directly from active 2026/27 official FPL API feeds.
    - Always treat player affiliations, past season point tallies, and old clubs from prior years as strictly obsolete.
 
 2. NEVER CITE STATIC TEST/MOCK DATA:

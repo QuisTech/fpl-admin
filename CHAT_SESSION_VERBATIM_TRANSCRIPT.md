@@ -32999,3 +32999,47 @@ Here is why GW13 is dangerous if left unadjusted:
   - Holding your Bench Boost for a second-half **Double Gameweek (GW25–GW37)** gives your bench 180 minutes of action (two matches each), which is the traditional gold standard.
 
 **Bottom Line:** Keep GW13 on your radar as a potential single-gameweek Bench Boost, but only pull the trigger if you use your Free Transfers to break up the Brighton vs Bournemouth civil war!
+
+
+---
+
+## Session Continuation: 2026-11-24 (GW11 Post-Match Analysis & GW12 Pre-Deadline Grounding)
+
+### User Request
+Verbruggen and Vuskovic played 90 minutes in GW11; fix false 0 mins and auto-subs, correct My Real XI transfer to De Cuyper → Van Hecke (£5.1m), and strictly segregate AI XI and My Real XI.
+
+### Assistant Response
+- Verified official Premier League live data: Verbruggen played 90 mins (2 pts), Vuskovic played 90 mins (0 pts). Removed all false auto-subs.
+- Overrode Real Transfer in humanComparison for GW11 to De Cuyper → Van Hecke (£5.1m), Bank: £0.4m, Squad Value: £101.8m.
+- Strictly segregated CareerModeView UI between AI XI and My Real XI.
+
+### User Request
+You vs AI Co-Pilot card showing same for both AI XI (39 pts) and My Real XI (43 pts) — which is it for?
+
+### Assistant Response
+- Clarified that You vs AI Co-Pilot is the Head-to-Head Duel Comparison Card comparing BOTH squads side-by-side for GW11 (Real 43 pts vs AI 39 pts, You +4 pts ahead).
+- Added interactive active Viewing state indicators (cyan for Real, emerald for AI) and 1-click team switching buttons.
+- Normalized Haaland GW11 base points to 2 (4 pts as captain).
+
+### User Request
+In forward roadmap, why is it showing Transfer Rayan → Wirtz? Do we even have Rayan in the AI Co-Pilot squad?
+
+### Assistant Response
+- Discovered and resolved root cause: Element ID 67 in official FPL database is Rayan (Bournemouth, £6.3m), whereas Justin Kluivert is Element ID 70 (Bournemouth, £5.9m).
+- The squad owned Justin Kluivert, but the ID was erroneously recorded as 67. The forward solver therefore looked up ID 67 and labeled it Rayan.
+- Re-mapped Kluivert to his true official FPL Element ID 70 across all 48 configuration keys.
+
+### User Request
+Verification that forward roadmaps for both AI Co-Pilot and Autonomous AI will be frozen at the deadline without mutation.
+
+### Assistant Response
+- Confirmed the immutable freeze pipeline: past history (GW1-GW11) is locked on disk in synced_career_history.json and autonomous_career_history.json.
+- Documented official pre-deadline GW12 baseline.
+
+### User Request
+Correcting agent for referencing Pep Guardiola (who is no longer managing in the Premier League in the 2026/27 campaign) and failing to use live FPL API grounding.
+
+### Assistant Response
+- Acknowledged error in citing obsolete manager from pre-2026 memory.
+- Created global skill fpl-live-grounding in ~/.gemini/config/skills/fpl_grounding/SKILL.md.
+- Updated GEMINI.md in both fpl-planner and fpl-admin strictly prohibiting referencing obsolete managers and mandating live FPL API verification.
