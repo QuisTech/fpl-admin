@@ -257,6 +257,15 @@ export class CareerService {
     return oracle;
   }
 
+  private static getDisambiguatedName(player: any, allPlayers: any[] = []): string {
+    if (!player) return 'Player';
+    const dupes = allPlayers.filter((p: any) => p.web_name === player.web_name);
+    if (dupes.length > 1 && player.first_name) {
+      return `${player.first_name[0]}. ${player.web_name}`;
+    }
+    return player.web_name;
+  }
+
   private static mapPlayer(
     id: number,
     baseData: any,
@@ -279,7 +288,7 @@ export class CareerService {
 
     return {
       id,
-      web_name: p ? p.web_name : `Player ${id}`,
+      web_name: p ? this.getDisambiguatedName(p, baseData.players) : `Player ${id}`,
       position: pos,
       cost,
       costDisplay: `£${(cost / 10).toFixed(1)}m`,
@@ -546,14 +555,14 @@ export class CareerService {
 
           transfersInList.push({
             id: inId,
-            name: pIn ? pIn.web_name : `Player ${inId}`,
+            name: pIn ? this.getDisambiguatedName(pIn, baseData.players) : `Player ${inId}`,
             position: oracle.getPosition(inId),
             cost: inCost,
             costDisplay: `£${(inCost / 10).toFixed(1)}m`
           });
           transfersOutList.push({
             id: outId,
-            name: pOut ? pOut.web_name : `Player ${outId}`,
+            name: pOut ? this.getDisambiguatedName(pOut, baseData.players) : `Player ${outId}`,
             position: oracle.getPosition(outId),
             cost: oracle.getCost(outId),
             sellPrice: outSell,
@@ -895,7 +904,7 @@ export class CareerService {
           const pIn = baseData.players.find((pl: any) => pl.id === t.element_in);
           return {
             id: t.element_in,
-            name: pIn ? pIn.web_name : `Player ${t.element_in}`,
+            name: pIn ? this.getDisambiguatedName(pIn, baseData.players) : `Player ${t.element_in}`,
             position: pIn?.element_type === 1 ? 'GKP' : pIn?.element_type === 2 ? 'DEF' : pIn?.element_type === 3 ? 'MID' : 'FWD',
             costDisplay: `£${((t.element_in_cost || 0) / 10).toFixed(1)}m`
           };
@@ -904,7 +913,7 @@ export class CareerService {
           const pOut = baseData.players.find((pl: any) => pl.id === t.element_out);
           return {
             id: t.element_out,
-            name: pOut ? pOut.web_name : `Player ${t.element_out}`,
+            name: pOut ? this.getDisambiguatedName(pOut, baseData.players) : `Player ${t.element_out}`,
             position: pOut?.element_type === 1 ? 'GKP' : pOut?.element_type === 2 ? 'DEF' : pOut?.element_type === 3 ? 'MID' : 'FWD',
             costDisplay: `£${((t.element_out_cost || 0) / 10).toFixed(1)}m`
           };
@@ -1138,8 +1147,8 @@ export class CareerService {
             g.decisionLog = `AI Rolled FT (Saved for future). You scored ${humanNet} pts, AI scored ${g.netPoints} pts (${alphaDelta >= 0 ? `+${alphaDelta}` : alphaDelta} pts).`;
           } else if (g.transfersIn?.length > 0 && g.transfersOut?.length > 0) {
             const transferDesc = g.transfersIn.length > 1
-              ? `Executed Double Transfer: ${g.transfersIn.map((t, i) => `${g.transfersOut[i]?.name || 'Player'} → ${t.name}`).join(', ')} (${g.transfersIn.length} FTs used, 0 hit)`
-              : `Transferred ${g.transfersOut[0].name} → ${g.transfersIn[0].name}`;
+              ? `Executed Double Transfer: ${g.transfersIn.map((t, i) => `${g.transfersOut[i]?.name || 'Player'} (${g.transfersOut[i]?.position || ''}) → ${t.name} (${t.position || ''})`).join(', ')} (${g.transfersIn.length} FTs used, 0 hit)`
+              : `Transferred ${g.transfersOut[0].name} (${g.transfersOut[0].position || ''}) → ${g.transfersIn[0].name} (${g.transfersIn[0].position || ''})`;
             g.decisionLog = `AI ${transferDesc}. You scored ${humanNet} pts, AI scored ${g.netPoints} pts (${alphaDelta >= 0 ? `+${alphaDelta}` : alphaDelta} pts).`;
           }
         }
@@ -1700,14 +1709,14 @@ export class CareerService {
 
           transfersInList.push({
             id: inId,
-            name: pIn ? pIn.web_name : `Player ${inId}`,
+            name: pIn ? this.getDisambiguatedName(pIn, baseData.players) : `Player ${inId}`,
             position: oracle.getPosition(inId),
             cost: inCost,
             costDisplay: `£${(inCost / 10).toFixed(1)}m`
           });
           transfersOutList.push({
             id: outId,
-            name: pOut ? pOut.web_name : `Player ${outId}`,
+            name: pOut ? this.getDisambiguatedName(pOut, baseData.players) : `Player ${outId}`,
             position: oracle.getPosition(outId),
             cost: oracle.getCost(outId),
             sellPrice: outSell,
@@ -1819,8 +1828,8 @@ export class CareerService {
       let log = isRolled
         ? `${logPrefix}GW${gw} Projected: Roll Free Transfer (Bank: ${state.freeTransfers} FTs). Captain: ${capModel.web_name} (${capXpFormatted} xP).`
         : transfersInList.length > 1
-        ? `${logPrefix}GW${gw} Projected: Double Transfer ${transfersInList.map((t, i) => `${transfersOutList[i]?.name || 'Player'} → ${t.name}`).join(', ')} (${transfersInList.length} FTs used, 0 hit). Captain: ${capModel.web_name} (${capXpFormatted} xP).`
-        : `${logPrefix}GW${gw} Projected: Transfer ${transfersOutList[0]?.name} → ${transfersInList[0]?.name}. Captain: ${capModel.web_name} (${capXpFormatted} xP).`;
+        ? `${logPrefix}GW${gw} Projected: Double Transfer ${transfersInList.map((t, i) => `${transfersOutList[i]?.name || 'Player'} (${transfersOutList[i]?.position || ''}) → ${t.name} (${t.position || ''})`).join(', ')} (${transfersInList.length} FTs used, 0 hit). Captain: ${capModel.web_name} (${capXpFormatted} xP).`
+        : `${logPrefix}GW${gw} Projected: Transfer ${transfersOutList[0]?.name} (${transfersOutList[0]?.position || ''}) → ${transfersInList[0]?.name} (${transfersInList[0]?.position || ''}). Captain: ${capModel.web_name} (${capXpFormatted} xP).`;
       if (activeChip === 'BB') {
         const benchXpSum = benchIds.reduce((sum, id) => sum + oracle.getXP(id, gw), 0);
         log += ` Bench Boost added +${benchXpSum.toFixed(1)} xP from bench.`;

@@ -764,7 +764,7 @@ export const CareerModeView = ({
                   <p className="text-xs text-slate-300 leading-relaxed font-sans">
                     {isHumanView 
                       ? (activeGwData.humanComparison?.decisionLog || (displayedTransfersIn.length > 0 
-                          ? `Real Transfer: ${displayedTransfersIn.map((t, i) => `${displayedTransfersOut[i]?.name || 'Player'} → ${t.name}`).join(', ')}. Captain: ${displayedCaptain?.web_name || 'Haaland'} (2×).`
+                          ? `Real Transfer: ${displayedTransfersIn.map((t, i) => `${displayedTransfersOut[i]?.name || 'Player'} (${displayedTransfersOut[i]?.position || ''}) → ${t.name} (${t.position || ''})`).join(', ')}. Captain: ${displayedCaptain?.web_name || 'Haaland'} (2×).`
                           : "No transfers made in real life (Free Transfer rolled)."))
                       : activeGwData.decisionLog}
                   </p>
@@ -789,8 +789,18 @@ export const CareerModeView = ({
                           return (
                             <div key={i} className="flex items-center justify-between bg-slate-900 p-2.5 rounded-xl border border-slate-800 text-xs">
                               <div className="flex items-center gap-2">
+                                {tOut?.position && (
+                                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono font-bold uppercase border border-slate-700">
+                                    {tOut.position}
+                                  </span>
+                                )}
                                 <span className="text-rose-400 line-through font-medium">{tOut?.name || 'Player'}</span>
                                 <ArrowRight className="w-3.5 h-3.5 text-slate-500" />
+                                {tIn?.position && (
+                                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 font-mono font-bold uppercase">
+                                    {tIn.position}
+                                  </span>
+                                )}
                                 <span className="text-emerald-400 font-bold">{tIn.name}</span>
                               </div>
                               <span className="text-[10px] font-mono text-slate-400">{tIn.costDisplay}</span>
