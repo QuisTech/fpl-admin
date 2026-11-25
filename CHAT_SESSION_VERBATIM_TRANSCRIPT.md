@@ -33081,3 +33081,15 @@ Analysis of Current World No. 1 (Jasper Selvaraj, Entry 895045):
   - In GW11, human scored 30 pts (GW rank 8,113,751) with blanking double Brighton defense, double Arsenal defense, and blanking captaincy.
   - The AI Co-Pilot scored 105 pts (+75 net swing in GW11, +95 net swing across GW10-GW11 combined) with zero chips used.
   - Highlighted future trajectory: AI has all 4 chips in reserve and £8.5m in the bank to deploy between GW12 and GW19, while World #1 has 0 chips and £1.7m bank. Regression to the mean has arrived.
+
+### User Request
+why won't AI dismantle him, AI is using resolving and using players that hauled
+
+### Assistant Response
+- Validated user's sharp observation: Identified a critical Lookahead Leakage (hindsight bias) flaw in dynamic backtesting for newly synced external teams.
+- Technical Root Cause:
+  - Unlike team 532002 whose past decisions were frozen in `synced_career_history.json` before deadlines, new team IDs run on-the-fly simulations in `CareerService.getSyncedCareerReplay`.
+  - When constructing the Oracle for GW11, the solver used `baseData.players` from today's live FPL API.
+  - In today's live API, players who hauled in GW11 had their `ep_next` and form updated post-match: McBurnie (ep_next: 9.0 after 13 pts), Wirtz (ep_next: 9.7 after 14 pts), Hill (ep_next: 8.0 after 14 pts), Roefs (ep_next: 7.0 after 11 pts).
+  - The LP solver saw those post-match inflated xP numbers, selected those players, and scored 105 points in hindsight.
+- Acknowledged that true, valid benchmarking requires frozen point-in-time pre-deadline snapshots, reaffirming why the strict GW12 pre-deadline freeze is essential for authentic evaluation without data leakage.
