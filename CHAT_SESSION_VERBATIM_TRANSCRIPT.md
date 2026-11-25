@@ -33155,3 +33155,13 @@ Account 365919 shows "Transfer Palmer → Trafford (£5.1m)". How can Palmer be 
   - Added `getDisambiguatedName` across `career-service.ts`: automatically outputs "A. Palmer" for Alex Palmer and "C. Palmer" for Cole Palmer when duplicate web_names exist.
   - Added explicit position badges (`[GKP]`, `[MID]`, etc.) to the Transfer Execution UI cards and decision logs (`Transfer A. Palmer (GKP) → Trafford (GKP)`).
   - Pushed to `main` across both `fpl-admin` and `fpl-planner`.
+
+### User Request
+Fix CSS layout and overflow on Transfer Execution card: prevent money and badges from wrapping into a vertical stack or overflowing horizontally on mobile view.
+
+### Assistant Response
+- Refactored Transfer Execution and Financial State layout in `CareerModeView.tsx`:
+  - Enforced single-row responsive flex with `min-w-0 flex-1 truncate` on player names and `shrink-0` on badges and arrows to prevent vertical stair-stepping.
+  - Wrapped `costDisplay` in a dedicated pill with `whitespace-nowrap shrink-0` to eliminate horizontal cost overflow.
+  - Condensed financial labels (`Bank:` and `Squad:` instead of `Bank Balance:` and `Squad Value:`) with `flex-col sm:flex-row gap-1 sm:gap-2` to guarantee zero boundary overflow on mobile viewports.
+  - Verified and pushed to `main` across both `fpl-admin` and `fpl-planner`.
