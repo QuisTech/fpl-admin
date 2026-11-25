@@ -33120,3 +33120,14 @@ So if I want to test 100 or 200 plus account to see just asking, just this Point
   - The snapshot engine acts as an immutable "time machine": when evaluating GW3 or GW8 for an arbitrary account, the solver only sees player prices, availability, and xP as archived in `data/snapshots/gw_{X}/` before that gameweek's deadline.
   - Backtesting 100, 200, or 1,000 arbitrary accounts is completely possible and leak-free on demand.
   - Going forward (GW12+), any account currently synced in the system is eligible to have its forward decisions frozen before the Friday deadline.
+
+### User Request
+@[Quote] I am not running this, I was just asking if I were to insert different account one at a time not bulk please
+
+### Assistant Response
+- Confirmed that no bulk process will be run.
+- Clarified that for normal single-account use (entering one team ID at a time in the Career tab), the Point-in-Time Historical Snapshot Replay works automatically and seamlessly.
+- When any individual account is entered:
+  - The app pulls that team's GW1 squad and real picks on demand.
+  - The engine replays the AI Co-Pilot through the pre-deadline snapshots (`data/snapshots/gw_{X}/fpl_native.csv`).
+  - The UI instantly renders the authentic Duel comparison, pitch lineups, and gameweek history with 0 lookahead bias.
