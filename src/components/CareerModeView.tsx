@@ -787,66 +787,40 @@ export const CareerModeView = ({
                         {displayedTransfersIn.map((tIn, i) => {
                           const tOut = displayedTransfersOut[i];
                           return (
-                            <div key={i} className="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 text-xs">
-                              {/* Desktop view: 1 clean horizontal row */}
-                              <div className="hidden sm:flex items-center justify-between gap-2">
-                                <div className="flex items-center gap-2">
-                                  {tOut?.position && (
-                                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono font-bold uppercase border border-slate-700 leading-none shrink-0">
-                                      {tOut.position}
-                                    </span>
-                                  )}
-                                  <span className="text-rose-400 line-through font-medium whitespace-nowrap">
-                                    {tOut?.name || 'Player'}
+                            <div key={i} className="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 text-xs space-y-1.5">
+                              {/* Row 1: Player Out */}
+                              <div className="flex items-center gap-2">
+                                <span className="text-[9px] px-1.5 py-0.5 rounded bg-rose-500/15 text-rose-400 font-mono font-bold uppercase border border-rose-500/30 leading-none shrink-0">
+                                  OUT
+                                </span>
+                                {tOut?.position && (
+                                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono font-bold uppercase border border-slate-700 leading-none shrink-0">
+                                    {tOut.position}
                                   </span>
-                                  <ArrowRight className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                                )}
+                                <span className="text-rose-400 line-through font-medium">
+                                  {tOut?.name || 'Player'}
+                                </span>
+                              </div>
+
+                              {/* Row 2: Player In + Price Docked Right */}
+                              <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-slate-800/80">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 font-mono font-bold uppercase border border-emerald-500/30 leading-none shrink-0">
+                                    IN
+                                  </span>
                                   {tIn?.position && (
                                     <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 font-mono font-bold uppercase leading-none shrink-0">
                                       {tIn.position}
                                     </span>
                                   )}
-                                  <span className="text-emerald-400 font-bold whitespace-nowrap">
+                                  <span className="text-emerald-400 font-bold">
                                     {tIn.name}
                                   </span>
                                 </div>
-                                <span className="text-[11px] font-mono text-slate-300 font-semibold px-2 py-0.5 rounded bg-slate-800/80 border border-slate-700/50 shrink-0 whitespace-nowrap">
+                                <span className="text-[11px] font-mono text-slate-200 font-semibold px-2 py-0.5 rounded bg-slate-800 border border-slate-700 shrink-0">
                                   {tIn.costDisplay}
                                 </span>
-                              </div>
-
-                              {/* Mobile view: 2 dedicated rows (no scrolling, no ellipsis, no overflow) */}
-                              <div className="flex sm:hidden flex-col gap-1.5">
-                                <div className="flex items-center gap-1.5">
-                                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-400 font-mono font-bold uppercase border border-rose-500/20 leading-none shrink-0">
-                                    OUT
-                                  </span>
-                                  {tOut?.position && (
-                                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono font-bold uppercase border border-slate-700 leading-none shrink-0">
-                                      {tOut.position}
-                                    </span>
-                                  )}
-                                  <span className="text-rose-400 line-through font-medium">
-                                    {tOut?.name || 'Player'}
-                                  </span>
-                                </div>
-                                <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-800/60">
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-mono font-bold uppercase border border-emerald-500/20 leading-none shrink-0">
-                                      IN
-                                    </span>
-                                    {tIn?.position && (
-                                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 font-mono font-bold uppercase leading-none shrink-0">
-                                        {tIn.position}
-                                      </span>
-                                    )}
-                                    <span className="text-emerald-400 font-bold">
-                                      {tIn.name}
-                                    </span>
-                                  </div>
-                                  <span className="text-[10px] font-mono text-slate-300 font-semibold px-1.5 py-0.5 rounded bg-slate-800/80 border border-slate-700/50 shrink-0 whitespace-nowrap">
-                                    {tIn.costDisplay}
-                                  </span>
-                                </div>
                               </div>
                             </div>
                           );
