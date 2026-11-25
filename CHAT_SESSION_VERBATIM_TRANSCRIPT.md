@@ -33131,3 +33131,12 @@ So if I want to test 100 or 200 plus account to see just asking, just this Point
   - The app pulls that team's GW1 squad and real picks on demand.
   - The engine replays the AI Co-Pilot through the pre-deadline snapshots (`data/snapshots/gw_{X}/fpl_native.csv`).
   - The UI instantly renders the authentic Duel comparison, pitch lineups, and gameweek history with 0 lookahead bias.
+
+### User Request
+@[Quote] for only my team right?
+Quote: "Pre-Deadline Freezing The Future (GW12 → GW38)"
+
+### Assistant Response
+- Confirmed unequivocally: YES, the permanent pre-deadline freeze is strictly and exclusively for the user's squad (Team ID 532002) and the Autonomous AI squad.
+- Documented that `synced_career_history.json` contains all 48 configuration keys dedicated exclusively to Team 532002.
+- Third-party teams are never stored in `synced_career_history.json`, ensuring the user's personal career history remains clean, unmutated, and untainted by external accounts. Third parties are evaluated strictly on demand via the Point-in-Time Historical Snapshot engine.
