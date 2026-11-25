@@ -33109,3 +33109,14 @@ So no way to actually see if AI beats them or not without AI not using retrospec
      - Enhanced `NativeOracle` to strictly load point-in-time pre-deadline snapshots instead of today's live `bootstrap-static`.
      - Verified clean replay: GW11 scored 41 pts (Captain: Nicolas Jackson, no McBurnie, no Wirtz hindsight haul) vs Jasper's 30 pts, proving AI still beat him (+11 pts) on pure authentic pre-match data.
 - Built, tested, and pushed fixes across both `fpl-admin` and `fpl-planner`.
+
+### User Request
+So if I want to test 100 or 200 plus account to see just asking, just this Point-in-Time Historical Snapshot Replay will do it cos I don't see how how it is possible to freeze just about any random account I may sync? Or am I missing something?
+
+### Assistant Response
+- Confirmed user's premise: You cannot predict in advance which random accounts out of 11M+ managers will be queried, which is precisely why the Point-in-Time Historical Snapshot Replay was engineered.
+- Explained the architecture:
+  - FPL's API stores any account's historical GW1 starting picks and weekly points forever.
+  - The snapshot engine acts as an immutable "time machine": when evaluating GW3 or GW8 for an arbitrary account, the solver only sees player prices, availability, and xP as archived in `data/snapshots/gw_{X}/` before that gameweek's deadline.
+  - Backtesting 100, 200, or 1,000 arbitrary accounts is completely possible and leak-free on demand.
+  - Going forward (GW12+), any account currently synced in the system is eligible to have its forward decisions frozen before the Friday deadline.
