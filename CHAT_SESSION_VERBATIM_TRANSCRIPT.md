@@ -33175,3 +33175,22 @@ Names of players are not showing complete, now showing with ellipsis; restore fu
   - Bound each player badge and name into an unbreakable inline unit (`inline-flex items-center gap-1.5 whitespace-nowrap shrink-0`).
   - Added `overflow-x-auto` to the transfer row container so full names are always 100% legible without breaking or causing card boundary overflow on any screen size.
   - Verified and pushed to `main` across both `fpl-admin` and `fpl-planner`.
+
+
+### User Request
+So what exactly have you fixed now? I don't like the horizontal scrolling you added
+
+### Assistant Response
+- Completely removed horizontal scrolling (`overflow-x-auto` eliminated) and eliminated ellipsis truncation (`truncate` eliminated).
+- Solved the layout problem by adopting a responsive mobile-first architecture in `CareerModeView.tsx`:
+  - **Desktop View (sm and up)**: 1 clean horizontal row with full player names, position badges, and right-aligned transfer cost badge:
+    `[GKP] Dubravka → [GKP] Kinsky    £4.4m`
+  - **Mobile View (under sm)**: 2 dedicated rows mirroring native mobile sports apps:
+    - Row 1: `OUT [GKP] Dubravka` (subtle rose badge + position pill + 100% full player name)
+    - Row 2: `IN [GKP] Kinsky` (emerald badge + position pill + 100% full player name) with the transfer cost `£4.4m` cleanly docked on the far right.
+- Result:
+  1. Zero horizontal scrolling (no scrollbars inside the card).
+  2. Zero text truncation or ellipsis (every player name is 100% complete and legible).
+  3. Zero staircase wrapping (badges and names stay grouped).
+  4. Ample breathing room for the price tag without pushing outside container bounds.
+- Verified TypeScript compilation and pushed changes to `main` across both `fpl-admin` and `fpl-planner`.
