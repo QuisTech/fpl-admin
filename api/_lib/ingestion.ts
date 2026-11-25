@@ -621,6 +621,13 @@ export class NativeOracle extends BaseOracle {
     // Populate metadata and features from live API
     this.populateMetadataAndFeatures(players, fixtures, teams, nextEventId);
 
+    const teamShortMap: Record<string, number> = {};
+    if (teams && teams.length > 0) {
+      teams.forEach(t => {
+        if (t.short_name) teamShortMap[t.short_name.toLowerCase()] = t.id;
+      });
+    }
+
     // If a point-in-time pre-deadline snapshot exists for this gameweek, load it to eliminate lookahead bias
     const snapshotXpMap = new Map<number, number>();
     const fileContent = _filePath ? getCachedFile(_filePath) : null;
@@ -630,9 +637,17 @@ export class NativeOracle extends BaseOracle {
         const parts = line.split(',');
         if (parts.length >= 7) {
           const pName = (parts[1] || '').replace(/^"|"$/g, '').trim().toLowerCase();
+          const teamName = (parts[3] || '').replace(/^"|"$/g, '').trim().toLowerCase();
+          const pos = (parts[4] || '').replace(/^"|"$/g, '').trim().toUpperCase();
+          const expectedElementType = pos === 'GKP' || pos === 'GK' ? 1 : pos === 'DEF' ? 2 : pos === 'MID' ? 3 : pos === 'FWD' ? 4 : 0;
           const xp = parseFloat((parts[6] || '').replace(/^"|"$/g, '').trim());
           if (pName && !isNaN(xp)) {
-            const match = players.find(p => (p.web_name || '').toLowerCase() === pName);
+            const csvTeamId = teamShortMap[teamName] || 0;
+            const match = players.find(p => {
+              if (csvTeamId > 0 && p.team !== undefined && p.team !== csvTeamId) return false;
+              if (expectedElementType > 0 && p.element_type !== undefined && p.element_type !== expectedElementType) return false;
+              return (p.web_name || '').toLowerCase() === pName;
+            });
             if (match) snapshotXpMap.set(match.id, xp);
           }
         }
