@@ -33165,3 +33165,13 @@ Fix CSS layout and overflow on Transfer Execution card: prevent money and badges
   - Wrapped `costDisplay` in a dedicated pill with `whitespace-nowrap shrink-0` to eliminate horizontal cost overflow.
   - Condensed financial labels (`Bank:` and `Squad:` instead of `Bank Balance:` and `Squad Value:`) with `flex-col sm:flex-row gap-1 sm:gap-2` to guarantee zero boundary overflow on mobile viewports.
   - Verified and pushed to `main` across both `fpl-admin` and `fpl-planner`.
+
+### User Request
+Names of players are not showing complete, now showing with ellipsis; restore full player names completely without ellipsis.
+
+### Assistant Response
+- Completely eliminated `truncate` CSS property from player names in `CareerModeView.tsx`.
+- Guaranteed 100% full player name rendering with zero ellipsis cutoffs:
+  - Bound each player badge and name into an unbreakable inline unit (`inline-flex items-center gap-1.5 whitespace-nowrap shrink-0`).
+  - Added `overflow-x-auto` to the transfer row container so full names are always 100% legible without breaking or causing card boundary overflow on any screen size.
+  - Verified and pushed to `main` across both `fpl-admin` and `fpl-planner`.
