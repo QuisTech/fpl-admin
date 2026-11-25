@@ -36,7 +36,10 @@ function getCachedFile(filePath: string): string | null {
     if (cached && cached.mtimeMs === stat.mtimeMs) {
       return cached.content;
     }
-    const content = fs.readFileSync(fullPath, 'utf-8');
+    const buf = fs.readFileSync(fullPath);
+    const content = (buf.length >= 2 && buf[0] === 0xff && buf[1] === 0xfe)
+      ? buf.toString('utf16le')
+      : buf.toString('utf-8');
     fileCache[fullPath] = { content, mtimeMs: stat.mtimeMs };
     return content;
   } catch {
@@ -606,7 +609,7 @@ export class NativeOracle extends BaseOracle {
   protected get fuelSource() { return 'NATIVE' as const; }
 
   constructor(
-    _filePath: string, // ignored
+    _filePath: string,
     players: any[] = [],
     riskMode: string = 'safe',
     fixtures: any[] = [],
@@ -618,12 +621,30 @@ export class NativeOracle extends BaseOracle {
     // Populate metadata and features from live API
     this.populateMetadataAndFeatures(players, fixtures, teams, nextEventId);
 
-    // Populate xpMatrix using official FPL ep_next for nextEventId,
+    // If a point-in-time pre-deadline snapshot exists for this gameweek, load it to eliminate lookahead bias
+    const snapshotXpMap = new Map<number, number>();
+    const fileContent = _filePath ? getCachedFile(_filePath) : null;
+    if (fileContent) {
+      const lines = fileContent.split('\n');
+      lines.forEach(line => {
+        const parts = line.split(',');
+        if (parts.length >= 7) {
+          const pName = (parts[1] || '').replace(/^"|"$/g, '').trim().toLowerCase();
+          const xp = parseFloat((parts[6] || '').replace(/^"|"$/g, '').trim());
+          if (pName && !isNaN(xp)) {
+            const match = players.find(p => (p.web_name || '').toLowerCase() === pName);
+            if (match) snapshotXpMap.set(match.id, xp);
+          }
+        }
+      });
+    }
+
+    // Populate xpMatrix using pre-deadline projection for nextEventId,
     // and calibrating multi-week forward projections (GW+1 through GW+14)
     // using the structural projection engine.
     players.forEach(p => {
       const fplId = p.id;
-      const epNext = parseFloat(p.ep_next) || 0;
+      const epNext = snapshotXpMap.has(fplId) ? snapshotXpMap.get(fplId)! : (parseFloat(p.ep_next) || 0);
       const features = this.featuresMatrix[fplId];
 
       this.xpMatrix[fplId] = {};

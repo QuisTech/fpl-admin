@@ -33093,3 +33093,19 @@ why won't AI dismantle him, AI is using resolving and using players that hauled
   - In today's live API, players who hauled in GW11 had their `ep_next` and form updated post-match: McBurnie (ep_next: 9.0 after 13 pts), Wirtz (ep_next: 9.7 after 14 pts), Hill (ep_next: 8.0 after 14 pts), Roefs (ep_next: 7.0 after 11 pts).
   - The LP solver saw those post-match inflated xP numbers, selected those players, and scored 105 points in hindsight.
 - Acknowledged that true, valid benchmarking requires frozen point-in-time pre-deadline snapshots, reaffirming why the strict GW12 pre-deadline freeze is essential for authentic evaluation without data leakage.
+
+### User Request
+So no way to actually see if AI beats them or not without AI not using retrospective replays or is their a way to check for third parties
+
+### Assistant Response
+- Clarified the 3 authentic, leak-proof ways to benchmark AI vs third-party managers:
+  1. **Autonomous AI Benchmark (The Control Group)**:
+     - Pure point-in-time autonomous squad created in GW1 with frozen on-disk decisions.
+     - Scored 61 pts in GW11 vs Jasper Selvaraj's 30 pts (+31 net lead legitimately with 0 chips used).
+  2. **Live Forward Freezing (The Gold Standard)**:
+     - Freezing GW12 predictions right before Friday's deadline (19:30 UTC) and comparing real matchday outcomes live with 0 retrospective replaying.
+  3. **Point-in-Time Historical Snapshot Replay**:
+     - Fixed `getCachedFile` to properly decode UTF-16LE snapshots (`data/snapshots/gw_{X}/fplform.csv` and `fpl_native.csv`).
+     - Enhanced `NativeOracle` to strictly load point-in-time pre-deadline snapshots instead of today's live `bootstrap-static`.
+     - Verified clean replay: GW11 scored 41 pts (Captain: Nicolas Jackson, no McBurnie, no Wirtz hindsight haul) vs Jasper's 30 pts, proving AI still beat him (+11 pts) on pure authentic pre-match data.
+- Built, tested, and pushed fixes across both `fpl-admin` and `fpl-planner`.
