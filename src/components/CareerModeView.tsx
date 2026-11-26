@@ -79,6 +79,7 @@ export interface CareerSeasonPayload {
   fuel: string;
   riskMode: string;
   forwardSource?: 'autonomous' | 'synced' | 'duel';
+  syncedSource?: 'frozen' | 'dynamic';
   startGw: number;
   endGw: number;
   totalPoints: number;
@@ -135,7 +136,9 @@ export const CareerModeView = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedGwIndex, setSelectedGwIndex] = useState<number>(0);
-  const [lineupSource, setLineupSource] = useState<'ai' | 'human'>('ai');
+  const [lineupSource, setLineupSource] = useState<'ai' | 'human' | 'dynamic'>('human');
+  const [dynamicData, setDynamicData] = useState<CareerSeasonPayload | null>(null);
+  const [loadingDynamic, setLoadingDynamic] = useState<boolean>(false);
 
   const hydrateLiveScores = async (payload: CareerSeasonPayload): Promise<CareerSeasonPayload> => {
     if (!payload || payload.mode === 'forward' || !Array.isArray(payload.gameweeks) || payload.gameweeks.length === 0) {
@@ -250,6 +253,31 @@ export const CareerModeView = ({
         const isForward = hydrated.mode === 'forward' || mode === 'forward';
         const defaultIndex = isForward ? 0 : hydrated.gameweeks.length - 1;
         setSelectedGwIndex(prev => (prev >= 0 && prev < hydrated.gameweeks.length) ? prev : defaultIndex);
+      }
+
+      if (mode === 'synced' && teamId === '532002') {
+        setLoadingDynamic(true);
+        axios.get('/api/career', {
+          params: {
+            mode: 'synced',
+            teamId,
+            fuel: activeFuel,
+            riskMode: activeRisk,
+            scenario: activeScenario,
+            syncedSource: 'dynamic'
+          }
+        }).then(async dynRes => {
+          if (dynRes.data && Array.isArray(dynRes.data.gameweeks)) {
+            const dynHydrated = await hydrateLiveScores(dynRes.data);
+            setDynamicData(dynHydrated);
+          }
+        }).catch(err => {
+          console.warn("[CareerModeView] Dynamic resolve fetch failed:", err);
+        }).finally(() => {
+          setLoadingDynamic(false);
+        });
+      } else {
+        setDynamicData(null);
       }
     } catch (err: any) {
       console.error("Career Mode Fetch Error:", err);
@@ -557,7 +585,11 @@ export const CareerModeView = ({
                     {data.humanSummary.netAlphaVsHuman >= 0 ? `+${data.humanSummary.netAlphaVsHuman}` : data.humanSummary.netAlphaVsHuman} pts
                   </div>
                   <div className="text-[10px] text-slate-400 mt-1">
-                    You: {data.humanSummary.totalPoints} pts • AI: {data.totalPoints} pts
+                    {teamId === '532002' && dynamicData ? (
+                      <span>You: <strong className="text-white">{data.humanSummary.totalPoints}</strong> • Frozen: <strong className="text-emerald-400">{data.totalPoints}</strong> • Dynamic: <strong className="text-purple-400">{dynamicData.totalPoints}</strong> pts</span>
+                    ) : (
+                      <span>You: {data.humanSummary.totalPoints} pts • AI: {data.totalPoints} pts</span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -704,13 +736,40 @@ export const CareerModeView = ({
 
           {/* Active Gameweek Detail Card */}
           {activeGwData && (() => {
+            const dynamicGwData = dynamicData?.gameweeks?.find(g => g.gameweek === activeGwData.gameweek);
             const isHumanView = mode === 'synced' && lineupSource === 'human' && !!activeGwData.humanComparison?.startingXI;
-            const displayedStartingXI = isHumanView ? activeGwData.humanComparison!.startingXI! : (activeGwData.startingXI || []);
-            const displayedBench = isHumanView ? (activeGwData.humanComparison!.bench || []) : (activeGwData.bench || []);
-            const displayedCaptain = isHumanView ? (activeGwData.humanComparison!.captain || activeGwData.activeCaptain) : activeGwData.activeCaptain;
-            const displayedViceCaptain = isHumanView ? (activeGwData.humanComparison!.viceCaptain || activeGwData.viceCaptain) : activeGwData.viceCaptain;
-            const displayedTransfersIn = isHumanView ? (activeGwData.humanComparison!.transfersIn || []) : (activeGwData.transfersIn || []);
-            const displayedTransfersOut = isHumanView ? (activeGwData.humanComparison!.transfersOut || []) : (activeGwData.transfersOut || []);
+            const isDynamicView = mode === 'synced' && lineupSource === 'dynamic';
+
+            const displayedStartingXI = isHumanView 
+              ? activeGwData.humanComparison!.startingXI! 
+              : isDynamicView 
+              ? (dynamicGwData?.startingXI || []) 
+              : (activeGwData.startingXI || []);
+            const displayedBench = isHumanView 
+              ? (activeGwData.humanComparison!.bench || []) 
+              : isDynamicView 
+              ? (dynamicGwData?.bench || []) 
+              : (activeGwData.bench || []);
+            const displayedCaptain = isHumanView 
+              ? (activeGwData.humanComparison!.captain || activeGwData.activeCaptain) 
+              : isDynamicView 
+              ? (dynamicGwData?.activeCaptain || dynamicGwData?.captain) 
+              : activeGwData.activeCaptain;
+            const displayedViceCaptain = isHumanView 
+              ? (activeGwData.humanComparison!.viceCaptain || activeGwData.viceCaptain) 
+              : isDynamicView 
+              ? (dynamicGwData?.viceCaptain || dynamicGwData?.viceCaptain) 
+              : activeGwData.viceCaptain;
+            const displayedTransfersIn = isHumanView 
+              ? (activeGwData.humanComparison!.transfersIn || []) 
+              : isDynamicView 
+              ? (dynamicGwData?.transfersIn || []) 
+              : (activeGwData.transfersIn || []);
+            const displayedTransfersOut = isHumanView 
+              ? (activeGwData.humanComparison!.transfersOut || []) 
+              : isDynamicView 
+              ? (dynamicGwData?.transfersOut || []) 
+              : (activeGwData.transfersOut || []);
 
             return (
             <div className="grid grid-cols-12 gap-4">
@@ -722,7 +781,12 @@ export const CareerModeView = ({
                     <div className="flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-fpl-green" />
                       <h3 className="text-xs font-black uppercase tracking-wider text-white">
-                        GW{activeGwData.gameweek} {isHumanView ? (teamId === '532002' ? "Your Real Decision" : "Real Manager Decision") : "Manager Decision"}
+                        GW{activeGwData.gameweek}{" "}
+                        {isHumanView 
+                          ? (teamId === '532002' ? "Your Real Decision" : "Real Manager Decision") 
+                          : isDynamicView 
+                          ? "Dynamic AI Decision" 
+                          : (teamId === '532002' ? "Frozen AI Decision" : "Manager Decision")}
                       </h3>
                     </div>
                     <div className="flex items-center gap-2.5">
@@ -733,6 +797,10 @@ export const CareerModeView = ({
                       ) : isHumanView ? (
                         <span className="text-[10px] font-mono text-cyan-400 font-bold">
                           {activeGwData.humanComparison?.netPoints || 43} Net Pts
+                        </span>
+                      ) : isDynamicView ? (
+                        <span className="text-[10px] font-mono text-purple-400 font-bold">
+                          {dynamicGwData?.netPoints ?? 0} Net Pts
                         </span>
                       ) : (
                         <>
@@ -766,19 +834,35 @@ export const CareerModeView = ({
                       ? (activeGwData.humanComparison?.decisionLog || (displayedTransfersIn.length > 0 
                           ? `Real Transfer: ${displayedTransfersIn.map((t, i) => `${displayedTransfersOut[i]?.name || 'Player'} (${displayedTransfersOut[i]?.position || ''}) → ${t.name} (${t.position || ''})`).join(', ')}. Captain: ${displayedCaptain?.web_name || 'Haaland'} (2×).`
                           : "No transfers made in real life (Free Transfer rolled)."))
+                      : isDynamicView 
+                      ? (dynamicGwData?.decisionLog || (loadingDynamic ? "Solving dynamic point-in-time replay on the fly..." : "Dynamic solve finished."))
                       : activeGwData.decisionLog}
                   </p>
 
                   {/* Transfer Action Details */}
                   <div className="space-y-2 pt-2 border-t border-fpl-border/40">
                     <div className="flex items-center justify-between text-[10px] font-mono uppercase font-bold text-slate-400">
-                      <span>{isHumanView ? (teamId === '532002' ? "Your Real Transfer Execution" : "Real Transfer Execution") : "Transfer Execution"}</span>
+                      <span>
+                        {isHumanView 
+                          ? (teamId === '532002' ? "Your Real Transfer Execution" : "Real Transfer Execution") 
+                          : isDynamicView 
+                          ? "Dynamic AI Transfer Execution" 
+                          : (teamId === '532002' ? "Frozen AI Transfer Execution" : "Transfer Execution")}
+                      </span>
                       {mode === 'synced' && activeGwData.humanComparison?.startingXI && (
                         <button
-                          onClick={() => setLineupSource(prev => prev === 'ai' ? 'human' : 'ai')}
+                          onClick={() => {
+                            if (teamId === '532002') {
+                              setLineupSource(prev => prev === 'human' ? 'ai' : prev === 'ai' ? 'dynamic' : 'human');
+                            } else {
+                              setLineupSource(prev => prev === 'ai' ? 'human' : 'ai');
+                            }
+                          }}
                           className="text-[9px] text-cyan-400 hover:underline normal-case font-sans cursor-pointer"
                         >
-                          Switch to {isHumanView ? "AI Lineup" : (teamId === '532002' ? "My Real Squad" : "Real Squad")}
+                          Switch to {teamId === '532002' 
+                            ? (isHumanView ? "Frozen AI" : isDynamicView ? "My Real Squad" : "Dynamic AI")
+                            : (isHumanView ? "AI Lineup" : "Real Squad")}
                         </button>
                       )}
                     </div>
@@ -859,7 +943,11 @@ export const CareerModeView = ({
                     <div className="flex items-center gap-1.5 whitespace-nowrap">
                       <span>Bank:</span>
                       <strong className="text-white font-bold">
-                        {isHumanView ? (activeGwData.humanComparison?.bankDisplay || "£0.4m") : activeGwData.bankDisplay}
+                        {isHumanView 
+                          ? (activeGwData.humanComparison?.bankDisplay || "£0.4m") 
+                          : isDynamicView 
+                          ? (dynamicGwData?.bankDisplay || "£0.0m") 
+                          : activeGwData.bankDisplay}
                       </strong>
                     </div>
                     <div className="flex items-center gap-1.5 whitespace-nowrap">
@@ -867,10 +955,16 @@ export const CareerModeView = ({
                       <strong className="text-white font-bold">
                         {isHumanView 
                           ? (activeGwData.humanComparison?.squadValueDisplay || "£101.8m") 
+                          : isDynamicView
+                          ? `£${((dynamicGwData?.squadValue || 1000) / 10).toFixed(1)}m`
                           : `£${((activeGwData.squadValue || 914) / 10).toFixed(1)}m`}
                       </strong>{" "}
                       <span className="text-slate-500">
-                        ({isHumanView ? (activeGwData.humanComparison?.teamValueDisplay || "£102.2m") : activeGwData.teamValueDisplay})
+                        ({isHumanView 
+                          ? (activeGwData.humanComparison?.teamValueDisplay || "£102.2m") 
+                          : isDynamicView 
+                          ? (dynamicGwData?.teamValueDisplay || "£100.0m") 
+                          : activeGwData.teamValueDisplay})
                       </span>
                     </div>
                   </div>
@@ -883,8 +977,12 @@ export const CareerModeView = ({
                       <div className="flex items-center gap-2">
                         <UserCheck className="w-4 h-4 text-cyan-400" />
                         <div>
-                          <h4 className="text-xs font-black uppercase tracking-wider text-white">You vs AI Co-Pilot</h4>
-                          <span className="text-[9px] text-slate-400 block font-mono">Head-to-head matchup duel</span>
+                          <h4 className="text-xs font-black uppercase tracking-wider text-white">
+                            {teamId === '532002' ? "Tri-Perspective Matchup Duel" : "You vs AI Co-Pilot"}
+                          </h4>
+                          <span className="text-[9px] text-slate-400 block font-mono">
+                            {teamId === '532002' ? "Real Matchday vs Frozen Co-Pilot vs Dynamic AI Resolver" : "Head-to-head matchup duel"}
+                          </span>
                         </div>
                       </div>
                       <span className={cn(
@@ -900,7 +998,11 @@ export const CareerModeView = ({
                     </div>
 
                     {/* Both squads compared side-by-side (Clickable to switch view) */}
-                    <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className={cn(
+                      "grid gap-2 text-xs",
+                      teamId === '532002' ? "grid-cols-1 sm:grid-cols-3" : "grid-cols-2"
+                    )}>
+                      {/* Perspective 1: Real Team */}
                       <button
                         onClick={() => setLineupSource('human')}
                         className={cn(
@@ -916,7 +1018,7 @@ export const CareerModeView = ({
                             "text-[10px] uppercase font-mono font-bold",
                             isHumanView ? "text-cyan-400" : "text-slate-400"
                           )}>
-                            {teamId === '532002' ? "Your Real Team" : (data?.managerName ? `${data.managerName}'s Team` : "Real Team")}
+                            {teamId === '532002' ? "My Real Team" : (data?.managerName ? `${data.managerName}'s Team` : "Real Team")}
                           </span>
                           {isHumanView && (
                             <span className="text-[8px] font-mono uppercase px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/40">
@@ -932,40 +1034,87 @@ export const CareerModeView = ({
                         </div>
                       </button>
 
+                      {/* Perspective 2: Frozen AI Co-Pilot */}
                       <button
                         onClick={() => setLineupSource('ai')}
                         className={cn(
                           "p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between",
-                          !isHumanView 
+                          lineupSource === 'ai' 
                             ? "bg-emerald-950/30 border-emerald-500/50 ring-1 ring-emerald-500/40 shadow-sm" 
                             : "bg-slate-900/60 border-slate-800 hover:border-emerald-500/30 opacity-75 hover:opacity-100"
                         )}
-                        title="Click to view AI Co-Pilot XI on the pitch"
+                        title="Click to view AI Co-Pilot (Frozen) XI on the pitch"
                       >
                         <div className="flex items-center justify-between mb-1">
                           <span className={cn(
                             "text-[10px] uppercase font-mono font-bold",
-                            !isHumanView ? "text-emerald-400" : "text-slate-400"
+                            lineupSource === 'ai' ? "text-emerald-400" : "text-slate-400"
                           )}>
-                            AI Co-Pilot Team
+                            {teamId === '532002' ? "AI Co-Pilot (Frozen)" : "AI Co-Pilot Team"}
                           </span>
-                          {!isHumanView && (
+                          {lineupSource === 'ai' && (
                             <span className="text-[8px] font-mono uppercase px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40">
                               Viewing
                             </span>
                           )}
                         </div>
-                        <div className={cn("text-lg font-black font-mono", !isHumanView ? "text-emerald-400" : "text-white")}>
+                        <div className={cn("text-lg font-black font-mono", lineupSource === 'ai' ? "text-emerald-400" : "text-white")}>
                           {activeGwData.netPoints} pts
                         </div>
                         <div className="text-[10px] text-slate-400 mt-1 font-mono">
                           Hits: {activeGwData.hitCostPoints ? `-${activeGwData.hitCostPoints} pts` : '0 pts'}
                         </div>
                       </button>
+
+                      {/* Perspective 3: Dynamic AI Resolver (when teamId === '532002') */}
+                      {teamId === '532002' && (
+                        <button
+                          onClick={() => setLineupSource('dynamic')}
+                          className={cn(
+                            "p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between",
+                            isDynamicView 
+                              ? "bg-purple-950/30 border-purple-500/50 ring-1 ring-purple-500/40 shadow-sm" 
+                              : "bg-slate-900/60 border-slate-800 hover:border-purple-500/30 opacity-75 hover:opacity-100"
+                          )}
+                          title="Click to view Dynamic AI Resolver XI on the pitch"
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <span className={cn(
+                              "text-[10px] uppercase font-mono font-bold",
+                              isDynamicView ? "text-purple-400" : "text-slate-400"
+                            )}>
+                              Dynamic AI (Live)
+                            </span>
+                            {isDynamicView && (
+                              <span className="text-[8px] font-mono uppercase px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 font-bold border border-purple-500/40">
+                                Viewing
+                              </span>
+                            )}
+                          </div>
+                          <div className={cn("text-lg font-black font-mono", isDynamicView ? "text-purple-300" : "text-white")}>
+                            {loadingDynamic && !dynamicGwData ? (
+                              <span className="text-xs text-purple-400 animate-pulse font-sans">Solving...</span>
+                            ) : (
+                              `${dynamicGwData?.netPoints ?? 0} pts`
+                            )}
+                          </div>
+                          <div className="text-[10px] text-slate-400 mt-1 font-mono">
+                            Hits: {loadingDynamic && !dynamicGwData ? '...' : (dynamicGwData?.hitCostPoints ? `-${dynamicGwData.hitCostPoints} pts` : '0 pts')}
+                          </div>
+                        </button>
+                      )}
                     </div>
 
                     <div className="text-[11px] text-slate-400 pt-1 font-sans">
-                      Cumulative Score after GW{activeGwData.gameweek}: You <strong className="text-white font-mono">{activeGwData.humanComparison.cumulativePoints} pts</strong> vs AI <strong className="text-emerald-400 font-mono">{activeGwData.cumulativePoints} pts</strong>.
+                      {teamId === '532002' && dynamicGwData ? (
+                        <span>
+                          Cumulative Score after GW{activeGwData.gameweek}: You <strong className="text-cyan-400 font-mono">{activeGwData.humanComparison.cumulativePoints} pts</strong> vs Frozen AI <strong className="text-emerald-400 font-mono">{activeGwData.cumulativePoints} pts</strong> vs Dynamic AI <strong className="text-purple-400 font-mono">{loadingDynamic ? '...' : `${dynamicGwData.cumulativePoints} pts`}</strong>.
+                        </span>
+                      ) : (
+                        <span>
+                          Cumulative Score after GW{activeGwData.gameweek}: You <strong className="text-white font-mono">{activeGwData.humanComparison.cumulativePoints} pts</strong> vs AI <strong className="text-emerald-400 font-mono">{activeGwData.cumulativePoints} pts</strong>.
+                        </span>
+                      )}
                     </div>
 
                     {(() => {
@@ -998,123 +1147,178 @@ export const CareerModeView = ({
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-fpl-border/60 pb-2.5 mb-3 gap-2">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-xs font-black uppercase tracking-wider text-white">
-                        GW{activeGwData.gameweek} {isHumanView ? (teamId === '532002' ? "My Real Lineup" : "Real Lineup") : "Starting Lineup"}
+                        GW{activeGwData.gameweek}{" "}
+                        {isHumanView 
+                          ? (teamId === '532002' ? "My Real Lineup" : "Real Lineup") 
+                          : isDynamicView 
+                          ? "Dynamic AI Lineup" 
+                          : (teamId === '532002' ? "Frozen AI Lineup" : "Starting Lineup")}
                       </span>
                       {mode === 'synced' && activeGwData.humanComparison?.startingXI && (
                         <div className="flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5 text-[10px]">
-                          <button
-                            onClick={() => setLineupSource('ai')}
-                            className={cn(
-                              "px-2 py-0.5 rounded font-bold transition-all flex items-center gap-1 cursor-pointer",
-                              !isHumanView ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-black" : "text-slate-400 hover:text-white"
-                            )}
-                          >
-                            <Bot className="w-3 h-3 text-emerald-400" />
-                            <span>AI XI ({activeGwData.netPoints} pts)</span>
-                          </button>
-                          <button
-                            onClick={() => setLineupSource('human')}
-                            className={cn(
-                              "px-2 py-0.5 rounded font-bold transition-all flex items-center gap-1 cursor-pointer",
-                              isHumanView ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-black" : "text-slate-400 hover:text-white"
-                            )}
-                          >
-                            <UserCheck className="w-3 h-3 text-cyan-400" />
-                            <span>{teamId === '532002' ? 'My Real XI' : 'Real XI'} ({activeGwData.humanComparison.netPoints} pts)</span>
-                          </button>
+                          {teamId === '532002' ? (
+                            <>
+                              <button
+                                onClick={() => setLineupSource('human')}
+                                className={cn(
+                                  "px-2 py-0.5 rounded font-bold transition-all flex items-center gap-1 cursor-pointer",
+                                  isHumanView ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-black" : "text-slate-400 hover:text-white"
+                                )}
+                              >
+                                <UserCheck className="w-3 h-3 text-cyan-400" />
+                                <span>My Real XI ({activeGwData.humanComparison.netPoints} pts)</span>
+                              </button>
+                              <button
+                                onClick={() => setLineupSource('ai')}
+                                className={cn(
+                                  "px-2 py-0.5 rounded font-bold transition-all flex items-center gap-1 cursor-pointer",
+                                  lineupSource === 'ai' ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-black" : "text-slate-400 hover:text-white"
+                                )}
+                              >
+                                <Bot className="w-3 h-3 text-emerald-400" />
+                                <span>Frozen AI ({activeGwData.netPoints} pts)</span>
+                              </button>
+                              <button
+                                onClick={() => setLineupSource('dynamic')}
+                                className={cn(
+                                  "px-2 py-0.5 rounded font-bold transition-all flex items-center gap-1 cursor-pointer",
+                                  isDynamicView ? "bg-purple-500/20 text-purple-300 border border-purple-500/40 font-black" : "text-slate-400 hover:text-white"
+                                )}
+                              >
+                                <Sparkles className="w-3 h-3 text-purple-400" />
+                                <span>Dynamic AI ({loadingDynamic && !dynamicGwData ? '...' : (dynamicGwData?.netPoints ?? 0)} pts)</span>
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => setLineupSource('ai')}
+                                className={cn(
+                                  "px-2 py-0.5 rounded font-bold transition-all flex items-center gap-1 cursor-pointer",
+                                  !isHumanView ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-black" : "text-slate-400 hover:text-white"
+                                )}
+                              >
+                                <Bot className="w-3 h-3 text-emerald-400" />
+                                <span>AI XI ({activeGwData.netPoints} pts)</span>
+                              </button>
+                              <button
+                                onClick={() => setLineupSource('human')}
+                                className={cn(
+                                  "px-2 py-0.5 rounded font-bold transition-all flex items-center gap-1 cursor-pointer",
+                                  isHumanView ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-black" : "text-slate-400 hover:text-white"
+                                )}
+                              >
+                                <UserCheck className="w-3 h-3 text-cyan-400" />
+                                <span>Real XI ({activeGwData.humanComparison.netPoints} pts)</span>
+                              </button>
+                            </>
+                          )}
                         </div>
                       )}
                     </div>
                     <span className="text-[10px] font-mono text-slate-400">
-                      Captain: <strong className={isHumanView ? "text-cyan-400" : "text-emerald-400"}>{displayedCaptain?.web_name || 'Captain'} (2×)</strong>
+                      Captain: <strong className={isHumanView ? "text-cyan-400" : isDynamicView ? "text-purple-400" : "text-emerald-400"}>{displayedCaptain?.web_name || 'Captain'} (2×)</strong>
                     </span>
                   </div>
 
-                  {/* Starting XI List Cards */}
-                  <div className="space-y-1.5">
-                    {displayedStartingXI.map((p) => {
-                      const isCap = p.id === displayedCaptain?.id || p.isCaptain;
-                      const isVc = (p.id === displayedViceCaptain?.id || p.isViceCaptain) && !isCap;
-                      const scoreDisplay = isCap ? p.points * 2 : p.points;
+                  {/* Starting XI List Cards / Loading Spinner */}
+                  {isDynamicView && loadingDynamic && (!dynamicGwData || !dynamicGwData.startingXI) ? (
+                    <div className="py-24 flex flex-col items-center justify-center space-y-3">
+                      <RefreshCw className="w-6 h-6 text-purple-400 animate-spin" />
+                      <p className="text-xs font-mono text-purple-300 uppercase tracking-widest">
+                        Solving Dynamic Point-in-Time Replay on the fly...
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-1.5">
+                      {displayedStartingXI.map((p) => {
+                        const isCap = p.id === displayedCaptain?.id || p.isCaptain;
+                        const isVc = (p.id === displayedViceCaptain?.id || p.isViceCaptain) && !isCap;
+                        const scoreDisplay = isCap ? p.points * 2 : p.points;
 
-                      return (
-                        <div 
-                          key={p.id}
-                          className={cn(
-                            "flex items-center justify-between px-3 py-2 rounded-xl border transition-all text-xs",
-                            isCap 
-                              ? (isHumanView ? "bg-cyan-500/10 border-cyan-500/40" : "bg-emerald-500/10 border-emerald-500/40")
-                              : "bg-slate-900 border-slate-800"
-                          )}
-                        >
-                          <div className="flex items-center gap-2.5">
-                            <span className={cn(
-                              "px-1.5 py-0.5 rounded text-[9px] font-mono font-bold uppercase",
-                              p.position === 'GKP' ? "bg-amber-500/20 text-amber-300" :
-                              p.position === 'DEF' ? "bg-blue-500/20 text-blue-300" :
-                              p.position === 'MID' ? "bg-emerald-500/20 text-emerald-300" :
-                              "bg-purple-500/20 text-purple-300"
-                            )}>
-                              {p.position}
-                            </span>
-                            <span className="font-bold text-white">{p.web_name}</span>
-                            <span className="text-[10px] text-slate-500">{p.team_short_name}</span>
-                            
-                            {isCap && (
+                        return (
+                          <div 
+                            key={p.id}
+                            className={cn(
+                              "flex items-center justify-between px-3 py-2 rounded-xl border transition-all text-xs",
+                              isCap 
+                                ? (isHumanView ? "bg-cyan-500/10 border-cyan-500/40" : isDynamicView ? "bg-purple-500/10 border-purple-500/40" : "bg-emerald-500/10 border-emerald-500/40")
+                                : "bg-slate-900 border-slate-800"
+                            )}
+                          >
+                            <div className="flex items-center gap-2.5">
                               <span className={cn(
-                                "px-1.5 py-0.2 rounded text-[8.5px] font-black",
-                                isHumanView ? "bg-cyan-500 text-slate-950" : "bg-emerald-500 text-slate-950"
+                                "px-1.5 py-0.5 rounded text-[9px] font-mono font-bold uppercase",
+                                p.position === 'GKP' ? "bg-amber-500/20 text-amber-300" :
+                                p.position === 'DEF' ? "bg-blue-500/20 text-blue-300" :
+                                p.position === 'MID' ? "bg-emerald-500/20 text-emerald-300" :
+                                "bg-purple-500/20 text-purple-300"
                               )}>
-                                (C) 2×
+                                {p.position}
                               </span>
-                            )}
-                            {isVc && (
-                              <span className="px-1.5 py-0.2 rounded text-[8.5px] font-bold bg-slate-800 text-slate-400">
-                                (VC)
-                              </span>
-                            )}
-                            {p.isAutoSubIn && (
-                              <span className="px-1.5 py-0.2 rounded text-[8.5px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                                Auto-Sub In
-                              </span>
-                            )}
-                          </div>
-
-                          <div className="flex items-center gap-2.5 sm:gap-3.5 font-mono">
-                            {mode === 'forward' ? (
-                              <>
-                                <span className="text-[10px] text-slate-500">{p.costDisplay}</span>
-                                <span className="text-xs font-black min-w-[28px] text-right text-emerald-400">
-                                  {p.xP !== undefined ? `${(isCap ? p.xP * (activeGwData.chipActive === 'TC' ? 3 : 2) : p.xP).toFixed(1)} xP` : '—'}
-                                </span>
-                              </>
-                            ) : (
-                              <>
-                                {p.xP !== undefined && (
-                                  <span className="text-[10px] text-slate-400">
-                                    Exp: <span className="text-slate-300 font-bold">{(isCap ? p.xP * (activeGwData.chipActive === 'TC' ? 3 : 2) : p.xP).toFixed(1)} xP</span>
-                                  </span>
-                                )}
-                                <span className="text-[10px] text-slate-500">{p.costDisplay}</span>
+                              <span className="font-bold text-white">{p.web_name}</span>
+                              <span className="text-[10px] text-slate-500">{p.team_short_name}</span>
+                              
+                              {isCap && (
                                 <span className={cn(
-                                  "text-xs font-black min-w-[28px] text-right",
-                                  scoreDisplay >= 10 ? "text-amber-400" : scoreDisplay >= 6 ? "text-emerald-400" : "text-white"
+                                  "px-1.5 py-0.2 rounded text-[8.5px] font-black",
+                                  isHumanView ? "bg-cyan-500 text-slate-950" : isDynamicView ? "bg-purple-500 text-white" : "bg-emerald-500 text-slate-950"
                                 )}>
-                                  {scoreDisplay} pts
+                                  (C) 2×
                                 </span>
-                              </>
-                            )}
+                              )}
+                              {isVc && (
+                                <span className="px-1.5 py-0.2 rounded text-[8.5px] font-bold bg-slate-800 text-slate-400">
+                                  (VC)
+                                </span>
+                              )}
+                              {p.isAutoSubIn && (
+                                <span className="px-1.5 py-0.2 rounded text-[8.5px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                  Auto-Sub In
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-2.5 sm:gap-3.5 font-mono">
+                              {mode === 'forward' ? (
+                                <>
+                                  <span className="text-[10px] text-slate-500">{p.costDisplay}</span>
+                                  <span className="text-xs font-black min-w-[28px] text-right text-emerald-400">
+                                    {p.xP !== undefined ? `${(isCap ? p.xP * (activeGwData.chipActive === 'TC' ? 3 : 2) : p.xP).toFixed(1)} xP` : '—'}
+                                  </span>
+                                </>
+                              ) : (
+                                <>
+                                  {p.xP !== undefined && (
+                                    <span className="text-[10px] text-slate-400">
+                                      Exp: <span className="text-slate-300 font-bold">{(isCap ? p.xP * (activeGwData.chipActive === 'TC' ? 3 : 2) : p.xP).toFixed(1)} xP</span>
+                                    </span>
+                                  )}
+                                  <span className="text-[10px] text-slate-500">{p.costDisplay}</span>
+                                  <span className={cn(
+                                    "text-xs font-black min-w-[28px] text-right",
+                                    scoreDisplay >= 10 ? "text-amber-400" : scoreDisplay >= 6 ? "text-emerald-400" : "text-white"
+                                  )}>
+                                    {scoreDisplay} pts
+                                  </span>
+                                </>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
                 {/* Bench Section */}
                 <div className="mt-4 pt-3 border-t border-fpl-border/60">
                   <div className="text-[10px] font-mono uppercase font-bold text-slate-400 mb-2">
-                    {isHumanView ? (teamId === '532002' ? "Your Real Substitutes Bench" : "Real Substitutes Bench") : "Substitutes Bench (Reserve GK + Ordered Priority)"}
+                    {isHumanView 
+                      ? (teamId === '532002' ? "Your Real Substitutes Bench" : "Real Substitutes Bench") 
+                      : isDynamicView 
+                      ? "Dynamic AI Substitutes Bench" 
+                      : "Substitutes Bench (Reserve GK + Ordered Priority)"}
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {(() => {

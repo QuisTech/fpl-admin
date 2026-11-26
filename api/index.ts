@@ -2056,11 +2056,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const riskMode = ((query.riskMode || req.body?.riskMode) as string) || 'safe';
       const scenario = (((query.scenario || req.body?.scenario) as string) || 'template') as 'quant' | 'template';
       const forwardSource = (((query.forwardSource || req.body?.forwardSource) as string) || 'autonomous') as 'autonomous' | 'synced' | 'duel';
+      const syncedSource = ((query.syncedSource || req.body?.syncedSource) as string) || 'frozen';
       const endGw = (query.endGw || req.body?.endGw) ? parseInt((query.endGw || req.body?.endGw) as string, 10) : undefined;
 
       const { CareerService } = await import("./_lib/career-service.js");
       if (mode === 'synced' && teamId) {
-        const payload = await CareerService.getSyncedCareerReplay(teamId, fuel, riskMode, endGw, scenario);
+        const payload = await CareerService.getSyncedCareerReplay(
+          teamId,
+          fuel,
+          riskMode,
+          endGw,
+          scenario,
+          syncedSource === 'dynamic'
+        );
         return res.status(200).json(payload);
       } else if (mode === 'forward') {
         const payload = await CareerService.getForwardCareerProjection(teamId, fuel, riskMode, 6, scenario, forwardSource);

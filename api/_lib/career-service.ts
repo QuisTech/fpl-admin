@@ -82,6 +82,7 @@ export interface CareerSeasonPayload {
   riskMode: string;
   scenario?: 'quant' | 'template';
   forwardSource?: 'autonomous' | 'synced' | 'duel';
+  syncedSource?: 'frozen' | 'dynamic';
   startGw: number;
   endGw: number;
   totalPoints: number;
@@ -951,7 +952,8 @@ export class CareerService {
     fuel: string = 'fplform',
     riskMode: string = 'safe',
     endGw?: number,
-    scenario: 'quant' | 'template' = 'quant'
+    scenario: 'quant' | 'template' = 'quant',
+    bypassFreeze: boolean = false
   ): Promise<CareerSeasonPayload> {
     const params = getParamsForRiskMode(riskMode, DEFAULT_PARAMETERS, scenario);
     const cleanId = String(teamId).trim();
@@ -1023,7 +1025,7 @@ export class CareerService {
     // Check for locked historical decisions in synced_career_history.json for permanent historical immutability
     const syncedHistoryFile = path.join(process.cwd(), 'data/snapshots/synced_career_history.json');
     let lockedSyncedGameweeks: CareerGameweek[] = [];
-    if (fs.existsSync(syncedHistoryFile)) {
+    if (!bypassFreeze && fs.existsSync(syncedHistoryFile)) {
       try {
         const histData = JSON.parse(fs.readFileSync(syncedHistoryFile, 'utf8'));
         const normFuel = fuel === 'eye-test' ? 'eye_test' : fuel;
@@ -1165,6 +1167,7 @@ export class CareerService {
         fuel,
         riskMode,
         scenario,
+        syncedSource: 'frozen',
         startGw: 1,
         endGw: effectiveEndGw,
         totalPoints: runningTotal,
@@ -1510,10 +1513,11 @@ export class CareerService {
       mode: 'synced',
       teamId: cleanId,
       managerName,
-      teamName,
+      teamName: bypassFreeze ? (teamName ? `${teamName} (Dynamic AI)` : 'Dynamic AI Resolver') : teamName,
       fuel,
       riskMode,
       scenario,
+      syncedSource: bypassFreeze ? 'dynamic' : 'frozen',
       startGw: 1,
       endGw: maxGw,
       totalPoints: state.accumulatedScore,
