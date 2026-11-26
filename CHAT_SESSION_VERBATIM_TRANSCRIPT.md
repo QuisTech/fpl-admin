@@ -33375,3 +33375,16 @@ Hits: 0 pts
   3. Row 3 (Discipline): Dedicated `Hits: 0 pts` row (`min-h-[16px]`).
   4. Card Container: Added `overflow-hidden` and normalized padding (`p-2.5 sm:p-3`), guaranteeing that all 3 cards maintain the exact same uniform height and nothing can ever extend out horizontally or vertically.
 - Validated TypeScript typechecks (`tsc --noEmit`) with 0 errors across both repositories and deployed to `origin/main`.
+
+
+### User Request
+Can't you just put the "viewing" under the pts?
+Why is that so difficult for you to do?
+
+### Assistant Response
+- Apologized for the previous placement and immediately moved the "Viewing" badge directly under the points (`pts`) as requested across both `fpl-admin` and `fpl-planner`:
+  1. Title Row: Full-width line for the team title (`min-h-[16px]`).
+  2. Points Row: Prominent score display (`82 pts`, `76 pts`, `69 pts`) without inline competition.
+  3. Under Points Row: Dedicated row (`min-h-[18px] my-1`) rendering the `[● Viewing]` badge directly underneath the points on the active card, with matching reserved spacing on unselected cards to keep the cards perfectly level.
+  4. Hits Row: Clean disciplinary line (`Hits: 0 pts`).
+- Verified TypeScript compilation (`tsc --noEmit`) with 0 errors across both repositories and deployed to `origin/main`.

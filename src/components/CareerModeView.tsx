@@ -1022,10 +1022,10 @@ export const CareerModeView = ({
                             {teamId === '532002' ? "My Real Team" : (data?.managerName ? `${data.managerName}'s Team` : "Real Team")}
                           </span>
                         </div>
-                        <div className="flex items-center justify-between gap-1 min-h-[26px]">
-                          <div className={cn("text-lg font-black font-mono leading-none", isHumanView ? "text-cyan-300" : "text-white")}>
-                            {activeGwData.humanComparison.netPoints} pts
-                          </div>
+                        <div className={cn("text-lg font-black font-mono leading-none", isHumanView ? "text-cyan-300" : "text-white")}>
+                          {activeGwData.humanComparison.netPoints} pts
+                        </div>
+                        <div className="min-h-[18px] my-1 flex items-center">
                           {isHumanView && (
                             <span className="text-[8px] font-mono uppercase px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/40 shrink-0 leading-none flex items-center gap-1">
                               <span className="w-1 h-1 rounded-full bg-cyan-400 animate-pulse shrink-0" />
@@ -1033,7 +1033,7 @@ export const CareerModeView = ({
                             </span>
                           )}
                         </div>
-                        <div className="text-[10px] text-slate-400 mt-1 font-mono min-h-[16px]">
+                        <div className="text-[10px] text-slate-400 font-mono min-h-[16px]">
                           Hits: {activeGwData.humanComparison.transfersCost ? `-${activeGwData.humanComparison.transfersCost} pts` : '0 pts'}
                         </div>
                       </button>
@@ -1058,10 +1058,10 @@ export const CareerModeView = ({
                             {teamId === '532002' ? "AI Co-Pilot (Frozen)" : "AI Co-Pilot Team"}
                           </span>
                         </div>
-                        <div className="flex items-center justify-between gap-1 min-h-[26px]">
-                          <div className={cn("text-lg font-black font-mono leading-none", lineupSource === 'ai' ? "text-emerald-400" : "text-white")}>
-                            {activeGwData.netPoints} pts
-                          </div>
+                        <div className={cn("text-lg font-black font-mono leading-none", lineupSource === 'ai' ? "text-emerald-400" : "text-white")}>
+                          {activeGwData.netPoints} pts
+                        </div>
+                        <div className="min-h-[18px] my-1 flex items-center">
                           {lineupSource === 'ai' && (
                             <span className="text-[8px] font-mono uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40 shrink-0 leading-none flex items-center gap-1">
                               <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse shrink-0" />
@@ -1069,7 +1069,7 @@ export const CareerModeView = ({
                             </span>
                           )}
                         </div>
-                        <div className="text-[10px] text-slate-400 mt-1 font-mono min-h-[16px]">
+                        <div className="text-[10px] text-slate-400 font-mono min-h-[16px]">
                           Hits: {activeGwData.hitCostPoints ? `-${activeGwData.hitCostPoints} pts` : '0 pts'}
                         </div>
                       </button>
@@ -1094,14 +1094,14 @@ export const CareerModeView = ({
                               Dynamic AI (Live)
                             </span>
                           </div>
-                          <div className="flex items-center justify-between gap-1 min-h-[26px]">
-                            <div className={cn("text-lg font-black font-mono leading-none", isDynamicView ? "text-purple-300" : "text-white")}>
-                              {loadingDynamic && !dynamicGwData ? (
-                                <span className="text-xs text-purple-400 animate-pulse font-sans">Solving...</span>
-                              ) : (
-                                `${dynamicGwData?.netPoints ?? 0} pts`
-                              )}
-                            </div>
+                          <div className={cn("text-lg font-black font-mono leading-none", isDynamicView ? "text-purple-300" : "text-white")}>
+                            {loadingDynamic && !dynamicGwData ? (
+                              <span className="text-xs text-purple-400 animate-pulse font-sans">Solving...</span>
+                            ) : (
+                              `${dynamicGwData?.netPoints ?? 0} pts`
+                            )}
+                          </div>
+                          <div className="min-h-[18px] my-1 flex items-center">
                             {isDynamicView && (
                               <span className="text-[8px] font-mono uppercase px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold border border-purple-500/40 shrink-0 leading-none flex items-center gap-1">
                                 <span className="w-1 h-1 rounded-full bg-purple-400 animate-pulse shrink-0" />
@@ -1109,7 +1109,7 @@ export const CareerModeView = ({
                               </span>
                             )}
                           </div>
-                          <div className="text-[10px] text-slate-400 mt-1 font-mono min-h-[16px]">
+                          <div className="text-[10px] text-slate-400 font-mono min-h-[16px]">
                             Hits: {loadingDynamic && !dynamicGwData ? '...' : (dynamicGwData?.hitCostPoints ? `-${dynamicGwData.hitCostPoints} pts` : '0 pts')}
                           </div>
                         </button>
