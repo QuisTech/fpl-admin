@@ -62,7 +62,7 @@ export abstract class BaseOracle implements XPOracle {
   protected teamDefenseRatings: Record<string, number> = {};
   protected allIds: number[] = [];
   protected top1kData: Record<number, { ownership: number; started: number; eo: number; captain: number; tripleCaptain: number }> = {};
-  
+
   protected featuresMatrix: Record<number, HistoricalPlayerFeatures> = {};
   protected projectionEngine: ProjectionEngine;
   protected nextEventId: number;
@@ -91,7 +91,7 @@ export abstract class BaseOracle implements XPOracle {
           Object.keys(parsed.players).forEach(pId => {
             const data = parsed.players[pId];
             let fplId = parseInt(pId);
-            
+
             if (players.length > 0) {
               const directMatch = players.find(p => p.id === fplId);
               if (!directMatch && data.name) {
@@ -162,9 +162,9 @@ export abstract class BaseOracle implements XPOracle {
       teams.forEach(t => {
         teamNameMap[t.id] = t.short_name;
         const features = featureStore.getFeatures(currentSeason, previousGw, t.id);
-        liveTeamRatings[t.id] = { 
-           attack: features.attack, 
-           defense: features.defense 
+        liveTeamRatings[t.id] = {
+          attack: features.attack,
+          defense: features.defense
         };
         const strengthMetric = ((t.strength_overall_home || 2) + (t.strength_overall_away || 2));
         this.teamDefenseRatings[t.short_name] = strengthMetric;
@@ -177,12 +177,12 @@ export abstract class BaseOracle implements XPOracle {
       const playerName = p.web_name || p.second_name || 'Unknown';
       const teamId = p.team;
       const teamShort = teamNameMap[teamId] || `TEAM_${teamId}`;
-      
+
       const expectedElementType = p.element_type;
-      const pos = expectedElementType === 1 ? 'GKP' : 
-                  expectedElementType === 2 ? 'DEF' : 
-                  expectedElementType === 3 ? 'MID' : 'FWD';
-      
+      const pos = expectedElementType === 1 ? 'GKP' :
+        expectedElementType === 2 ? 'DEF' :
+          expectedElementType === 3 ? 'MID' : 'FWD';
+
       const cost = p.now_cost || 50; // default 5.0m if missing
 
       this.playerNames[fplId] = playerName;
@@ -330,7 +330,7 @@ export abstract class BaseOracle implements XPOracle {
         shots90,
         keyPasses90,
         fixturesByGw,
-        
+
         minutesLast1: dynamicPredictedMins,
         minutesLast3: dynamicPredictedMins * 3,
         minutesLast5: dynamicPredictedMins * 5,
@@ -369,14 +369,14 @@ export abstract class BaseOracle implements XPOracle {
     }
     if (!this.predictionCache[playerId][gameweek]) {
       this.predictionCache[playerId][gameweek] = this.projectionEngine.predict(
-        this.getProjectionInput(playerId, gameweek), 
+        this.getProjectionInput(playerId, gameweek),
         gameweek
       );
     }
     return this.predictionCache[playerId][gameweek];
   }
 
-  getXP(playerId: number, gameweek: number): number { 
+  getXP(playerId: number, gameweek: number): number {
     if (gameweek < this.nextEventId || gameweek >= this.nextEventId + 8) {
       return 0;
     }
@@ -386,7 +386,7 @@ export abstract class BaseOracle implements XPOracle {
     }
     return this.getPrediction(playerId, gameweek).expected;
   }
-  getVariance(playerId: number, gameweek: number): number { 
+  getVariance(playerId: number, gameweek: number): number {
     return this.getPrediction(playerId, gameweek).variance;
   }
   getDistribution(playerId: number, gameweek: number): PlayerDistribution {
@@ -455,7 +455,7 @@ export class FplformOracle extends BaseOracle {
     nextEventId: number = 1
   ) {
     super(players, nextEventId, riskMode);
-    
+
     // 1. Populate metadata and features from API
     this.populateMetadataAndFeatures(players, fixtures, teams, nextEventId);
 
@@ -514,7 +514,7 @@ export class FplformOracle extends BaseOracle {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
       if (!line) continue;
-      
+
       const cols = parseCsvLine(line);
 
       if (cols.length >= 7 && cols[3]) {
@@ -535,13 +535,13 @@ export class FplformOracle extends BaseOracle {
           const sName = (p.second_name || '').toLowerCase();
           const pName = playerName.toLowerCase();
 
-          return wName === pName || (wName.length > 2 && pName.includes(wName)) || 
-                 sName === pName || (sName.length > 2 && pName.includes(sName));
+          return wName === pName || (wName.length > 2 && pName.includes(wName)) ||
+            sName === pName || (sName.length > 2 && pName.includes(sName));
         });
 
         if (matchedPlayer) {
           const fplId = matchedPlayer.id;
-          
+
           // Probability of appearance (0.0 to 1.0)
           let probPlay = parseFloat(cols[8]);
           if (!isNaN(probPlay)) {
@@ -573,7 +573,7 @@ export class FplformOracle extends BaseOracle {
             const ev = rawXp * probPlay;
             this.xpMatrix[fplId][gw] = Math.min(25.0, Math.max(0, Math.round(ev * 10) / 10));
           }
-          
+
           // Override position and team from CSV if they were defaults
           this.playerPositions[fplId] = pos;
           this.playerTeams[fplId] = teamName.toUpperCase();
@@ -617,7 +617,7 @@ export class NativeOracle extends BaseOracle {
     nextEventId: number = 1
   ) {
     super(players, nextEventId, riskMode);
-    
+
     // Populate metadata and features from live API
     this.populateMetadataAndFeatures(players, fixtures, teams, nextEventId);
 
@@ -726,7 +726,7 @@ export class EyeTestOracle extends BaseOracle {
     fixturesFilePath?: string
   ) {
     super(players, nextEventId, riskMode);
-    
+
     // For EyeTest 2026-27 fixtures override if custom path provided
     if (fixturesFilePath) {
       const fixturesFullPath = path.resolve(process.cwd(), fixturesFilePath);
@@ -759,11 +759,11 @@ export class EyeTestOracle extends BaseOracle {
 // ─────────────────────────────────────────────────────────────────────────────
 export class OracleFactory {
   static create(
-    csvFilePath: string, 
-    players: any[], 
-    fuel: string, 
-    fixtures: any[] = [], 
-    teams: any[] = [], 
+    csvFilePath: string,
+    players: any[],
+    fuel: string,
+    fixtures: any[] = [],
+    teams: any[] = [],
     nextEventId: number = 1,
     riskMode: string = 'safe',
     fixturesFilePath?: string
@@ -780,4 +780,4 @@ export class OracleFactory {
 }
 
 // Backward Compatibility Alias
-export class CSVOracle extends FplformOracle {}
+export class CSVOracle extends FplformOracle { }
