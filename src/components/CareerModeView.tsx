@@ -1006,30 +1006,34 @@ export const CareerModeView = ({
                       <button
                         onClick={() => setLineupSource('human')}
                         className={cn(
-                          "p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between",
+                          teamId === '532002' ? "p-2.5" : "p-3",
+                          "rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between overflow-hidden",
                           isHumanView 
                             ? "bg-cyan-950/30 border-cyan-500/50 ring-1 ring-cyan-500/40 shadow-sm" 
                             : "bg-slate-900/60 border-slate-800 hover:border-cyan-500/30 opacity-75 hover:opacity-100"
                         )}
                         title={teamId === '532002' ? "Click to view My Real XI on the pitch" : "Click to view Real Manager XI on the pitch"}
                       >
-                        <div className="flex items-center justify-between mb-1">
+                        <div className="min-h-[16px] mb-1">
                           <span className={cn(
-                            "text-[10px] uppercase font-mono font-bold",
+                            "text-[10px] uppercase font-mono font-bold block truncate",
                             isHumanView ? "text-cyan-400" : "text-slate-400"
                           )}>
                             {teamId === '532002' ? "My Real Team" : (data?.managerName ? `${data.managerName}'s Team` : "Real Team")}
                           </span>
+                        </div>
+                        <div className="flex items-center justify-between gap-1 min-h-[26px]">
+                          <div className={cn("text-lg font-black font-mono leading-none", isHumanView ? "text-cyan-300" : "text-white")}>
+                            {activeGwData.humanComparison.netPoints} pts
+                          </div>
                           {isHumanView && (
-                            <span className="text-[8px] font-mono uppercase px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/40">
+                            <span className="text-[8px] font-mono uppercase px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/40 shrink-0 leading-none flex items-center gap-1">
+                              <span className="w-1 h-1 rounded-full bg-cyan-400 animate-pulse shrink-0" />
                               Viewing
                             </span>
                           )}
                         </div>
-                        <div className={cn("text-lg font-black font-mono", isHumanView ? "text-cyan-300" : "text-white")}>
-                          {activeGwData.humanComparison.netPoints} pts
-                        </div>
-                        <div className="text-[10px] text-slate-400 mt-1 font-mono">
+                        <div className="text-[10px] text-slate-400 mt-1 font-mono min-h-[16px]">
                           Hits: {activeGwData.humanComparison.transfersCost ? `-${activeGwData.humanComparison.transfersCost} pts` : '0 pts'}
                         </div>
                       </button>
@@ -1038,30 +1042,34 @@ export const CareerModeView = ({
                       <button
                         onClick={() => setLineupSource('ai')}
                         className={cn(
-                          "p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between",
+                          teamId === '532002' ? "p-2.5" : "p-3",
+                          "rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between overflow-hidden",
                           lineupSource === 'ai' 
                             ? "bg-emerald-950/30 border-emerald-500/50 ring-1 ring-emerald-500/40 shadow-sm" 
                             : "bg-slate-900/60 border-slate-800 hover:border-emerald-500/30 opacity-75 hover:opacity-100"
                         )}
                         title="Click to view AI Co-Pilot (Frozen) XI on the pitch"
                       >
-                        <div className="flex items-center justify-between mb-1">
+                        <div className="min-h-[16px] mb-1">
                           <span className={cn(
-                            "text-[10px] uppercase font-mono font-bold",
+                            "text-[10px] uppercase font-mono font-bold block truncate",
                             lineupSource === 'ai' ? "text-emerald-400" : "text-slate-400"
                           )}>
                             {teamId === '532002' ? "AI Co-Pilot (Frozen)" : "AI Co-Pilot Team"}
                           </span>
+                        </div>
+                        <div className="flex items-center justify-between gap-1 min-h-[26px]">
+                          <div className={cn("text-lg font-black font-mono leading-none", lineupSource === 'ai' ? "text-emerald-400" : "text-white")}>
+                            {activeGwData.netPoints} pts
+                          </div>
                           {lineupSource === 'ai' && (
-                            <span className="text-[8px] font-mono uppercase px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40">
+                            <span className="text-[8px] font-mono uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40 shrink-0 leading-none flex items-center gap-1">
+                              <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse shrink-0" />
                               Viewing
                             </span>
                           )}
                         </div>
-                        <div className={cn("text-lg font-black font-mono", lineupSource === 'ai' ? "text-emerald-400" : "text-white")}>
-                          {activeGwData.netPoints} pts
-                        </div>
-                        <div className="text-[10px] text-slate-400 mt-1 font-mono">
+                        <div className="text-[10px] text-slate-400 mt-1 font-mono min-h-[16px]">
                           Hits: {activeGwData.hitCostPoints ? `-${activeGwData.hitCostPoints} pts` : '0 pts'}
                         </div>
                       </button>
@@ -1071,34 +1079,37 @@ export const CareerModeView = ({
                         <button
                           onClick={() => setLineupSource('dynamic')}
                           className={cn(
-                            "p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between",
+                            "p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between overflow-hidden",
                             isDynamicView 
                               ? "bg-purple-950/30 border-purple-500/50 ring-1 ring-purple-500/40 shadow-sm" 
                               : "bg-slate-900/60 border-slate-800 hover:border-purple-500/30 opacity-75 hover:opacity-100"
                           )}
                           title="Click to view Dynamic AI Resolver XI on the pitch"
                         >
-                          <div className="flex items-center justify-between mb-1">
+                          <div className="min-h-[16px] mb-1">
                             <span className={cn(
-                              "text-[10px] uppercase font-mono font-bold",
+                              "text-[10px] uppercase font-mono font-bold block truncate",
                               isDynamicView ? "text-purple-400" : "text-slate-400"
                             )}>
                               Dynamic AI (Live)
                             </span>
+                          </div>
+                          <div className="flex items-center justify-between gap-1 min-h-[26px]">
+                            <div className={cn("text-lg font-black font-mono leading-none", isDynamicView ? "text-purple-300" : "text-white")}>
+                              {loadingDynamic && !dynamicGwData ? (
+                                <span className="text-xs text-purple-400 animate-pulse font-sans">Solving...</span>
+                              ) : (
+                                `${dynamicGwData?.netPoints ?? 0} pts`
+                              )}
+                            </div>
                             {isDynamicView && (
-                              <span className="text-[8px] font-mono uppercase px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 font-bold border border-purple-500/40">
+                              <span className="text-[8px] font-mono uppercase px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold border border-purple-500/40 shrink-0 leading-none flex items-center gap-1">
+                                <span className="w-1 h-1 rounded-full bg-purple-400 animate-pulse shrink-0" />
                                 Viewing
                               </span>
                             )}
                           </div>
-                          <div className={cn("text-lg font-black font-mono", isDynamicView ? "text-purple-300" : "text-white")}>
-                            {loadingDynamic && !dynamicGwData ? (
-                              <span className="text-xs text-purple-400 animate-pulse font-sans">Solving...</span>
-                            ) : (
-                              `${dynamicGwData?.netPoints ?? 0} pts`
-                            )}
-                          </div>
-                          <div className="text-[10px] text-slate-400 mt-1 font-mono">
+                          <div className="text-[10px] text-slate-400 mt-1 font-mono min-h-[16px]">
                             Hits: {loadingDynamic && !dynamicGwData ? '...' : (dynamicGwData?.hitCostPoints ? `-${dynamicGwData.hitCostPoints} pts` : '0 pts')}
                           </div>
                         </button>

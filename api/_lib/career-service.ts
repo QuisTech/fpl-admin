@@ -306,7 +306,7 @@ export class CareerService {
   /**
    * Run the Autonomous Season Career from GW1 to endGw under official FPL human constraints.
    */
-    private static orderBenchIds(benchIds: number[], oracle: XPOracle, gw: number): number[] {
+  private static orderBenchIds(benchIds: number[], oracle: XPOracle, gw: number): number[] {
     const gkpIds = benchIds.filter(id => oracle.getPosition(id) === 'GKP');
     const outfieldIds = benchIds.filter(id => oracle.getPosition(id) !== 'GKP');
     outfieldIds.sort((a, b) => {
@@ -359,7 +359,7 @@ export class CareerService {
           let oracle: XPOracle | null = null;
           try {
             oracle = this.getOracleForGw(g.gameweek, baseData, fuel, riskMode);
-          } catch {}
+          } catch { }
 
           if (oracle) {
             let expectedSum = 0;
@@ -801,20 +801,20 @@ export class CareerService {
           fetchPromises.push(
             axios.get(`${this.FPL_BASE}/entry/${cleanId}/transfers/`, { headers: { 'User-Agent': 'Mozilla/5.0' }, timeout: 6000 })
               .then(res => { if (Array.isArray(res.data)) userRealHistory.transfers = res.data; })
-              .catch(() => {})
+              .catch(() => { })
           );
         }
         for (const gw of missingGws) {
           fetchPromises.push(
             axios.get(`${this.FPL_BASE}/entry/${cleanId}/event/${gw}/picks/`, { headers: { 'User-Agent': 'Mozilla/5.0' }, timeout: 6000 })
               .then(res => { if (res.data?.picks) userRealHistory.picksByGw[String(gw)] = res.data; })
-              .catch(() => {})
+              .catch(() => { })
           );
         }
         await Promise.all(fetchPromises);
         try {
           fs.writeFileSync(userRealPicksFile, JSON.stringify(userRealHistory, null, 2), 'utf8');
-        } catch {}
+        } catch { }
       } catch (e: any) {
         console.warn(`[CareerService] Failed to fetch full picks for ${cleanId}:`, e.message);
       }
@@ -878,10 +878,10 @@ export class CareerService {
         getXP: () => 0
       } as any;
 
-      startingXI = starters.map((p: any) => 
+      startingXI = starters.map((p: any) =>
         this.mapPlayer(p.element, baseData, dummyOracle, actualStats, p.is_captain, p.is_vice_captain, p.multiplier || 1, gw)
       );
-      bench = reserves.map((p: any) => 
+      bench = reserves.map((p: any) =>
         this.mapPlayer(p.element, baseData, dummyOracle, actualStats, false, false, 0, gw)
       );
       if (capPick) {
@@ -1051,7 +1051,7 @@ export class CareerService {
           let oracle: XPOracle | null = null;
           try {
             oracle = this.getOracleForGw(g.gameweek, baseData, fuel, riskMode);
-          } catch {}
+          } catch { }
 
           if (oracle) {
             let expectedSum = 0;
@@ -1832,8 +1832,8 @@ export class CareerService {
       let log = isRolled
         ? `${logPrefix}GW${gw} Projected: Roll Free Transfer (Bank: ${state.freeTransfers} FTs). Captain: ${capModel.web_name} (${capXpFormatted} xP).`
         : transfersInList.length > 1
-        ? `${logPrefix}GW${gw} Projected: Double Transfer ${transfersInList.map((t, i) => `${transfersOutList[i]?.name || 'Player'} (${transfersOutList[i]?.position || ''}) → ${t.name} (${t.position || ''})`).join(', ')} (${transfersInList.length} FTs used, 0 hit). Captain: ${capModel.web_name} (${capXpFormatted} xP).`
-        : `${logPrefix}GW${gw} Projected: Transfer ${transfersOutList[0]?.name} (${transfersOutList[0]?.position || ''}) → ${transfersInList[0]?.name} (${transfersInList[0]?.position || ''}). Captain: ${capModel.web_name} (${capXpFormatted} xP).`;
+          ? `${logPrefix}GW${gw} Projected: Double Transfer ${transfersInList.map((t, i) => `${transfersOutList[i]?.name || 'Player'} (${transfersOutList[i]?.position || ''}) → ${t.name} (${t.position || ''})`).join(', ')} (${transfersInList.length} FTs used, 0 hit). Captain: ${capModel.web_name} (${capXpFormatted} xP).`
+          : `${logPrefix}GW${gw} Projected: Transfer ${transfersOutList[0]?.name} (${transfersOutList[0]?.position || ''}) → ${transfersInList[0]?.name} (${transfersInList[0]?.position || ''}). Captain: ${capModel.web_name} (${capXpFormatted} xP).`;
       if (activeChip === 'BB') {
         const benchXpSum = benchIds.reduce((sum, id) => sum + oracle.getXP(id, gw), 0);
         log += ` Bench Boost added +${benchXpSum.toFixed(1)} xP from bench.`;

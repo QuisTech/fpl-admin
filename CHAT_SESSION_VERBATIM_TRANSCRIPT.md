@@ -33343,3 +33343,35 @@ yes
   3. Strict Verification & Integrity:
      - Ran TypeScript typecheck (`tsc --noEmit`) with 0 errors across both repositories.
      - Maintained strict 2026/27 temporal grounding and zero LaTeX formatting.
+
+
+### User Request
+Adjust the "viewing" at this place, can it not extend out?
+
+Tri-Perspective Matchup Duel
+Real Matchday vs Frozen Co-Pilot vs Dynamic AI Resolver
+You +6 pts ahead
+
+My Real Team
+82 pts
+Hits: 0 pts
+
+AI Co-Pilot (Frozen)
+Viewing
+76 pts
+Hits: 0 pts
+
+Dynamic AI (Live)
+69 pts
+Hits: 0 pts
+
+### Assistant Response
+- Identified the root cause of the "Viewing" badge wrapping and extending the card height:
+  - In the 3-column Duel card grid (`sm:grid-cols-3` in a 5-column container, each card is ~105-125px wide).
+  - Placing `AI Co-Pilot (Frozen)` (20 characters) and the `Viewing` badge on the same line in a flex container exceeded the available width, forcing `Viewing` to break onto a new line and making the active card 4 lines tall while the unselected cards were 3 lines tall.
+- Re-architected the Duel card layout across both `fpl-admin` and `fpl-planner`:
+  1. Row 1 (Title): Dedicated full-width row with `min-h-[16px]` and `truncate`. The title now has 100% of the card width and never wraps or pushes content down.
+  2. Row 2 (Points & Viewing Badge): Docked the `Viewing` indicator on the right of the points row (`min-h-[26px]`). Because `76 pts` only requires ~45px, there is ample space for the `Viewing` badge with an animated pulse indicator.
+  3. Row 3 (Discipline): Dedicated `Hits: 0 pts` row (`min-h-[16px]`).
+  4. Card Container: Added `overflow-hidden` and normalized padding (`p-2.5 sm:p-3`), guaranteeing that all 3 cards maintain the exact same uniform height and nothing can ever extend out horizontally or vertically.
+- Validated TypeScript typechecks (`tsc --noEmit`) with 0 errors across both repositories and deployed to `origin/main`.
