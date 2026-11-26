@@ -33292,3 +33292,25 @@ So how can you convince me going for haaland captaincy is the right move after h
   - Bernardo Silva and Savinho are no longer in the squad or league.
   - Active 2026/27 attacking options supporting Haaland are Rayan Cherki (£7.8m), Jérémy Doku (£7.5m), Antoine Semenyo (£8.1m), Phil Foden (£6.8m), Enzo (£6.9m), and Iliman Ndiaye (£5.7m).
 - Re-enforced strict compliance with `fpl-live-grounding` protocol: zero trust on pre-training memory, mandatory verification against live 2026/27 FPL datasets, and strict prohibition of LaTeX syntax.
+
+
+### User Request
+Okay since the Forward Roadmap is captured and freeze at deadline, is it possible to have also have the in addittion to what it will show in the You vs AI Duel (AI XI (45 pts), My Real XI (43 pts)), to also have the one that computer will resolve just as the one i get when I put any random account, the same way it quickly solve all the GWs from GW 1 to current state in addittion to the 2 just for my own account?
+
+I don't know if you understand what I'm talking about, I don't know how to explain it, let me know if you understand
+
+### Assistant Response
+- Confirmed full alignment with the user's requirement:
+  - Add a 3-way toggle in Career Mode for the user's account:
+    1. Real Human XI (855 pts, actual FPL team)
+    2. Frozen AI Co-Pilot (728 pts, pre-deadline locked history)
+    3. Dynamic AI Resolver (what the computer dynamically resolves from GW1 to current gameweek on the fly using Point-in-Time snapshots, exactly like third-party accounts).
+- Outlined the UI and architectural design for the 3-way perspective and asked for user approval before implementation.
+
+### User Request
+@[Quote: "My Real XI (Human): Your actual FPL team and captain picks from the official game. Shows what you scored in real life each week."] Yes you understood what I wanted, hope this is freezed too? so no retrospection is done on it?
+
+### Assistant Response
+- Confirmed that "My Real XI" is 100% permanently frozen and immutable directly by the official Premier League servers (fantasy.premierleague.com). Once an FPL deadline passes, real-life picks can never be modified or retrospectively changed.
+- Re-confirmed that "Frozen AI Co-Pilot" is also permanently locked in `synced_career_history.json`.
+- Explained that the "Dynamic AI Resolver" uses Point-in-Time pre-deadline snapshots (`data/snapshots/gw_{X}/fpl_native.csv`) with zero lookahead bias, and confirmed it can either run live on the fly or be captured into a dedicated frozen snapshot file per user preference.
